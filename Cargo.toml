@@ -1,0 +1,3 @@
+[workspace]
+members = ["src/pt_backend", "src/shared"]
+resolver = "2"

@@ -1,0 +1,18 @@
+type Document = record {
+  id: text;
+  content: text;
+  version: nat32;
+  timestamp: nat64;
+  owner: text;
+  allowed_users: vec text;
+};
+
+type DocumentList = vec Document
+
+service : {
+  create_document: (text, text, text) -> ();
+  update_document: (text, text, text) -> ();
+  add_user_to_document: (text, text, text) -> ();
+  get_document: (text, text) -> (opt Document);
+  get_documents: (text, text) -> (opt DocumentList);
+}

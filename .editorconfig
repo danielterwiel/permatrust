@@ -1,0 +1,54 @@
+# Top-most EditorConfig file
+root = true
+
+# Global settings (applies to all files)
+[*]
+indent_style = space
+indent_size = 2
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = true
+insert_final_newline = true
+max_line_length = 80
+
+# Python specific settings
+[*.py]
+indent_style = space
+indent_size = 4
+
+# JavaScript specific settings
+[*.js]
+indent_style = space
+indent_size = 2
+
+# Markdown specific settings
+[*.md]
+trim_trailing_whitespace = false
+
+# JSON specific settings
+[*.json]
+indent_style = space
+indent_size = 2
+
+# C# specific settings
+[*.cs]
+indent_style = space
+indent_size = 4
+dotnet_diagnostic.CA1001.severity = warning
+dotnet_diagnostic.CA1821.severity = warning
+dotnet_diagnostic.CA2213.severity = warning
+dotnet_diagnostic.CA2231.severity = warning
+
+# Makefile specific settings
+[Makefile]
+indent_style = tab
+
+# Custom settings for specific directories
+[lib/**.js]
+indent_style = space
+indent_size = 2
+
+# Settings for specific files
+[{package.json,.travis.yml}]
+indent_style = space
+indent_size = 2
