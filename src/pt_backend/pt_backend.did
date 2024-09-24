@@ -1,18 +1,20 @@
+type DocumentId = nat64;
+
 type Document = record {
-  id: text;
-  content: text;
-  version: nat32;
-  timestamp: nat64;
-  owner: text;
-  allowed_users: vec text;
+    id : DocumentId;
+    title : text;
+    content : vec nat8;
+    version : nat32;
+    timestamp : nat64;
+    author : principal;
 };
 
 type DocumentList = vec Document
 
 service : {
-  create_document: (text, text, text) -> ();
-  update_document: (text, text, text) -> ();
-  add_user_to_document: (text, text, text) -> ();
-  get_document: (text, text) -> (opt Document);
-  get_documents: (text, text) -> (opt DocumentList);
+    create_document : (text, vec nat8) -> (DocumentId);
+    get_document : (DocumentId) -> (opt Document) query;
+    update_document : (DocumentId, opt text, opt vec nat8) -> (variant { Ok; Err : text });
+    delete_document : (DocumentId) -> (variant { Ok; Err : text });
+    list_documents : () -> (vec Document) query;
 }

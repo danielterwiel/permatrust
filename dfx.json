@@ -113,8 +113,12 @@
       "type": "rust"
     },
     "pt_frontend": {
-      "dependencies": ["pt_backend"],
-      "source": ["src/pt_frontend/dist"],
+      "dependencies": [
+        "pt_backend"
+      ],
+      "source": [
+        "src/pt_frontend/dist"
+      ],
       "type": "assets",
       "workspace": "pt_frontend"
     }

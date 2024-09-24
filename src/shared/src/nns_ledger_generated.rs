@@ -60,6 +60,8 @@ pub struct Archive { pub canister_id: Principal }
 pub struct Archives { pub archives: Vec<Archive> }
 #[derive(CandidType, Deserialize)]
 pub struct DecimalsRet { pub decimals: u32 }
+#[derive(CandidType, Deserialize)]
+pub struct Icrc10SupportedStandardsRetItem { pub url: String, pub name: String }
 pub type Icrc1Tokens = candid::Nat;
 #[derive(CandidType, Deserialize)]
 pub enum Value {
@@ -94,6 +96,57 @@ pub enum Icrc1TransferError {
 }
 #[derive(CandidType, Deserialize)]
 pub enum Icrc1TransferResult { Ok(Icrc1BlockIndex), Err(Icrc1TransferError) }
+#[derive(CandidType, Deserialize)]
+pub struct Icrc21ConsentMessageMetadata {
+  pub utc_offset_minutes: Option<i16>,
+  pub language: String,
+}
+#[derive(CandidType, Deserialize)]
+pub enum Icrc21ConsentMessageSpecDeviceSpecInner {
+  GenericDisplay,
+  LineDisplay{ characters_per_line: u16, lines_per_page: u16 },
+}
+#[derive(CandidType, Deserialize)]
+pub struct Icrc21ConsentMessageSpec {
+  pub metadata: Icrc21ConsentMessageMetadata,
+  pub device_spec: Option<Icrc21ConsentMessageSpecDeviceSpecInner>,
+}
+#[derive(CandidType, Deserialize)]
+pub struct Icrc21ConsentMessageRequest {
+  pub arg: serde_bytes::ByteBuf,
+  pub method: String,
+  pub user_preferences: Icrc21ConsentMessageSpec,
+}
+#[derive(CandidType, Deserialize)]
+pub struct Icrc21ConsentMessageLineDisplayMessagePagesItem {
+  pub lines: Vec<String>,
+}
+#[derive(CandidType, Deserialize)]
+pub enum Icrc21ConsentMessage {
+  LineDisplayMessage{
+    pages: Vec<Icrc21ConsentMessageLineDisplayMessagePagesItem>,
+  },
+  GenericDisplayMessage(String),
+}
+#[derive(CandidType, Deserialize)]
+pub struct Icrc21ConsentInfo {
+  pub metadata: Icrc21ConsentMessageMetadata,
+  pub consent_message: Icrc21ConsentMessage,
+}
+#[derive(CandidType, Deserialize)]
+pub struct Icrc21ErrorInfo { pub description: String }
+#[derive(CandidType, Deserialize)]
+pub enum Icrc21Error {
+  GenericError{ description: String, error_code: candid::Nat },
+  InsufficientPayment(Icrc21ErrorInfo),
+  UnsupportedCanisterCall(Icrc21ErrorInfo),
+  ConsentMessageUnavailable(Icrc21ErrorInfo),
+}
+#[derive(CandidType, Deserialize)]
+pub enum Icrc21ConsentMessageResponse {
+  Ok(Icrc21ConsentInfo),
+  Err(Icrc21Error),
+}
 #[derive(CandidType, Deserialize)]
 pub struct AllowanceArgs { pub account: Account, pub spender: Account }
 #[derive(CandidType, Deserialize)]
@@ -299,6 +352,9 @@ impl Service {
   pub async fn decimals(&self) -> Result<(DecimalsRet,)> {
     ic_cdk::call(self.0, "decimals", ()).await
   }
+  pub async fn icrc_10_supported_standards(&self) -> Result<(Vec<Icrc10SupportedStandardsRetItem>,)> {
+    ic_cdk::call(self.0, "icrc10_supported_standards", ()).await
+  }
   pub async fn icrc_1_balance_of(&self, arg0: Account) -> Result<(Icrc1Tokens,)> {
     ic_cdk::call(self.0, "icrc1_balance_of", (arg0,)).await
   }
@@ -328,6 +384,9 @@ impl Service {
   }
   pub async fn icrc_1_transfer(&self, arg0: TransferArg) -> Result<(Icrc1TransferResult,)> {
     ic_cdk::call(self.0, "icrc1_transfer", (arg0,)).await
+  }
+  pub async fn icrc_21_canister_call_consent_message(&self, arg0: Icrc21ConsentMessageRequest) -> Result<(Icrc21ConsentMessageResponse,)> {
+    ic_cdk::call(self.0, "icrc21_canister_call_consent_message", (arg0,)).await
   }
   pub async fn icrc_2_allowance(&self, arg0: AllowanceArgs) -> Result<(Allowance,)> {
     ic_cdk::call(self.0, "icrc2_allowance", (arg0,)).await
