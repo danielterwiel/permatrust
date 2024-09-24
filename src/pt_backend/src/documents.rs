@@ -109,5 +109,4 @@ fn list_documents() -> Vec<Document> {
     DOCUMENTS.with(|documents| documents.borrow().values().cloned().collect())
 }
 
-// Export the Candid interface
 ic_cdk::export_candid!();

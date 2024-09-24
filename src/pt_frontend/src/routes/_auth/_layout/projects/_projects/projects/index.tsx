@@ -41,10 +41,10 @@ function Projects() {
 
 	const getProjects = async () => {
 		setLoading(true);
-		const [response] = await pt_backend.list_documents();
+		const response = await pt_backend.list_documents();
 		console.log("response", response);
-		// const parsedResponse = JSON.parse(stringifyBigIntObjects(response));
-		// setResponse(parsedResponse);
+		const parsedResponse = JSON.parse(stringifyBigIntObjects(response));
+		setResponse(parsedResponse);
 		setLoading(false);
 	};
 
