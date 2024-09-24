@@ -52,7 +52,7 @@ export default defineConfig({
       prefix: "VITE_CANISTER_ID_",
       defineOn: "import.meta.env",
     }),
-    biomePlugin(),
+    // biomePlugin(), // TODO: maybe just use an editor and fmt on CI in stead
   ],
   test: {
     environment: "jsdom",

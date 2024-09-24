@@ -1,20 +1,7 @@
-use candid;
-use candid::{CandidType, Deserialize, Principal};
-use ic_cdk_macros::*;
+use ic_cdk_macros::{init, query, update};
+use shared::pt_backend_generated::{Document, DocumentId};
 use std::cell::RefCell;
 use std::collections::HashMap;
-
-type DocumentId = u64;
-
-#[derive(Clone, Debug, CandidType, Deserialize)]
-struct Document {
-    id: DocumentId,
-    title: String,
-    content: Vec<u8>,
-    version: u32,
-    timestamp: u64,
-    author: Principal,
-}
 
 thread_local! {
     static DOCUMENTS: RefCell<HashMap<DocumentId, Document>> = RefCell::new(HashMap::new());
@@ -27,7 +14,7 @@ fn init() {
 }
 
 #[update]
-fn create_document(title: String, content: Vec<u8>) -> DocumentId {
+fn create_document(title: String, content: serde_bytes::ByteBuf) -> DocumentId {
     let caller = ic_cdk::caller();
     let id = NEXT_ID.with(|next_id| {
         let current_id = *next_id.borrow();
@@ -38,8 +25,8 @@ fn create_document(title: String, content: Vec<u8>) -> DocumentId {
     let document = Document {
         id,
         title,
-        content,
         version: 1,
+        content,
         timestamp: ic_cdk::api::time(),
         author: caller,
     };
@@ -51,16 +38,16 @@ fn create_document(title: String, content: Vec<u8>) -> DocumentId {
     id
 }
 
-#[query]
-fn get_document(id: DocumentId) -> Option<Document> {
-    DOCUMENTS.with(|documents| documents.borrow().get(&id).cloned())
-}
+// #[query]
+// fn get_document(id: DocumentId) -> Option<&'static Document> {
+//     DOCUMENTS.with(|documents| documents.borrow().get(&id))
+// }
 
 #[update]
 fn update_document(
     id: DocumentId,
     title: Option<String>,
-    content: Option<Vec<u8>>,
+    content: Option<serde_bytes::ByteBuf>,
 ) -> Result<(), String> {
     let caller = ic_cdk::caller();
 

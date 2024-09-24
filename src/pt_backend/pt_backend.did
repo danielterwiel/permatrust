@@ -1,3 +1,16 @@
+type ProjectId = nat64;
+
+type Project = record {
+    id : ProjectId;
+    name: text;
+    timestamp : nat64;
+    author : principal;
+    documents: vec DocumentId;
+};
+
+type ProjectList = vec Project;
+
+
 type DocumentId = nat64;
 
 type Document = record {
@@ -12,9 +25,9 @@ type Document = record {
 type DocumentList = vec Document
 
 service : {
+    create_project : (text) -> (ProjectId);
+    list_projects : () -> (vec Project);
+
     create_document : (text, vec nat8) -> (DocumentId);
-    get_document : (DocumentId) -> (opt Document) query;
-    update_document : (DocumentId, opt text, opt vec nat8) -> (variant { Ok; Err : text });
-    delete_document : (DocumentId) -> (variant { Ok; Err : text });
     list_documents : () -> (vec Document) query;
 }

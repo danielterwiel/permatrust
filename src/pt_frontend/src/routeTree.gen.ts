@@ -14,9 +14,9 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as AuthenticateImport } from './routes/authenticate'
 import { Route as IndexImport } from './routes/index'
 import { Route as AuthLayoutImport } from './routes/_auth/_layout'
+import { Route as AuthLayoutProjectsIndexImport } from './routes/_auth/_layout/projects/index'
 import { Route as AuthLayoutNnsIndexImport } from './routes/_auth/_layout/nns/index'
-import { Route as AuthLayoutProjectsProjectsProjectsImport } from './routes/_auth/_layout/projects/_projects/projects'
-import { Route as AuthLayoutProjectsProjectsProjectsIndexImport } from './routes/_auth/_layout/projects/_projects/projects/index'
+import { Route as AuthLayoutProjectsCreateImport } from './routes/_auth/_layout/projects/create'
 
 // Create/Update Routes
 
@@ -35,22 +35,20 @@ const AuthLayoutRoute = AuthLayoutImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
+const AuthLayoutProjectsIndexRoute = AuthLayoutProjectsIndexImport.update({
+  path: '/projects/',
+  getParentRoute: () => AuthLayoutRoute,
+} as any)
+
 const AuthLayoutNnsIndexRoute = AuthLayoutNnsIndexImport.update({
   path: '/nns/',
   getParentRoute: () => AuthLayoutRoute,
 } as any)
 
-const AuthLayoutProjectsProjectsProjectsRoute =
-  AuthLayoutProjectsProjectsProjectsImport.update({
-    path: '/projects/projects',
-    getParentRoute: () => AuthLayoutRoute,
-  } as any)
-
-const AuthLayoutProjectsProjectsProjectsIndexRoute =
-  AuthLayoutProjectsProjectsProjectsIndexImport.update({
-    path: '/',
-    getParentRoute: () => AuthLayoutProjectsProjectsProjectsRoute,
-  } as any)
+const AuthLayoutProjectsCreateRoute = AuthLayoutProjectsCreateImport.update({
+  path: '/projects/create',
+  getParentRoute: () => AuthLayoutRoute,
+} as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -77,6 +75,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLayoutImport
       parentRoute: typeof rootRoute
     }
+    '/_auth/_layout/projects/create': {
+      id: '/_auth/_layout/projects/create'
+      path: '/projects/create'
+      fullPath: '/projects/create'
+      preLoaderRoute: typeof AuthLayoutProjectsCreateImport
+      parentRoute: typeof AuthLayoutImport
+    }
     '/_auth/_layout/nns/': {
       id: '/_auth/_layout/nns/'
       path: '/nns'
@@ -84,19 +89,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLayoutNnsIndexImport
       parentRoute: typeof AuthLayoutImport
     }
-    '/_auth/_layout/projects/_projects/projects': {
-      id: '/_auth/_layout/projects/_projects/projects'
-      path: '/projects/projects'
-      fullPath: '/projects/projects'
-      preLoaderRoute: typeof AuthLayoutProjectsProjectsProjectsImport
+    '/_auth/_layout/projects/': {
+      id: '/_auth/_layout/projects/'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof AuthLayoutProjectsIndexImport
       parentRoute: typeof AuthLayoutImport
-    }
-    '/_auth/_layout/projects/_projects/projects/': {
-      id: '/_auth/_layout/projects/_projects/projects/'
-      path: '/'
-      fullPath: '/projects/projects/'
-      preLoaderRoute: typeof AuthLayoutProjectsProjectsProjectsIndexImport
-      parentRoute: typeof AuthLayoutProjectsProjectsProjectsImport
     }
   }
 }
@@ -107,11 +105,9 @@ export const routeTree = rootRoute.addChildren({
   IndexRoute,
   AuthenticateRoute,
   AuthLayoutRoute: AuthLayoutRoute.addChildren({
+    AuthLayoutProjectsCreateRoute,
     AuthLayoutNnsIndexRoute,
-    AuthLayoutProjectsProjectsProjectsRoute:
-      AuthLayoutProjectsProjectsProjectsRoute.addChildren({
-        AuthLayoutProjectsProjectsProjectsIndexRoute,
-      }),
+    AuthLayoutProjectsIndexRoute,
   }),
 })
 
@@ -137,24 +133,22 @@ export const routeTree = rootRoute.addChildren({
     "/_auth/_layout": {
       "filePath": "_auth/_layout.tsx",
       "children": [
+        "/_auth/_layout/projects/create",
         "/_auth/_layout/nns/",
-        "/_auth/_layout/projects/_projects/projects"
+        "/_auth/_layout/projects/"
       ]
+    },
+    "/_auth/_layout/projects/create": {
+      "filePath": "_auth/_layout/projects/create.tsx",
+      "parent": "/_auth/_layout"
     },
     "/_auth/_layout/nns/": {
       "filePath": "_auth/_layout/nns/index.tsx",
       "parent": "/_auth/_layout"
     },
-    "/_auth/_layout/projects/_projects/projects": {
-      "filePath": "_auth/_layout/projects/_projects/projects.tsx",
-      "parent": "/_auth/_layout",
-      "children": [
-        "/_auth/_layout/projects/_projects/projects/"
-      ]
-    },
-    "/_auth/_layout/projects/_projects/projects/": {
-      "filePath": "_auth/_layout/projects/_projects/projects/index.tsx",
-      "parent": "/_auth/_layout/projects/_projects/projects"
+    "/_auth/_layout/projects/": {
+      "filePath": "_auth/_layout/projects/index.tsx",
+      "parent": "/_auth/_layout"
     }
   }
 }

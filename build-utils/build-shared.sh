@@ -34,3 +34,6 @@ build_dir="./src/shared/src"
 for src_file in "${source_files[@]}"; do
     run_commands "$src_file" "$build_dir"
 done
+
+# add "Clone" to the generated traits
+source "./build-utils/add-clone-trait-to-structs.sh"

@@ -19,7 +19,7 @@ export const Route = createFileRoute("/")({
     }
     if (context.auth.authenticated) {
       throw redirect({
-        to: "/projects/projects",
+        to: "/projects",
       });
     }
   },

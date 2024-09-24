@@ -17,6 +17,7 @@
   "workspaces": [
     "src/pt_frontend"
   ],
-  "dependencies": {},
-  "devDependencies": {}
+  "dependencies": {
+    "react-hook-form": "^7.53.0"
+  }
 }
