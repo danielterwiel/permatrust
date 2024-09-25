@@ -10,21 +10,20 @@ run_commands() {
     # Replace all hyphens with underscores
     local base_name=${base_name_dirty//-/_}
 
-
     # Define the paths for the generated files
-    local generated_file="$build_dir/${base_name}_generated.rs"
+    local generated_rust_file="$build_dir/${base_name}_generated.rs"
 
-    # Run the commands
-    rm -rf "$generated_file"
-    touch "$generated_file"
-    ./build-utils/didc-macos bind "$src_file_path" -t rs | tee -a "$generated_file"
-    ./build-utils/replace-allow.sh "$generated_file"
+    # Run the commands for Rust
+    rm -rf "$generated_rust_file"
+    touch "$generated_rust_file"
+    ./build-utils/didc-macos bind "$src_file_path" -t rs | tee -a "$generated_rust_file"
+    ./build-utils/replace-allow.sh "$generated_rust_file"
 }
 
 # Array of source file paths
 source_files=(
     "src/pt_backend/pt_backend.did"
-    "candid/nns-ledger.did"
+    # "candid/nns-ledger.did"
 )
 
 # Build directory

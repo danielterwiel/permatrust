@@ -17,6 +17,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 import useDebounce from "@/hooks/useDebounce";
 import type {
   Project,
@@ -73,20 +74,21 @@ export type TableData = TableDataItem[];
 interface TableProps {
   tableData?: TableData;
   showOpenEntityButton?: boolean;
-  entityName?: string; // TODO: see if we can get a Paths object from tanstack router
+  entityName?: string;
+  onSelectionChange?: (selectedRows: TableDataItem[]) => void;
 }
 
 export const DataTable: React.FC<TableProps> = ({
   tableData = [],
   showOpenEntityButton = false,
-  entityName
+  entityName,
+  onSelectionChange,
 }) => {
-  const [columnFilters, setColumnFilters] = useState<Record<string, string>>(
-    {},
-  );
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
+  const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
 
-  const debouncedColumnFilters = useDebounce(columnFilters, 500); // Use the debounced value
+  const debouncedColumnFilters = useDebounce(columnFilters, 500);
 
   const camelCaseToHumanReadable = useCallback((input: string) => {
     const spaced = input.replace(
@@ -111,11 +113,31 @@ export const DataTable: React.FC<TableProps> = ({
   const headers = useMemo(() => Object.keys(firstRow ?? {}), [firstRow]);
 
   const columns: ColumnDef<TableDataItem>[] = useMemo(
-    () =>
-      headers.map((header: string) => ({
+    () => [
+      {
+        id: 'select',
+        header: ({ table }) => (
+          <Checkbox
+            checked={table.getIsAllPageRowsSelected()}
+            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+            aria-label="Select all"
+          />
+        ),
+        cell: ({ row }) => (
+          <Checkbox
+            checked={row.getIsSelected()}
+            onCheckedChange={(value) => row.toggleSelected(!!value)}
+            aria-label="Select row"
+          />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+      },
+      ...headers.map((header: string) => ({
         accessorKey: header,
         header: camelCaseToHumanReadable(header),
       })),
+    ],
     [headers, camelCaseToHumanReadable],
   );
 
@@ -137,6 +159,10 @@ export const DataTable: React.FC<TableProps> = ({
     columns,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    onRowSelectionChange: setRowSelection,
+    state: {
+      rowSelection,
+    },
   });
 
   const headerRefs = useRef<(HTMLTableCellElement | null)[]>([]);
@@ -151,6 +177,15 @@ export const DataTable: React.FC<TableProps> = ({
     });
     setColumnWidths(newColumnWidths);
   }, [headers]);
+
+  useEffect(() => {
+    if (onSelectionChange) {
+      const selectedRows = table
+        .getFilteredSelectedRowModel()
+        .rows.map((row) => row.original);
+      onSelectionChange(selectedRows);
+    }
+  }, [rowSelection, onSelectionChange, table]);
 
   return (
     <div className="grid">
@@ -175,7 +210,12 @@ export const DataTable: React.FC<TableProps> = ({
                       headerRefs.current[index] = el;
                     }}
                   >
-                    {header.column.columnDef.header?.toString()}
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -189,10 +229,11 @@ export const DataTable: React.FC<TableProps> = ({
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
-                {showOpenEntityButton && <TableCell>
-                  <Link to={`${entityName ? entityName + '/' : ''}${row.id}`}>Open</Link>
-                </TableCell>
-                }
+                {showOpenEntityButton && (
+                  <TableCell>
+                    <Link to={`${entityName ? entityName + '/' : ''}${row.id}`}>Open</Link>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
           </TableBody>

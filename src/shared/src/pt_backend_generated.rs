@@ -8,13 +8,6 @@ pub type ProjectId = u64;
 pub type DocumentId = u64;
 pub type DocumentRevisionId = u64;
 #[derive(CandidType, Deserialize, Clone)]
-pub struct Document {
-  pub id: DocumentId,
-  pub revisions: Vec<DocumentRevisionId>,
-  pub projects: Vec<ProjectId>,
-  pub currentVersion: u64,
-}
-#[derive(CandidType, Deserialize, Clone)]
 pub struct DocumentRevision {
   pub id: DocumentRevisionId,
   pub title: String,
@@ -23,6 +16,13 @@ pub struct DocumentRevision {
   pub version: u64,
   pub timestamp: u64,
   pub documentId: DocumentId,
+}
+#[derive(CandidType, Deserialize, Clone)]
+pub struct Document {
+  pub id: DocumentId,
+  pub revisions: Vec<DocumentRevisionId>,
+  pub projects: Vec<ProjectId>,
+  pub currentVersion: u64,
 }
 #[derive(CandidType, Deserialize, Clone)]
 pub struct Project {
@@ -43,6 +43,9 @@ impl Service {
   }
   pub async fn create_project(&self, arg0: String) -> Result<(ProjectId,)> {
     ic_cdk::call(self.0, "create_project", (arg0,)).await
+  }
+  pub async fn diff_document_revisions(&self, arg0: DocumentRevisionId, arg1: DocumentRevisionId) -> Result<(Vec<DocumentRevision>,)> {
+    ic_cdk::call(self.0, "diff_document_revisions", (arg0,arg1,)).await
   }
   pub async fn list_all_documents(&self) -> Result<(Vec<Document>,)> {
     ic_cdk::call(self.0, "list_all_documents", ()).await

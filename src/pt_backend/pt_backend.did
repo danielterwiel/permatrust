@@ -37,6 +37,7 @@ service : {
     create_document_revision : (ProjectId, DocumentId, text, vec nat8) ->
     (DocumentRevisionId);
     list_document_revisions : (DocumentId) -> (vec DocumentRevision) query;
+    diff_document_revisions : (DocumentRevisionId, DocumentRevisionId) -> (vec DocumentRevision) query;
 
     list_all_documents : () -> (vec Document) query;
 };

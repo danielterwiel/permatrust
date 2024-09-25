@@ -21,6 +21,7 @@ import { Route as AuthLayoutProjectsProjectIdIndexImport } from './routes/_auth/
 import { Route as AuthLayoutProjectsProjectIdDocumentsIndexImport } from './routes/_auth/_layout/projects/$projectId/documents/index'
 import { Route as AuthLayoutProjectsProjectIdDocumentsCreateImport } from './routes/_auth/_layout/projects/$projectId/documents/create'
 import { Route as AuthLayoutProjectsProjectIdDocumentsDocumentIdIndexImport } from './routes/_auth/_layout/projects/$projectId/documents/$documentId/index'
+import { Route as AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsDiffImport } from './routes/_auth/_layout/projects/$projectId/documents/$documentId/revisions/diff'
 import { Route as AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsCreateImport } from './routes/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create'
 import { Route as AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsRevisionIdIndexImport } from './routes/_auth/_layout/projects/$projectId/documents/$documentId/revisions/$revisionId/index'
 
@@ -77,6 +78,12 @@ const AuthLayoutProjectsProjectIdDocumentsCreateRoute =
 const AuthLayoutProjectsProjectIdDocumentsDocumentIdIndexRoute =
   AuthLayoutProjectsProjectIdDocumentsDocumentIdIndexImport.update({
     path: '/projects/$projectId/documents/$documentId/',
+    getParentRoute: () => AuthLayoutRoute,
+  } as any)
+
+const AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsDiffRoute =
+  AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsDiffImport.update({
+    path: '/projects/$projectId/documents/$documentId/revisions/diff',
     getParentRoute: () => AuthLayoutRoute,
   } as any)
 
@@ -175,6 +182,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsCreateImport
       parentRoute: typeof AuthLayoutImport
     }
+    '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/diff': {
+      id: '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/diff'
+      path: '/projects/$projectId/documents/$documentId/revisions/diff'
+      fullPath: '/projects/$projectId/documents/$documentId/revisions/diff'
+      preLoaderRoute: typeof AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsDiffImport
+      parentRoute: typeof AuthLayoutImport
+    }
     '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/$revisionId/': {
       id: '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/$revisionId/'
       path: '/projects/$projectId/documents/$documentId/revisions/$revisionId'
@@ -199,6 +213,7 @@ export const routeTree = rootRoute.addChildren({
     AuthLayoutProjectsProjectIdDocumentsIndexRoute,
     AuthLayoutProjectsProjectIdDocumentsDocumentIdIndexRoute,
     AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsCreateRoute,
+    AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsDiffRoute,
     AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsRevisionIdIndexRoute,
   }),
 })
@@ -233,6 +248,7 @@ export const routeTree = rootRoute.addChildren({
         "/_auth/_layout/projects/$projectId/documents/",
         "/_auth/_layout/projects/$projectId/documents/$documentId/",
         "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create",
+        "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/diff",
         "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/$revisionId/"
       ]
     },
@@ -266,6 +282,10 @@ export const routeTree = rootRoute.addChildren({
     },
     "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create": {
       "filePath": "_auth/_layout/projects/$projectId/documents/$documentId/revisions/create.tsx",
+      "parent": "/_auth/_layout"
+    },
+    "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/diff": {
+      "filePath": "_auth/_layout/projects/$projectId/documents/$documentId/revisions/diff.tsx",
       "parent": "/_auth/_layout"
     },
     "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/$revisionId/": {

@@ -76,6 +76,7 @@ fn list_documents(project_id: ProjectId) -> Vec<Document> {
     })
 }
 
+// TODO: filter on author
 #[query]
 fn list_document_revisions(document_id: DocumentId) -> Vec<DocumentRevision> {
     DOCUMENTS.with(|documents| {
@@ -91,6 +92,61 @@ fn list_document_revisions(document_id: DocumentId) -> Vec<DocumentRevision> {
                     .collect()
             })
             .unwrap_or_else(Vec::new)
+    })
+}
+
+#[query]
+fn diff_document_revisions(
+    start_revision_id: DocumentRevisionId,
+    end_revision_id: DocumentRevisionId,
+) -> Vec<DocumentRevision> {
+    DOCUMENT_REVISIONS.with(|revisions| {
+        let revisions = revisions.borrow();
+        let start_revision = revisions.get(&start_revision_id);
+        let end_revision = revisions.get(&end_revision_id);
+
+        match (start_revision, end_revision) {
+            (Some(start), Some(end)) => {
+                if start.documentId != end.documentId {
+                    return Vec::new(); // Revisions are from different documents
+                }
+
+                let document_id = start.documentId;
+                DOCUMENTS.with(|documents| {
+                    if let Some(document) = documents.borrow().get(&document_id) {
+                        let start_index = document
+                            .revisions
+                            .iter()
+                            .position(|&id| id == start_revision_id)
+                            .unwrap_or(0);
+                        let end_index = document
+                            .revisions
+                            .iter()
+                            .position(|&id| id == end_revision_id)
+                            .unwrap_or(document.revisions.len() - 1);
+
+                        if start_index <= end_index {
+                            document.revisions[start_index..=end_index]
+                                .iter()
+                                .filter_map(|&rev_id| revisions.get(&rev_id).cloned())
+                                .collect()
+                        } else {
+                            document.revisions[end_index..=start_index]
+                                .iter()
+                                .rev()
+                                .filter_map(|&rev_id| revisions.get(&rev_id).cloned())
+                                .collect()
+                        }
+                    } else {
+                        Vec::new()
+                    }
+                })
+            }
+            (Some(revision), None) | (None, Some(revision)) => {
+                vec![revision.clone()]
+            }
+            (None, None) => Vec::new(),
+        }
     })
 }
 
