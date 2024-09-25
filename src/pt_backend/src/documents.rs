@@ -14,7 +14,11 @@ fn init() {
 }
 
 #[update]
-fn create_document(title: String, content: serde_bytes::ByteBuf) -> DocumentId {
+fn create_document(
+    project_id: ProjectId,
+    title: String,
+    content: serde_bytes::ByteBuf,
+) -> DocumentId {
     let caller = ic_cdk::caller();
     let id = NEXT_ID.with(|next_id| {
         let current_id = *next_id.borrow();
@@ -26,7 +30,7 @@ fn create_document(title: String, content: serde_bytes::ByteBuf) -> DocumentId {
         id,
         title,
         version: 1,
-        projects: vec![],
+        projects: vec![project_id],
         content,
         timestamp: ic_cdk::api::time(),
         author: caller,
