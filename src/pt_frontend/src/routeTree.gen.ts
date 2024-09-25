@@ -17,6 +17,8 @@ import { Route as AuthLayoutImport } from './routes/_auth/_layout'
 import { Route as AuthLayoutProjectsIndexImport } from './routes/_auth/_layout/projects/index'
 import { Route as AuthLayoutNnsIndexImport } from './routes/_auth/_layout/nns/index'
 import { Route as AuthLayoutProjectsCreateImport } from './routes/_auth/_layout/projects/create'
+import { Route as AuthLayoutProjectsProjectIdIndexImport } from './routes/_auth/_layout/projects/$projectId/index'
+import { Route as AuthLayoutProjectsProjectIdCreateImport } from './routes/_auth/_layout/projects/$projectId/create'
 
 // Create/Update Routes
 
@@ -49,6 +51,18 @@ const AuthLayoutProjectsCreateRoute = AuthLayoutProjectsCreateImport.update({
   path: '/projects/create',
   getParentRoute: () => AuthLayoutRoute,
 } as any)
+
+const AuthLayoutProjectsProjectIdIndexRoute =
+  AuthLayoutProjectsProjectIdIndexImport.update({
+    path: '/projects/$projectId/',
+    getParentRoute: () => AuthLayoutRoute,
+  } as any)
+
+const AuthLayoutProjectsProjectIdCreateRoute =
+  AuthLayoutProjectsProjectIdCreateImport.update({
+    path: '/projects/$projectId/create',
+    getParentRoute: () => AuthLayoutRoute,
+  } as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -96,6 +110,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLayoutProjectsIndexImport
       parentRoute: typeof AuthLayoutImport
     }
+    '/_auth/_layout/projects/$projectId/create': {
+      id: '/_auth/_layout/projects/$projectId/create'
+      path: '/projects/$projectId/create'
+      fullPath: '/projects/$projectId/create'
+      preLoaderRoute: typeof AuthLayoutProjectsProjectIdCreateImport
+      parentRoute: typeof AuthLayoutImport
+    }
+    '/_auth/_layout/projects/$projectId/': {
+      id: '/_auth/_layout/projects/$projectId/'
+      path: '/projects/$projectId'
+      fullPath: '/projects/$projectId'
+      preLoaderRoute: typeof AuthLayoutProjectsProjectIdIndexImport
+      parentRoute: typeof AuthLayoutImport
+    }
   }
 }
 
@@ -108,6 +136,8 @@ export const routeTree = rootRoute.addChildren({
     AuthLayoutProjectsCreateRoute,
     AuthLayoutNnsIndexRoute,
     AuthLayoutProjectsIndexRoute,
+    AuthLayoutProjectsProjectIdCreateRoute,
+    AuthLayoutProjectsProjectIdIndexRoute,
   }),
 })
 
@@ -135,7 +165,9 @@ export const routeTree = rootRoute.addChildren({
       "children": [
         "/_auth/_layout/projects/create",
         "/_auth/_layout/nns/",
-        "/_auth/_layout/projects/"
+        "/_auth/_layout/projects/",
+        "/_auth/_layout/projects/$projectId/create",
+        "/_auth/_layout/projects/$projectId/"
       ]
     },
     "/_auth/_layout/projects/create": {
@@ -148,6 +180,14 @@ export const routeTree = rootRoute.addChildren({
     },
     "/_auth/_layout/projects/": {
       "filePath": "_auth/_layout/projects/index.tsx",
+      "parent": "/_auth/_layout"
+    },
+    "/_auth/_layout/projects/$projectId/create": {
+      "filePath": "_auth/_layout/projects/$projectId/create.tsx",
+      "parent": "/_auth/_layout"
+    },
+    "/_auth/_layout/projects/$projectId/": {
+      "filePath": "_auth/_layout/projects/$projectId/index.tsx",
       "parent": "/_auth/_layout"
     }
   }

@@ -1,5 +1,5 @@
 use ic_cdk_macros::{init, query, update};
-use shared::pt_backend_generated::{Document, DocumentId};
+use shared::pt_backend_generated::{Document, DocumentId, ProjectId};
 use std::cell::RefCell;
 use std::collections::HashMap;
 
@@ -26,6 +26,7 @@ fn create_document(title: String, content: serde_bytes::ByteBuf) -> DocumentId {
         id,
         title,
         version: 1,
+        projects: vec![],
         content,
         timestamp: ic_cdk::api::time(),
         author: caller,
@@ -92,8 +93,15 @@ fn delete_document(id: DocumentId) -> Result<(), String> {
 }
 
 #[query]
-fn list_documents() -> Vec<Document> {
-    DOCUMENTS.with(|documents| documents.borrow().values().cloned().collect())
+fn list_documents(project_id: ProjectId) -> Vec<Document> {
+    DOCUMENTS.with(|documents| {
+        documents
+            .borrow()
+            .values()
+            .filter(|doc| doc.projects.contains(&project_id))
+            .cloned()
+            .collect()
+    })
 }
 
 ic_cdk::export_candid!();

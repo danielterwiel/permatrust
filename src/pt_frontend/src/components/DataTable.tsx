@@ -7,6 +7,7 @@ import {
   type ColumnDef,
   type HeaderGroup,
 } from "@tanstack/react-table";
+import { Link } from "@tanstack/react-router";
 import { Input } from "@/components/ui/input";
 import {
   Table,
@@ -70,9 +71,13 @@ export type TableData = TableDataItem[];
 
 interface TableProps {
   tableData?: TableData;
+  entityPath?: string;
 }
 
-export const DataTable: React.FC<TableProps> = ({ tableData = [] }) => {
+export const DataTable: React.FC<TableProps> = ({
+  tableData = [],
+  entityPath,
+}) => {
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>(
     {},
   );
@@ -144,6 +149,8 @@ export const DataTable: React.FC<TableProps> = ({ tableData = [] }) => {
     setColumnWidths(newColumnWidths);
   }, [headers]);
 
+  console.log("entityPath", entityPath);
+
   return (
     <div className="grid">
       <div className="overflow-auto py-2">
@@ -181,6 +188,9 @@ export const DataTable: React.FC<TableProps> = ({ tableData = [] }) => {
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
+                <TableCell>
+                  <Link to={row.id}>Open</Link>
+                </TableCell>
               </TableRow>
             ))}
           </TableBody>

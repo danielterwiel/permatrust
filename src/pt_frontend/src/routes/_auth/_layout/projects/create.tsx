@@ -1,7 +1,7 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_auth/_layout/projects/create")({
-  component: () => <Create />,
+  component: CreateProject,
 });
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -19,14 +19,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { pt_backend } from "@/declarations/pt_backend";
 
 const formSchema = z.object({
   name: z.string().min(2, {
     message: "Project name must be at least 2 characters.",
   }),
-});
+}); // TODO: backend validation
 
-export function Create() {
+export function CreateProject() {
+  const router = useRouter();
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -34,8 +37,12 @@ export function Create() {
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    // TODO: prevent create "create" as name
+    const response = await pt_backend.create_project(values.name);
+    console.log("response", response);
+    router.history.push(`/projects/${response}`);
+    // TODO: error handling
   }
 
   return (

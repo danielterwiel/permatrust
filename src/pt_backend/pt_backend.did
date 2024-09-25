@@ -20,6 +20,7 @@ type Document = record {
     version : nat32;
     timestamp : nat64;
     author : principal;
+    projects: vec ProjectId;
 };
 
 type DocumentList = vec Document
@@ -28,6 +29,6 @@ service : {
     create_project : (text) -> (ProjectId);
     list_projects : () -> (vec Project);
 
-    create_document : (text, vec nat8) -> (DocumentId);
-    list_documents : () -> (vec Document) query;
+    create_document : (ProjectId, text, vec nat8) -> (DocumentId);
+    list_documents : (ProjectId) -> (vec Document) query;
 }
