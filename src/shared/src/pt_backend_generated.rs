@@ -6,15 +6,23 @@ use ic_cdk::api::call::CallResult as Result;
 
 pub type ProjectId = u64;
 pub type DocumentId = u64;
+pub type DocumentRevisionId = u64;
 #[derive(CandidType, Deserialize, Clone)]
 pub struct Document {
   pub id: DocumentId,
+  pub revisions: Vec<DocumentRevisionId>,
+  pub projects: Vec<ProjectId>,
+  pub currentVersion: u64,
+}
+#[derive(CandidType, Deserialize, Clone)]
+pub struct DocumentRevision {
+  pub id: DocumentRevisionId,
   pub title: String,
   pub content: serde_bytes::ByteBuf,
-  pub projects: Vec<ProjectId>,
   pub author: Principal,
-  pub version: u32,
+  pub version: u64,
   pub timestamp: u64,
+  pub documentId: DocumentId,
 }
 #[derive(CandidType, Deserialize, Clone)]
 pub struct Project {
@@ -32,6 +40,12 @@ impl Service {
   }
   pub async fn create_project(&self, arg0: String) -> Result<(ProjectId,)> {
     ic_cdk::call(self.0, "create_project", (arg0,)).await
+  }
+  pub async fn list_all_documents(&self) -> Result<(Vec<Document>,)> {
+    ic_cdk::call(self.0, "list_all_documents", ()).await
+  }
+  pub async fn list_document_revisions(&self, arg0: DocumentId) -> Result<(Vec<DocumentRevision>,)> {
+    ic_cdk::call(self.0, "list_document_revisions", (arg0,)).await
   }
   pub async fn list_documents(&self, arg0: ProjectId) -> Result<(Vec<Document>,)> {
     ic_cdk::call(self.0, "list_documents", (arg0,)).await

@@ -1,11 +1,14 @@
 use ic_cdk_macros::{init, query, update};
-use shared::pt_backend_generated::{Document, DocumentId, ProjectId};
+use shared::pt_backend_generated::{
+    Document, DocumentId, DocumentRevision, DocumentRevisionId, ProjectId,
+};
 use std::cell::RefCell;
 use std::collections::HashMap;
 
 thread_local! {
     static DOCUMENTS: RefCell<HashMap<DocumentId, Document>> = RefCell::new(HashMap::new());
-    static NEXT_ID: RefCell<DocumentId> = RefCell::new(0);
+    static DOCUMENT_REVISIONS: RefCell<HashMap<DocumentRevisionId, DocumentRevision>> = RefCell::new(HashMap::new());
+    static NEXT_DOCUMENT_ID: RefCell<DocumentId> = RefCell::new(0);
 }
 
 #[init]
@@ -14,87 +17,46 @@ fn init() {
 }
 
 #[update]
-
 fn create_document(
     project_id: ProjectId,
     title: String,
     content: serde_bytes::ByteBuf,
 ) -> DocumentId {
     let caller = ic_cdk::caller();
-    let id = NEXT_ID.with(|next_id| {
+    let document_id = NEXT_DOCUMENT_ID.with(|next_id| {
         let current_id = *next_id.borrow();
         *next_id.borrow_mut() += 1;
         current_id
     });
 
-    let document = Document {
-        id,
-        title,
+    let initial_revision = DocumentRevision {
+        id: 0, // First revision always has id 0
+        documentId: document_id,
         version: 1,
-        projects: vec![project_id],
+        title,
         content,
         timestamp: ic_cdk::api::time(),
         author: caller,
     };
 
-    DOCUMENTS.with(|documents| {
-        documents.borrow_mut().insert(id, document);
+    DOCUMENT_REVISIONS.with(|document_revisions| {
+        document_revisions
+            .borrow_mut()
+            .insert(initial_revision.id, initial_revision.clone());
     });
 
-    id
-}
-
-// #[query]
-// fn get_document(id: DocumentId) -> Option<&'static Document> {
-//     DOCUMENTS.with(|documents| documents.borrow().get(&id))
-// }
-
-#[update]
-fn update_document(
-    id: DocumentId,
-    title: Option<String>,
-    content: Option<serde_bytes::ByteBuf>,
-) -> Result<(), String> {
-    let caller = ic_cdk::caller();
+    let document = Document {
+        id: document_id,
+        currentVersion: 1,
+        revisions: vec![initial_revision.id],
+        projects: vec![project_id],
+    };
 
     DOCUMENTS.with(|documents| {
-        let mut documents = documents.borrow_mut();
-        if let Some(doc) = documents.get_mut(&id) {
-            if doc.author != caller {
-                return Err("Only the author can update the document".to_string());
-            }
+        documents.borrow_mut().insert(document_id, document);
+    });
 
-            if let Some(new_title) = title {
-                doc.title = new_title;
-            }
-            if let Some(new_content) = content {
-                doc.content = new_content;
-            }
-            doc.version += 1;
-            doc.timestamp = ic_cdk::api::time();
-            Ok(())
-        } else {
-            Err("Document not found".to_string())
-        }
-    })
-}
-
-#[update]
-fn delete_document(id: DocumentId) -> Result<(), String> {
-    let caller = ic_cdk::caller();
-
-    DOCUMENTS.with(|documents| {
-        let mut documents = documents.borrow_mut();
-        if let Some(doc) = documents.get(&id) {
-            if doc.author != caller {
-                return Err("Only the author can delete the document".to_string());
-            }
-            documents.remove(&id);
-            Ok(())
-        } else {
-            Err("Document not found".to_string())
-        }
-    })
+    document_id
 }
 
 #[query]
@@ -111,6 +73,24 @@ fn list_documents(project_id: ProjectId) -> Vec<Document> {
             .filter(|doc| doc.projects.contains(&project_id))
             .cloned()
             .collect()
+    })
+}
+
+#[query]
+fn list_document_revisions(document_id: DocumentId) -> Vec<DocumentRevision> {
+    DOCUMENTS.with(|documents| {
+        documents
+            .borrow()
+            .get(&document_id)
+            .map(|doc| {
+                doc.revisions
+                    .iter()
+                    .filter_map(|rev_id| {
+                        DOCUMENT_REVISIONS.with(|revisions| revisions.borrow().get(rev_id).cloned())
+                    })
+                    .collect()
+            })
+            .unwrap_or_else(Vec::new)
     })
 }
 

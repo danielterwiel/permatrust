@@ -18,7 +18,9 @@ import { Route as AuthLayoutProjectsIndexImport } from './routes/_auth/_layout/p
 import { Route as AuthLayoutNnsIndexImport } from './routes/_auth/_layout/nns/index'
 import { Route as AuthLayoutProjectsCreateImport } from './routes/_auth/_layout/projects/create'
 import { Route as AuthLayoutProjectsProjectIdIndexImport } from './routes/_auth/_layout/projects/$projectId/index'
-import { Route as AuthLayoutProjectsProjectIdCreateImport } from './routes/_auth/_layout/projects/$projectId/create'
+import { Route as AuthLayoutProjectsProjectIdDocumentsIndexImport } from './routes/_auth/_layout/projects/$projectId/documents/index'
+import { Route as AuthLayoutProjectsProjectIdDocumentsCreateImport } from './routes/_auth/_layout/projects/$projectId/documents/create'
+import { Route as AuthLayoutProjectsProjectIdDocumentsDocumentIdIndexImport } from './routes/_auth/_layout/projects/$projectId/documents/$documentId/index'
 
 // Create/Update Routes
 
@@ -58,9 +60,21 @@ const AuthLayoutProjectsProjectIdIndexRoute =
     getParentRoute: () => AuthLayoutRoute,
   } as any)
 
-const AuthLayoutProjectsProjectIdCreateRoute =
-  AuthLayoutProjectsProjectIdCreateImport.update({
-    path: '/projects/$projectId/create',
+const AuthLayoutProjectsProjectIdDocumentsIndexRoute =
+  AuthLayoutProjectsProjectIdDocumentsIndexImport.update({
+    path: '/projects/$projectId/documents/',
+    getParentRoute: () => AuthLayoutRoute,
+  } as any)
+
+const AuthLayoutProjectsProjectIdDocumentsCreateRoute =
+  AuthLayoutProjectsProjectIdDocumentsCreateImport.update({
+    path: '/projects/$projectId/documents/create',
+    getParentRoute: () => AuthLayoutRoute,
+  } as any)
+
+const AuthLayoutProjectsProjectIdDocumentsDocumentIdIndexRoute =
+  AuthLayoutProjectsProjectIdDocumentsDocumentIdIndexImport.update({
+    path: '/projects/$projectId/documents/$documentId/',
     getParentRoute: () => AuthLayoutRoute,
   } as any)
 
@@ -110,18 +124,32 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLayoutProjectsIndexImport
       parentRoute: typeof AuthLayoutImport
     }
-    '/_auth/_layout/projects/$projectId/create': {
-      id: '/_auth/_layout/projects/$projectId/create'
-      path: '/projects/$projectId/create'
-      fullPath: '/projects/$projectId/create'
-      preLoaderRoute: typeof AuthLayoutProjectsProjectIdCreateImport
-      parentRoute: typeof AuthLayoutImport
-    }
     '/_auth/_layout/projects/$projectId/': {
       id: '/_auth/_layout/projects/$projectId/'
       path: '/projects/$projectId'
       fullPath: '/projects/$projectId'
       preLoaderRoute: typeof AuthLayoutProjectsProjectIdIndexImport
+      parentRoute: typeof AuthLayoutImport
+    }
+    '/_auth/_layout/projects/$projectId/documents/create': {
+      id: '/_auth/_layout/projects/$projectId/documents/create'
+      path: '/projects/$projectId/documents/create'
+      fullPath: '/projects/$projectId/documents/create'
+      preLoaderRoute: typeof AuthLayoutProjectsProjectIdDocumentsCreateImport
+      parentRoute: typeof AuthLayoutImport
+    }
+    '/_auth/_layout/projects/$projectId/documents/': {
+      id: '/_auth/_layout/projects/$projectId/documents/'
+      path: '/projects/$projectId/documents'
+      fullPath: '/projects/$projectId/documents'
+      preLoaderRoute: typeof AuthLayoutProjectsProjectIdDocumentsIndexImport
+      parentRoute: typeof AuthLayoutImport
+    }
+    '/_auth/_layout/projects/$projectId/documents/$documentId/': {
+      id: '/_auth/_layout/projects/$projectId/documents/$documentId/'
+      path: '/projects/$projectId/documents/$documentId'
+      fullPath: '/projects/$projectId/documents/$documentId'
+      preLoaderRoute: typeof AuthLayoutProjectsProjectIdDocumentsDocumentIdIndexImport
       parentRoute: typeof AuthLayoutImport
     }
   }
@@ -136,8 +164,10 @@ export const routeTree = rootRoute.addChildren({
     AuthLayoutProjectsCreateRoute,
     AuthLayoutNnsIndexRoute,
     AuthLayoutProjectsIndexRoute,
-    AuthLayoutProjectsProjectIdCreateRoute,
     AuthLayoutProjectsProjectIdIndexRoute,
+    AuthLayoutProjectsProjectIdDocumentsCreateRoute,
+    AuthLayoutProjectsProjectIdDocumentsIndexRoute,
+    AuthLayoutProjectsProjectIdDocumentsDocumentIdIndexRoute,
   }),
 })
 
@@ -166,8 +196,10 @@ export const routeTree = rootRoute.addChildren({
         "/_auth/_layout/projects/create",
         "/_auth/_layout/nns/",
         "/_auth/_layout/projects/",
-        "/_auth/_layout/projects/$projectId/create",
-        "/_auth/_layout/projects/$projectId/"
+        "/_auth/_layout/projects/$projectId/",
+        "/_auth/_layout/projects/$projectId/documents/create",
+        "/_auth/_layout/projects/$projectId/documents/",
+        "/_auth/_layout/projects/$projectId/documents/$documentId/"
       ]
     },
     "/_auth/_layout/projects/create": {
@@ -182,12 +214,20 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "_auth/_layout/projects/index.tsx",
       "parent": "/_auth/_layout"
     },
-    "/_auth/_layout/projects/$projectId/create": {
-      "filePath": "_auth/_layout/projects/$projectId/create.tsx",
-      "parent": "/_auth/_layout"
-    },
     "/_auth/_layout/projects/$projectId/": {
       "filePath": "_auth/_layout/projects/$projectId/index.tsx",
+      "parent": "/_auth/_layout"
+    },
+    "/_auth/_layout/projects/$projectId/documents/create": {
+      "filePath": "_auth/_layout/projects/$projectId/documents/create.tsx",
+      "parent": "/_auth/_layout"
+    },
+    "/_auth/_layout/projects/$projectId/documents/": {
+      "filePath": "_auth/_layout/projects/$projectId/documents/index.tsx",
+      "parent": "/_auth/_layout"
+    },
+    "/_auth/_layout/projects/$projectId/documents/$documentId/": {
+      "filePath": "_auth/_layout/projects/$projectId/documents/$documentId/index.tsx",
       "parent": "/_auth/_layout"
     }
   }

@@ -1,36 +1,40 @@
 type ProjectId = nat64;
+type DocumentId = nat64;
+type DocumentRevisionId = nat64;
 
 type Project = record {
     id : ProjectId;
-    name: text;
+    name : text;
     timestamp : nat64;
     author : principal;
-    documents: vec DocumentId;
+    documents : vec DocumentId;
 };
-
-type ProjectList = vec Project;
-
-
-type DocumentId = nat64;
 
 type Document = record {
     id : DocumentId;
-    title : text;
-    content : vec nat8;
-    version : nat32;
-    timestamp : nat64;
-    author : principal;
-    projects: vec ProjectId;
+    currentVersion : nat64;
+    revisions : vec DocumentRevisionId;
+    projects : vec ProjectId;
 };
 
-type DocumentList = vec Document
+type DocumentRevision = record {
+    id : DocumentRevisionId;
+    documentId : DocumentId;
+    version : nat64;
+    title : text;
+    content : vec nat8;
+    timestamp : nat64;
+    author : principal;
+};
 
 service : {
     create_project : (text) -> (ProjectId);
-    list_projects : () -> (vec Project);
+    list_projects : () -> (vec Project) query;
 
     create_document : (ProjectId, text, vec nat8) -> (DocumentId);
     list_documents : (ProjectId) -> (vec Document) query;
 
+    list_document_revisions : (DocumentId) -> (vec DocumentRevision) query;
+
     list_all_documents : () -> (vec Document) query;
-}
+};

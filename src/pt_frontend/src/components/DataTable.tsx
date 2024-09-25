@@ -21,6 +21,7 @@ import useDebounce from "@/hooks/useDebounce";
 import type {
   Project,
   Document,
+  DocumentRevision,
 } from "@/declarations/pt_backend/pt_backend.did";
 
 interface TableFiltersProps {
@@ -66,17 +67,19 @@ const TableFilters: React.FC<TableFiltersProps> = ({
   );
 };
 
-export type TableDataItem = Document | Project;
+export type TableDataItem = Project | Document | DocumentRevision;
 export type TableData = TableDataItem[];
 
 interface TableProps {
   tableData?: TableData;
   showOpenEntityButton?: boolean;
+  entityName?: string; // TODO: see if we can get a Paths object from tanstack router
 }
 
 export const DataTable: React.FC<TableProps> = ({
   tableData = [],
-  showOpenEntityButton = false
+  showOpenEntityButton = false,
+  entityName
 }) => {
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>(
     {},
@@ -187,7 +190,7 @@ export const DataTable: React.FC<TableProps> = ({
                   </TableCell>
                 ))}
                 {showOpenEntityButton && <TableCell>
-                  <Link to={row.id}>Open</Link>
+                  <Link to={`${entityName ? entityName + '/' : ''}${row.id}`}>Open</Link>
                 </TableCell>
                 }
               </TableRow>
