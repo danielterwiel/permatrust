@@ -38,6 +38,9 @@ impl Service {
   pub async fn create_document(&self, arg0: ProjectId, arg1: String, arg2: serde_bytes::ByteBuf) -> Result<(DocumentId,)> {
     ic_cdk::call(self.0, "create_document", (arg0,arg1,arg2,)).await
   }
+  pub async fn create_document_revision(&self, arg0: ProjectId, arg1: DocumentId, arg2: String, arg3: serde_bytes::ByteBuf) -> Result<(DocumentRevisionId,)> {
+    ic_cdk::call(self.0, "create_document_revision", (arg0,arg1,arg2,arg3,)).await
+  }
   pub async fn create_project(&self, arg0: String) -> Result<(ProjectId,)> {
     ic_cdk::call(self.0, "create_project", (arg0,)).await
   }

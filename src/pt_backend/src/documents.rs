@@ -94,4 +94,47 @@ fn list_document_revisions(document_id: DocumentId) -> Vec<DocumentRevision> {
     })
 }
 
+#[update]
+fn create_document_revision(
+    project_id: ProjectId,
+    document_id: DocumentId,
+    title: String,
+    content: serde_bytes::ByteBuf,
+) -> DocumentRevisionId {
+    let caller = ic_cdk::caller();
+
+    DOCUMENTS.with(|documents| {
+        let mut documents = documents.borrow_mut();
+        let document = documents.get_mut(&document_id).expect("Document not found");
+
+        let new_revision_id = document.revisions.len() as DocumentRevisionId;
+        let new_version = document.currentVersion + 1;
+
+        let new_revision = DocumentRevision {
+            id: new_revision_id,
+            documentId: document_id,
+            version: new_version,
+            title,
+            content,
+            timestamp: ic_cdk::api::time(),
+            author: caller,
+        };
+
+        DOCUMENT_REVISIONS.with(|document_revisions| {
+            document_revisions
+                .borrow_mut()
+                .insert(new_revision_id, new_revision.clone());
+        });
+
+        document.currentVersion = new_version;
+        document.revisions.push(new_revision_id);
+
+        if !document.projects.contains(&project_id) {
+            document.projects.push(project_id);
+        }
+
+        new_revision_id
+    })
+}
+
 ic_cdk::export_candid!();

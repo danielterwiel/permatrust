@@ -18,9 +18,9 @@ import { MDXEditor, UndoRedo, BoldItalicUnderlineToggles, headingsPlugin, toolba
 import '@mdxeditor/editor/style.css'
 
 export const Route = createFileRoute(
-  "/_auth/_layout/projects/$projectId/documents/create",
+  "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create",
 )({
-  component: CreateDocument,
+  component: CreateRevision,
 });
 
 const formSchema = z.object({
@@ -33,10 +33,10 @@ const formSchema = z.object({
   projects: z.array(z.bigint()),
 }); // TODO: backend validation
 
-export function CreateDocument() {
+export function CreateRevision() {
   const router = useRouter();
   const params = useParams({
-    from: "/_auth/_layout/projects/$projectId/documents/create",
+    from: "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create",
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -53,8 +53,9 @@ export function CreateDocument() {
     const encoder = new TextEncoder();
     const content = encoder.encode(values.content);
 
-    const response = await pt_backend.create_document(
+    const response = await pt_backend.create_document_revision(
       BigInt(params.projectId),
+      BigInt(params.documentId),
       values.title,
       content,
     );

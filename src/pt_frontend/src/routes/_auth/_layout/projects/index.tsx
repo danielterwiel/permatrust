@@ -16,7 +16,7 @@ function Projects() {
   const { projects } = Route.useLoaderData()
   return (
     <>
-      <Link href="/projects/create">Create Project</Link>
+      <Link to="/projects/create">Create Project</Link>
       <DataTable tableData={projects} showOpenEntityButton={true} />
     </>
   );

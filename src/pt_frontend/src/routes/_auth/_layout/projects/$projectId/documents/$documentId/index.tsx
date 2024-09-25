@@ -23,8 +23,8 @@ function DocumentRevisions() {
       {/* TODO: get document.name for title */}
       <h2>Document Revisions {documentId}</h2>
       <h3>Revisions</h3>
-      <Link to={`/projects/${projectId}/documents/${documentId}/create`}>Create Revision</Link>
-      <DataTable tableData={revisions} showOpenEntityButton={true} entityName="revision" />
+      <Link to={`/projects/${projectId}/documents/${documentId}/revisions/create`}>Create Revision</Link>
+      <DataTable tableData={revisions} showOpenEntityButton={true} entityName="revisions" />
     </>
   )
 }

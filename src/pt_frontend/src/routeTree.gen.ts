@@ -21,6 +21,8 @@ import { Route as AuthLayoutProjectsProjectIdIndexImport } from './routes/_auth/
 import { Route as AuthLayoutProjectsProjectIdDocumentsIndexImport } from './routes/_auth/_layout/projects/$projectId/documents/index'
 import { Route as AuthLayoutProjectsProjectIdDocumentsCreateImport } from './routes/_auth/_layout/projects/$projectId/documents/create'
 import { Route as AuthLayoutProjectsProjectIdDocumentsDocumentIdIndexImport } from './routes/_auth/_layout/projects/$projectId/documents/$documentId/index'
+import { Route as AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsCreateImport } from './routes/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create'
+import { Route as AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsRevisionIdIndexImport } from './routes/_auth/_layout/projects/$projectId/documents/$documentId/revisions/$revisionId/index'
 
 // Create/Update Routes
 
@@ -77,6 +79,20 @@ const AuthLayoutProjectsProjectIdDocumentsDocumentIdIndexRoute =
     path: '/projects/$projectId/documents/$documentId/',
     getParentRoute: () => AuthLayoutRoute,
   } as any)
+
+const AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsCreateRoute =
+  AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsCreateImport.update({
+    path: '/projects/$projectId/documents/$documentId/revisions/create',
+    getParentRoute: () => AuthLayoutRoute,
+  } as any)
+
+const AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsRevisionIdIndexRoute =
+  AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsRevisionIdIndexImport.update(
+    {
+      path: '/projects/$projectId/documents/$documentId/revisions/$revisionId/',
+      getParentRoute: () => AuthLayoutRoute,
+    } as any,
+  )
 
 // Populate the FileRoutesByPath interface
 
@@ -152,6 +168,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthLayoutProjectsProjectIdDocumentsDocumentIdIndexImport
       parentRoute: typeof AuthLayoutImport
     }
+    '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create': {
+      id: '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create'
+      path: '/projects/$projectId/documents/$documentId/revisions/create'
+      fullPath: '/projects/$projectId/documents/$documentId/revisions/create'
+      preLoaderRoute: typeof AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsCreateImport
+      parentRoute: typeof AuthLayoutImport
+    }
+    '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/$revisionId/': {
+      id: '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/$revisionId/'
+      path: '/projects/$projectId/documents/$documentId/revisions/$revisionId'
+      fullPath: '/projects/$projectId/documents/$documentId/revisions/$revisionId'
+      preLoaderRoute: typeof AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsRevisionIdIndexImport
+      parentRoute: typeof AuthLayoutImport
+    }
   }
 }
 
@@ -168,6 +198,8 @@ export const routeTree = rootRoute.addChildren({
     AuthLayoutProjectsProjectIdDocumentsCreateRoute,
     AuthLayoutProjectsProjectIdDocumentsIndexRoute,
     AuthLayoutProjectsProjectIdDocumentsDocumentIdIndexRoute,
+    AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsCreateRoute,
+    AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsRevisionIdIndexRoute,
   }),
 })
 
@@ -199,7 +231,9 @@ export const routeTree = rootRoute.addChildren({
         "/_auth/_layout/projects/$projectId/",
         "/_auth/_layout/projects/$projectId/documents/create",
         "/_auth/_layout/projects/$projectId/documents/",
-        "/_auth/_layout/projects/$projectId/documents/$documentId/"
+        "/_auth/_layout/projects/$projectId/documents/$documentId/",
+        "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create",
+        "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/$revisionId/"
       ]
     },
     "/_auth/_layout/projects/create": {
@@ -228,6 +262,14 @@ export const routeTree = rootRoute.addChildren({
     },
     "/_auth/_layout/projects/$projectId/documents/$documentId/": {
       "filePath": "_auth/_layout/projects/$projectId/documents/$documentId/index.tsx",
+      "parent": "/_auth/_layout"
+    },
+    "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create": {
+      "filePath": "_auth/_layout/projects/$projectId/documents/$documentId/revisions/create.tsx",
+      "parent": "/_auth/_layout"
+    },
+    "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/$revisionId/": {
+      "filePath": "_auth/_layout/projects/$projectId/documents/$documentId/revisions/$revisionId/index.tsx",
       "parent": "/_auth/_layout"
     }
   }
