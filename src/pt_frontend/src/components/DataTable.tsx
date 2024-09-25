@@ -71,12 +71,12 @@ export type TableData = TableDataItem[];
 
 interface TableProps {
   tableData?: TableData;
-  entityPath?: string;
+  showOpenEntityButton?: boolean;
 }
 
 export const DataTable: React.FC<TableProps> = ({
   tableData = [],
-  entityPath,
+  showOpenEntityButton = false
 }) => {
   const [columnFilters, setColumnFilters] = useState<Record<string, string>>(
     {},
@@ -149,8 +149,6 @@ export const DataTable: React.FC<TableProps> = ({
     setColumnWidths(newColumnWidths);
   }, [headers]);
 
-  console.log("entityPath", entityPath);
-
   return (
     <div className="grid">
       <div className="overflow-auto py-2">
@@ -188,9 +186,10 @@ export const DataTable: React.FC<TableProps> = ({
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
-                <TableCell>
+                {showOpenEntityButton && <TableCell>
                   <Link to={row.id}>Open</Link>
                 </TableCell>
+                }
               </TableRow>
             ))}
           </TableBody>

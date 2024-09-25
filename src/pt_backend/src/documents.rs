@@ -14,6 +14,7 @@ fn init() {
 }
 
 #[update]
+
 fn create_document(
     project_id: ProjectId,
     title: String,
@@ -94,6 +95,11 @@ fn delete_document(id: DocumentId) -> Result<(), String> {
             Err("Document not found".to_string())
         }
     })
+}
+
+#[query]
+fn list_all_documents() -> Vec<Document> {
+    DOCUMENTS.with(|documents| documents.borrow().values().cloned().collect())
 }
 
 #[query]

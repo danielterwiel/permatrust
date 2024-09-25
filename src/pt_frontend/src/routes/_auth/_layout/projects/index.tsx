@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { pt_backend } from "@/declarations/pt_backend";
 import { DataTable, type TableData } from "@/components/DataTable";
 import { Loading } from "@/components/Loading";
+import { stringifyBigIntObject } from '@/helpers/stringifyBigIntObject'
 
 export const Route = createFileRoute("/_auth/_layout/projects/")({
   component: Projects,
@@ -18,26 +19,11 @@ function Projects() {
     }
   }, [loading]);
 
-  const stringifyBigIntObjects = (obj: TableData | undefined) => {
-    if (!obj) {
-      return "[]";
-    }
-
-    const replacer = (_key: string, value: unknown) => {
-      if (typeof value === "bigint") {
-        return value.toString();
-      }
-      return value;
-    };
-
-    return JSON.stringify(obj, replacer, 2);
-  };
-
   const getProjects = async () => {
     setLoading(true);
     const response = await pt_backend.list_projects();
     console.log("response", response);
-    const parsedResponse = JSON.parse(stringifyBigIntObjects(response));
+    const parsedResponse = JSON.parse(stringifyBigIntObject(response));
     setResponse(parsedResponse);
     setLoading(false);
   };
@@ -46,7 +32,7 @@ function Projects() {
     <>
       <a href="/projects/create">Create</a>
       {loading ? <Loading /> : <></>}
-      {!loading ? <DataTable tableData={response} /> : <></>}
+      {!loading ? <DataTable tableData={response} showOpenEntityButton={true} /> : <></>}
     </>
   );
 }

@@ -31,4 +31,6 @@ service : {
 
     create_document : (ProjectId, text, vec nat8) -> (DocumentId);
     list_documents : (ProjectId) -> (vec Document) query;
+
+    list_all_documents : () -> (vec Document) query;
 }

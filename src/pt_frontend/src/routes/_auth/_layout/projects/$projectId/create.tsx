@@ -3,7 +3,6 @@ import { pt_backend } from "@/declarations/pt_backend";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import type { Document } from "@/declarations/pt_backend/pt_backend.did";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
