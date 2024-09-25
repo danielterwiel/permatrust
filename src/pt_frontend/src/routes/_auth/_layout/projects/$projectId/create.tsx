@@ -14,6 +14,10 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { MDXEditor, UndoRedo, BoldItalicUnderlineToggles, headingsPlugin, toolbarPlugin } from '@mdxeditor/editor'
+
+import '@mdxeditor/editor/style.css'
+
 
 export const Route = createFileRoute(
   "/_auth/_layout/projects/$projectId/create",
@@ -73,7 +77,7 @@ export function CreateDocument() {
               <FormControl>
                 <Input placeholder="Document" {...field} />
               </FormControl>
-              <FormDescription>This is your project name.</FormDescription>
+              <FormDescription>This is your document title.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -85,9 +89,24 @@ export function CreateDocument() {
             <FormItem>
               <FormLabel>Content</FormLabel>
               <FormControl>
-                <Input placeholder="Document" {...field} />
+
+                <MDXEditor
+                  markdown="Hello world"
+                  plugins={[
+                    headingsPlugin(),
+                    toolbarPlugin({
+                      toolbarContents: () => (
+                        <>
+                          {' '}
+                          <UndoRedo />
+                          <BoldItalicUnderlineToggles />
+                        </>
+                      )
+                    })
+                  ]}
+                  {...field} />
               </FormControl>
-              <FormDescription>This is your project name.</FormDescription>
+              <FormDescription>This is your document.</FormDescription>
               <FormMessage />
             </FormItem>
           )}
