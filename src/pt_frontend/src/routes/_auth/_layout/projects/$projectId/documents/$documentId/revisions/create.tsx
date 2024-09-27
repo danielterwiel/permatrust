@@ -90,6 +90,7 @@ export function CreateRevision() {
               <FormControl>
                 <MDXEditor
                   markdown="# Hello world"
+                  contentEditableClassName="prose"
                   plugins={[
                     headingsPlugin(),
                     toolbarPlugin({

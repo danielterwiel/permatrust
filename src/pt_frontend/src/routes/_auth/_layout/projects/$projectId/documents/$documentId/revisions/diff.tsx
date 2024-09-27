@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 
+import { MDXEditor, diffSourcePlugin } from '@mdxeditor/editor'
 import { pt_backend } from "@/declarations/pt_backend";
 
 const DocumentRevisionSchema = z.object({
@@ -64,9 +65,15 @@ function DocumentRevisionDiff() {
 
 
   return (
-    <>
-      <div>{contentCurrent}</div>
-      <div>{contentTheirs}</div>
-    </>
+    <MDXEditor
+      markdown={contentCurrent}
+      plugins={[
+        diffSourcePlugin({
+          diffMarkdown: contentTheirs,
+          viewMode: 'diff',
+          readOnlyDiff: true
+        })
+      ]}
+    />
   );
 }
