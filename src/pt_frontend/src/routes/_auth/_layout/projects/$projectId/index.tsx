@@ -23,13 +23,29 @@ function ProjectDetails() {
       <h2>Project details {projectId}</h2>
       <h3>Documents</h3>
       <div>TODO: project meta data</div>
-      <Link to={`/projects/$projectId/documents/create`} params={{ projectId }}>
+      <Link
+        to={'/projects/$projectId/documents/create'}
+        params={{ projectId }}
+        variant="default"
+      >
         Create Document
       </Link>
       <DataTable
         tableData={documents}
         showOpenEntityButton={true}
         routePath="documents"
+        columnConfig={[
+          {
+            id: 'title',
+            headerName: 'Document Title',
+            cellPreprocess: (title) => title,
+          },
+          {
+            id: 'current_version',
+            headerName: 'Version',
+            cellPreprocess: (version) => version,
+          },
+        ]}
       />
     </>
   );

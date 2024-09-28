@@ -4,6 +4,7 @@ import { pt_backend } from '@/declarations/pt_backend';
 import { stringifyBigIntObject } from '@/helpers/stringifyBigIntObject';
 import { Link } from '@/components/Link';
 import { DataTable, type TableDataItem } from '@/components/DataTable';
+import { Principal } from '@dfinity/principal';
 
 export const Route = createFileRoute(
   '/_auth/_layout/projects/$projectId/documents/$documentId/'
@@ -34,15 +35,14 @@ function DocumentRevisionsList() {
       {/* TODO: get document.name for title */}
       <h2>Document Revisions {documentId}</h2>
       <h3>Revisions</h3>
-      <div>
+      <div className="flex gap-4 pr-8 flex-row-reverse">
         <Link
           to={'/projects/$projectId/documents/$documentId/revisions/create'}
           params={{ projectId, documentId }}
+          variant="default"
         >
           Create Revision
         </Link>
-      </div>
-      <div>
         <Link
           to={'/projects/$projectId/documents/$documentId/revisions/diff'}
           params={{
@@ -64,6 +64,33 @@ function DocumentRevisionsList() {
         showOpenEntityButton={true}
         routePath="revisions"
         onSelectionChange={handleSelect}
+        columnConfig={[
+          {
+            id: 'version',
+            cellPreprocess: (v) => v,
+          },
+          {
+            id: 'author',
+            cellPreprocess: (author) =>
+              Principal.fromUint8Array(author).toString(),
+          },
+          {
+            id: 'content',
+            cellPreprocess: (content) => {
+              return new TextDecoder().decode(
+                new Uint8Array(content ? Object.values(content) : [])
+              );
+            },
+          },
+          {
+            id: 'timestamp',
+            headerName: 'Created at',
+            cellPreprocess: (timestamp) => {
+              const date = new Date(Number(timestamp / 1000000));
+              return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+            },
+          },
+        ]}
       />
     </>
   );

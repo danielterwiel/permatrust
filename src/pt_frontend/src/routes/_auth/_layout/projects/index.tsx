@@ -1,7 +1,9 @@
-import { Link, createFileRoute } from '@tanstack/react-router';
+import { Link } from '@/components/Link';
+import { createFileRoute } from '@tanstack/react-router';
 import { pt_backend } from '@/declarations/pt_backend';
 import { DataTable } from '@/components/DataTable';
 import { stringifyBigIntObject } from '@/helpers/stringifyBigIntObject';
+import { Principal } from '@dfinity/principal';
 
 export const Route = createFileRoute('/_auth/_layout/projects/')({
   component: Projects,
@@ -16,8 +18,26 @@ function Projects() {
   const { projects } = Route.useLoaderData();
   return (
     <>
-      <Link to="/projects/create">Create Project</Link>
-      <DataTable tableData={projects} showOpenEntityButton={true} />
+      <Link to="/projects/create" variant="default">
+        Create Project
+      </Link>
+      <DataTable
+        tableData={projects}
+        showOpenEntityButton={true}
+        columnConfig={[
+          {
+            id: 'name',
+            headerName: 'Project Name',
+            cellPreprocess: (v) => v,
+          },
+          {
+            id: 'author',
+            cellPreprocess: (author) => {
+              return Principal.fromUint8Array(author).toString();
+            },
+          },
+        ]}
+      />
     </>
   );
 }
