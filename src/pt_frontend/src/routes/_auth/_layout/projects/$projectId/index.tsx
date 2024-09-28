@@ -22,14 +22,15 @@ function ProjectDetails() {
       {/* TODO: get project.name for title */}
       <h2>Project details {projectId}</h2>
       <h3>Documents</h3>
-      <div>TODO: project meta data</div>
-      <Link
-        to={'/projects/$projectId/documents/create'}
-        params={{ projectId }}
-        variant="default"
-      >
-        Create Document
-      </Link>
+      <div className="flex gap-4 pr-6 flex-row-reverse">
+        <Link
+          to={'/projects/$projectId/documents/create'}
+          params={{ projectId }}
+          variant="default"
+        >
+          Create Document
+        </Link>
+      </div>
       <DataTable
         tableData={documents}
         showOpenEntityButton={true}

@@ -1,5 +1,5 @@
 import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_auth/_layout/projects/create")({
   component: CreateProject,
@@ -29,7 +29,7 @@ const formSchema = z.object({
 }); // TODO: backend validation
 
 export function CreateProject() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,7 +42,10 @@ export function CreateProject() {
     // TODO: prevent create "create" as name
     const response = await pt_backend.create_project(values.name);
     console.log("response", response);
-    navigate({ to: `/projects/${response.toString()}`, from: `/projects/create` });
+    navigate({
+      to: `/projects/${response.toString()}`,
+      from: "/projects/create",
+    });
     // TODO: error handling
   }
 

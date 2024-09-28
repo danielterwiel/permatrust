@@ -1,3 +1,11 @@
+# TODO: error types, make AppError a variant
+type AppError = text;
+
+type Result<T> = variant {
+    Ok : T;
+    Err : AppError;
+};
+
 type ProjectId = nat64;
 type DocumentId = nat64;
 type DocumentRevisionId = nat64;

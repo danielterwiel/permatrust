@@ -16,11 +16,7 @@ export const Route = createFileRoute(
 
 function DocumentRevisionDetail() {
   const { revision } = Route.useLoaderData();
-  console.log('revision', revision?.content);
-  console.log(
-    'new TextDecoder().decode(new Uint8Array(revision.content))',
-    new TextDecoder().decode(new Uint8Array(revision?.content ?? []))
-  );
+
   return (
     <MDXEditor
       plugins={[headingsPlugin()]}

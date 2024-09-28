@@ -35,7 +35,7 @@ function DocumentRevisionsList() {
       {/* TODO: get document.name for title */}
       <h2>Document Revisions {documentId}</h2>
       <h3>Revisions</h3>
-      <div className="flex gap-4 pr-8 flex-row-reverse">
+      <div className="flex gap-4 pr-6 flex-row-reverse">
         <Link
           to={'/projects/$projectId/documents/$documentId/revisions/create'}
           params={{ projectId, documentId }}

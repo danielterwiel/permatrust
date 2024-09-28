@@ -16,14 +16,18 @@ export const Route = createFileRoute('/_auth/_layout/projects/')({
 
 function Projects() {
   const { projects } = Route.useLoaderData();
+
   return (
     <>
-      <Link to="/projects/create" variant="default">
-        Create Project
-      </Link>
+      <div className="flex gap-4 pr-6 flex-row-reverse">
+        <Link to="/projects/create" variant="default">
+          Create Project
+        </Link>
+      </div>
       <DataTable
         tableData={projects}
         showOpenEntityButton={true}
+        routePath=""
         columnConfig={[
           {
             id: 'name',
@@ -32,9 +36,8 @@ function Projects() {
           },
           {
             id: 'author',
-            cellPreprocess: (author) => {
-              return Principal.fromUint8Array(author).toString();
-            },
+            cellPreprocess: (author) =>
+              Principal.fromUint8Array(author).toString(),
           },
         ]}
       />

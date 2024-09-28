@@ -5,7 +5,6 @@ import {
   getCoreRowModel,
   type ColumnDef,
 } from '@tanstack/react-table';
-import { Link } from '@/components/Link';
 import {
   Table,
   TableBody,
@@ -15,13 +14,14 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Link } from '@/components/Link';
 import type {
   Project,
   Document,
   DocumentRevision,
 } from '@/declarations/pt_backend/pt_backend.did';
 import type { routeTree } from '@/routeTree.gen';
-import type { ParseRoute } from '@tanstack/react-router';
+import { useNavigate, type ParseRoute } from '@tanstack/react-router';
 
 type ValidRoute = ParseRoute<typeof routeTree>['parentRoute'];
 
@@ -31,6 +31,7 @@ export type TableData = TableDataItem[];
 interface ColumnConfigItem {
   id: string;
   headerName?: string;
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   cellPreprocess?: (value: any) => any;
 }
 
@@ -39,7 +40,7 @@ interface TableProps {
   showOpenEntityButton?: boolean;
   routePath?: ValidRoute;
   onSelectionChange?: (selectedRows: TableDataItem[]) => void;
-  columnConfig?: ColumnConfigItem[]; // Updated prop
+  columnConfig?: ColumnConfigItem[];
 }
 
 export const DataTable: React.FC<TableProps> = ({
@@ -47,9 +48,10 @@ export const DataTable: React.FC<TableProps> = ({
   showOpenEntityButton = false,
   routePath = '',
   onSelectionChange,
-  columnConfig = [], // Default to empty array
+  columnConfig = [],
 }) => {
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
+  const navigate = useNavigate();
 
   const camelCaseToHumanReadable = useCallback((input: string) => {
     const spaced = input.replace(
@@ -88,14 +90,13 @@ export const DataTable: React.FC<TableProps> = ({
       enableHiding: false,
     };
 
-    // Map over all possible headers to create columns
     const allColumns = headers.map((header: string) => {
       const config = columnConfig.find((col) => col.id === header);
       const columnDef: ColumnDef<TableDataItem> = {
         accessorKey: header,
         header: config?.headerName || camelCaseToHumanReadable(header),
         cell: config?.cellPreprocess
-          ? ({ getValue }) => config.cellPreprocess!(getValue())
+          ? ({ getValue }) => config.cellPreprocess?.(getValue())
           : undefined,
       };
       return columnDef;
@@ -104,18 +105,15 @@ export const DataTable: React.FC<TableProps> = ({
     return [selectColumn, ...allColumns];
   }, [headers, camelCaseToHumanReadable, columnConfig]);
 
-  // Set up column visibility state
   const [columnVisibility, setColumnVisibility] = useState(() => {
-    // Hide all columns by default
     const initialVisibility: Record<string, boolean> = {};
-    headers.forEach((header) => {
+    for (const header of headers) {
       initialVisibility[header] = false;
-    });
+    }
 
-    // Show columns specified in columnConfig
-    columnConfig.forEach((col) => {
+    for (const col of columnConfig) {
       initialVisibility[col.id] = true;
-    });
+    }
 
     return initialVisibility;
   });
@@ -181,15 +179,17 @@ export const DataTable: React.FC<TableProps> = ({
                 ))}
                 {showOpenEntityButton && (
                   <TableCell>
-                    <Link
-                      to={
-                        `${routePath ? `${routePath}/` : ''}${row.getValue(
-                          'id'
-                        )}` as ValidRoute // TODO: improve type of routePath
-                      }
-                    >
-                      Open
-                    </Link>
+                    <div className="flex justify-end">
+                      <Link
+                        to={
+                          `${routePath ? `${routePath}/` : ''}${row.getValue(
+                            'id'
+                          )}` as ValidRoute // TODO: improve type of routePath
+                        }
+                      >
+                        Open
+                      </Link>
+                    </div>
                   </TableCell>
                 )}
               </TableRow>
