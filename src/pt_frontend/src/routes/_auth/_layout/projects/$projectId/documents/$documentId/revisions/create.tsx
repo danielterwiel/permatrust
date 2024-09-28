@@ -45,7 +45,6 @@ export function CreateRevision() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // TODO: prevent create "create" as name
     const encoder = new TextEncoder();
     const content = encoder.encode(values.content);
 
@@ -55,7 +54,7 @@ export function CreateRevision() {
       content,
     );
     console.log("response", response);
-    navigate({ to: `/projects/${params.projectId}/documents/${params.projectId}/` });
+    navigate({ to: `/projects/${params.projectId}/documents/${params.documentId}/` });
     // TODO: error handling
   }
 

@@ -1,8 +1,8 @@
-import { Link } from "@tanstack/react-router";
+import { Link } from "@/components/Link";
 import { createFileRoute } from "@tanstack/react-router";
 import { pt_backend } from "@/declarations/pt_backend";
-import { DataTable, } from "@/components/DataTable";
-import { stringifyBigIntObject } from '@/helpers/stringifyBigIntObject'
+import { DataTable } from "@/components/DataTable";
+import { stringifyBigIntObject } from "@/helpers/stringifyBigIntObject";
 
 export const Route = createFileRoute("/_auth/_layout/projects/$projectId/")({
   component: ProjectDetails,
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_auth/_layout/projects/$projectId/")({
 
 function ProjectDetails() {
   const { projectId } = Route.useParams();
-  const { documents } = Route.useLoaderData()
+  const { documents } = Route.useLoaderData();
 
   return (
     <>
@@ -23,8 +23,14 @@ function ProjectDetails() {
       <h2>Project details {projectId}</h2>
       <h3>Documents</h3>
       <div>TODO: project meta data</div>
-      <Link to={`/projects/${projectId}/documents/create`}>Create Document</Link>
-      <DataTable tableData={documents} showOpenEntityButton={true} entityName="documents" />
+      <Link to={`/projects/$projectId/documents/create`} params={{ projectId }}>
+        Create Document
+      </Link>
+      <DataTable
+        tableData={documents}
+        showOpenEntityButton={true}
+        routePath="documents"
+      />
     </>
   );
 }

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { createFileRoute } from "@tanstack/react-router";
 import { pt_backend, } from "@/declarations/pt_backend";
 import { stringifyBigIntObject } from "@/helpers/stringifyBigIntObject";
-import { Link } from '@tanstack/react-router';
+import { Link } from '@/components/Link';
 import { DataTable, type TableDataItem } from "@/components/DataTable";
 
 export const Route = createFileRoute("/_auth/_layout/projects/$projectId/documents/$documentId/")({
@@ -30,20 +30,28 @@ function DocumentRevisionsList() {
       <h2>Document Revisions {documentId}</h2>
       <h3>Revisions</h3>
       <div>
-        <Link to={`/projects/${projectId}/documents/${documentId}/revisions/create`}>Create Revision</Link>
+        <Link to={`/projects/$projectId/documents/$documentId/revisions/create`} params={{ projectId, documentId }} >Create Revision</Link>
       </div>
       <div>
         <Link
-          to={`/projects/${projectId}/documents/${documentId}/revisions/diff?theirs=${selected[0]?.id}&current=${selected[1]?.id}`}
+          to={`/projects/$projectId/documents/$documentId/revisions/diff`}
+          params={{
+            projectId, documentId
+          }}
+          search={{
+            theirs: selected[0]?.id ? Number(selected[0].id) : undefined,
+            current: selected[1]?.id ? Number(selected[1].id) : undefined
+          }}
           disabled={selected.length !== 2}
+          variant="secondary"
         >
           Diff
         </Link>
-      </div>
+      </div >
       <DataTable
         tableData={revisions}
         showOpenEntityButton={true}
-        entityName="revisions"
+        routePath="revisions"
         onSelectionChange={handleSelect}
       />
     </>

@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link } from "@/components/Link";
 import { createFileRoute } from "@tanstack/react-router";
 import { pt_backend } from "@/declarations/pt_backend";
 import { DataTable } from "@/components/DataTable";
@@ -24,9 +24,9 @@ function ProjectDocuments() {
   return (
     <>
       {/* TODO: get project.name for title */}
-      <h2>Project documents {projectId}</h2>
+      <h2>Project documents {projectId.toString()}</h2>
       <h3>Documents</h3>
-      <Link to={`/projects/${projectId}/documents/create`}>
+      <Link to={`/projects/$projectId/documents/create`} params={{ projectId }}>
         Create Document
       </Link>
       <DataTable tableData={documents} showOpenEntityButton={true} />

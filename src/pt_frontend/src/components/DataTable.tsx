@@ -5,7 +5,7 @@ import {
   getCoreRowModel,
   type ColumnDef,
 } from "@tanstack/react-table";
-import { Link } from "@tanstack/react-router";
+import { Link } from "@/components/Link";
 import {
   Table,
   TableBody,
@@ -20,6 +20,10 @@ import type {
   Document,
   DocumentRevision,
 } from "@/declarations/pt_backend/pt_backend.did";
+import type { routeTree } from "@/routeTree.gen";
+import type { ParseRoute } from "@tanstack/react-router";
+
+type ValidRoute = ParseRoute<typeof routeTree>["parentRoute"];
 
 export type TableDataItem = Project | Document | DocumentRevision;
 export type TableData = TableDataItem[];
@@ -27,14 +31,14 @@ export type TableData = TableDataItem[];
 interface TableProps {
   tableData?: TableData;
   showOpenEntityButton?: boolean;
-  entityName?: string;
+  routePath?: ValidRoute;
   onSelectionChange?: (selectedRows: TableDataItem[]) => void;
 }
 
 export const DataTable: React.FC<TableProps> = ({
   tableData = [],
   showOpenEntityButton = false,
-  entityName,
+  routePath = "",
   onSelectionChange,
 }) => {
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
@@ -115,8 +119,6 @@ export const DataTable: React.FC<TableProps> = ({
     return <p>Invalid data</p>;
   }
 
-  console.log("tableData", tableData);
-
   return (
     <div className="grid">
       <div className="overflow-auto py-2">
@@ -148,7 +150,9 @@ export const DataTable: React.FC<TableProps> = ({
                 {showOpenEntityButton && (
                   <TableCell>
                     <Link
-                      to={`${entityName ? `${entityName}/` : ""}${row.getValue("id")}`}
+                      to={
+                        `${routePath ? `${routePath}/` : ""}${row.getValue("id")}` as ValidRoute // TODO: improve type of routePath
+                      }
                     >
                       Open
                     </Link>

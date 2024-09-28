@@ -59,8 +59,7 @@ export function CreateDocument() {
       values.title,
       content,
     );
-    console.log("response", response);
-    navigate({ to: `/projects/${params.projectId}/documents/${params.projectId}/` });
+    navigate({ to: `/projects/${params.projectId}/documents/${response}/` });
     // TODO: error handling
   }
 
