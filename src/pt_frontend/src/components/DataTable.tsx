@@ -1,14 +1,11 @@
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   useReactTable,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
   type ColumnDef,
-  type HeaderGroup,
 } from "@tanstack/react-table";
 import { Link } from "@tanstack/react-router";
-import { Input } from "@/components/ui/input";
 import {
   Table,
   TableBody,
@@ -18,55 +15,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Checkbox } from "@/components/ui/checkbox";
-import useDebounce from "@/hooks/useDebounce";
 import type {
   Project,
   Document,
   DocumentRevision,
 } from "@/declarations/pt_backend/pt_backend.did";
-
-interface TableFiltersProps {
-  headerGroups: HeaderGroup<TableDataItem>[];
-  headers: string[];
-  columnFilters: Record<string, string>;
-  setColumnFilters: React.Dispatch<
-    React.SetStateAction<Record<string, string>>
-  >;
-  camelCaseToHumanReadable: (input: string) => string;
-  columnWidths: Record<string, number>;
-}
-
-const TableFilters: React.FC<TableFiltersProps> = ({
-  headers,
-  columnFilters,
-  setColumnFilters,
-  columnWidths,
-}) => {
-  const handleInputChange = useCallback(
-    (header: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
-      setColumnFilters((prev) => ({
-        ...prev,
-        [header]: e.target.value,
-      }));
-    },
-    [setColumnFilters],
-  );
-
-  return (
-    <div className="flex">
-      {headers.map((header) => (
-        <div key={header}>
-          <Input
-            type="text"
-            value={columnFilters[header] || ""}
-            onChange={handleInputChange(header)}
-            style={{ width: `${columnWidths[header] || 150}px` }}
-          />
-        </div>
-      ))}
-    </div>
-  );
-};
 
 export type TableDataItem = Project | Document | DocumentRevision;
 export type TableData = TableDataItem[];
@@ -84,13 +37,7 @@ export const DataTable: React.FC<TableProps> = ({
   entityName,
   onSelectionChange,
 }) => {
-  const [columnFilters, setColumnFilters] = useState<Record<string, string>>(
-    {},
-  );
-  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
-
-  const debouncedColumnFilters = useDebounce(columnFilters, 500);
 
   const camelCaseToHumanReadable = useCallback((input: string) => {
     const spaced = input.replace(
@@ -139,42 +86,15 @@ export const DataTable: React.FC<TableProps> = ({
     [headers, camelCaseToHumanReadable],
   );
 
-  const filteredData = useMemo(
-    () =>
-      tableData.filter((row) =>
-        headers.every((header) =>
-          (row[header as keyof TableDataItem] as unknown as string)
-            ?.toString()
-            .toLowerCase()
-            .includes(debouncedColumnFilters[header]?.toLowerCase() || ""),
-        ),
-      ),
-    [tableData, headers, debouncedColumnFilters],
-  );
-
   const table = useReactTable({
-    data: filteredData,
+    data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     onRowSelectionChange: setRowSelection,
     state: {
       rowSelection,
     },
   });
-
-  const headerRefs = useRef<(HTMLTableCellElement | null)[]>([]);
-
-  useEffect(() => {
-    const newColumnWidths: Record<string, number> = {};
-    headerRefs.current.forEach((header, index) => {
-      if (header) {
-        const headerId = headers[index];
-        newColumnWidths[headerId ?? 0] = header.offsetWidth;
-      }
-    });
-    setColumnWidths(newColumnWidths);
-  }, [headers]);
 
   useEffect(() => {
     if (onSelectionChange) {
@@ -200,26 +120,12 @@ export const DataTable: React.FC<TableProps> = ({
   return (
     <div className="grid">
       <div className="overflow-auto py-2">
-        <TableFilters
-          headerGroups={table.getHeaderGroups()}
-          headers={headers}
-          columnFilters={columnFilters}
-          setColumnFilters={setColumnFilters}
-          camelCaseToHumanReadable={camelCaseToHumanReadable}
-          columnWidths={columnWidths}
-        />
         <Table className="font-mono">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header, index) => (
-                  <TableHead
-                    key={header.id}
-                    className="text-nowrap"
-                    ref={(el) => {
-                      headerRefs.current[index] = el;
-                    }}
-                  >
+                {headerGroup.headers.map((header) => (
+                  <TableHead key={header.id} className="text-nowrap">
                     {header.isPlaceholder
                       ? null
                       : flexRender(
