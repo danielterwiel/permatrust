@@ -1,6 +1,6 @@
-import { useRouter } from "@tanstack/react-router";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from '@tanstack/react-router';
 
 export const Route = createFileRoute("/authenticate")({
   component: Authenticate,
@@ -23,7 +23,7 @@ function Authenticate() {
   const { auth } = Route.useRouteContext({
     select: ({ auth }) => ({ auth }),
   });
-  const router = useRouter();
+  const navigate = useNavigate();
   return (
     <div className="flex justify-end">
       {!auth.authenticated ? (
@@ -32,7 +32,7 @@ function Authenticate() {
             await auth.initAuthClient();
             const result = await auth.authenticate();
             if (result) {
-              router.history.push("/projects");
+              navigate({ to: "/projects", from: '/authenticate' });
             }
           }}
         >

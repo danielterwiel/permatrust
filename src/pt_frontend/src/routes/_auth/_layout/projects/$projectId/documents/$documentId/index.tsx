@@ -4,12 +4,11 @@ import { pt_backend, } from "@/declarations/pt_backend";
 import { stringifyBigIntObject } from "@/helpers/stringifyBigIntObject";
 import { Link } from '@tanstack/react-router';
 import { DataTable, type TableDataItem } from "@/components/DataTable";
-import type { DocumentRevision, } from "@/declarations/pt_backend/pt_backend.did";
 
 export const Route = createFileRoute("/_auth/_layout/projects/$projectId/documents/$documentId/")({
   component: DocumentRevisionsList,
-  loader: async ({ params: { projectId } }) => {
-    const response = await pt_backend.list_document_revisions(BigInt(projectId));
+  loader: async ({ params: { projectId, documentId } }) => {
+    const response = await pt_backend.list_document_revisions(BigInt(projectId), BigInt(documentId));
     const revisions = JSON.parse(stringifyBigIntObject(response));
     return { revisions, projectId };
   },
@@ -32,7 +31,6 @@ function DocumentRevisionsList() {
       <h3>Revisions</h3>
       <div>
         <Link to={`/projects/${projectId}/documents/${documentId}/revisions/create`}>Create Revision</Link>
-
       </div>
       <div>
         <Link

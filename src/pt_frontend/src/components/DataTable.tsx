@@ -84,7 +84,9 @@ export const DataTable: React.FC<TableProps> = ({
   entityName,
   onSelectionChange,
 }) => {
-  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>(
+    {},
+  );
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({});
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
 
@@ -99,27 +101,23 @@ export const DataTable: React.FC<TableProps> = ({
     return capitalized;
   }, []);
 
-  if (tableData === undefined) {
-    return <p>No data fetched yet</p>;
-  }
-  if (tableData.length === 0) {
-    return <p>No data available</p>;
-  }
-  if (!Array.isArray(tableData)) {
-    return <p>Invalid data</p>;
-  }
-
-  const [firstRow] = tableData;
-  const headers = useMemo(() => Object.keys(firstRow ?? {}), [firstRow]);
+  const headers = useMemo(() => {
+    if (!Array.isArray(tableData) || tableData.length === 0) {
+      return [];
+    }
+    return Object.keys(tableData[0] ?? {});
+  }, [tableData]);
 
   const columns: ColumnDef<TableDataItem>[] = useMemo(
     () => [
       {
-        id: 'select',
+        id: "select",
         header: ({ table }) => (
           <Checkbox
             checked={table.getIsAllPageRowsSelected()}
-            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+            onCheckedChange={(value) =>
+              table.toggleAllPageRowsSelected(!!value)
+            }
             aria-label="Select all"
           />
         ),
@@ -185,7 +183,19 @@ export const DataTable: React.FC<TableProps> = ({
         .rows.map((row) => row.original);
       onSelectionChange(selectedRows);
     }
-  }, [rowSelection, onSelectionChange, table]);
+  }, [onSelectionChange, table]);
+
+  if (tableData === undefined) {
+    return <p>No data fetched yet</p>;
+  }
+  if (tableData.length === 0) {
+    return <p>No data available</p>;
+  }
+  if (!Array.isArray(tableData)) {
+    return <p>Invalid data</p>;
+  }
+
+  console.log("tableData", tableData);
 
   return (
     <div className="grid">
@@ -213,9 +223,9 @@ export const DataTable: React.FC<TableProps> = ({
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
                   </TableHead>
                 ))}
               </TableRow>
@@ -231,7 +241,11 @@ export const DataTable: React.FC<TableProps> = ({
                 ))}
                 {showOpenEntityButton && (
                   <TableCell>
-                    <Link to={`${entityName ? entityName + '/' : ''}${row.id}`}>Open</Link>
+                    <Link
+                      to={`${entityName ? `${entityName}/` : ""}${row.getValue("id")}`}
+                    >
+                      Open
+                    </Link>
                   </TableCell>
                 )}
               </TableRow>

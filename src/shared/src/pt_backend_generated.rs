@@ -10,19 +10,20 @@ pub type DocumentRevisionId = u64;
 #[derive(CandidType, Deserialize, Clone)]
 pub struct DocumentRevision {
   pub id: DocumentRevisionId,
-  pub title: String,
   pub content: serde_bytes::ByteBuf,
+  pub document_id: DocumentId,
   pub author: Principal,
-  pub version: u64,
+  pub version: u8,
   pub timestamp: u64,
-  pub documentId: DocumentId,
+  pub project_id: ProjectId,
 }
 #[derive(CandidType, Deserialize, Clone)]
 pub struct Document {
   pub id: DocumentId,
+  pub title: String,
   pub revisions: Vec<DocumentRevisionId>,
   pub projects: Vec<ProjectId>,
-  pub currentVersion: u64,
+  pub current_version: u8,
 }
 #[derive(CandidType, Deserialize, Clone)]
 pub struct Project {
@@ -50,8 +51,8 @@ impl Service {
   pub async fn list_all_documents(&self) -> Result<(Vec<Document>,)> {
     ic_cdk::call(self.0, "list_all_documents", ()).await
   }
-  pub async fn list_document_revisions(&self, arg0: DocumentId) -> Result<(Vec<DocumentRevision>,)> {
-    ic_cdk::call(self.0, "list_document_revisions", (arg0,)).await
+  pub async fn list_document_revisions(&self, arg0: ProjectId, arg1: DocumentId) -> Result<(Vec<DocumentRevision>,)> {
+    ic_cdk::call(self.0, "list_document_revisions", (arg0,arg1,)).await
   }
   pub async fn list_documents(&self, arg0: ProjectId) -> Result<(Vec<Document>,)> {
     ic_cdk::call(self.0, "list_documents", (arg0,)).await

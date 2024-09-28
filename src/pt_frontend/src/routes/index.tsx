@@ -4,7 +4,7 @@ import {
   Navigate,
   redirect,
   useRouteContext,
-  useRouter,
+  useNavigate
 } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/")({
 function LoginComponent() {
   const [password, setPassword] = useState<string>("");
   const search = Route.useSearch<{ redirect?: string }>();
-  const router = useRouter();
+  const navigate = useNavigate();
   const auth = useRouteContext({
     from: "/",
     select: (state) => state.auth,
@@ -37,9 +37,9 @@ function LoginComponent() {
   // Ah, the subtle nuances of client side auth. 🙄
   useLayoutEffect(() => {
     if (auth.loggedIn && search.redirect) {
-      router.history.push(search.redirect);
+      navigate({ to: search.redirect })
     }
-  }, [auth.loggedIn, search.redirect, router.history.push]);
+  }, [auth.loggedIn, search.redirect, navigate]);
 
   const deobfuscatePassword = (obfuscated: string) => {
     const shift = 7331;
@@ -55,7 +55,7 @@ function LoginComponent() {
     const expected = "ᴐᴒᴏᴗᴒᴖᴜᴐᴓᴄᴗᴌᴆᴒᴋᴒᴚᴇᴌᴇᴜᴒᴘᴎᴑᴒᴚᴋᴒᴚᴗᴒᴊᴈᴗᴌᴑ᳢";
     auth.loggedIn = password === deobfuscatePassword(expected);
     if (auth.loggedIn) {
-      router.history.push("/authenticate");
+      navigate({ to: "/authenticate" });
     }
   };
 

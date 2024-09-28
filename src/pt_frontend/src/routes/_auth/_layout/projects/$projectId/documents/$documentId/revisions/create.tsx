@@ -1,4 +1,4 @@
-import { createFileRoute, useParams, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useParams, useNavigate } from "@tanstack/react-router";
 import { pt_backend } from "@/declarations/pt_backend";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,9 +24,6 @@ export const Route = createFileRoute(
 });
 
 const formSchema = z.object({
-  title: z.string().min(2, {
-    message: "Project name must be at least 2 characters.",
-  }),
   content: z.string().min(1, {
     message: "Content must be at least 1 character.",
   }),
@@ -34,7 +31,7 @@ const formSchema = z.object({
 }); // TODO: backend validation
 
 export function CreateRevision() {
-  const router = useRouter();
+  const navigate = useNavigate();
   const params = useParams({
     from: "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create",
   });
@@ -42,7 +39,6 @@ export function CreateRevision() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: "",
       content: "",
       projects: [BigInt(params.projectId)],
     },
@@ -56,31 +52,16 @@ export function CreateRevision() {
     const response = await pt_backend.create_document_revision(
       BigInt(params.projectId),
       BigInt(params.documentId),
-      values.title,
       content,
     );
     console.log("response", response);
-    router.history.push(`/projects/${params.projectId}/documents/${params.projectId}/`);
+    navigate({ to: `/projects/${params.projectId}/documents/${params.projectId}/` });
     // TODO: error handling
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Title</FormLabel>
-              <FormControl>
-                <Input placeholder="Document" {...field} />
-              </FormControl>
-              <FormDescription>This is your document title.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <FormField
           control={form.control}
           name="content"

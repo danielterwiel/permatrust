@@ -1,4 +1,4 @@
-import { createFileRoute, useParams, useRouter } from "@tanstack/react-router";
+import { createFileRoute, useParams, useNavigate } from "@tanstack/react-router";
 import { pt_backend } from "@/declarations/pt_backend";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,7 +34,8 @@ const formSchema = z.object({
 }); // TODO: backend validation
 
 export function CreateDocument() {
-  const router = useRouter();
+  const navigate = useNavigate();
+
   const params = useParams({
     from: "/_auth/_layout/projects/$projectId/documents/create",
   });
@@ -59,7 +60,7 @@ export function CreateDocument() {
       content,
     );
     console.log("response", response);
-    router.history.push(`/projects/${params.projectId}/documents/${params.projectId}/`);
+    navigate({ to: `/projects/${params.projectId}/documents/${params.projectId}/` });
     // TODO: error handling
   }
 
