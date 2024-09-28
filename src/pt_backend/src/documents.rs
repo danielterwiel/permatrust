@@ -117,7 +117,8 @@ fn list_document_revisions(
     get_document_revisions(project_id, document_id)
 }
 
-fn get_revision(revision_id: DocumentRevisionId) -> Option<DocumentRevision> {
+#[query]
+fn get_document_revision(revision_id: DocumentRevisionId) -> Option<DocumentRevision> {
     DOCUMENT_REVISIONS.with(|revisions| revisions.borrow().get(&revision_id).cloned())
 }
 
@@ -148,8 +149,8 @@ fn diff_document_revisions(
     start_revision_id: DocumentRevisionId,
     end_revision_id: DocumentRevisionId,
 ) -> Vec<DocumentRevision> {
-    let start_revision = get_revision(start_revision_id);
-    let end_revision = get_revision(end_revision_id);
+    let start_revision = get_document_revision(start_revision_id);
+    let end_revision = get_document_revision(end_revision_id);
 
     match (start_revision, end_revision) {
         (Some(start), Some(end)) => {
@@ -185,19 +186,13 @@ fn diff_document_revisions(
 fn get_next_revision_id() -> u64 {
     DOCUMENT_REVISIONS.with(|revisions| {
         let revisions = revisions.borrow();
-        return revisions.len() as u64 + 1;
+        return if revisions.len() == 0 {
+            0
+        } else {
+            revisions.len() as u64
+        };
     })
 }
-
-// fn get_next_revision_version(project_id: ProjectId, document_id: DocumentId) -> usize {
-//     DOCUMENT_REVISIONS.with(|revisions| {
-//         let revisions = revisions.borrow();
-//         revisions
-//             .values()
-//             .find(|rev| rev.project_id == project_id && rev.document_id == document_id)
-//             .map_or(0, |_| revisions.len())
-//     })
-// }
 
 fn insert_document_revision(revision_id: DocumentRevisionId, revision: DocumentRevision) {
     DOCUMENT_REVISIONS.with(|document_revisions| {

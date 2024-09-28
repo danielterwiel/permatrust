@@ -1,6 +1,6 @@
 {
   "files": {
-    "ignore": ["node_modules/**", "routeTree.gen.ts"]
+    "ignore": ["node_modules/**", "routeTree.gen.ts", "../../node_modules"]
   },
   "organizeImports": {
     "enabled": true
@@ -8,60 +8,13 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true,
-      "correctness": {
-        "noUnreachable": "error",
-        "noUnusedVariables": "error",
-        "noUndeclaredVariables": "error",
-        "noInvalidConstructorSuper": "error",
-        "noConstAssign": "error",
-        "noPrecisionLoss": "error",
-        "noUnsafeOptionalChaining": "error"
-      },
-      "suspicious": {
-        "noEmptyTypeParameters": "error",
-        "noInvalidUseBeforeDeclaration": "error",
-        "useExhaustiveDependencies": "error",
-        "noBannedTypes": "error"
-      },
-      "complexity": {
-        "useOptionalChain": "error",
-        "useSimplifiedLogicExpression": "error"
-      },
-      "style": {
-        "noUselessFragments": "error",
-        "noUselessRename": "error",
-        "useArrowFunction": "error",
-        "useFlatMap": "error",
-        "noUselessStringConcat": "error",
-        "noUselessTernary": "error"
-      },
-      "performance": {
-        "noUselessConstructor": "error"
-      },
-      "nursery": {
-        "useImportType": "error",
-        "noUnusedImports": "error",
-        "useImportExtensions": "error",
-        "noCommonJs": "warn",
-        "useConsistentCurlyBraces": "error",
-        "useSortedClasses": "error"
-      },
-      "a11y": {
-        "useKeyWithClickEvents": "error",
-        "useAltText": "error"
-      },
-      "react": {
-        "useHookAtTopLevel": "error",
-        "useJsxKeyInIterable": "error"
-      }
+      "recommended": true
     }
   },
   "formatter": {
     "enabled": true,
     "formatWithErrors": false,
     "indentStyle": "space",
-    "indentSize": 2,
     "lineWidth": 80
   },
   "javascript": {

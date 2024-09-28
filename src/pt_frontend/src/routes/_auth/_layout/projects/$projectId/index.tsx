@@ -1,14 +1,14 @@
-import { Link } from "@/components/Link";
-import { createFileRoute } from "@tanstack/react-router";
-import { pt_backend } from "@/declarations/pt_backend";
-import { DataTable } from "@/components/DataTable";
-import { stringifyBigIntObject } from "@/helpers/stringifyBigIntObject";
+import { Link } from '@/components/Link';
+import { createFileRoute } from '@tanstack/react-router';
+import { pt_backend } from '@/declarations/pt_backend';
+import { DataTable } from '@/components/DataTable';
+import { stringifyBigIntObject } from '@/helpers/stringifyBigIntObject';
 
-export const Route = createFileRoute("/_auth/_layout/projects/$projectId/")({
+export const Route = createFileRoute('/_auth/_layout/projects/$projectId/')({
   component: ProjectDetails,
   loader: async ({ params: { projectId } }) => {
     const response = await pt_backend.list_documents(BigInt(projectId));
-    const documents = JSON.parse(stringifyBigIntObject(response));
+    const documents = stringifyBigIntObject(response);
     return { documents, projectId };
   },
 });

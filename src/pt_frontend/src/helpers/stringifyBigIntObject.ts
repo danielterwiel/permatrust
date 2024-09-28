@@ -1,16 +1,19 @@
-import type { TableData } from "@/components/DataTable";
+import type { TableData } from '@/components/DataTable';
 
-export const stringifyBigIntObject = <T extends TableData | undefined>(obj: T): T extends undefined ? "[]" : string => {
+export const stringifyBigIntObject = <T extends TableData | undefined>(
+  obj: T
+): T => {
   if (!obj) {
-    return "[]" as T extends undefined ? "[]" : string;
+    return JSON.parse('[]') as T;
   }
 
   const replacer = (_key: string, value: unknown) => {
-    if (typeof value === "bigint") {
+    if (typeof value === 'bigint') {
       return value.toString();
     }
     return value;
   };
 
-  return JSON.stringify(obj, replacer, 2) as T extends undefined ? "[]" : string;
+  const stringified = JSON.stringify(obj, replacer, 2);
+  return JSON.parse(stringified) as T;
 };
