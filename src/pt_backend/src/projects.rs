@@ -1,5 +1,7 @@
 use ic_cdk_macros::{query, update};
-use shared::pt_backend_generated::{AppError, Project, ProjectId, ProjectIdResult, ProjectsResult};
+use shared::pt_backend_generated::{
+    AppError, Project, ProjectId, ProjectIdResult, ProjectResult, ProjectsResult,
+};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::vec;
@@ -44,4 +46,12 @@ fn list_projects() -> ProjectsResult {
     let projects =
         PROJECTS.with(|projects| projects.borrow().values().cloned().collect::<Vec<_>>());
     ProjectsResult::Ok(projects)
+}
+
+#[query]
+fn get_project(project_id: ProjectId) -> ProjectResult {
+    PROJECTS.with(|projects| match projects.borrow().get(&project_id) {
+        Some(project) => ProjectResult::Ok(project.clone()),
+        None => ProjectResult::Err(AppError::EntityNotFound("Project not found".to_string())),
+    })
 }

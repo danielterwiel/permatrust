@@ -8,12 +8,15 @@ import { handleResult } from '@/utils/handleResult';
 
 export const Route = createFileRoute('/_auth/_layout/projects/')({
   component: Projects,
-  loader: async () => {
+  loader: async ({ context }) => {
     const response = await pt_backend.list_projects();
     console.log('response', response);
     const result = handleResult(response);
     const projects = stringifyBigIntObject(result);
-    return { projects };
+    return {
+      ...context,
+      projects,
+    };
   },
   errorComponent: ({ error }) => {
     return <div>Error: {error.message}</div>;

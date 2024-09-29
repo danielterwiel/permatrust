@@ -10,6 +10,8 @@ const router = createRouter({
   routeTree,
   context: {
     auth,
+
+    selected: {},
   },
 });
 

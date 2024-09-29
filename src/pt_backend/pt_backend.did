@@ -1,7 +1,6 @@
-
 type ProjectId = nat64;
 type DocumentId = nat64;
-type DocumentRevisionId = nat64;
+type RevisionId = nat64;
 
 type Project = record {
     id : ProjectId;
@@ -15,12 +14,12 @@ type Document = record {
     id : DocumentId;
     title: text;
     current_version : nat8;
-    revisions : vec DocumentRevisionId;
+    revisions : vec RevisionId;
     projects : vec ProjectId;
 };
 
-type DocumentRevision = record {
-    id : DocumentRevisionId;
+type Revision = record {
+    id : RevisionId;
     version : nat8;
     document_id : DocumentId;
     project_id : ProjectId;
@@ -45,13 +44,24 @@ type DocumentIdResult = variant {
     Err : AppError;
 };
 
-type DocumentRevisionIdResult = variant {
-    Ok : DocumentRevisionId;
+type RevisionIdResult = variant {
+    Ok : RevisionId;
     Err : AppError;
 };
 
-type DocumentRevisionResult = variant {
-    Ok: DocumentRevision;
+
+type ProjectResult = variant {
+    Ok: Project;
+    Err: AppError;
+};
+
+type DocumentResult = variant {
+    Ok: Document;
+    Err: AppError;
+};
+
+type RevisionResult = variant {
+    Ok: Revision;
     Err: AppError;
 };
 
@@ -65,24 +75,24 @@ type DocumentsResult = variant {
     Err: AppError;
 };
 
-type DocumentRevisionsResult = variant {
-    Ok: vec DocumentRevision;
+type RevisionsResult = variant {
+    Ok: vec Revision;
     Err: AppError;
 };
-
-
 
 service : {
     create_project : (text) -> (ProjectIdResult);
     list_projects : () -> (ProjectsResult) query;
+    get_project: (ProjectId) -> (ProjectResult) query;
 
     create_document : (ProjectId, text, vec nat8) -> (DocumentIdResult);
     list_documents : (ProjectId) -> (DocumentsResult) query;
+    get_document : (DocumentId) -> (DocumentResult) query;
 
-    create_document_revision : (ProjectId, DocumentId, vec nat8) -> (DocumentRevisionIdResult);
-    list_document_revisions : (ProjectId, DocumentId) -> (DocumentRevisionsResult) query;
-    diff_document_revisions : (DocumentRevisionId, DocumentRevisionId) -> (DocumentRevisionsResult) query;
-    get_document_revision : (DocumentRevisionId) -> (DocumentRevisionResult) query;
+    create_revision : (ProjectId, DocumentId, vec nat8) -> (RevisionIdResult);
+    list_revisions : (ProjectId, DocumentId) -> (RevisionsResult) query;
+    diff_revisions : (RevisionId, RevisionId) -> (RevisionsResult) query;
+    get_revision : (RevisionId) -> (RevisionResult) query;
 
     list_all_documents : () -> (DocumentsResult) query;
 };

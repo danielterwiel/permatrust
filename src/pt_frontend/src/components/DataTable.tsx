@@ -18,14 +18,14 @@ import { Link } from '@/components/Link';
 import type {
   Project,
   Document,
-  DocumentRevision,
+  Revision,
 } from '@/declarations/pt_backend/pt_backend.did';
 import type { routeTree } from '@/routeTree.gen';
-import { useNavigate, type ParseRoute } from '@tanstack/react-router';
+import { type ParseRoute } from '@tanstack/react-router';
 
 type ValidRoute = ParseRoute<typeof routeTree>['parentRoute'];
 
-export type TableDataItem = Project | Document | DocumentRevision;
+export type TableDataItem = Project | Document | Revision;
 export type TableData = TableDataItem[];
 
 interface ColumnConfigItem {
@@ -171,6 +171,7 @@ export const DataTable: React.FC<TableProps> = ({
                         )}
                   </TableHead>
                 ))}
+                <TableHead>Actions</TableHead>
               </TableRow>
             ))}
           </TableHeader>

@@ -7,11 +7,26 @@ import { handleResult } from '@/utils/handleResult';
 
 export const Route = createFileRoute('/_auth/_layout/projects/$projectId/')({
   component: ProjectDetails,
-  loader: async ({ params: { projectId } }) => {
-    const response = await pt_backend.list_documents(BigInt(projectId));
-    const result = handleResult(response);
-    const documents = stringifyBigIntObject(result);
-    return { documents, projectId };
+  loader: async ({ params: { projectId }, context }) => {
+    const documents_response = await pt_backend.list_documents(
+      BigInt(projectId)
+    );
+    const project_response = await pt_backend.get_project(BigInt(projectId));
+    const project_result = handleResult(project_response);
+    const documents_result = handleResult(documents_response);
+    const documents = stringifyBigIntObject(documents_result);
+    const project = stringifyBigIntObject(project_result);
+    return {
+      ...context,
+
+      documents,
+
+      selected: {
+        project: project,
+      },
+
+      projectId,
+    };
   },
   errorComponent: ({ error }) => {
     return <div>Error: {error.message}</div>;
@@ -20,12 +35,11 @@ export const Route = createFileRoute('/_auth/_layout/projects/$projectId/')({
 
 function ProjectDetails() {
   const { projectId } = Route.useParams();
-  const { documents } = Route.useLoaderData();
+  const { documents, selected } = Route.useLoaderData();
 
   return (
     <>
-      {/* TODO: get project.name for title */}
-      <h2>Project details {projectId}</h2>
+      <h2>{selected.project.name}</h2>
       <h3>Documents</h3>
       <div className="flex gap-4 pr-6 flex-row-reverse">
         <Link

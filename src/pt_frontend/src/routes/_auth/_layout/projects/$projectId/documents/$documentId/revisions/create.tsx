@@ -2,12 +2,12 @@ import {
   createFileRoute,
   useParams,
   useNavigate,
-} from '@tanstack/react-router';
-import { pt_backend } from '@/declarations/pt_backend';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
+} from "@tanstack/react-router";
+import { pt_backend } from "@/declarations/pt_backend";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -16,25 +16,25 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
+} from "@/components/ui/form";
 import {
   MDXEditor,
   UndoRedo,
   BoldItalicUnderlineToggles,
   headingsPlugin,
   toolbarPlugin,
-} from '@mdxeditor/editor';
-import '@mdxeditor/editor/style.css';
+} from "@mdxeditor/editor";
+import "@mdxeditor/editor/style.css";
 
 export const Route = createFileRoute(
-  '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create'
+  "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create",
 )({
   component: CreateRevision,
 });
 
 const formSchema = z.object({
   content: z.string().min(1, {
-    message: 'Content must be at least 1 character.',
+    message: "Content must be at least 1 character.",
   }),
   projects: z.array(z.bigint()),
 });
@@ -42,13 +42,13 @@ const formSchema = z.object({
 export function CreateRevision() {
   const navigate = useNavigate();
   const params = useParams({
-    from: '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create',
+    from: "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create",
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      content: '',
+      content: "",
       projects: [BigInt(params.projectId)],
     },
   });
@@ -57,12 +57,12 @@ export function CreateRevision() {
     const encoder = new TextEncoder();
     const content = encoder.encode(values.content);
 
-    const response = await pt_backend.create_document_revision(
+    const response = await pt_backend.create_revision(
       BigInt(params.projectId),
       BigInt(params.documentId),
-      content
+      content,
     );
-    console.log('TODO: handle result', response);
+    console.log("TODO: handle result", response);
     navigate({
       to: `/projects/${params.projectId}/documents/${params.documentId}/`,
     });
@@ -86,7 +86,7 @@ export function CreateRevision() {
                     toolbarPlugin({
                       toolbarContents: () => (
                         <>
-                          {' '}
+                          {" "}
                           <UndoRedo />
                           <BoldItalicUnderlineToggles />
                         </>

@@ -1,15 +1,14 @@
 use ic_cdk_macros::{init, query, update};
 use shared::pt_backend_generated::{
-    AppError, Document, DocumentId, DocumentIdResult, DocumentRevision, DocumentRevisionId,
-    DocumentRevisionIdResult, DocumentRevisionResult, DocumentRevisionsResult, DocumentsResult,
-    ProjectId,
+    AppError, Document, DocumentId, DocumentIdResult, DocumentResult, DocumentsResult, ProjectId,
+    Revision, RevisionId, RevisionIdResult, RevisionResult, RevisionsResult,
 };
 use std::cell::RefCell;
 use std::collections::HashMap;
 
 thread_local! {
     static DOCUMENTS: RefCell<HashMap<DocumentId, Document>> = RefCell::new(HashMap::new());
-    static DOCUMENT_REVISIONS: RefCell<HashMap<DocumentRevisionId, DocumentRevision>> = RefCell::new(HashMap::new());
+    static REVISIONS: RefCell<HashMap<RevisionId, Revision>> = RefCell::new(HashMap::new());
 }
 
 #[init]
@@ -35,11 +34,7 @@ fn insert_document(document: Document) {
     });
 }
 
-fn update_document_revisions(
-    project_id: ProjectId,
-    document_id: DocumentId,
-    revision_id: DocumentRevisionId,
-) {
+fn update_revisions(project_id: ProjectId, document_id: DocumentId, revision_id: RevisionId) {
     DOCUMENTS.with(|documents| {
         let mut documents = documents.borrow_mut();
         if let Some(doc) = documents.get_mut(&document_id) {
@@ -68,14 +63,14 @@ fn create_document(
 
     insert_document(document);
 
-    let revision_result = create_document_revision(project_id, document_id, content);
+    let revision_result = create_revision(project_id, document_id, content);
 
     match revision_result {
-        DocumentRevisionIdResult::Ok(revision_id) => {
-            update_document_revisions(project_id, document_id, revision_id);
+        RevisionIdResult::Ok(revision_id) => {
+            update_revisions(project_id, document_id, revision_id);
             DocumentIdResult::Ok(document_id)
         }
-        DocumentRevisionIdResult::Err(err) => {
+        RevisionIdResult::Err(err) => {
             // Remove the inserted document if revision creation failed
             DOCUMENTS.with(|documents| {
                 documents.borrow_mut().remove(&document_id);
@@ -102,10 +97,18 @@ fn list_documents(project_id: ProjectId) -> DocumentsResult {
     DocumentsResult::Ok(documents)
 }
 
-fn get_document_revisions(
+#[query]
+fn get_document(document_id: DocumentId) -> DocumentResult {
+    DOCUMENTS.with(|documents| match documents.borrow().get(&document_id) {
+        Some(document) => DocumentResult::Ok(document.clone()),
+        None => DocumentResult::Err(AppError::EntityNotFound("Document not found".to_string())),
+    })
+}
+
+fn get_revisions(
     project_id: ProjectId,
     document_id: DocumentId,
-) -> Result<Vec<DocumentRevision>, AppError> {
+) -> Result<Vec<Revision>, AppError> {
     // Check if the document exists and belongs to the project
     let document_exists = DOCUMENTS.with(|documents| {
         documents
@@ -120,7 +123,7 @@ fn get_document_revisions(
         ));
     }
 
-    let revisions = DOCUMENT_REVISIONS.with(|documents| {
+    let revisions = REVISIONS.with(|documents| {
         documents
             .borrow()
             .values()
@@ -133,32 +136,23 @@ fn get_document_revisions(
 }
 
 #[query]
-fn list_document_revisions(
-    project_id: ProjectId,
-    document_id: DocumentId,
-) -> DocumentRevisionsResult {
-    match get_document_revisions(project_id, document_id) {
-        Ok(revisions) => DocumentRevisionsResult::Ok(revisions),
-        Err(err) => DocumentRevisionsResult::Err(err),
+fn list_revisions(project_id: ProjectId, document_id: DocumentId) -> RevisionsResult {
+    match get_revisions(project_id, document_id) {
+        Ok(revisions) => RevisionsResult::Ok(revisions),
+        Err(err) => RevisionsResult::Err(err),
     }
 }
 
 #[query]
-fn get_document_revision(revision_id: DocumentRevisionId) -> DocumentRevisionResult {
-    DOCUMENT_REVISIONS.with(|revisions| match revisions.borrow().get(&revision_id) {
-        Some(revision) => DocumentRevisionResult::Ok(revision.clone()),
-        None => {
-            DocumentRevisionResult::Err(AppError::EntityNotFound("Revision not found".to_string()))
-        }
+fn get_revision(revision_id: RevisionId) -> RevisionResult {
+    REVISIONS.with(|revisions| match revisions.borrow().get(&revision_id) {
+        Some(revision) => RevisionResult::Ok(revision.clone()),
+        None => RevisionResult::Err(AppError::EntityNotFound("Revision not found".to_string())),
     })
 }
 
-fn get_document_revision_range(
-    document: &Document,
-    start_index: usize,
-    end_index: usize,
-) -> Vec<DocumentRevision> {
-    DOCUMENT_REVISIONS.with(|revisions| {
+fn get_revision_range(document: &Document, start_index: usize, end_index: usize) -> Vec<Revision> {
+    REVISIONS.with(|revisions| {
         let revisions = revisions.borrow();
         if start_index <= end_index {
             document.revisions[start_index..=end_index]
@@ -176,18 +170,15 @@ fn get_document_revision_range(
 }
 
 #[query]
-fn diff_document_revisions(
-    start_revision_id: DocumentRevisionId,
-    end_revision_id: DocumentRevisionId,
-) -> DocumentRevisionsResult {
-    let start_revision_result = get_document_revision(start_revision_id);
-    let end_revision_result = get_document_revision(end_revision_id);
+fn diff_revisions(start_revision_id: RevisionId, end_revision_id: RevisionId) -> RevisionsResult {
+    let start_revision_result = get_revision(start_revision_id);
+    let end_revision_result = get_revision(end_revision_id);
 
     match (start_revision_result, end_revision_result) {
-        (DocumentRevisionResult::Ok(start), DocumentRevisionResult::Ok(end)) => {
+        (RevisionResult::Ok(start), RevisionResult::Ok(end)) => {
             if start.document_id != end.document_id {
                 // Revisions are from different documents
-                DocumentRevisionsResult::Err(AppError::InternalError(
+                RevisionsResult::Err(AppError::InternalError(
                     "Revisions are from different documents".to_string(),
                 ))
             } else {
@@ -206,30 +197,27 @@ fn diff_document_revisions(
                         if let (Some(start_index), Some(end_index)) =
                             (start_index_option, end_index_option)
                         {
-                            let revisions =
-                                get_document_revision_range(document, start_index, end_index);
-                            DocumentRevisionsResult::Ok(revisions)
+                            let revisions = get_revision_range(document, start_index, end_index);
+                            RevisionsResult::Ok(revisions)
                         } else {
-                            DocumentRevisionsResult::Err(AppError::EntityNotFound(
+                            RevisionsResult::Err(AppError::EntityNotFound(
                                 "Revisions not found in document".to_string(),
                             ))
                         }
                     } else {
-                        DocumentRevisionsResult::Err(AppError::EntityNotFound(
+                        RevisionsResult::Err(AppError::EntityNotFound(
                             "Document not found".to_string(),
                         ))
                     }
                 })
             }
         }
-        (DocumentRevisionResult::Err(err), _) | (_, DocumentRevisionResult::Err(err)) => {
-            DocumentRevisionsResult::Err(err)
-        }
+        (RevisionResult::Err(err), _) | (_, RevisionResult::Err(err)) => RevisionsResult::Err(err),
     }
 }
 
 fn get_next_revision_id() -> u64 {
-    DOCUMENT_REVISIONS.with(|revisions| {
+    REVISIONS.with(|revisions| {
         let revisions = revisions.borrow();
         if revisions.is_empty() {
             0
@@ -239,20 +227,18 @@ fn get_next_revision_id() -> u64 {
     })
 }
 
-fn insert_document_revision(revision_id: DocumentRevisionId, revision: DocumentRevision) {
-    DOCUMENT_REVISIONS.with(|document_revisions| {
-        document_revisions
-            .borrow_mut()
-            .insert(revision_id, revision);
+fn insert_revision(revision_id: RevisionId, revision: Revision) {
+    REVISIONS.with(|revisions| {
+        revisions.borrow_mut().insert(revision_id, revision);
     });
 }
 
 #[update]
-fn create_document_revision(
+fn create_revision(
     project_id: ProjectId,
     document_id: DocumentId,
     content: serde_bytes::ByteBuf,
-) -> DocumentRevisionIdResult {
+) -> RevisionIdResult {
     let caller = ic_cdk::caller();
 
     DOCUMENTS.with(|documents| {
@@ -267,7 +253,7 @@ fn create_document_revision(
                 let new_revision_id = get_next_revision_id();
                 let version = document.current_version + 1;
 
-                let new_revision = DocumentRevision {
+                let new_revision = Revision {
                     id: new_revision_id,
                     version,
                     document_id,
@@ -277,14 +263,14 @@ fn create_document_revision(
                     author: caller,
                 };
 
-                insert_document_revision(new_revision_id, new_revision);
+                insert_revision(new_revision_id, new_revision);
 
                 document.current_version = version;
                 document.revisions.push(new_revision_id);
 
-                DocumentRevisionIdResult::Ok(new_revision_id)
+                RevisionIdResult::Ok(new_revision_id)
             }
-            None => DocumentRevisionIdResult::Err(AppError::EntityNotFound(
+            None => RevisionIdResult::Err(AppError::EntityNotFound(
                 "Document not found or does not belong to the specified project".to_string(),
             )),
         }

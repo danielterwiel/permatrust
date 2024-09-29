@@ -7,9 +7,9 @@ import { handleResult } from '@/utils/handleResult';
 export const Route = createFileRoute(
   '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/$revisionId/'
 )({
-  component: DocumentRevisionDetail,
+  component: RevisionDetails,
   loader: async ({ params: { revisionId } }) => {
-    const response = await pt_backend.get_document_revision(BigInt(revisionId));
+    const response = await pt_backend.get_revision(BigInt(revisionId));
     const result = handleResult(response);
     const revision = stringifyBigIntObject(result);
     return { revision };
@@ -19,7 +19,7 @@ export const Route = createFileRoute(
   },
 });
 
-function DocumentRevisionDetail() {
+function RevisionDetails() {
   const { revision } = Route.useLoaderData();
 
   return (

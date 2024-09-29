@@ -10,33 +10,44 @@ import { handleResult } from '@/utils/handleResult';
 export const Route = createFileRoute(
   '/_auth/_layout/projects/$projectId/documents/$documentId/'
 )({
-  component: DocumentRevisionsList,
-  loader: async ({ params: { projectId, documentId } }) => {
-    const response = await pt_backend.list_document_revisions(
+  component: DocumentDetails,
+  loader: async ({ params: { projectId, documentId }, context }) => {
+    const revisions_response = await pt_backend.list_revisions(
       BigInt(projectId),
       BigInt(documentId)
     );
-    const result = handleResult(response);
-    const revisions = stringifyBigIntObject(result);
-    return { revisions, projectId };
+    const document_response = await pt_backend.get_document(BigInt(projectId));
+    const revisions_result = handleResult(revisions_response);
+    const document_result = handleResult(document_response);
+    const revisions = stringifyBigIntObject(revisions_result);
+    const document = stringifyBigIntObject(document_result);
+    return {
+      ...context,
+
+      revisions,
+
+      selected: {
+        project: context.selected.project,
+        document,
+      },
+
+      projectId,
+    };
   },
 });
 
-function DocumentRevisionsList() {
+function DocumentDetails() {
   const { projectId, documentId } = Route.useParams();
-  const { revisions } = Route.useLoaderData();
-  const [selected, setSelected] = useState<TableDataItem[]>([]);
+  const { revisions, selected } = Route.useLoaderData();
+  const [checked, setChecked] = useState<TableDataItem[]>([]);
 
-  function handleSelect(revisions: TableDataItem[]) {
-    console.log('revisions', revisions);
-    // todo: maybe sort by version
-    setSelected(revisions);
+  function handleCheckedChange(revisions: TableDataItem[]) {
+    setChecked(revisions);
   }
 
   return (
     <>
-      {/* TODO: get document.name for title */}
-      <h2>Document Revisions {documentId}</h2>
+      <h2>{selected.document.title}</h2>
       <h3>Revisions</h3>
       <div className="flex gap-4 pr-6 flex-row-reverse">
         <Link
@@ -53,10 +64,10 @@ function DocumentRevisionsList() {
             documentId,
           }}
           search={{
-            theirs: selected[0]?.id ? Number(selected[0].id) : undefined,
-            current: selected[1]?.id ? Number(selected[1].id) : undefined,
+            theirs: checked[0]?.id ? Number(checked[0].id) : undefined,
+            current: checked[1]?.id ? Number(checked[1].id) : undefined,
           }}
-          disabled={selected.length !== 2}
+          disabled={checked.length !== 2}
           variant="secondary"
         >
           Diff
@@ -66,7 +77,7 @@ function DocumentRevisionsList() {
         tableData={revisions}
         showOpenEntityButton={true}
         routePath="revisions"
-        onSelectionChange={handleSelect}
+        onSelectionChange={handleCheckedChange}
         columnConfig={[
           {
             id: 'version',
@@ -80,8 +91,12 @@ function DocumentRevisionsList() {
           {
             id: 'content',
             cellPreprocess: (content) => {
-              return new TextDecoder().decode(
-                new Uint8Array(content ? Object.values(content) : [])
+              return (
+                <div className="truncate max-w-md">
+                  {new TextDecoder().decode(
+                    new Uint8Array(content ? Object.values(content) : [])
+                  )}
+                </div>
               );
             },
           },
