@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { pt_backend } from '@/declarations/pt_backend';
-import { stringifyBigIntObject } from '@/helpers/stringifyBigIntObject';
+import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
 import { Link } from '@/components/Link';
 import { DataTable, type TableDataItem } from '@/components/DataTable';
 import { Principal } from '@dfinity/principal';
+import { handleResult } from '@/utils/handleResult';
 
 export const Route = createFileRoute(
   '/_auth/_layout/projects/$projectId/documents/$documentId/'
@@ -15,7 +16,8 @@ export const Route = createFileRoute(
       BigInt(projectId),
       BigInt(documentId)
     );
-    const revisions = stringifyBigIntObject(response);
+    const result = handleResult(response);
+    const revisions = stringifyBigIntObject(result);
     return { revisions, projectId };
   },
 });
@@ -26,6 +28,7 @@ function DocumentRevisionsList() {
   const [selected, setSelected] = useState<TableDataItem[]>([]);
 
   function handleSelect(revisions: TableDataItem[]) {
+    console.log('revisions', revisions);
     // todo: maybe sort by version
     setSelected(revisions);
   }

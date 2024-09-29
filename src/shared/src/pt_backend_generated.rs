@@ -6,7 +6,19 @@ use ic_cdk::api::call::CallResult as Result;
 
 pub type ProjectId = u64;
 pub type DocumentId = u64;
+#[derive(CandidType, Deserialize, Clone)]
+pub enum AppError {
+  EntityNotFound(String),
+  Unauthorized,
+  InternalError(String),
+}
+#[derive(CandidType, Deserialize, Clone)]
+pub enum DocumentIdResult { Ok(DocumentId), Err(AppError) }
 pub type DocumentRevisionId = u64;
+#[derive(CandidType, Deserialize, Clone)]
+pub enum DocumentRevisionIdResult { Ok(DocumentRevisionId), Err(AppError) }
+#[derive(CandidType, Deserialize, Clone)]
+pub enum ProjectIdResult { Ok(ProjectId), Err(AppError) }
 #[derive(CandidType, Deserialize, Clone)]
 pub struct DocumentRevision {
   pub id: DocumentRevisionId,
@@ -18,6 +30,10 @@ pub struct DocumentRevision {
   pub project_id: ProjectId,
 }
 #[derive(CandidType, Deserialize, Clone)]
+pub enum DocumentRevisionsResult { Ok(Vec<DocumentRevision>), Err(AppError) }
+#[derive(CandidType, Deserialize, Clone)]
+pub enum DocumentRevisionResult { Ok(DocumentRevision), Err(AppError) }
+#[derive(CandidType, Deserialize, Clone)]
 pub struct Document {
   pub id: DocumentId,
   pub title: String,
@@ -26,6 +42,8 @@ pub struct Document {
   pub current_version: u8,
 }
 #[derive(CandidType, Deserialize, Clone)]
+pub enum DocumentsResult { Ok(Vec<Document>), Err(AppError) }
+#[derive(CandidType, Deserialize, Clone)]
 pub struct Project {
   pub id: ProjectId,
   pub documents: Vec<DocumentId>,
@@ -33,34 +51,36 @@ pub struct Project {
   pub author: Principal,
   pub timestamp: u64,
 }
+#[derive(CandidType, Deserialize, Clone)]
+pub enum ProjectsResult { Ok(Vec<Project>), Err(AppError) }
 
 pub struct Service(pub Principal);
 impl Service {
-  pub async fn create_document(&self, arg0: ProjectId, arg1: String, arg2: serde_bytes::ByteBuf) -> Result<(DocumentId,)> {
+  pub async fn create_document(&self, arg0: ProjectId, arg1: String, arg2: serde_bytes::ByteBuf) -> Result<(DocumentIdResult,)> {
     ic_cdk::call(self.0, "create_document", (arg0,arg1,arg2,)).await
   }
-  pub async fn create_document_revision(&self, arg0: ProjectId, arg1: DocumentId, arg2: serde_bytes::ByteBuf) -> Result<(DocumentRevisionId,)> {
+  pub async fn create_document_revision(&self, arg0: ProjectId, arg1: DocumentId, arg2: serde_bytes::ByteBuf) -> Result<(DocumentRevisionIdResult,)> {
     ic_cdk::call(self.0, "create_document_revision", (arg0,arg1,arg2,)).await
   }
-  pub async fn create_project(&self, arg0: String) -> Result<(ProjectId,)> {
+  pub async fn create_project(&self, arg0: String) -> Result<(ProjectIdResult,)> {
     ic_cdk::call(self.0, "create_project", (arg0,)).await
   }
-  pub async fn diff_document_revisions(&self, arg0: DocumentRevisionId, arg1: DocumentRevisionId) -> Result<(Vec<DocumentRevision>,)> {
+  pub async fn diff_document_revisions(&self, arg0: DocumentRevisionId, arg1: DocumentRevisionId) -> Result<(DocumentRevisionsResult,)> {
     ic_cdk::call(self.0, "diff_document_revisions", (arg0,arg1,)).await
   }
-  pub async fn get_document_revision(&self, arg0: DocumentRevisionId) -> Result<(Option<DocumentRevision>,)> {
+  pub async fn get_document_revision(&self, arg0: DocumentRevisionId) -> Result<(DocumentRevisionResult,)> {
     ic_cdk::call(self.0, "get_document_revision", (arg0,)).await
   }
-  pub async fn list_all_documents(&self) -> Result<(Vec<Document>,)> {
+  pub async fn list_all_documents(&self) -> Result<(DocumentsResult,)> {
     ic_cdk::call(self.0, "list_all_documents", ()).await
   }
-  pub async fn list_document_revisions(&self, arg0: ProjectId, arg1: DocumentId) -> Result<(Vec<DocumentRevision>,)> {
+  pub async fn list_document_revisions(&self, arg0: ProjectId, arg1: DocumentId) -> Result<(DocumentRevisionsResult,)> {
     ic_cdk::call(self.0, "list_document_revisions", (arg0,arg1,)).await
   }
-  pub async fn list_documents(&self, arg0: ProjectId) -> Result<(Vec<Document>,)> {
+  pub async fn list_documents(&self, arg0: ProjectId) -> Result<(DocumentsResult,)> {
     ic_cdk::call(self.0, "list_documents", (arg0,)).await
   }
-  pub async fn list_projects(&self) -> Result<(Vec<Project>,)> {
+  pub async fn list_projects(&self) -> Result<(ProjectsResult,)> {
     ic_cdk::call(self.0, "list_projects", ()).await
   }
 }

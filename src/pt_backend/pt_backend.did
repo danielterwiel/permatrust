@@ -1,10 +1,3 @@
-# TODO: error types, make AppError a variant
-type AppError = text;
-
-type Result<T> = variant {
-    Ok : T;
-    Err : AppError;
-};
 
 type ProjectId = nat64;
 type DocumentId = nat64;
@@ -36,17 +29,60 @@ type DocumentRevision = record {
     author : principal;
 };
 
+type AppError = variant {
+    EntityNotFound : text;
+    Unauthorized : null;
+    InternalError : text;
+};
+
+type ProjectIdResult = variant {
+    Ok : ProjectId;
+    Err : AppError;
+};
+
+type DocumentIdResult = variant {
+    Ok : DocumentId;
+    Err : AppError;
+};
+
+type DocumentRevisionIdResult = variant {
+    Ok : DocumentRevisionId;
+    Err : AppError;
+};
+
+type DocumentRevisionResult = variant {
+    Ok: DocumentRevision;
+    Err: AppError;
+};
+
+type ProjectsResult = variant {
+    Ok: vec Project;
+    Err: AppError;
+};
+
+type DocumentsResult = variant {
+    Ok: vec Document;
+    Err: AppError;
+};
+
+type DocumentRevisionsResult = variant {
+    Ok: vec DocumentRevision;
+    Err: AppError;
+};
+
+
+
 service : {
-    create_project : (text) -> (ProjectId);
-    list_projects : () -> (vec Project) query;
+    create_project : (text) -> (ProjectIdResult);
+    list_projects : () -> (ProjectsResult) query;
 
-    create_document : (ProjectId, text, vec nat8) -> (DocumentId);
-    list_documents : (ProjectId) -> (vec Document) query;
+    create_document : (ProjectId, text, vec nat8) -> (DocumentIdResult);
+    list_documents : (ProjectId) -> (DocumentsResult) query;
 
-    create_document_revision : (ProjectId, DocumentId, vec nat8) -> (DocumentRevisionId);
-    list_document_revisions : (ProjectId, DocumentId) -> (vec DocumentRevision) query;
-    diff_document_revisions : (DocumentRevisionId, DocumentRevisionId) -> (vec DocumentRevision) query;
-    get_document_revision : (DocumentRevisionId) -> (opt DocumentRevision) query;
+    create_document_revision : (ProjectId, DocumentId, vec nat8) -> (DocumentRevisionIdResult);
+    list_document_revisions : (ProjectId, DocumentId) -> (DocumentRevisionsResult) query;
+    diff_document_revisions : (DocumentRevisionId, DocumentRevisionId) -> (DocumentRevisionsResult) query;
+    get_document_revision : (DocumentRevisionId) -> (DocumentRevisionResult) query;
 
-    list_all_documents : () -> (vec Document) query;
+    list_all_documents : () -> (DocumentsResult) query;
 };

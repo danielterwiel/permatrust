@@ -1,10 +1,13 @@
-import { createFileRoute, useParams, useNavigate } from "@tanstack/react-router";
-import { pt_backend } from "@/declarations/pt_backend";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import {
+  createFileRoute,
+  useParams,
+  useNavigate,
+} from '@tanstack/react-router';
+import { pt_backend } from '@/declarations/pt_backend';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -13,33 +16,39 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { MDXEditor, UndoRedo, BoldItalicUnderlineToggles, headingsPlugin, toolbarPlugin } from '@mdxeditor/editor'
-import '@mdxeditor/editor/style.css'
+} from '@/components/ui/form';
+import {
+  MDXEditor,
+  UndoRedo,
+  BoldItalicUnderlineToggles,
+  headingsPlugin,
+  toolbarPlugin,
+} from '@mdxeditor/editor';
+import '@mdxeditor/editor/style.css';
 
 export const Route = createFileRoute(
-  "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create",
+  '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create'
 )({
   component: CreateRevision,
 });
 
 const formSchema = z.object({
   content: z.string().min(1, {
-    message: "Content must be at least 1 character.",
+    message: 'Content must be at least 1 character.',
   }),
   projects: z.array(z.bigint()),
-}); // TODO: backend validation
+});
 
 export function CreateRevision() {
   const navigate = useNavigate();
   const params = useParams({
-    from: "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create",
+    from: '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create',
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      content: "",
+      content: '',
       projects: [BigInt(params.projectId)],
     },
   });
@@ -51,11 +60,12 @@ export function CreateRevision() {
     const response = await pt_backend.create_document_revision(
       BigInt(params.projectId),
       BigInt(params.documentId),
-      content,
+      content
     );
-    console.log("response", response);
-    navigate({ to: `/projects/${params.projectId}/documents/${params.documentId}/` });
-    // TODO: error handling
+    console.log('TODO: handle result', response);
+    navigate({
+      to: `/projects/${params.projectId}/documents/${params.documentId}/`,
+    });
   }
 
   return (
@@ -80,10 +90,11 @@ export function CreateRevision() {
                           <UndoRedo />
                           <BoldItalicUnderlineToggles />
                         </>
-                      )
-                    })
+                      ),
+                    }),
                   ]}
-                  {...field} />
+                  {...field}
+                />
               </FormControl>
               <FormDescription>This is your document.</FormDescription>
               <FormMessage />

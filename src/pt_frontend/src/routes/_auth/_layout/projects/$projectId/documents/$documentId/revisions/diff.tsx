@@ -1,9 +1,10 @@
-import { useEffect } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { z } from "zod";
+import { useEffect } from 'react';
+import { createFileRoute } from '@tanstack/react-router';
+import { z } from 'zod';
 
-import { MDXEditor, diffSourcePlugin } from "@mdxeditor/editor";
-import { pt_backend } from "@/declarations/pt_backend";
+import { MDXEditor, diffSourcePlugin } from '@mdxeditor/editor';
+import { pt_backend } from '@/declarations/pt_backend';
+import { handleResult } from '@/utils/handleResult';
 
 const DocumentRevisionSchema = z.object({
   id: z.bigint(),
@@ -20,17 +21,21 @@ const revisionSearchSchema = z.object({
 });
 
 export const Route = createFileRoute(
-  "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/diff",
+  '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/diff'
 )({
   component: DocumentRevisionDiff,
   validateSearch: revisionSearchSchema,
   loaderDeps: ({ search: { current, theirs } }) => ({ current, theirs }),
   loader: async ({ deps: { current, theirs } }) => {
-    const revisions = await pt_backend.diff_document_revisions(
+    const response = await pt_backend.diff_document_revisions(
       BigInt(current),
-      BigInt(theirs),
+      BigInt(theirs)
     );
+    const revisions = handleResult(response);
     return { revisions };
+  },
+  errorComponent: ({ error }) => {
+    return <div>Error: {error.message}</div>;
   },
 });
 
@@ -40,7 +45,6 @@ function preDecode(data: number[] | Uint8Array) {
 }
 
 function DocumentRevisionDiff() {
-  // const { current, theirs } = Route.useSearch();
   const { revisions } = Route.useLoaderData();
 
   useEffect(() => {
@@ -48,15 +52,13 @@ function DocumentRevisionDiff() {
       const validatedRevisions = z
         .array(DocumentRevisionSchema)
         .parse(revisions);
-      console.log("Validated revisions", validatedRevisions);
+      console.log('Validated revisions', validatedRevisions);
     } catch (error) {
-      console.error("Revision validation error:", error);
+      console.error('Revision validation error:', error);
     }
   }, [revisions]);
 
-  // console.log('current', current);
-  // console.log('theirs', theirs);
-  console.log("revisions", revisions);
+  console.log('revisions', revisions);
 
   const [current, theirs] = revisions;
 
@@ -71,11 +73,11 @@ function DocumentRevisionDiff() {
   return (
     <MDXEditor
       markdown={contentCurrent}
-      onError={(error) => console.error("MDXEditor error:", error)}
+      onError={(error) => console.error('MDXEditor error:', error)}
       plugins={[
         diffSourcePlugin({
           diffMarkdown: contentTheirs,
-          viewMode: "diff",
+          viewMode: 'diff',
           readOnlyDiff: true,
         }),
       ]}

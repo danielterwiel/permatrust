@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import {
   useReactTable,
   flexRender,
@@ -31,7 +31,6 @@ export type TableData = TableDataItem[];
 interface ColumnConfigItem {
   id: string;
   headerName?: string;
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   cellPreprocess?: (value: any) => any;
 }
 
@@ -51,7 +50,6 @@ export const DataTable: React.FC<TableProps> = ({
   columnConfig = [],
 }) => {
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
-  const navigate = useNavigate();
 
   const camelCaseToHumanReadable = useCallback((input: string) => {
     const spaced = input.replace(
@@ -75,14 +73,16 @@ export const DataTable: React.FC<TableProps> = ({
       header: ({ table }) => (
         <Checkbox
           checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          onCheckedChange={(checked) =>
+            table.toggleAllPageRowsSelected(!!checked)
+          }
           aria-label="Select all"
         />
       ),
       cell: ({ row }) => (
         <Checkbox
           checked={row.getIsSelected()}
-          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          onCheckedChange={(checked) => row.toggleSelected(!!checked)}
           aria-label="Select row"
         />
       ),
@@ -102,8 +102,9 @@ export const DataTable: React.FC<TableProps> = ({
       return columnDef;
     });
 
-    return [selectColumn, ...allColumns];
-  }, [headers, camelCaseToHumanReadable, columnConfig]);
+    // Conditionally include the selectColumn based on the presence of onSelectionChange
+    return onSelectionChange ? [selectColumn, ...allColumns] : allColumns;
+  }, [headers, camelCaseToHumanReadable, columnConfig, onSelectionChange]);
 
   const [columnVisibility, setColumnVisibility] = useState(() => {
     const initialVisibility: Record<string, boolean> = {};
@@ -130,14 +131,18 @@ export const DataTable: React.FC<TableProps> = ({
     onColumnVisibilityChange: setColumnVisibility,
   });
 
+  // Use a ref to track if the row selection has changed to avoid infinite re-renders
+  const previousSelection = useRef(rowSelection);
+
   useEffect(() => {
-    if (onSelectionChange) {
+    if (onSelectionChange && previousSelection.current !== rowSelection) {
+      previousSelection.current = rowSelection;
       const selectedRows = table
         .getFilteredSelectedRowModel()
         .rows.map((row) => row.original);
       onSelectionChange(selectedRows);
     }
-  }, [onSelectionChange, table]);
+  }, [onSelectionChange, rowSelection, table]);
 
   if (tableData === undefined) {
     return <p>No data fetched yet</p>;

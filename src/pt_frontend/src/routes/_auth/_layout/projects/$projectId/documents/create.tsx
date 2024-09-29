@@ -30,11 +30,15 @@ import {
   toolbarPlugin,
 } from '@mdxeditor/editor';
 import '@mdxeditor/editor/style.css';
+import { handleResult } from '@/utils/handleResult';
 
 export const Route = createFileRoute(
   '/_auth/_layout/projects/$projectId/documents/create'
 )({
   component: CreateDocument,
+  errorComponent: ({ error }) => {
+    return <div>Error: {error.message}</div>;
+  },
 });
 
 const formSchema = z.object({
@@ -45,7 +49,7 @@ const formSchema = z.object({
     message: 'Content must be at least 1 character.',
   }),
   projects: z.array(z.bigint()),
-}); // TODO: backend validation
+});
 
 export function CreateDocument() {
   const navigate = useNavigate();
@@ -64,17 +68,15 @@ export function CreateDocument() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // TODO: prevent create "create" as name
     const encoder = new TextEncoder();
     const content = encoder.encode(values.content);
-
     const response = await pt_backend.create_document(
       BigInt(params.projectId),
       values.title,
       content
     );
-    navigate({ to: `/projects/${params.projectId}/documents/${response}/` });
-    // TODO: error handling
+    const result = handleResult(response);
+    navigate({ to: `/projects/${params.projectId}/documents/${result}/` });
   }
 
   return (

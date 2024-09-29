@@ -1,15 +1,10 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
 
-export const Route = createFileRoute("/_auth/_layout/projects/create")({
-  component: CreateProject,
-});
-
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-
-import { Button } from "@/components/ui/button";
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -18,15 +13,23 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { pt_backend } from "@/declarations/pt_backend";
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { pt_backend } from '@/declarations/pt_backend';
+import { handleResult } from '@/utils/handleResult';
+
+export const Route = createFileRoute('/_auth/_layout/projects/create')({
+  component: CreateProject,
+  errorComponent: ({ error }) => {
+    return <div>Error: {error.message}</div>;
+  },
+});
 
 const formSchema = z.object({
   name: z.string().min(2, {
-    message: "Project name must be at least 2 characters.",
+    message: 'Project name must be at least 2 characters.',
   }),
-}); // TODO: backend validation
+});
 
 export function CreateProject() {
   const navigate = useNavigate();
@@ -34,19 +37,17 @@ export function CreateProject() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
+      name: '',
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    // TODO: prevent create "create" as name
     const response = await pt_backend.create_project(values.name);
-    console.log("response", response);
+    const result = handleResult(response);
     navigate({
-      to: `/projects/${response.toString()}`,
-      from: "/projects/create",
+      to: `/projects/${result.toString()}`,
+      from: '/projects/create',
     });
-    // TODO: error handling
   }
 
   return (
