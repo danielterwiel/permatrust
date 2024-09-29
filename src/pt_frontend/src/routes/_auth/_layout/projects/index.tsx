@@ -5,6 +5,7 @@ import { DataTable } from '@/components/DataTable';
 import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
 import { Principal } from '@dfinity/principal';
 import { handleResult } from '@/utils/handleResult';
+import { Icon } from '@/components/ui/Icon';
 
 export const Route = createFileRoute('/_auth/_layout/projects/')({
   component: Projects,
@@ -28,9 +29,14 @@ function Projects() {
 
   return (
     <>
+      <h2>PermaTrust</h2>
+      <h3>Projects</h3>
       <div className="flex gap-4 pr-6 flex-row-reverse">
         <Link to="/projects/create" variant="default">
-          Create Project
+          <div className="flex gap-2">
+            Create Project
+            <Icon name="rectangle-outline" size="md" />
+          </div>
         </Link>
       </div>
       <DataTable

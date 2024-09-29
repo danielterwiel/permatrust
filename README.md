@@ -46,6 +46,19 @@ Copy the .did value from a Canister UI response or whatever. Save it in a file l
 cat canisterMethod.mock.did | idl2json | tee canisterMethod.mock.json
 ```
 
+## Icons
+
+We're using `@sly-cli/cly` for adding icons and `svg-icons-cli` to build the SVG's
+into a sprite. As of date Sly seems somewhat buggy as it hangs after an add. But
+you can just ctrl+c the session as it does add the file.
+
+```sh
+npm run icons:add # ctrl+c to close
+npm run build:icons
+```
+
+This adds an importable Icon component to /components/ui
+
 # Default docs
 
 Welcome to your new pt project and to the internet computer development community. By default, creating a new project adds this README and some template files to your project directory. You can edit these template files to customize your project and to include your own code to speed up the development cycle.

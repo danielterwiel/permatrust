@@ -4,6 +4,7 @@ import { pt_backend } from '@/declarations/pt_backend';
 import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
 import { Link } from '@/components/Link';
 import { DataTable, type TableDataItem } from '@/components/DataTable';
+import { Icon } from '@/components/ui/Icon';
 import { Principal } from '@dfinity/principal';
 import { handleResult } from '@/utils/handleResult';
 
@@ -55,7 +56,10 @@ function DocumentDetails() {
           params={{ projectId, documentId }}
           variant="default"
         >
-          Create Revision
+          <div className="flex gap-2">
+            Create Revision
+            <Icon name="file-stack-outline" size="md" />
+          </div>
         </Link>
         <Link
           to={'/projects/$projectId/documents/$documentId/revisions/diff'}

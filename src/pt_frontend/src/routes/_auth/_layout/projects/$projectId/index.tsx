@@ -4,6 +4,7 @@ import { pt_backend } from '@/declarations/pt_backend';
 import { DataTable } from '@/components/DataTable';
 import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
 import { handleResult } from '@/utils/handleResult';
+import { Icon } from '@/components/ui/Icon';
 
 export const Route = createFileRoute('/_auth/_layout/projects/$projectId/')({
   component: ProjectDetails,
@@ -47,7 +48,10 @@ function ProjectDetails() {
           params={{ projectId }}
           variant="default"
         >
-          Create Document
+          <div>
+            Create Document
+            <Icon name="file-outline" size="md" />
+          </div>
         </Link>
       </div>
       <DataTable

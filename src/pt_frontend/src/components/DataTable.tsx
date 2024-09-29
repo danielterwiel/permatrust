@@ -171,7 +171,9 @@ export const DataTable: React.FC<TableProps> = ({
                         )}
                   </TableHead>
                 ))}
-                <TableHead>Actions</TableHead>
+                <TableHead>
+                  <div className="flex justify-end pr-4">Actions</div>
+                </TableHead>
               </TableRow>
             ))}
           </TableHeader>

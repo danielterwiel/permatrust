@@ -20,13 +20,14 @@
     "react-dom": "^18.3.1",
     "react-hook-form": "^7.53.0",
     "react-window": "^1.8.10",
-    "tailwind-merge": "^2.3.0",
+    "tailwind-merge": "^2.5.2",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.23.8"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.7.3",
     "@dfinity/ledger-icp": "^2.3.1",
+    "@sly-cli/sly": "^1.14.0",
     "@tailwindcss/typography": "^0.5.15",
     "@tanstack/router-devtools": "^1.34.5",
     "@tanstack/router-vite-plugin": "^1.34.1",
@@ -44,6 +45,7 @@
     "postcss": "^8.4.38",
     "postcss-import": "^16.1.0",
     "postcss-nesting": "^12.1.5",
+    "svg-icons-cli": "^0.0.8",
     "tailwindcss": "^3.4.3",
     "typescript": "^5.1.3",
     "vite": "^4.3.9",
@@ -54,6 +56,8 @@
   "private": true,
   "scripts": {
     "build": "tsc && vite build",
+    "build:icons": "npx svg-icons-cli build -i src/components/icons -o src/components/ui/icons",
+    "icons:add": "npx @sly-cli/sly add --directory ./src/components/icons --overwrite --yes",
     "prebuild": "dfx generate",
     "setup": "npm run build:shared && npm i && dfx canister create pt_backend && dfx generate pt_backend && dfx deploy",
     "start": "vite --port 3000",
