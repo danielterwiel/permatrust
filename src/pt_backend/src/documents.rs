@@ -1,6 +1,8 @@
-use ic_cdk_macros::{init, query, update};
+use crate::logger::{log_info, loggable_document};
+use ic_cdk_macros::{query, update};
+use shared::pagination::{paginate, PaginatedDocumentsResult};
 use shared::pt_backend_generated::{
-    AppError, Document, DocumentId, DocumentIdResult, DocumentResult, DocumentsResult, ProjectId,
+    AppError, Document, DocumentId, DocumentIdResult, DocumentResult, PaginationInput, ProjectId,
     RevisionId, RevisionIdResult,
 };
 use std::cell::RefCell;
@@ -10,11 +12,6 @@ use crate::revisions::create_revision;
 
 thread_local! {
     pub static DOCUMENTS: RefCell<HashMap<DocumentId, Document>> = RefCell::new(HashMap::new());
-}
-
-#[init]
-fn init() {
-    // Initialization logic, if needed
 }
 
 fn get_next_document_id(project_id: ProjectId) -> DocumentId {
@@ -64,12 +61,15 @@ fn create_document(
         projects: vec![project_id],
     };
 
-    insert_document(document);
+    insert_document(document.clone());
 
     let revision_result = create_revision(project_id, document_id, content);
 
     match revision_result {
-        RevisionIdResult::Ok(_revision_id) => DocumentIdResult::Ok(document_id.into()),
+        RevisionIdResult::Ok(_revision_id) => {
+            log_info("create_document", loggable_document(&document));
+            DocumentIdResult::Ok(document_id.into())
+        }
         RevisionIdResult::Err(err) => {
             // Remove the inserted document if revision creation failed
             DOCUMENTS.with(|documents| {
@@ -92,9 +92,15 @@ fn get_documents_by_project(project_id: ProjectId) -> Vec<Document> {
 }
 
 #[query]
-fn list_documents(project_id: ProjectId) -> DocumentsResult {
+fn list_documents(project_id: ProjectId, pagination: PaginationInput) -> PaginatedDocumentsResult {
     let documents = get_documents_by_project(project_id);
-    DocumentsResult::Ok(documents)
+
+    match paginate(&documents, pagination.page_size, pagination.page_number) {
+        Ok((paginated_documents, pagination_metadata)) => {
+            PaginatedDocumentsResult::Ok(paginated_documents, pagination_metadata)
+        }
+        Err(e) => PaginatedDocumentsResult::Err(e),
+    }
 }
 
 #[query]

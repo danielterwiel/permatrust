@@ -4,7 +4,7 @@ import {
   Navigate,
   redirect,
   useRouteContext,
-  useNavigate
+  useNavigate,
 } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -20,6 +20,7 @@ export const Route = createFileRoute("/")({
     if (context.auth.authenticated) {
       throw redirect({
         to: "/projects",
+        search: { page: 1 },
       });
     }
   },
@@ -37,7 +38,7 @@ function LoginComponent() {
   // Ah, the subtle nuances of client side auth. 🙄
   useLayoutEffect(() => {
     if (auth.loggedIn && search.redirect) {
-      navigate({ to: search.redirect })
+      navigate({ to: search.redirect });
     }
   }, [auth.loggedIn, search.redirect, navigate]);
 

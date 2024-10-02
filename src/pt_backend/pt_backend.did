@@ -2,12 +2,52 @@ type ProjectId = nat64;
 type DocumentId = nat64;
 type RevisionId = nat64;
 
+type PageSize = nat64;
+type PageNumber = nat64;
+type TotalPages = nat64;
+type TotalItems = nat64;
+type PaginationInput = record {
+    page_size: PageSize;
+    page_number: PageNumber;
+};
+type PaginationMetadata = record {
+    page_size : PageSize;
+    page_number : PageNumber;
+    total_pages : TotalPages;
+    total_items : TotalItems;
+    has_next_page: bool;
+    has_previous_page: bool;
+};
+
+type AppError = variant {
+    Unauthorized : null;
+    EntityNotFound : text;
+    InternalError : text;
+    InvalidPageSize : text;
+    InvalidPageNumber: text;
+};
+
 type Project = record {
     id : ProjectId;
     name : text;
     timestamp : nat64;
     author : principal;
     documents : vec DocumentId;
+};
+type ProjectIdResult = variant {
+    Ok : ProjectId;
+    Err : AppError;
+};
+type ProjectResult = variant {
+    Ok: Project;
+    Err: AppError;
+};
+type PaginatedProjectsResult = variant {
+    Ok : record {
+      vec Project;
+      PaginationMetadata;
+    };
+    Err : AppError;
 };
 
 type Document = record {
@@ -16,6 +56,25 @@ type Document = record {
     current_version : nat8;
     revisions : vec RevisionId;
     projects : vec ProjectId;
+};
+type DocumentIdResult = variant {
+    Ok : DocumentId;
+    Err : AppError;
+};
+type DocumentResult = variant {
+    Ok: Document;
+    Err: AppError;
+};
+type DocumentsResult = variant {
+    Ok: vec Document;
+    Err: AppError;
+};
+type PaginatedDocumentsResult = variant {
+    Ok : record {
+      vec Document;
+      PaginationMetadata;
+    };
+    Err : AppError;
 };
 
 type Revision = record {
@@ -27,70 +86,37 @@ type Revision = record {
     timestamp : nat64;
     author : principal;
 };
-
-type AppError = variant {
-    EntityNotFound : text;
-    Unauthorized : null;
-    InternalError : text;
-};
-
-type ProjectIdResult = variant {
-    Ok : ProjectId;
-    Err : AppError;
-};
-
-type DocumentIdResult = variant {
-    Ok : DocumentId;
-    Err : AppError;
-};
-
 type RevisionIdResult = variant {
     Ok : RevisionId;
     Err : AppError;
 };
-
-
-type ProjectResult = variant {
-    Ok: Project;
-    Err: AppError;
-};
-
-type DocumentResult = variant {
-    Ok: Document;
-    Err: AppError;
-};
-
 type RevisionResult = variant {
     Ok: Revision;
     Err: AppError;
 };
-
-type ProjectsResult = variant {
-    Ok: vec Project;
-    Err: AppError;
-};
-
-type DocumentsResult = variant {
-    Ok: vec Document;
-    Err: AppError;
-};
-
 type RevisionsResult = variant {
     Ok: vec Revision;
     Err: AppError;
 };
+type PaginatedRevisionsResult = variant {
+    Ok : record {
+      vec Revision;
+      PaginationMetadata;
+    };
+    Err : AppError;
+};
 
 service : {
     create_project : (text) -> (ProjectIdResult);
-    list_projects : () -> (ProjectsResult) query;
+    list_projects : (PaginationInput) -> (PaginatedProjectsResult) query;
     get_project: (ProjectId) -> (ProjectResult) query;
 
     create_document : (ProjectId, text, vec nat8) -> (DocumentIdResult);
-    list_documents : (ProjectId) -> (DocumentsResult) query;
+    list_documents : (ProjectId, PaginationInput) -> (PaginatedDocumentsResult) query;
     get_document : (DocumentId) -> (DocumentResult) query;
 
     create_revision : (ProjectId, DocumentId, vec nat8) -> (RevisionIdResult);
-    list_revisions : (ProjectId, DocumentId) -> (RevisionsResult) query;
+    list_revisions : (ProjectId, DocumentId, PaginationInput) -> (PaginatedRevisionsResult) query;
     diff_revisions : (RevisionId, RevisionId) -> (RevisionsResult) query;
     get_revision : (RevisionId) -> (RevisionResult) query;
 

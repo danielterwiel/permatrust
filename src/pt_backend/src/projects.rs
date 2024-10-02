@@ -1,10 +1,13 @@
 use ic_cdk_macros::{query, update};
+use shared::pagination::{paginate, PaginatedProjectsResult};
 use shared::pt_backend_generated::{
-    AppError, Project, ProjectId, ProjectIdResult, ProjectResult, ProjectsResult,
+    AppError, PaginationInput, Project, ProjectId, ProjectIdResult, ProjectResult,
 };
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::vec;
+
+use crate::logger::{log_info, loggable_project};
 
 thread_local! {
     static PROJECTS: RefCell<HashMap<ProjectId, Project>> = RefCell::new(HashMap::new());
@@ -35,17 +38,25 @@ fn create_project(name: String) -> ProjectIdResult {
     };
 
     PROJECTS.with(|projects| {
-        projects.borrow_mut().insert(id, project);
+        projects.borrow_mut().insert(id, project.clone());
     });
+
+    log_info("create_project", loggable_project(&project));
 
     ProjectIdResult::Ok(id)
 }
 
 #[query]
-fn list_projects() -> ProjectsResult {
+fn list_projects(pagination: PaginationInput) -> PaginatedProjectsResult {
     let projects =
         PROJECTS.with(|projects| projects.borrow().values().cloned().collect::<Vec<_>>());
-    ProjectsResult::Ok(projects)
+
+    match paginate(&projects, pagination.page_size, pagination.page_number) {
+        Ok((paginated_projects, pagination_metadata)) => {
+            PaginatedProjectsResult::Ok(paginated_projects, pagination_metadata)
+        }
+        Err(e) => PaginatedProjectsResult::Err(e),
+    }
 }
 
 #[query]

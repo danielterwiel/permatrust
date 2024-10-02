@@ -57,7 +57,8 @@
   "scripts": {
     "build": "tsc && vite build",
     "build:icons": "npx svg-icons-cli build -i src/components/icons -o src/components/ui/icons",
-    "icons:add": "npx @sly-cli/sly add --directory ./src/components/icons --overwrite --yes",
+    "add:icons": "npx @sly-cli/sly add --directory ./src/components/icons --overwrite --yes",
+    "add:components": "npx shadcn@latest add",
     "prebuild": "dfx generate",
     "setup": "npm run build:shared && npm i && dfx canister create pt_backend && dfx generate pt_backend && dfx deploy",
     "start": "vite --port 3000",

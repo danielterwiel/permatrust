@@ -1,11 +1,11 @@
-import { Outlet, createRootRouteWithContext } from '@tanstack/react-router';
-import { TanStackRouterDevtools } from '@tanstack/router-devtools';
-import type { Auth } from '@/context/auth';
+import { Outlet, createRootRouteWithContext } from "@tanstack/react-router";
+import { TanStackRouterDevtools } from "@tanstack/router-devtools";
+import type { Auth } from "@/context/auth";
 import type {
   Project,
   Document,
   Revision,
-} from '@/declarations/pt_backend/pt_backend.did';
+} from "@/declarations/pt_backend/pt_backend.did";
 
 type RouteContext = {
   auth: Auth;
@@ -14,7 +14,7 @@ type RouteContext = {
   documents?: Document[];
   revisions?: Revision[];
 
-  selected: {
+  active: {
     project?: Project;
     document?: Document;
     revision?: Revision;

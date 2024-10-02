@@ -1,7 +1,9 @@
+use crate::logger::{log_info, loggable_revision};
 use ic_cdk_macros::{query, update};
+use shared::pagination::{paginate, PaginatedRevisionsResult};
 use shared::pt_backend_generated::{
-    AppError, DocumentId, ProjectId, Revision, RevisionId, RevisionIdResult, RevisionResult,
-    RevisionsResult,
+    AppError, DocumentId, PaginationInput, ProjectId, Revision, RevisionId, RevisionIdResult,
+    RevisionResult, RevisionsResult,
 };
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -45,8 +47,9 @@ pub fn create_revision(
                 author: caller,
             };
 
-            insert_revision(new_revision_id, new_revision);
+            insert_revision(new_revision_id, new_revision.clone());
             update_document_revision(document_id, version, new_revision_id);
+            log_info("create_revision", loggable_revision(&new_revision));
 
             RevisionIdResult::Ok(new_revision_id)
         }
@@ -86,15 +89,25 @@ pub fn get_revisions(
             ))
         }
     } else {
-        Err(AppError::EntityNotFound("Document not found".to_string()))
+        // TODO: asuming REVISIONS.length == 0. Probably needs more error handling
+        Ok(vec![])
     }
 }
 
 #[query]
-pub fn list_revisions(project_id: ProjectId, document_id: DocumentId) -> RevisionsResult {
-    match get_revisions(project_id, document_id) {
-        Ok(revisions) => RevisionsResult::Ok(revisions),
-        Err(err) => RevisionsResult::Err(err),
+fn list_revisions(
+    project_id: ProjectId,
+    document_id: DocumentId,
+    pagination: PaginationInput,
+) -> PaginatedRevisionsResult {
+    let revisions =
+        get_revisions(project_id, document_id).expect("Something went wrong getting revision");
+
+    match paginate(&revisions, pagination.page_size, pagination.page_number) {
+        Ok((paginated_revisions, pagination_metadata)) => {
+            PaginatedRevisionsResult::Ok(paginated_revisions, pagination_metadata)
+        }
+        Err(e) => PaginatedRevisionsResult::Err(e),
     }
 }
 

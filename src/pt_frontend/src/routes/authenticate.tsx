@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from '@tanstack/react-router';
+import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/authenticate")({
   component: Authenticate,
@@ -13,6 +13,7 @@ export const Route = createFileRoute("/authenticate")({
     if (context.auth.authenticated) {
       throw redirect({
         to: "/projects",
+        search: { page: 1 },
       });
     }
     return context;
@@ -32,7 +33,10 @@ function Authenticate() {
             await auth.initAuthClient();
             const result = await auth.authenticate();
             if (result) {
-              navigate({ to: "/projects", from: '/authenticate' });
+              navigate({
+                to: "/projects",
+                search: { page: 1 },
+              });
             }
           }}
         >

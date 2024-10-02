@@ -6,7 +6,7 @@ import {
   type ColumnDef,
 } from '@tanstack/react-table';
 import {
-  Table,
+  Table as TableBase,
   TableBody,
   TableCell,
   TableHead,
@@ -15,22 +15,18 @@ import {
 } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Link } from '@/components/Link';
-import type {
-  Project,
-  Document,
-  Revision,
-} from '@/declarations/pt_backend/pt_backend.did';
-import type { routeTree } from '@/routeTree.gen';
-import { type ParseRoute } from '@tanstack/react-router';
+import type { Entity } from '@/consts/entities';
+import type { ValidRoute } from '@/types/routes';
+import type { PaginationMetadata } from '@/declarations/pt_backend/pt_backend.did';
+import { Pagination } from './Pagination';
 
-type ValidRoute = ParseRoute<typeof routeTree>['parentRoute'];
-
-export type TableDataItem = Project | Document | Revision;
-export type TableData = TableDataItem[];
+type TableDataItem = Entity;
+export type TableData = Entity[];
 
 interface ColumnConfigItem {
   id: string;
   headerName?: string;
+  // biome-ignore lint/suspicious/noExplicitAny: columnConfig can pass any value
   cellPreprocess?: (value: any) => any;
 }
 
@@ -40,14 +36,16 @@ interface TableProps {
   routePath?: ValidRoute;
   onSelectionChange?: (selectedRows: TableDataItem[]) => void;
   columnConfig?: ColumnConfigItem[];
+  paginationMetaData?: PaginationMetadata;
 }
 
-export const DataTable: React.FC<TableProps> = ({
+export const Table: React.FC<TableProps> = ({
   tableData = [],
-  showOpenEntityButton = false,
-  routePath = '',
   onSelectionChange,
   columnConfig = [],
+  routePath = '',
+  showOpenEntityButton = false,
+  paginationMetaData,
 }) => {
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
 
@@ -157,7 +155,7 @@ export const DataTable: React.FC<TableProps> = ({
   return (
     <div className="grid">
       <div className="overflow-auto py-2">
-        <Table className="font-mono">
+        <TableBase className="font-mono">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
@@ -192,7 +190,7 @@ export const DataTable: React.FC<TableProps> = ({
                         to={
                           `${routePath ? `${routePath}/` : ''}${row.getValue(
                             'id'
-                          )}` as ValidRoute // TODO: improve type of routePath
+                          )}` as ValidRoute // TODO: make stricter
                         }
                       >
                         Open
@@ -203,7 +201,12 @@ export const DataTable: React.FC<TableProps> = ({
               </TableRow>
             ))}
           </TableBody>
-        </Table>
+        </TableBase>
+        <div className="pt-16">
+          {paginationMetaData && (
+            <Pagination paginationMetaData={paginationMetaData} />
+          )}
+        </div>
       </div>
     </div>
   );

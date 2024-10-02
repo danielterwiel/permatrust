@@ -1,28 +1,44 @@
 import { Link } from '@/components/Link';
 import { createFileRoute } from '@tanstack/react-router';
 import { pt_backend } from '@/declarations/pt_backend';
-import { DataTable } from '@/components/DataTable';
+import { Table } from '@/components/Table';
 import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
 import { handleResult } from '@/utils/handleResult';
 import { Icon } from '@/components/ui/Icon';
+import { DEFAULT_PAGINATION } from '@/consts/pagination';
+import { z } from 'zod';
+
+const projectsSearchSchema = z.object({
+  page: z.number().int().nonnegative().optional(),
+});
 
 export const Route = createFileRoute('/_auth/_layout/projects/$projectId/')({
   component: ProjectDetails,
-  loader: async ({ params: { projectId }, context }) => {
+  validateSearch: (search) => projectsSearchSchema.parse(search),
+  loaderDeps: ({ search: { page } }) => ({ page }),
+  loader: async ({ params: { projectId }, deps: { page }, context }) => {
+    const pagination = {
+      ...DEFAULT_PAGINATION,
+      page_number: BigInt(page ?? 1),
+    };
     const documents_response = await pt_backend.list_documents(
-      BigInt(projectId)
+      BigInt(projectId),
+      pagination
     );
     const project_response = await pt_backend.get_project(BigInt(projectId));
     const project_result = handleResult(project_response);
     const documents_result = handleResult(documents_response);
-    const documents = stringifyBigIntObject(documents_result);
+    const [documents, paginationMetaData] =
+      stringifyBigIntObject(documents_result);
     const project = stringifyBigIntObject(project_result);
+
     return {
       ...context,
 
       documents,
+      paginationMetaData,
 
-      selected: {
+      active: {
         project: project,
       },
 
@@ -36,11 +52,11 @@ export const Route = createFileRoute('/_auth/_layout/projects/$projectId/')({
 
 function ProjectDetails() {
   const { projectId } = Route.useParams();
-  const { documents, selected } = Route.useLoaderData();
+  const { documents, paginationMetaData, active } = Route.useLoaderData();
 
   return (
     <>
-      <h2>{selected.project.name}</h2>
+      <h2>{active.project.name}</h2>
       <h3>Documents</h3>
       <div className="flex gap-4 pr-6 flex-row-reverse">
         <Link
@@ -48,16 +64,17 @@ function ProjectDetails() {
           params={{ projectId }}
           variant="default"
         >
-          <div>
+          <div className="flex gap-2">
             Create Document
             <Icon name="file-outline" size="md" />
           </div>
         </Link>
       </div>
-      <DataTable
+      <Table
         tableData={documents}
         showOpenEntityButton={true}
         routePath="documents"
+        paginationMetaData={paginationMetaData}
         columnConfig={[
           {
             id: 'title',

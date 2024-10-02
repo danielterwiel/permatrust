@@ -1,22 +1,35 @@
 import { Link } from '@/components/Link';
 import { createFileRoute } from '@tanstack/react-router';
 import { pt_backend } from '@/declarations/pt_backend';
-import { DataTable } from '@/components/DataTable';
+import { Table } from '@/components/Table';
 import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
 import { Principal } from '@dfinity/principal';
 import { handleResult } from '@/utils/handleResult';
 import { Icon } from '@/components/ui/Icon';
+import { DEFAULT_PAGINATION } from '@/consts/pagination';
+import { z } from 'zod';
+
+const projectsSearchSchema = z.object({
+  page: z.number().int().nonnegative().optional(),
+});
 
 export const Route = createFileRoute('/_auth/_layout/projects/')({
   component: Projects,
-  loader: async ({ context }) => {
-    const response = await pt_backend.list_projects();
-    console.log('response', response);
+  validateSearch: (search) => projectsSearchSchema.parse(search),
+  loaderDeps: ({ search: { page } }) => ({ page }),
+  loader: async ({ context, deps: { page } }) => {
+    const pagination = {
+      ...DEFAULT_PAGINATION,
+      page_number: BigInt(page ?? 1),
+    };
+    const response = await pt_backend.list_projects(pagination);
     const result = handleResult(response);
-    const projects = stringifyBigIntObject(result);
+    const [projects, paginationMetaData] = stringifyBigIntObject(result);
     return {
       ...context,
+
       projects,
+      paginationMetaData,
     };
   },
   errorComponent: ({ error }) => {
@@ -25,7 +38,7 @@ export const Route = createFileRoute('/_auth/_layout/projects/')({
 });
 
 function Projects() {
-  const { projects } = Route.useLoaderData();
+  const { projects, paginationMetaData } = Route.useLoaderData();
 
   return (
     <>
@@ -39,10 +52,11 @@ function Projects() {
           </div>
         </Link>
       </div>
-      <DataTable
+      <Table
         tableData={projects}
         showOpenEntityButton={true}
         routePath=""
+        paginationMetaData={paginationMetaData}
         columnConfig={[
           {
             id: 'name',

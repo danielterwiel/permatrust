@@ -1,0 +1,113 @@
+use ic_cdk::println;
+use shared::pt_backend_generated::{Document, Project, Revision};
+use std::cell::RefCell;
+use std::env;
+use std::fmt::Debug;
+
+pub struct LoggableProject<'a>(&'a Project);
+pub struct LoggableDocument<'a>(&'a Document);
+pub struct LoggableRevision<'a>(&'a Revision);
+
+impl<'a> std::fmt::Display for LoggableProject<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Project {{ id: {}, name: {}, author: {} }}",
+            self.0.id, self.0.name, self.0.author
+        )
+    }
+}
+
+impl<'a> std::fmt::Display for LoggableDocument<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Document {{ id: {}, title: {} }}",
+            self.0.id, self.0.title
+        )
+    }
+}
+
+impl<'a> std::fmt::Display for LoggableRevision<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Revision {{ id: {}, document_id: {} }}",
+            self.0.id, self.0.document_id
+        )
+    }
+}
+
+pub fn loggable_project(project: &Project) -> LoggableProject {
+    LoggableProject(project)
+}
+
+pub fn loggable_document(document: &Document) -> LoggableDocument {
+    LoggableDocument(document)
+}
+
+pub fn loggable_revision(revision: &Revision) -> LoggableRevision {
+    LoggableRevision(revision)
+}
+
+#[derive(Clone, Debug, candid::CandidType, PartialEq, Ord, PartialOrd, Eq)]
+pub enum LogLevel {
+    Error,
+    Warn,
+    Info,
+    Debug,
+}
+
+thread_local! {
+    static LOG_LEVEL: RefCell<LogLevel> = RefCell::new(LogLevel::Info);
+}
+
+fn log<T: Debug>(level: LogLevel, message: &str, value: T) {
+    LOG_LEVEL.with(|current_level| {
+        if level <= *current_level.borrow() {
+            println!(
+                "[{}] {} : {:?}",
+                format!("{:?}", level).to_uppercase(),
+                message,
+                value
+            );
+        }
+    });
+}
+
+pub fn log_error<T: Debug>(message: &str, value: T) {
+    log(LogLevel::Error, message, value);
+}
+
+pub fn log_warn<T: Debug>(message: &str, value: T) {
+    log(LogLevel::Warn, message, value);
+}
+
+pub fn log_info<T: std::fmt::Display>(message: &str, value: T) {
+    LOG_LEVEL.with(|current_level| {
+        if LogLevel::Info <= *current_level.borrow() {
+            println!(
+                "[{}] {} {}",
+                format!("{:?}", LogLevel::Info).to_uppercase(),
+                message,
+                value
+            );
+        }
+    });
+}
+
+pub fn log_debug<T: Debug>(message: &str, value: T) {
+    log(LogLevel::Debug, message, value);
+}
+
+pub fn init_logger() {
+    let log_level = env::var("LOG_LEVEL").unwrap_or_else(|_| "info".to_string());
+    let level = match log_level.to_lowercase().as_str() {
+        "error" => LogLevel::Error,
+        "warn" => LogLevel::Warn,
+        "info" => LogLevel::Info,
+        "debug" => LogLevel::Debug,
+        _ => LogLevel::Info,
+    };
+    LOG_LEVEL.with(|l| *l.borrow_mut() = level);
+}

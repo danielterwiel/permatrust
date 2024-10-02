@@ -4,6 +4,7 @@
 run_commands() {
     local src_file_path=$1
     local build_dir=$2
+    local traits_to_add=("${@:3}")
 
     # Define the base name for the generated files
     local base_name_dirty=$(basename "$src_file_path" .did)
@@ -17,7 +18,6 @@ run_commands() {
     rm -rf "$generated_rust_file"
     touch "$generated_rust_file"
     ./build-utils/didc-macos bind "$src_file_path" -t rs | tee -a "$generated_rust_file"
-    ./build-utils/replace-allow.sh "$generated_rust_file"
 }
 
 # Array of source file paths
@@ -31,8 +31,7 @@ build_dir="./src/shared/src"
 
 # Loop through the source files and run the commands
 for src_file in "${source_files[@]}"; do
-    run_commands "$src_file" "$build_dir"
+    run_commands "$src_file" "$build_dir" "${traits_to_add[@]}"
 done
 
-# add "Clone" to the generated traits
-source "./build-utils/add-clone-trait-to-structs.sh"
+./build-utils/add-traits.sh

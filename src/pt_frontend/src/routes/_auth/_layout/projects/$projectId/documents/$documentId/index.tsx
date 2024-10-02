@@ -3,52 +3,76 @@ import { createFileRoute } from '@tanstack/react-router';
 import { pt_backend } from '@/declarations/pt_backend';
 import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
 import { Link } from '@/components/Link';
-import { DataTable, type TableDataItem } from '@/components/DataTable';
+import { Table } from '@/components/Table';
 import { Icon } from '@/components/ui/Icon';
 import { Principal } from '@dfinity/principal';
 import { handleResult } from '@/utils/handleResult';
+import { DEFAULT_PAGINATION } from '@/consts/pagination';
+import type { Entity } from '@/consts/entities';
+import { z } from 'zod';
+
+const revisionsSearchSchema = z.object({
+  page: z.number().int().nonnegative().optional(),
+});
 
 export const Route = createFileRoute(
   '/_auth/_layout/projects/$projectId/documents/$documentId/'
 )({
   component: DocumentDetails,
-  loader: async ({ params: { projectId, documentId }, context }) => {
+  validateSearch: (search) => revisionsSearchSchema.parse(search),
+  loaderDeps: ({ search: { page } }) => ({ page }),
+  loader: async ({
+    params: { projectId, documentId },
+    deps: { page },
+    context,
+  }) => {
+    const pagination = {
+      ...DEFAULT_PAGINATION,
+      page_number: BigInt(page ?? 1),
+    };
     const revisions_response = await pt_backend.list_revisions(
       BigInt(projectId),
-      BigInt(documentId)
+      BigInt(documentId),
+      pagination
     );
-    const document_response = await pt_backend.get_document(BigInt(projectId));
+    const document_response = await pt_backend.get_document(BigInt(documentId));
     const revisions_result = handleResult(revisions_response);
     const document_result = handleResult(document_response);
-    const revisions = stringifyBigIntObject(revisions_result);
+    const [revisions, paginationMetaData] =
+      stringifyBigIntObject(revisions_result);
     const document = stringifyBigIntObject(document_result);
+
     return {
       ...context,
 
       revisions,
+      paginationMetaData,
 
-      selected: {
-        project: context.selected.project,
+      active: {
+        project: context.active.project,
         document,
       },
 
       projectId,
     };
   },
+  errorComponent: ({ error }) => {
+    return <div>Error: {error.message}</div>;
+  },
 });
 
 function DocumentDetails() {
   const { projectId, documentId } = Route.useParams();
-  const { revisions, selected } = Route.useLoaderData();
-  const [checked, setChecked] = useState<TableDataItem[]>([]);
+  const { revisions, paginationMetaData, active } = Route.useLoaderData();
+  const [selected, setSelected] = useState<Entity[]>([]);
 
-  function handleCheckedChange(revisions: TableDataItem[]) {
-    setChecked(revisions);
+  function handleCheckedChange(revisions: Entity[]) {
+    setSelected(revisions);
   }
 
   return (
     <>
-      <h2>{selected.document.title}</h2>
+      <h2>{active.document.title}</h2>
       <h3>Revisions</h3>
       <div className="flex gap-4 pr-6 flex-row-reverse">
         <Link
@@ -68,20 +92,21 @@ function DocumentDetails() {
             documentId,
           }}
           search={{
-            theirs: checked[0]?.id ? Number(checked[0].id) : undefined,
-            current: checked[1]?.id ? Number(checked[1].id) : undefined,
+            theirs: selected[0]?.id ? Number(selected[0].id) : undefined,
+            current: selected[1]?.id ? Number(selected[1].id) : undefined,
           }}
-          disabled={checked.length !== 2}
+          disabled={selected.length !== 2}
           variant="secondary"
         >
           Diff
         </Link>
       </div>
-      <DataTable
+      <Table
         tableData={revisions}
         showOpenEntityButton={true}
         routePath="revisions"
         onSelectionChange={handleCheckedChange}
+        paginationMetaData={paginationMetaData}
         columnConfig={[
           {
             id: 'version',

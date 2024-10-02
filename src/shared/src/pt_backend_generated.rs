@@ -1,25 +1,27 @@
 // This is an experimental feature to generate Rust binding from Candid.
 // You may want to manually adjust some of the types.
-#![allow(dead_code, unused_imports, non_snake_case)]
+#![allow(dead_code, unused_imports)]
 use candid::{self, CandidType, Deserialize, Principal};
 use ic_cdk::api::call::CallResult as Result;
 
 pub type ProjectId = u64;
 pub type DocumentId = u64;
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize, Debug)]
 pub enum AppError {
+  InvalidPageSize(String),
   EntityNotFound(String),
+  InvalidPageNumber(String),
   Unauthorized,
   InternalError(String),
 }
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize)]
 pub enum DocumentIdResult { Ok(DocumentId), Err(AppError) }
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize)]
 pub enum ProjectIdResult { Ok(ProjectId), Err(AppError) }
 pub type RevisionId = u64;
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize)]
 pub enum RevisionIdResult { Ok(RevisionId), Err(AppError) }
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct Revision {
   pub id: RevisionId,
   pub content: serde_bytes::ByteBuf,
@@ -29,9 +31,9 @@ pub struct Revision {
   pub timestamp: u64,
   pub project_id: ProjectId,
 }
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize)]
 pub enum RevisionsResult { Ok(Vec<Revision>), Err(AppError) }
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct Document {
   pub id: DocumentId,
   pub title: String,
@@ -39,9 +41,9 @@ pub struct Document {
   pub projects: Vec<ProjectId>,
   pub current_version: u8,
 }
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize)]
 pub enum DocumentResult { Ok(Document), Err(AppError) }
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct Project {
   pub id: ProjectId,
   pub documents: Vec<DocumentId>,
@@ -49,14 +51,45 @@ pub struct Project {
   pub author: Principal,
   pub timestamp: u64,
 }
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize)]
 pub enum ProjectResult { Ok(Project), Err(AppError) }
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize)]
 pub enum RevisionResult { Ok(Revision), Err(AppError) }
-#[derive(CandidType, Deserialize, Clone)]
+#[derive(CandidType, Deserialize)]
 pub enum DocumentsResult { Ok(Vec<Document>), Err(AppError) }
-#[derive(CandidType, Deserialize, Clone)]
-pub enum ProjectsResult { Ok(Vec<Project>), Err(AppError) }
+pub type PageSize = u64;
+pub type PageNumber = u64;
+#[derive(CandidType, Deserialize)]
+pub struct PaginationInput {
+  pub page_size: PageSize,
+  pub page_number: PageNumber,
+}
+pub type TotalPages = u64;
+pub type TotalItems = u64;
+#[derive(CandidType, Deserialize)]
+pub struct PaginationMetadata {
+  pub page_size: PageSize,
+  pub total_pages: TotalPages,
+  pub total_items: TotalItems,
+  pub has_previous_page: bool,
+  pub has_next_page: bool,
+  pub page_number: PageNumber,
+}
+#[derive(CandidType, Deserialize)]
+pub enum PaginatedDocumentsResult {
+  Ok(Vec<Document>,PaginationMetadata,),
+  Err(AppError),
+}
+#[derive(CandidType, Deserialize)]
+pub enum PaginatedProjectsResult {
+  Ok(Vec<Project>,PaginationMetadata,),
+  Err(AppError),
+}
+#[derive(CandidType, Deserialize)]
+pub enum PaginatedRevisionsResult {
+  Ok(Vec<Revision>,PaginationMetadata,),
+  Err(AppError),
+}
 
 pub struct Service(pub Principal);
 impl Service {
@@ -84,14 +117,14 @@ impl Service {
   pub async fn list_all_documents(&self) -> Result<(DocumentsResult,)> {
     ic_cdk::call(self.0, "list_all_documents", ()).await
   }
-  pub async fn list_documents(&self, arg0: ProjectId) -> Result<(DocumentsResult,)> {
-    ic_cdk::call(self.0, "list_documents", (arg0,)).await
+  pub async fn list_documents(&self, arg0: ProjectId, arg1: PaginationInput) -> Result<(PaginatedDocumentsResult,)> {
+    ic_cdk::call(self.0, "list_documents", (arg0,arg1,)).await
   }
-  pub async fn list_projects(&self) -> Result<(ProjectsResult,)> {
-    ic_cdk::call(self.0, "list_projects", ()).await
+  pub async fn list_projects(&self, arg0: PaginationInput) -> Result<(PaginatedProjectsResult,)> {
+    ic_cdk::call(self.0, "list_projects", (arg0,)).await
   }
-  pub async fn list_revisions(&self, arg0: ProjectId, arg1: DocumentId) -> Result<(RevisionsResult,)> {
-    ic_cdk::call(self.0, "list_revisions", (arg0,arg1,)).await
+  pub async fn list_revisions(&self, arg0: ProjectId, arg1: DocumentId, arg2: PaginationInput) -> Result<(PaginatedRevisionsResult,)> {
+    ic_cdk::call(self.0, "list_revisions", (arg0,arg1,arg2,)).await
   }
 }
 
