@@ -11,7 +11,6 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as AuthenticateImport } from './routes/authenticate'
 import { Route as IndexImport } from './routes/index'
 import { Route as AuthLayoutImport } from './routes/_auth/_layout'
 import { Route as AuthLayoutProjectsIndexImport } from './routes/_auth/_layout/projects/index'
@@ -25,11 +24,6 @@ import { Route as AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsCreateI
 import { Route as AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsRevisionIdIndexImport } from './routes/_auth/_layout/projects/$projectId/documents/$documentId/revisions/$revisionId/index'
 
 // Create/Update Routes
-
-const AuthenticateRoute = AuthenticateImport.update({
-  path: '/authenticate',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const IndexRoute = IndexImport.update({
   path: '/',
@@ -103,13 +97,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexImport
-      parentRoute: typeof rootRoute
-    }
-    '/authenticate': {
-      id: '/authenticate'
-      path: '/authenticate'
-      fullPath: '/authenticate'
-      preLoaderRoute: typeof AuthenticateImport
       parentRoute: typeof rootRoute
     }
     '/_auth/_layout': {
@@ -189,7 +176,6 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren({
   IndexRoute,
-  AuthenticateRoute,
   AuthLayoutRoute: AuthLayoutRoute.addChildren({
     AuthLayoutProjectsCreateRoute,
     AuthLayoutNnsIndexRoute,
@@ -212,15 +198,11 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/authenticate",
         "/_auth/_layout"
       ]
     },
     "/": {
       "filePath": "index.tsx"
-    },
-    "/authenticate": {
-      "filePath": "authenticate.tsx"
     },
     "/_auth/_layout": {
       "filePath": "_auth/_layout.tsx",

@@ -1,83 +1,47 @@
-import { useState, useLayoutEffect } from "react";
-import {
-  createFileRoute,
-  Navigate,
-  redirect,
-  useRouteContext,
-  useNavigate,
-} from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { createFileRoute, redirect } from '@tanstack/react-router';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from '@tanstack/react-router';
 
-export const Route = createFileRoute("/")({
-  component: LoginComponent,
-  beforeLoad: ({ context }) => {
-    if (context.auth.loggedIn) {
-      throw redirect({
-        to: "/authenticate",
-      });
-    }
+export const Route = createFileRoute('/')({
+  component: Authenticate,
+  beforeLoad: async ({ context }) => {
     if (context.auth.authenticated) {
       throw redirect({
-        to: "/projects",
+        to: '/projects',
         search: { page: 1 },
       });
     }
+    return context;
   },
 });
 
-function LoginComponent() {
-  const [password, setPassword] = useState<string>("");
-  const search = Route.useSearch<{ redirect?: string }>();
-  const navigate = useNavigate();
-  const auth = useRouteContext({
-    from: "/",
-    select: (state) => state.auth,
+function Authenticate() {
+  const { auth } = Route.useRouteContext({
+    select: ({ auth }) => ({ auth }),
   });
-
-  // Ah, the subtle nuances of client side auth. 🙄
-  useLayoutEffect(() => {
-    if (auth.loggedIn && search.redirect) {
-      navigate({ to: search.redirect });
-    }
-  }, [auth.loggedIn, search.redirect, navigate]);
-
-  const deobfuscatePassword = (obfuscated: string) => {
-    const shift = 7331;
-    let password = "";
-    for (let i = 0; i < obfuscated.length; i++) {
-      password += String.fromCharCode(obfuscated.charCodeAt(i) - shift);
-    }
-    return password;
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const expected = "ᴐᴒᴏᴗᴒᴖᴜᴐᴓᴄᴗᴌᴆᴒᴋᴒᴚᴇᴌᴇᴜᴒᴘᴎᴑᴒᴚᴋᴒᴚᴗᴒᴊᴈᴗᴌᴑ᳢";
-    auth.loggedIn = password === deobfuscatePassword(expected);
-    if (auth.loggedIn) {
-      navigate({ to: "/authenticate" });
-    }
-  };
-
-  return auth.loggedIn ? (
-    <Navigate to="/authenticate" />
-  ) : (
-    <div className="grid place-items-center">
-      <form onSubmit={handleSubmit}>
-        <div className="form-control">
-          <label htmlFor="password">Password</label>
-          <Input
-            id="password"
-            alt="Password"
-            type="password"
-            className="input input-bordered"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
-        <Button type="submit">Login</Button>
-      </form>
+  const navigate = useNavigate();
+  return (
+    <div className="flex justify-end">
+      {!auth.authenticated ? (
+        <Button
+          onClick={async () => {
+            await auth.initAuthClient();
+            const result = await auth.authenticate();
+            if (result) {
+              navigate({
+                to: '/projects',
+                search: { page: 1 },
+              });
+            }
+          }}
+        >
+          Authenticate
+        </Button>
+      ) : (
+        <Button type="button" onClick={auth.logout}>
+          Logout
+        </Button>
+      )}
     </div>
   );
 }

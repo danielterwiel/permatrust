@@ -1,24 +1,17 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { Header } from "@/components/Header";
-import { Sidebar } from "@/components/Sidebar";
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
+import { Header } from '@/components/Header';
+import { Sidebar } from '@/components/Sidebar';
 
-export const Route = createFileRoute("/_auth/_layout")({
+export const Route = createFileRoute('/_auth/_layout')({
   component: AuthLayout,
   beforeLoad: async ({ context, location }) => {
     // TODO: do not run every time
+    console.log('initAuthClient should run once');
     await context.auth.initAuthClient();
-    if (!context.auth.loggedIn) {
-      throw redirect({
-        to: "/",
-        search: {
-          redirect: location.href,
-        },
-      });
-    }
 
     if (!context.auth.authenticated) {
       throw redirect({
-        to: "/authenticate",
+        to: '/authenticate',
         search: {
           redirect: location.href,
         },
