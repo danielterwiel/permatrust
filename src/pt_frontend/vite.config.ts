@@ -2,27 +2,12 @@
 import url from "node:url";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
-import { TanStackRouterVite } from "@tanstack/router-vite-plugin";
 import environment from "vite-plugin-environment";
+import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import dotenv from "dotenv";
-import { exec } from "node:child_process";
+import { routes } from "./src/routes";
 
 dotenv.config({ path: "../../.env" });
-
-function biomePlugin() {
-  return {
-    name: "vite-plugin-biome",
-    handleHotUpdate({ file }) {
-      exec(`npx biome format --write ${file}`, (err, stdout, stderr) => {
-        if (err) {
-          console.error(`Biome error: ${stderr}`);
-        } else {
-          console.log(`Biome output: ${stdout}`);
-        }
-      });
-    },
-  };
-}
 
 export default defineConfig({
   build: {
@@ -44,7 +29,9 @@ export default defineConfig({
     },
   },
   plugins: [
-    TanStackRouterVite(),
+    TanStackRouterVite({
+      virtualRouteConfig: routes,
+    }),
     react(),
     environment("all", { prefix: "DFX_" }),
     environment("all", { prefix: "CANISTER_" }),
@@ -52,12 +39,11 @@ export default defineConfig({
       prefix: "VITE_CANISTER_ID_",
       defineOn: "import.meta.env",
     }),
-    // biomePlugin(), // TODO: maybe just use an editor and fmt on CI in stead
   ],
-  test: {
-    environment: "jsdom",
-    setupFiles: "src/setupTests.js",
-  },
+  // test: {
+  //   environment: 'jsdom',
+  //   setupFiles: 'src/setupTests.js',
+  // },
   resolve: {
     alias: [
       {

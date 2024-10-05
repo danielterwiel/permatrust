@@ -10,83 +10,110 @@
 
 // Import Routes
 
-import { Route as rootRoute } from './routes/__root'
-import { Route as IndexImport } from './routes/index'
-import { Route as AuthLayoutImport } from './routes/_auth/_layout'
-import { Route as AuthLayoutProjectsIndexImport } from './routes/_auth/_layout/projects/index'
-import { Route as AuthLayoutNnsIndexImport } from './routes/_auth/_layout/nns/index'
-import { Route as AuthLayoutProjectsCreateImport } from './routes/_auth/_layout/projects/create'
-import { Route as AuthLayoutProjectsProjectIdIndexImport } from './routes/_auth/_layout/projects/$projectId/index'
-import { Route as AuthLayoutProjectsProjectIdDocumentsCreateImport } from './routes/_auth/_layout/projects/$projectId/documents/create'
-import { Route as AuthLayoutProjectsProjectIdDocumentsDocumentIdIndexImport } from './routes/_auth/_layout/projects/$projectId/documents/$documentId/index'
-import { Route as AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsDiffImport } from './routes/_auth/_layout/projects/$projectId/documents/$documentId/revisions/diff'
-import { Route as AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsCreateImport } from './routes/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create'
-import { Route as AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsRevisionIdIndexImport } from './routes/_auth/_layout/projects/$projectId/documents/$documentId/revisions/$revisionId/index'
+import { Route as rootRoute } from './routes/root'
+import { Route as layoutsAuthenticatedImport } from './routes/_layouts/_authenticated'
+import { Route as homeImport } from './routes/home'
+import { Route as appProjectsProjectsindexImport } from './routes/app/projects/projects.index'
+import { Route as appNnsNnsImport } from './routes/app/nns/nns'
+import { Route as appProjectsProjectIdindexImport } from './routes/app/projects/$projectId.index'
+import { Route as appProjectsCreateImport } from './routes/app/projects/create'
+import { Route as appProjectsProjectsImport } from './routes/app/projects/projects'
+import { Route as appDocumentsDocumentsindexImport } from './routes/app/documents/documents.index'
+import { Route as appProjectsProjectIdImport } from './routes/app/projects/$projectId'
+import { Route as appDocumentsDocumentIdindexImport } from './routes/app/documents/$documentId.index'
+import { Route as appDocumentsCreateImport } from './routes/app/documents/create'
+import { Route as appRevisionsRevisionsindexImport } from './routes/app/revisions/revisions.index'
+import { Route as appDocumentsDocumentIdImport } from './routes/app/documents/$documentId'
+import { Route as appRevisionsDiffImport } from './routes/app/revisions/diff'
+import { Route as appRevisionsCreateImport } from './routes/app/revisions/create'
+import { Route as appRevisionsRevisionIdImport } from './routes/app/revisions/$revisionId'
 
 // Create/Update Routes
 
-const IndexRoute = IndexImport.update({
+const layoutsAuthenticatedRoute = layoutsAuthenticatedImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const homeRoute = homeImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
 } as any)
 
-const AuthLayoutRoute = AuthLayoutImport.update({
-  id: '/_auth/_layout',
-  getParentRoute: () => rootRoute,
+const appProjectsProjectsindexRoute = appProjectsProjectsindexImport.update({
+  path: '/projects',
+  getParentRoute: () => layoutsAuthenticatedRoute,
 } as any)
 
-const AuthLayoutProjectsIndexRoute = AuthLayoutProjectsIndexImport.update({
-  path: '/projects/',
-  getParentRoute: () => AuthLayoutRoute,
+const appNnsNnsRoute = appNnsNnsImport.update({
+  path: '/nns',
+  getParentRoute: () => layoutsAuthenticatedRoute,
 } as any)
 
-const AuthLayoutNnsIndexRoute = AuthLayoutNnsIndexImport.update({
-  path: '/nns/',
-  getParentRoute: () => AuthLayoutRoute,
+const appProjectsProjectIdindexRoute = appProjectsProjectIdindexImport.update({
+  path: '/$projectId',
+  getParentRoute: () => appProjectsProjectsindexRoute,
 } as any)
 
-const AuthLayoutProjectsCreateRoute = AuthLayoutProjectsCreateImport.update({
-  path: '/projects/create',
-  getParentRoute: () => AuthLayoutRoute,
+const appProjectsCreateRoute = appProjectsCreateImport.update({
+  path: '/create',
+  getParentRoute: () => appProjectsProjectsindexRoute,
 } as any)
 
-const AuthLayoutProjectsProjectIdIndexRoute =
-  AuthLayoutProjectsProjectIdIndexImport.update({
-    path: '/projects/$projectId/',
-    getParentRoute: () => AuthLayoutRoute,
+const appProjectsProjectsRoute = appProjectsProjectsImport.update({
+  path: '/',
+  getParentRoute: () => appProjectsProjectsindexRoute,
+} as any)
+
+const appDocumentsDocumentsindexRoute = appDocumentsDocumentsindexImport.update(
+  {
+    path: '/documents',
+    getParentRoute: () => appProjectsProjectIdindexRoute,
+  } as any,
+)
+
+const appProjectsProjectIdRoute = appProjectsProjectIdImport.update({
+  path: '/',
+  getParentRoute: () => appProjectsProjectIdindexRoute,
+} as any)
+
+const appDocumentsDocumentIdindexRoute =
+  appDocumentsDocumentIdindexImport.update({
+    path: '/$documentId',
+    getParentRoute: () => appDocumentsDocumentsindexRoute,
   } as any)
 
-const AuthLayoutProjectsProjectIdDocumentsCreateRoute =
-  AuthLayoutProjectsProjectIdDocumentsCreateImport.update({
-    path: '/projects/$projectId/documents/create',
-    getParentRoute: () => AuthLayoutRoute,
-  } as any)
+const appDocumentsCreateRoute = appDocumentsCreateImport.update({
+  path: '/create',
+  getParentRoute: () => appDocumentsDocumentsindexRoute,
+} as any)
 
-const AuthLayoutProjectsProjectIdDocumentsDocumentIdIndexRoute =
-  AuthLayoutProjectsProjectIdDocumentsDocumentIdIndexImport.update({
-    path: '/projects/$projectId/documents/$documentId/',
-    getParentRoute: () => AuthLayoutRoute,
-  } as any)
+const appRevisionsRevisionsindexRoute = appRevisionsRevisionsindexImport.update(
+  {
+    path: '/revisions',
+    getParentRoute: () => appDocumentsDocumentIdindexRoute,
+  } as any,
+)
 
-const AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsDiffRoute =
-  AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsDiffImport.update({
-    path: '/projects/$projectId/documents/$documentId/revisions/diff',
-    getParentRoute: () => AuthLayoutRoute,
-  } as any)
+const appDocumentsDocumentIdRoute = appDocumentsDocumentIdImport.update({
+  path: '/',
+  getParentRoute: () => appDocumentsDocumentIdindexRoute,
+} as any)
 
-const AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsCreateRoute =
-  AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsCreateImport.update({
-    path: '/projects/$projectId/documents/$documentId/revisions/create',
-    getParentRoute: () => AuthLayoutRoute,
-  } as any)
+const appRevisionsDiffRoute = appRevisionsDiffImport.update({
+  path: '/diff',
+  getParentRoute: () => appRevisionsRevisionsindexRoute,
+} as any)
 
-const AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsRevisionIdIndexRoute =
-  AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsRevisionIdIndexImport.update(
-    {
-      path: '/projects/$projectId/documents/$documentId/revisions/$revisionId/',
-      getParentRoute: () => AuthLayoutRoute,
-    } as any,
-  )
+const appRevisionsCreateRoute = appRevisionsCreateImport.update({
+  path: '/create',
+  getParentRoute: () => appRevisionsRevisionsindexRoute,
+} as any)
+
+const appRevisionsRevisionIdRoute = appRevisionsRevisionIdImport.update({
+  path: '/$revisionId',
+  getParentRoute: () => appRevisionsRevisionsindexRoute,
+} as any)
 
 // Populate the FileRoutesByPath interface
 
@@ -96,98 +123,342 @@ declare module '@tanstack/react-router' {
       id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexImport
+      preLoaderRoute: typeof homeImport
       parentRoute: typeof rootRoute
     }
-    '/_auth/_layout': {
-      id: '/_auth/_layout'
+    '/_authenticated': {
+      id: '/_authenticated'
       path: ''
       fullPath: ''
-      preLoaderRoute: typeof AuthLayoutImport
+      preLoaderRoute: typeof layoutsAuthenticatedImport
       parentRoute: typeof rootRoute
     }
-    '/_auth/_layout/projects/create': {
-      id: '/_auth/_layout/projects/create'
-      path: '/projects/create'
-      fullPath: '/projects/create'
-      preLoaderRoute: typeof AuthLayoutProjectsCreateImport
-      parentRoute: typeof AuthLayoutImport
-    }
-    '/_auth/_layout/nns/': {
-      id: '/_auth/_layout/nns/'
+    '/_authenticated/nns': {
+      id: '/_authenticated/nns'
       path: '/nns'
       fullPath: '/nns'
-      preLoaderRoute: typeof AuthLayoutNnsIndexImport
-      parentRoute: typeof AuthLayoutImport
+      preLoaderRoute: typeof appNnsNnsImport
+      parentRoute: typeof layoutsAuthenticatedImport
     }
-    '/_auth/_layout/projects/': {
-      id: '/_auth/_layout/projects/'
+    '/_authenticated/projects': {
+      id: '/_authenticated/projects'
       path: '/projects'
       fullPath: '/projects'
-      preLoaderRoute: typeof AuthLayoutProjectsIndexImport
-      parentRoute: typeof AuthLayoutImport
+      preLoaderRoute: typeof appProjectsProjectsindexImport
+      parentRoute: typeof layoutsAuthenticatedImport
     }
-    '/_auth/_layout/projects/$projectId/': {
-      id: '/_auth/_layout/projects/$projectId/'
-      path: '/projects/$projectId'
+    '/_authenticated/projects/': {
+      id: '/_authenticated/projects/'
+      path: '/'
+      fullPath: '/projects/'
+      preLoaderRoute: typeof appProjectsProjectsImport
+      parentRoute: typeof appProjectsProjectsindexImport
+    }
+    '/_authenticated/projects/create': {
+      id: '/_authenticated/projects/create'
+      path: '/create'
+      fullPath: '/projects/create'
+      preLoaderRoute: typeof appProjectsCreateImport
+      parentRoute: typeof appProjectsProjectsindexImport
+    }
+    '/_authenticated/projects/$projectId': {
+      id: '/_authenticated/projects/$projectId'
+      path: '/$projectId'
       fullPath: '/projects/$projectId'
-      preLoaderRoute: typeof AuthLayoutProjectsProjectIdIndexImport
-      parentRoute: typeof AuthLayoutImport
+      preLoaderRoute: typeof appProjectsProjectIdindexImport
+      parentRoute: typeof appProjectsProjectsindexImport
     }
-    '/_auth/_layout/projects/$projectId/documents/create': {
-      id: '/_auth/_layout/projects/$projectId/documents/create'
-      path: '/projects/$projectId/documents/create'
+    '/_authenticated/projects/$projectId/': {
+      id: '/_authenticated/projects/$projectId/'
+      path: '/'
+      fullPath: '/projects/$projectId/'
+      preLoaderRoute: typeof appProjectsProjectIdImport
+      parentRoute: typeof appProjectsProjectIdindexImport
+    }
+    '/_authenticated/projects/$projectId/documents': {
+      id: '/_authenticated/projects/$projectId/documents'
+      path: '/documents'
+      fullPath: '/projects/$projectId/documents'
+      preLoaderRoute: typeof appDocumentsDocumentsindexImport
+      parentRoute: typeof appProjectsProjectIdindexImport
+    }
+    '/_authenticated/projects/$projectId/documents/create': {
+      id: '/_authenticated/projects/$projectId/documents/create'
+      path: '/create'
       fullPath: '/projects/$projectId/documents/create'
-      preLoaderRoute: typeof AuthLayoutProjectsProjectIdDocumentsCreateImport
-      parentRoute: typeof AuthLayoutImport
+      preLoaderRoute: typeof appDocumentsCreateImport
+      parentRoute: typeof appDocumentsDocumentsindexImport
     }
-    '/_auth/_layout/projects/$projectId/documents/$documentId/': {
-      id: '/_auth/_layout/projects/$projectId/documents/$documentId/'
-      path: '/projects/$projectId/documents/$documentId'
+    '/_authenticated/projects/$projectId/documents/$documentId': {
+      id: '/_authenticated/projects/$projectId/documents/$documentId'
+      path: '/$documentId'
       fullPath: '/projects/$projectId/documents/$documentId'
-      preLoaderRoute: typeof AuthLayoutProjectsProjectIdDocumentsDocumentIdIndexImport
-      parentRoute: typeof AuthLayoutImport
+      preLoaderRoute: typeof appDocumentsDocumentIdindexImport
+      parentRoute: typeof appDocumentsDocumentsindexImport
     }
-    '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create': {
-      id: '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create'
-      path: '/projects/$projectId/documents/$documentId/revisions/create'
-      fullPath: '/projects/$projectId/documents/$documentId/revisions/create'
-      preLoaderRoute: typeof AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsCreateImport
-      parentRoute: typeof AuthLayoutImport
+    '/_authenticated/projects/$projectId/documents/$documentId/': {
+      id: '/_authenticated/projects/$projectId/documents/$documentId/'
+      path: '/'
+      fullPath: '/projects/$projectId/documents/$documentId/'
+      preLoaderRoute: typeof appDocumentsDocumentIdImport
+      parentRoute: typeof appDocumentsDocumentIdindexImport
     }
-    '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/diff': {
-      id: '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/diff'
-      path: '/projects/$projectId/documents/$documentId/revisions/diff'
-      fullPath: '/projects/$projectId/documents/$documentId/revisions/diff'
-      preLoaderRoute: typeof AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsDiffImport
-      parentRoute: typeof AuthLayoutImport
+    '/_authenticated/projects/$projectId/documents/$documentId/revisions': {
+      id: '/_authenticated/projects/$projectId/documents/$documentId/revisions'
+      path: '/revisions'
+      fullPath: '/projects/$projectId/documents/$documentId/revisions'
+      preLoaderRoute: typeof appRevisionsRevisionsindexImport
+      parentRoute: typeof appDocumentsDocumentIdindexImport
     }
-    '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/$revisionId/': {
-      id: '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/$revisionId/'
-      path: '/projects/$projectId/documents/$documentId/revisions/$revisionId'
+    '/_authenticated/projects/$projectId/documents/$documentId/revisions/$revisionId': {
+      id: '/_authenticated/projects/$projectId/documents/$documentId/revisions/$revisionId'
+      path: '/$revisionId'
       fullPath: '/projects/$projectId/documents/$documentId/revisions/$revisionId'
-      preLoaderRoute: typeof AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsRevisionIdIndexImport
-      parentRoute: typeof AuthLayoutImport
+      preLoaderRoute: typeof appRevisionsRevisionIdImport
+      parentRoute: typeof appRevisionsRevisionsindexImport
+    }
+    '/_authenticated/projects/$projectId/documents/$documentId/revisions/create': {
+      id: '/_authenticated/projects/$projectId/documents/$documentId/revisions/create'
+      path: '/create'
+      fullPath: '/projects/$projectId/documents/$documentId/revisions/create'
+      preLoaderRoute: typeof appRevisionsCreateImport
+      parentRoute: typeof appRevisionsRevisionsindexImport
+    }
+    '/_authenticated/projects/$projectId/documents/$documentId/revisions/diff': {
+      id: '/_authenticated/projects/$projectId/documents/$documentId/revisions/diff'
+      path: '/diff'
+      fullPath: '/projects/$projectId/documents/$documentId/revisions/diff'
+      preLoaderRoute: typeof appRevisionsDiffImport
+      parentRoute: typeof appRevisionsRevisionsindexImport
     }
   }
 }
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren({
-  IndexRoute,
-  AuthLayoutRoute: AuthLayoutRoute.addChildren({
-    AuthLayoutProjectsCreateRoute,
-    AuthLayoutNnsIndexRoute,
-    AuthLayoutProjectsIndexRoute,
-    AuthLayoutProjectsProjectIdIndexRoute,
-    AuthLayoutProjectsProjectIdDocumentsCreateRoute,
-    AuthLayoutProjectsProjectIdDocumentsDocumentIdIndexRoute,
-    AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsCreateRoute,
-    AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsDiffRoute,
-    AuthLayoutProjectsProjectIdDocumentsDocumentIdRevisionsRevisionIdIndexRoute,
-  }),
-})
+interface appRevisionsRevisionsindexRouteChildren {
+  appRevisionsRevisionIdRoute: typeof appRevisionsRevisionIdRoute
+  appRevisionsCreateRoute: typeof appRevisionsCreateRoute
+  appRevisionsDiffRoute: typeof appRevisionsDiffRoute
+}
+
+const appRevisionsRevisionsindexRouteChildren: appRevisionsRevisionsindexRouteChildren =
+  {
+    appRevisionsRevisionIdRoute: appRevisionsRevisionIdRoute,
+    appRevisionsCreateRoute: appRevisionsCreateRoute,
+    appRevisionsDiffRoute: appRevisionsDiffRoute,
+  }
+
+const appRevisionsRevisionsindexRouteWithChildren =
+  appRevisionsRevisionsindexRoute._addFileChildren(
+    appRevisionsRevisionsindexRouteChildren,
+  )
+
+interface appDocumentsDocumentIdindexRouteChildren {
+  appDocumentsDocumentIdRoute: typeof appDocumentsDocumentIdRoute
+  appRevisionsRevisionsindexRoute: typeof appRevisionsRevisionsindexRouteWithChildren
+}
+
+const appDocumentsDocumentIdindexRouteChildren: appDocumentsDocumentIdindexRouteChildren =
+  {
+    appDocumentsDocumentIdRoute: appDocumentsDocumentIdRoute,
+    appRevisionsRevisionsindexRoute:
+      appRevisionsRevisionsindexRouteWithChildren,
+  }
+
+const appDocumentsDocumentIdindexRouteWithChildren =
+  appDocumentsDocumentIdindexRoute._addFileChildren(
+    appDocumentsDocumentIdindexRouteChildren,
+  )
+
+interface appDocumentsDocumentsindexRouteChildren {
+  appDocumentsCreateRoute: typeof appDocumentsCreateRoute
+  appDocumentsDocumentIdindexRoute: typeof appDocumentsDocumentIdindexRouteWithChildren
+}
+
+const appDocumentsDocumentsindexRouteChildren: appDocumentsDocumentsindexRouteChildren =
+  {
+    appDocumentsCreateRoute: appDocumentsCreateRoute,
+    appDocumentsDocumentIdindexRoute:
+      appDocumentsDocumentIdindexRouteWithChildren,
+  }
+
+const appDocumentsDocumentsindexRouteWithChildren =
+  appDocumentsDocumentsindexRoute._addFileChildren(
+    appDocumentsDocumentsindexRouteChildren,
+  )
+
+interface appProjectsProjectIdindexRouteChildren {
+  appProjectsProjectIdRoute: typeof appProjectsProjectIdRoute
+  appDocumentsDocumentsindexRoute: typeof appDocumentsDocumentsindexRouteWithChildren
+}
+
+const appProjectsProjectIdindexRouteChildren: appProjectsProjectIdindexRouteChildren =
+  {
+    appProjectsProjectIdRoute: appProjectsProjectIdRoute,
+    appDocumentsDocumentsindexRoute:
+      appDocumentsDocumentsindexRouteWithChildren,
+  }
+
+const appProjectsProjectIdindexRouteWithChildren =
+  appProjectsProjectIdindexRoute._addFileChildren(
+    appProjectsProjectIdindexRouteChildren,
+  )
+
+interface appProjectsProjectsindexRouteChildren {
+  appProjectsProjectsRoute: typeof appProjectsProjectsRoute
+  appProjectsCreateRoute: typeof appProjectsCreateRoute
+  appProjectsProjectIdindexRoute: typeof appProjectsProjectIdindexRouteWithChildren
+}
+
+const appProjectsProjectsindexRouteChildren: appProjectsProjectsindexRouteChildren =
+  {
+    appProjectsProjectsRoute: appProjectsProjectsRoute,
+    appProjectsCreateRoute: appProjectsCreateRoute,
+    appProjectsProjectIdindexRoute: appProjectsProjectIdindexRouteWithChildren,
+  }
+
+const appProjectsProjectsindexRouteWithChildren =
+  appProjectsProjectsindexRoute._addFileChildren(
+    appProjectsProjectsindexRouteChildren,
+  )
+
+interface layoutsAuthenticatedRouteChildren {
+  appNnsNnsRoute: typeof appNnsNnsRoute
+  appProjectsProjectsindexRoute: typeof appProjectsProjectsindexRouteWithChildren
+}
+
+const layoutsAuthenticatedRouteChildren: layoutsAuthenticatedRouteChildren = {
+  appNnsNnsRoute: appNnsNnsRoute,
+  appProjectsProjectsindexRoute: appProjectsProjectsindexRouteWithChildren,
+}
+
+const layoutsAuthenticatedRouteWithChildren =
+  layoutsAuthenticatedRoute._addFileChildren(layoutsAuthenticatedRouteChildren)
+
+export interface FileRoutesByFullPath {
+  '/': typeof homeRoute
+  '': typeof layoutsAuthenticatedRouteWithChildren
+  '/nns': typeof appNnsNnsRoute
+  '/projects': typeof appProjectsProjectsindexRouteWithChildren
+  '/projects/': typeof appProjectsProjectsRoute
+  '/projects/create': typeof appProjectsCreateRoute
+  '/projects/$projectId': typeof appProjectsProjectIdindexRouteWithChildren
+  '/projects/$projectId/': typeof appProjectsProjectIdRoute
+  '/projects/$projectId/documents': typeof appDocumentsDocumentsindexRouteWithChildren
+  '/projects/$projectId/documents/create': typeof appDocumentsCreateRoute
+  '/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentIdindexRouteWithChildren
+  '/projects/$projectId/documents/$documentId/': typeof appDocumentsDocumentIdRoute
+  '/projects/$projectId/documents/$documentId/revisions': typeof appRevisionsRevisionsindexRouteWithChildren
+  '/projects/$projectId/documents/$documentId/revisions/$revisionId': typeof appRevisionsRevisionIdRoute
+  '/projects/$projectId/documents/$documentId/revisions/create': typeof appRevisionsCreateRoute
+  '/projects/$projectId/documents/$documentId/revisions/diff': typeof appRevisionsDiffRoute
+}
+
+export interface FileRoutesByTo {
+  '/': typeof homeRoute
+  '': typeof layoutsAuthenticatedRouteWithChildren
+  '/nns': typeof appNnsNnsRoute
+  '/projects': typeof appProjectsProjectsRoute
+  '/projects/create': typeof appProjectsCreateRoute
+  '/projects/$projectId': typeof appProjectsProjectIdRoute
+  '/projects/$projectId/documents': typeof appDocumentsDocumentsindexRouteWithChildren
+  '/projects/$projectId/documents/create': typeof appDocumentsCreateRoute
+  '/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentIdRoute
+  '/projects/$projectId/documents/$documentId/revisions': typeof appRevisionsRevisionsindexRouteWithChildren
+  '/projects/$projectId/documents/$documentId/revisions/$revisionId': typeof appRevisionsRevisionIdRoute
+  '/projects/$projectId/documents/$documentId/revisions/create': typeof appRevisionsCreateRoute
+  '/projects/$projectId/documents/$documentId/revisions/diff': typeof appRevisionsDiffRoute
+}
+
+export interface FileRoutesById {
+  __root__: typeof rootRoute
+  '/': typeof homeRoute
+  '/_authenticated': typeof layoutsAuthenticatedRouteWithChildren
+  '/_authenticated/nns': typeof appNnsNnsRoute
+  '/_authenticated/projects': typeof appProjectsProjectsindexRouteWithChildren
+  '/_authenticated/projects/': typeof appProjectsProjectsRoute
+  '/_authenticated/projects/create': typeof appProjectsCreateRoute
+  '/_authenticated/projects/$projectId': typeof appProjectsProjectIdindexRouteWithChildren
+  '/_authenticated/projects/$projectId/': typeof appProjectsProjectIdRoute
+  '/_authenticated/projects/$projectId/documents': typeof appDocumentsDocumentsindexRouteWithChildren
+  '/_authenticated/projects/$projectId/documents/create': typeof appDocumentsCreateRoute
+  '/_authenticated/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentIdindexRouteWithChildren
+  '/_authenticated/projects/$projectId/documents/$documentId/': typeof appDocumentsDocumentIdRoute
+  '/_authenticated/projects/$projectId/documents/$documentId/revisions': typeof appRevisionsRevisionsindexRouteWithChildren
+  '/_authenticated/projects/$projectId/documents/$documentId/revisions/$revisionId': typeof appRevisionsRevisionIdRoute
+  '/_authenticated/projects/$projectId/documents/$documentId/revisions/create': typeof appRevisionsCreateRoute
+  '/_authenticated/projects/$projectId/documents/$documentId/revisions/diff': typeof appRevisionsDiffRoute
+}
+
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths:
+    | '/'
+    | ''
+    | '/nns'
+    | '/projects'
+    | '/projects/'
+    | '/projects/create'
+    | '/projects/$projectId'
+    | '/projects/$projectId/'
+    | '/projects/$projectId/documents'
+    | '/projects/$projectId/documents/create'
+    | '/projects/$projectId/documents/$documentId'
+    | '/projects/$projectId/documents/$documentId/'
+    | '/projects/$projectId/documents/$documentId/revisions'
+    | '/projects/$projectId/documents/$documentId/revisions/$revisionId'
+    | '/projects/$projectId/documents/$documentId/revisions/create'
+    | '/projects/$projectId/documents/$documentId/revisions/diff'
+  fileRoutesByTo: FileRoutesByTo
+  to:
+    | '/'
+    | ''
+    | '/nns'
+    | '/projects'
+    | '/projects/create'
+    | '/projects/$projectId'
+    | '/projects/$projectId/documents'
+    | '/projects/$projectId/documents/create'
+    | '/projects/$projectId/documents/$documentId'
+    | '/projects/$projectId/documents/$documentId/revisions'
+    | '/projects/$projectId/documents/$documentId/revisions/$revisionId'
+    | '/projects/$projectId/documents/$documentId/revisions/create'
+    | '/projects/$projectId/documents/$documentId/revisions/diff'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/_authenticated/nns'
+    | '/_authenticated/projects'
+    | '/_authenticated/projects/'
+    | '/_authenticated/projects/create'
+    | '/_authenticated/projects/$projectId'
+    | '/_authenticated/projects/$projectId/'
+    | '/_authenticated/projects/$projectId/documents'
+    | '/_authenticated/projects/$projectId/documents/create'
+    | '/_authenticated/projects/$projectId/documents/$documentId'
+    | '/_authenticated/projects/$projectId/documents/$documentId/'
+    | '/_authenticated/projects/$projectId/documents/$documentId/revisions'
+    | '/_authenticated/projects/$projectId/documents/$documentId/revisions/$revisionId'
+    | '/_authenticated/projects/$projectId/documents/$documentId/revisions/create'
+    | '/_authenticated/projects/$projectId/documents/$documentId/revisions/diff'
+  fileRoutesById: FileRoutesById
+}
+
+export interface RootRouteChildren {
+  homeRoute: typeof homeRoute
+  layoutsAuthenticatedRoute: typeof layoutsAuthenticatedRouteWithChildren
+}
+
+const rootRouteChildren: RootRouteChildren = {
+  homeRoute: homeRoute,
+  layoutsAuthenticatedRoute: layoutsAuthenticatedRouteWithChildren,
+}
+
+export const routeTree = rootRoute
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()
 
 /* prettier-ignore-end */
 
@@ -195,64 +466,99 @@ export const routeTree = rootRoute.addChildren({
 {
   "routes": {
     "__root__": {
-      "filePath": "__root.tsx",
+      "filePath": "root.tsx",
       "children": [
         "/",
-        "/_auth/_layout"
+        "/_authenticated"
       ]
     },
     "/": {
-      "filePath": "index.tsx"
+      "filePath": "home.tsx"
     },
-    "/_auth/_layout": {
-      "filePath": "_auth/_layout.tsx",
+    "/_authenticated": {
+      "filePath": "_layouts/_authenticated.tsx",
       "children": [
-        "/_auth/_layout/projects/create",
-        "/_auth/_layout/nns/",
-        "/_auth/_layout/projects/",
-        "/_auth/_layout/projects/$projectId/",
-        "/_auth/_layout/projects/$projectId/documents/create",
-        "/_auth/_layout/projects/$projectId/documents/$documentId/",
-        "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create",
-        "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/diff",
-        "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/$revisionId/"
+        "/_authenticated/nns",
+        "/_authenticated/projects"
       ]
     },
-    "/_auth/_layout/projects/create": {
-      "filePath": "_auth/_layout/projects/create.tsx",
-      "parent": "/_auth/_layout"
+    "/_authenticated/nns": {
+      "filePath": "app/nns/nns.tsx",
+      "parent": "/_authenticated"
     },
-    "/_auth/_layout/nns/": {
-      "filePath": "_auth/_layout/nns/index.tsx",
-      "parent": "/_auth/_layout"
+    "/_authenticated/projects": {
+      "filePath": "app/projects/projects.index.tsx",
+      "parent": "/_authenticated",
+      "children": [
+        "/_authenticated/projects/",
+        "/_authenticated/projects/create",
+        "/_authenticated/projects/$projectId"
+      ]
     },
-    "/_auth/_layout/projects/": {
-      "filePath": "_auth/_layout/projects/index.tsx",
-      "parent": "/_auth/_layout"
+    "/_authenticated/projects/": {
+      "filePath": "app/projects/projects.tsx",
+      "parent": "/_authenticated/projects"
     },
-    "/_auth/_layout/projects/$projectId/": {
-      "filePath": "_auth/_layout/projects/$projectId/index.tsx",
-      "parent": "/_auth/_layout"
+    "/_authenticated/projects/create": {
+      "filePath": "app/projects/create.tsx",
+      "parent": "/_authenticated/projects"
     },
-    "/_auth/_layout/projects/$projectId/documents/create": {
-      "filePath": "_auth/_layout/projects/$projectId/documents/create.tsx",
-      "parent": "/_auth/_layout"
+    "/_authenticated/projects/$projectId": {
+      "filePath": "app/projects/$projectId.index.tsx",
+      "parent": "/_authenticated/projects",
+      "children": [
+        "/_authenticated/projects/$projectId/",
+        "/_authenticated/projects/$projectId/documents"
+      ]
     },
-    "/_auth/_layout/projects/$projectId/documents/$documentId/": {
-      "filePath": "_auth/_layout/projects/$projectId/documents/$documentId/index.tsx",
-      "parent": "/_auth/_layout"
+    "/_authenticated/projects/$projectId/": {
+      "filePath": "app/projects/$projectId.tsx",
+      "parent": "/_authenticated/projects/$projectId"
     },
-    "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/create": {
-      "filePath": "_auth/_layout/projects/$projectId/documents/$documentId/revisions/create.tsx",
-      "parent": "/_auth/_layout"
+    "/_authenticated/projects/$projectId/documents": {
+      "filePath": "app/documents/documents.index.tsx",
+      "parent": "/_authenticated/projects/$projectId",
+      "children": [
+        "/_authenticated/projects/$projectId/documents/create",
+        "/_authenticated/projects/$projectId/documents/$documentId"
+      ]
     },
-    "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/diff": {
-      "filePath": "_auth/_layout/projects/$projectId/documents/$documentId/revisions/diff.tsx",
-      "parent": "/_auth/_layout"
+    "/_authenticated/projects/$projectId/documents/create": {
+      "filePath": "app/documents/create.tsx",
+      "parent": "/_authenticated/projects/$projectId/documents"
     },
-    "/_auth/_layout/projects/$projectId/documents/$documentId/revisions/$revisionId/": {
-      "filePath": "_auth/_layout/projects/$projectId/documents/$documentId/revisions/$revisionId/index.tsx",
-      "parent": "/_auth/_layout"
+    "/_authenticated/projects/$projectId/documents/$documentId": {
+      "filePath": "app/documents/$documentId.index.tsx",
+      "parent": "/_authenticated/projects/$projectId/documents",
+      "children": [
+        "/_authenticated/projects/$projectId/documents/$documentId/",
+        "/_authenticated/projects/$projectId/documents/$documentId/revisions"
+      ]
+    },
+    "/_authenticated/projects/$projectId/documents/$documentId/": {
+      "filePath": "app/documents/$documentId.tsx",
+      "parent": "/_authenticated/projects/$projectId/documents/$documentId"
+    },
+    "/_authenticated/projects/$projectId/documents/$documentId/revisions": {
+      "filePath": "app/revisions/revisions.index.tsx",
+      "parent": "/_authenticated/projects/$projectId/documents/$documentId",
+      "children": [
+        "/_authenticated/projects/$projectId/documents/$documentId/revisions/$revisionId",
+        "/_authenticated/projects/$projectId/documents/$documentId/revisions/create",
+        "/_authenticated/projects/$projectId/documents/$documentId/revisions/diff"
+      ]
+    },
+    "/_authenticated/projects/$projectId/documents/$documentId/revisions/$revisionId": {
+      "filePath": "app/revisions/$revisionId.tsx",
+      "parent": "/_authenticated/projects/$projectId/documents/$documentId/revisions"
+    },
+    "/_authenticated/projects/$projectId/documents/$documentId/revisions/create": {
+      "filePath": "app/revisions/create.tsx",
+      "parent": "/_authenticated/projects/$projectId/documents/$documentId/revisions"
+    },
+    "/_authenticated/projects/$projectId/documents/$documentId/revisions/diff": {
+      "filePath": "app/revisions/diff.tsx",
+      "parent": "/_authenticated/projects/$projectId/documents/$documentId/revisions"
     }
   }
 }

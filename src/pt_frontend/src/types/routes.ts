@@ -23,5 +23,5 @@ export type RouteContext = {
     revision?: Revision;
   };
 
-  getTitle: () => string;
+  getTitle?: () => string;
 };

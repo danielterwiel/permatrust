@@ -1,36 +1,40 @@
-import { Link } from '@/components/Link';
-import { createFileRoute } from '@tanstack/react-router';
-import { pt_backend } from '@/declarations/pt_backend';
-import { Table } from '@/components/Table';
-import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
-import { handleResult } from '@/utils/handleResult';
-import { Icon } from '@/components/ui/Icon';
-import { DEFAULT_PAGINATION } from '@/consts/pagination';
-import { z } from 'zod';
+import { Link } from '@/components/Link'
+import { createFileRoute } from '@tanstack/react-router'
+import { pt_backend } from '@/declarations/pt_backend'
+import { Table } from '@/components/Table'
+import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject'
+import { handleResult } from '@/utils/handleResult'
+import { Icon } from '@/components/ui/Icon'
+import { DEFAULT_PAGINATION } from '@/consts/pagination'
+import { z } from 'zod'
 
 const projectsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
-});
+})
 
-export const Route = createFileRoute('/_auth/_layout/projects/$projectId/')({
+export const Route = createFileRoute('/_authenticated/projects/$projectId/')({
   component: ProjectDetails,
   validateSearch: (search) => projectsSearchSchema.parse(search),
+  beforeLoad: () => ({
+    getTitle: () => 'Project',
+  }),
   loaderDeps: ({ search: { page } }) => ({ page }),
   loader: async ({ params: { projectId }, deps: { page }, context }) => {
+    console.log('loader')
     const pagination = {
       ...DEFAULT_PAGINATION,
       page_number: BigInt(page ?? 1),
-    };
+    }
     const documents_response = await pt_backend.list_documents(
       BigInt(projectId),
-      pagination
-    );
-    const project_response = await pt_backend.get_project(BigInt(projectId));
-    const project_result = handleResult(project_response);
-    const documents_result = handleResult(documents_response);
+      pagination,
+    )
+    const project_response = await pt_backend.get_project(BigInt(projectId))
+    const project_result = handleResult(project_response)
+    const documents_result = handleResult(documents_response)
     const [documents, paginationMetaData] =
-      stringifyBigIntObject(documents_result);
-    const project = stringifyBigIntObject(project_result);
+      stringifyBigIntObject(documents_result)
+    const project = stringifyBigIntObject(project_result)
 
     return {
       ...context,
@@ -43,16 +47,16 @@ export const Route = createFileRoute('/_auth/_layout/projects/$projectId/')({
       },
 
       projectId,
-    };
+    }
   },
   errorComponent: ({ error }) => {
-    return <div>Error: {error.message}</div>;
+    return <div>Error: {error.message}</div>
   },
-});
+})
 
 function ProjectDetails() {
-  const { projectId } = Route.useParams();
-  const { documents, paginationMetaData, active } = Route.useLoaderData();
+  const { projectId } = Route.useParams()
+  const { documents, paginationMetaData, active } = Route.useLoaderData()
 
   return (
     <>
@@ -89,5 +93,5 @@ function ProjectDetails() {
         ]}
       />
     </>
-  );
+  )
 }

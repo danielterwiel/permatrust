@@ -13,8 +13,11 @@ const projectsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
 });
 
-export const Route = createFileRoute('/_auth/_layout/projects/')({
+export const Route = createFileRoute('/_authenticated/projects/')({
   component: Projects,
+  beforeLoad: () => ({
+    getTitle: () => 'Projects',
+  }),
   validateSearch: (search) => projectsSearchSchema.parse(search),
   loaderDeps: ({ search: { page } }) => ({ page }),
   loader: async ({ context, deps: { page } }) => {
@@ -42,8 +45,6 @@ function Projects() {
 
   return (
     <>
-      <h2>PermaTrust</h2>
-      <h3>Projects</h3>
       <div className="flex gap-4 pr-6 flex-row-reverse">
         <Link to="/projects/create" variant="default">
           <div className="flex gap-2">

@@ -16,7 +16,7 @@ const revisionsSearchSchema = z.object({
 });
 
 export const Route = createFileRoute(
-  '/_auth/_layout/projects/$projectId/documents/$documentId/'
+  '/_authenticated/projects/$projectId/documents/$documentId/'
 )({
   component: DocumentDetails,
   validateSearch: (search) => revisionsSearchSchema.parse(search),
@@ -96,7 +96,7 @@ function DocumentDetails() {
             current: selected[1]?.id ? Number(selected[1].id) : undefined,
           }}
           disabled={selected.length !== 2}
-          variant="secondary"
+          variant="outline"
         >
           Diff
         </Link>

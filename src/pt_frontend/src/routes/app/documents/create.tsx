@@ -33,8 +33,11 @@ import '@mdxeditor/editor/style.css';
 import { handleResult } from '@/utils/handleResult';
 
 export const Route = createFileRoute(
-  '/_auth/_layout/projects/$projectId/documents/create'
+  '/_authenticated/projects/$projectId/documents/create'
 )({
+  beforeLoad: () => ({
+    getTitle: () => 'Create document',
+  }),
   component: CreateDocument,
   errorComponent: ({ error }) => {
     return <div>Error: {error.message}</div>;
@@ -55,7 +58,7 @@ export function CreateDocument() {
   const navigate = useNavigate();
 
   const params = useParams({
-    from: '/_auth/_layout/projects/$projectId/documents/create',
+    from: '/_authenticated/projects/$projectId/documents/create',
   });
 
   const form = useForm<z.infer<typeof formSchema>>({

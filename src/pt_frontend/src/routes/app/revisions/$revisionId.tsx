@@ -5,9 +5,12 @@ import { MDXEditor, headingsPlugin } from '@mdxeditor/editor';
 import { handleResult } from '@/utils/handleResult';
 
 export const Route = createFileRoute(
-  '/_auth/_layout/projects/$projectId/documents/$documentId/revisions/$revisionId/'
+  '/_authenticated/projects/$projectId/documents/$documentId/revisions/$revisionId'
 )({
   component: RevisionDetails,
+  beforeLoad: () => ({
+    getTitle: () => 'Revision',
+  }),
   loader: async ({ params: { revisionId } }) => {
     const response = await pt_backend.get_revision(BigInt(revisionId));
     const result = handleResult(response);
@@ -24,6 +27,7 @@ function RevisionDetails() {
 
   return (
     <MDXEditor
+      readOnly={true}
       plugins={[headingsPlugin()]}
       contentEditableClassName="prose"
       markdown={new TextDecoder().decode(

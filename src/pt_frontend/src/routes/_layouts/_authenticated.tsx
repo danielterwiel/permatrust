@@ -1,8 +1,9 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
 import { Header } from '@/components/Header';
 import { Sidebar } from '@/components/Sidebar';
+import { Breadcrumbs } from '@/components/Breadcrumbs';
 
-export const Route = createFileRoute('/_auth/_layout')({
+export const Route = createFileRoute('/_authenticated')({
   component: AuthLayout,
   beforeLoad: async ({ context, location }) => {
     // TODO: do not run every time
@@ -11,12 +12,15 @@ export const Route = createFileRoute('/_auth/_layout')({
 
     if (!context.auth.authenticated) {
       throw redirect({
-        to: '/authenticate',
+        to: '/',
         search: {
           redirect: location.href,
         },
       });
     }
+    return {
+      getTitle: () => 'Home',
+    };
   },
 });
 
@@ -26,6 +30,7 @@ function AuthLayout() {
       <Header />
       <Sidebar />
       <main className="col-span-2 sm:col-span-1">
+        <Breadcrumbs />
         <Outlet />
       </main>
       <footer className="col-span-1 sm:col-span-2">

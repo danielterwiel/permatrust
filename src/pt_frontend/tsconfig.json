@@ -7,26 +7,42 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "lib": [
+      "DOM",
+      "DOM.Iterable",
+      "ESNext"
+    ],
     "module": "ESNext",
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "noEmit": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "strict": true,
     "target": "ESNext",
-    "types": ["vite/client", "@testing-library/jest-dom"],
+    "types": [
+      "vite/client",
+      "@testing-library/jest-dom"
+    ],
     "useDefineForClassFields": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "@/declarations/*": ["./../declarations/*"],
+      "@/*": [
+        "./src/*"
+      ],
+      "@/declarations/*": [
+        "./../declarations/*"
+      ],
       "~/icon-name": [
         "src/components/ui/icons/name.d.ts",
         "types/icon-name.d.ts"
       ]
     }
   },
-  "include": ["src"],
-  "exclude": ["node_modules/**", "routeTree.gen.ts"]
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "node_modules/**",
+    "routeTree.gen.ts"
+  ]
 }
