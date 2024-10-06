@@ -1,19 +1,30 @@
 use ic_cdk::println;
-use shared::pt_backend_generated::{Document, Project, Revision};
+use shared::pt_backend_generated::{Document, Organisation, Project, Revision};
 use std::cell::RefCell;
 use std::env;
 use std::fmt::Debug;
 
+pub struct LoggableOrganisation<'a>(&'a Organisation);
 pub struct LoggableProject<'a>(&'a Project);
 pub struct LoggableDocument<'a>(&'a Document);
 pub struct LoggableRevision<'a>(&'a Revision);
+
+impl<'a> std::fmt::Display for LoggableOrganisation<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Organisation {{ id: {}, name: {}, created_by: {} }}",
+            self.0.id, self.0.name, self.0.created_by
+        )
+    }
+}
 
 impl<'a> std::fmt::Display for LoggableProject<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Project {{ id: {}, name: {}, author: {} }}",
-            self.0.id, self.0.name, self.0.author
+            "Project {{ id: {}, name: {}, created_by: {} }}",
+            self.0.id, self.0.name, self.0.created_by
         )
     }
 }
@@ -36,6 +47,10 @@ impl<'a> std::fmt::Display for LoggableRevision<'a> {
             self.0.id, self.0.document_id
         )
     }
+}
+
+pub fn loggable_organisation(organistation: &Organisation) -> LoggableOrganisation {
+    LoggableOrganisation(organistation)
 }
 
 pub fn loggable_project(project: &Project) -> LoggableProject {

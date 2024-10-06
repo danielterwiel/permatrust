@@ -14,8 +14,12 @@ import { Route as rootRoute } from './routes/root'
 import { Route as publicAuthenticateImport } from './routes/public/authenticate'
 import { Route as layoutsAuthenticatedImport } from './routes/_layouts/_authenticated'
 import { Route as publicHomeImport } from './routes/public/home'
-import { Route as appProjectsProjectsindexImport } from './routes/app/projects/projects.index'
+import { Route as appOrganisationsOrganisationsindexImport } from './routes/app/organisations/organisations.index'
 import { Route as appNnsNnsImport } from './routes/app/nns/nns'
+import { Route as appOrganisationsOrganisationIdindexImport } from './routes/app/organisations/$organisationId.index'
+import { Route as appOrganisationsCreateImport } from './routes/app/organisations/create'
+import { Route as appOrganisationsOrganisationsImport } from './routes/app/organisations/organisations'
+import { Route as appProjectsProjectsindexImport } from './routes/app/projects/projects.index'
 import { Route as appProjectsProjectIdindexImport } from './routes/app/projects/$projectId.index'
 import { Route as appProjectsCreateImport } from './routes/app/projects/create'
 import { Route as appProjectsProjectsImport } from './routes/app/projects/projects'
@@ -46,14 +50,37 @@ const publicHomeRoute = publicHomeImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const appProjectsProjectsindexRoute = appProjectsProjectsindexImport.update({
-  path: '/projects',
-  getParentRoute: () => layoutsAuthenticatedRoute,
-} as any)
+const appOrganisationsOrganisationsindexRoute =
+  appOrganisationsOrganisationsindexImport.update({
+    path: '/organisations',
+    getParentRoute: () => layoutsAuthenticatedRoute,
+  } as any)
 
 const appNnsNnsRoute = appNnsNnsImport.update({
   path: '/nns',
   getParentRoute: () => layoutsAuthenticatedRoute,
+} as any)
+
+const appOrganisationsOrganisationIdindexRoute =
+  appOrganisationsOrganisationIdindexImport.update({
+    path: '/$organisationId',
+    getParentRoute: () => appOrganisationsOrganisationsindexRoute,
+  } as any)
+
+const appOrganisationsCreateRoute = appOrganisationsCreateImport.update({
+  path: '/create',
+  getParentRoute: () => appOrganisationsOrganisationsindexRoute,
+} as any)
+
+const appOrganisationsOrganisationsRoute =
+  appOrganisationsOrganisationsImport.update({
+    path: '/',
+    getParentRoute: () => appOrganisationsOrganisationsindexRoute,
+  } as any)
+
+const appProjectsProjectsindexRoute = appProjectsProjectsindexImport.update({
+  path: '/projects',
+  getParentRoute: () => appOrganisationsOrganisationIdindexRoute,
 } as any)
 
 const appProjectsProjectIdindexRoute = appProjectsProjectIdindexImport.update({
@@ -153,94 +180,122 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appNnsNnsImport
       parentRoute: typeof layoutsAuthenticatedImport
     }
-    '/_authenticated/projects': {
-      id: '/_authenticated/projects'
-      path: '/projects'
-      fullPath: '/projects'
-      preLoaderRoute: typeof appProjectsProjectsindexImport
+    '/_authenticated/organisations': {
+      id: '/_authenticated/organisations'
+      path: '/organisations'
+      fullPath: '/organisations'
+      preLoaderRoute: typeof appOrganisationsOrganisationsindexImport
       parentRoute: typeof layoutsAuthenticatedImport
     }
-    '/_authenticated/projects/': {
-      id: '/_authenticated/projects/'
+    '/_authenticated/organisations/': {
+      id: '/_authenticated/organisations/'
       path: '/'
-      fullPath: '/projects/'
+      fullPath: '/organisations/'
+      preLoaderRoute: typeof appOrganisationsOrganisationsImport
+      parentRoute: typeof appOrganisationsOrganisationsindexImport
+    }
+    '/_authenticated/organisations/create': {
+      id: '/_authenticated/organisations/create'
+      path: '/create'
+      fullPath: '/organisations/create'
+      preLoaderRoute: typeof appOrganisationsCreateImport
+      parentRoute: typeof appOrganisationsOrganisationsindexImport
+    }
+    '/_authenticated/organisations/$organisationId': {
+      id: '/_authenticated/organisations/$organisationId'
+      path: '/$organisationId'
+      fullPath: '/organisations/$organisationId'
+      preLoaderRoute: typeof appOrganisationsOrganisationIdindexImport
+      parentRoute: typeof appOrganisationsOrganisationsindexImport
+    }
+    '/_authenticated/organisations/$organisationId/projects': {
+      id: '/_authenticated/organisations/$organisationId/projects'
+      path: '/projects'
+      fullPath: '/organisations/$organisationId/projects'
+      preLoaderRoute: typeof appProjectsProjectsindexImport
+      parentRoute: typeof appOrganisationsOrganisationIdindexImport
+    }
+    '/_authenticated/organisations/$organisationId/projects/': {
+      id: '/_authenticated/organisations/$organisationId/projects/'
+      path: '/'
+      fullPath: '/organisations/$organisationId/projects/'
       preLoaderRoute: typeof appProjectsProjectsImport
       parentRoute: typeof appProjectsProjectsindexImport
     }
-    '/_authenticated/projects/create': {
-      id: '/_authenticated/projects/create'
+    '/_authenticated/organisations/$organisationId/projects/create': {
+      id: '/_authenticated/organisations/$organisationId/projects/create'
       path: '/create'
-      fullPath: '/projects/create'
+      fullPath: '/organisations/$organisationId/projects/create'
       preLoaderRoute: typeof appProjectsCreateImport
       parentRoute: typeof appProjectsProjectsindexImport
     }
-    '/_authenticated/projects/$projectId': {
-      id: '/_authenticated/projects/$projectId'
+    '/_authenticated/organisations/$organisationId/projects/$projectId': {
+      id: '/_authenticated/organisations/$organisationId/projects/$projectId'
       path: '/$projectId'
-      fullPath: '/projects/$projectId'
+      fullPath: '/organisations/$organisationId/projects/$projectId'
       preLoaderRoute: typeof appProjectsProjectIdindexImport
       parentRoute: typeof appProjectsProjectsindexImport
     }
-    '/_authenticated/projects/$projectId/': {
-      id: '/_authenticated/projects/$projectId/'
+    '/_authenticated/organisations/$organisationId/projects/$projectId/': {
+      id: '/_authenticated/organisations/$organisationId/projects/$projectId/'
       path: '/'
-      fullPath: '/projects/$projectId/'
+      fullPath: '/organisations/$organisationId/projects/$projectId/'
       preLoaderRoute: typeof appProjectsProjectIdImport
       parentRoute: typeof appProjectsProjectIdindexImport
     }
-    '/_authenticated/projects/$projectId/documents': {
-      id: '/_authenticated/projects/$projectId/documents'
+    '/_authenticated/organisations/$organisationId/projects/$projectId/documents': {
+      id: '/_authenticated/organisations/$organisationId/projects/$projectId/documents'
       path: '/documents'
-      fullPath: '/projects/$projectId/documents'
+      fullPath: '/organisations/$organisationId/projects/$projectId/documents'
       preLoaderRoute: typeof appDocumentsDocumentsindexImport
       parentRoute: typeof appProjectsProjectIdindexImport
     }
-    '/_authenticated/projects/$projectId/documents/create': {
-      id: '/_authenticated/projects/$projectId/documents/create'
+    '/_authenticated/organisations/$organisationId/projects/$projectId/documents/create': {
+      id: '/_authenticated/organisations/$organisationId/projects/$projectId/documents/create'
       path: '/create'
-      fullPath: '/projects/$projectId/documents/create'
+      fullPath: '/organisations/$organisationId/projects/$projectId/documents/create'
       preLoaderRoute: typeof appDocumentsCreateImport
       parentRoute: typeof appDocumentsDocumentsindexImport
     }
-    '/_authenticated/projects/$projectId/documents/$documentId': {
-      id: '/_authenticated/projects/$projectId/documents/$documentId'
+    '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId': {
+      id: '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId'
       path: '/$documentId'
-      fullPath: '/projects/$projectId/documents/$documentId'
+      fullPath: '/organisations/$organisationId/projects/$projectId/documents/$documentId'
       preLoaderRoute: typeof appDocumentsDocumentIdindexImport
       parentRoute: typeof appDocumentsDocumentsindexImport
     }
-    '/_authenticated/projects/$projectId/documents/$documentId/': {
-      id: '/_authenticated/projects/$projectId/documents/$documentId/'
+    '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/': {
+      id: '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/'
       path: '/'
-      fullPath: '/projects/$projectId/documents/$documentId/'
+      fullPath: '/organisations/$organisationId/projects/$projectId/documents/$documentId/'
       preLoaderRoute: typeof appDocumentsDocumentIdImport
       parentRoute: typeof appDocumentsDocumentIdindexImport
     }
-    '/_authenticated/projects/$projectId/documents/$documentId/revisions': {
-      id: '/_authenticated/projects/$projectId/documents/$documentId/revisions'
+    '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions': {
+      id: '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions'
       path: '/revisions'
-      fullPath: '/projects/$projectId/documents/$documentId/revisions'
+      fullPath: '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions'
       preLoaderRoute: typeof appRevisionsRevisionsindexImport
       parentRoute: typeof appDocumentsDocumentIdindexImport
     }
-    '/_authenticated/projects/$projectId/documents/$documentId/revisions/$revisionId': {
-      id: '/_authenticated/projects/$projectId/documents/$documentId/revisions/$revisionId'
+    '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/$revisionId': {
+      id: '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/$revisionId'
       path: '/$revisionId'
-      fullPath: '/projects/$projectId/documents/$documentId/revisions/$revisionId'
+      fullPath: '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/$revisionId'
       preLoaderRoute: typeof appRevisionsRevisionIdImport
       parentRoute: typeof appRevisionsRevisionsindexImport
     }
-    '/_authenticated/projects/$projectId/documents/$documentId/revisions/create': {
-      id: '/_authenticated/projects/$projectId/documents/$documentId/revisions/create'
+    '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/create': {
+      id: '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/create'
       path: '/create'
-      fullPath: '/projects/$projectId/documents/$documentId/revisions/create'
+      fullPath: '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/create'
       preLoaderRoute: typeof appRevisionsCreateImport
       parentRoute: typeof appRevisionsRevisionsindexImport
     }
-    '/_authenticated/projects/$projectId/documents/$documentId/revisions/diff': {
-      id: '/_authenticated/projects/$projectId/documents/$documentId/revisions/diff'
+    '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/diff': {
+      id: '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/diff'
       path: '/diff'
-      fullPath: '/projects/$projectId/documents/$documentId/revisions/diff'
+      fullPath: '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/diff'
       preLoaderRoute: typeof appRevisionsDiffImport
       parentRoute: typeof appRevisionsRevisionsindexImport
     }
@@ -336,14 +391,48 @@ const appProjectsProjectsindexRouteWithChildren =
     appProjectsProjectsindexRouteChildren,
   )
 
+interface appOrganisationsOrganisationIdindexRouteChildren {
+  appProjectsProjectsindexRoute: typeof appProjectsProjectsindexRouteWithChildren
+}
+
+const appOrganisationsOrganisationIdindexRouteChildren: appOrganisationsOrganisationIdindexRouteChildren =
+  {
+    appProjectsProjectsindexRoute: appProjectsProjectsindexRouteWithChildren,
+  }
+
+const appOrganisationsOrganisationIdindexRouteWithChildren =
+  appOrganisationsOrganisationIdindexRoute._addFileChildren(
+    appOrganisationsOrganisationIdindexRouteChildren,
+  )
+
+interface appOrganisationsOrganisationsindexRouteChildren {
+  appOrganisationsOrganisationsRoute: typeof appOrganisationsOrganisationsRoute
+  appOrganisationsCreateRoute: typeof appOrganisationsCreateRoute
+  appOrganisationsOrganisationIdindexRoute: typeof appOrganisationsOrganisationIdindexRouteWithChildren
+}
+
+const appOrganisationsOrganisationsindexRouteChildren: appOrganisationsOrganisationsindexRouteChildren =
+  {
+    appOrganisationsOrganisationsRoute: appOrganisationsOrganisationsRoute,
+    appOrganisationsCreateRoute: appOrganisationsCreateRoute,
+    appOrganisationsOrganisationIdindexRoute:
+      appOrganisationsOrganisationIdindexRouteWithChildren,
+  }
+
+const appOrganisationsOrganisationsindexRouteWithChildren =
+  appOrganisationsOrganisationsindexRoute._addFileChildren(
+    appOrganisationsOrganisationsindexRouteChildren,
+  )
+
 interface layoutsAuthenticatedRouteChildren {
   appNnsNnsRoute: typeof appNnsNnsRoute
-  appProjectsProjectsindexRoute: typeof appProjectsProjectsindexRouteWithChildren
+  appOrganisationsOrganisationsindexRoute: typeof appOrganisationsOrganisationsindexRouteWithChildren
 }
 
 const layoutsAuthenticatedRouteChildren: layoutsAuthenticatedRouteChildren = {
   appNnsNnsRoute: appNnsNnsRoute,
-  appProjectsProjectsindexRoute: appProjectsProjectsindexRouteWithChildren,
+  appOrganisationsOrganisationsindexRoute:
+    appOrganisationsOrganisationsindexRouteWithChildren,
 }
 
 const layoutsAuthenticatedRouteWithChildren =
@@ -354,19 +443,23 @@ export interface FileRoutesByFullPath {
   '': typeof layoutsAuthenticatedRouteWithChildren
   '/authenticate': typeof publicAuthenticateRoute
   '/nns': typeof appNnsNnsRoute
-  '/projects': typeof appProjectsProjectsindexRouteWithChildren
-  '/projects/': typeof appProjectsProjectsRoute
-  '/projects/create': typeof appProjectsCreateRoute
-  '/projects/$projectId': typeof appProjectsProjectIdindexRouteWithChildren
-  '/projects/$projectId/': typeof appProjectsProjectIdRoute
-  '/projects/$projectId/documents': typeof appDocumentsDocumentsindexRouteWithChildren
-  '/projects/$projectId/documents/create': typeof appDocumentsCreateRoute
-  '/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentIdindexRouteWithChildren
-  '/projects/$projectId/documents/$documentId/': typeof appDocumentsDocumentIdRoute
-  '/projects/$projectId/documents/$documentId/revisions': typeof appRevisionsRevisionsindexRouteWithChildren
-  '/projects/$projectId/documents/$documentId/revisions/$revisionId': typeof appRevisionsRevisionIdRoute
-  '/projects/$projectId/documents/$documentId/revisions/create': typeof appRevisionsCreateRoute
-  '/projects/$projectId/documents/$documentId/revisions/diff': typeof appRevisionsDiffRoute
+  '/organisations': typeof appOrganisationsOrganisationsindexRouteWithChildren
+  '/organisations/': typeof appOrganisationsOrganisationsRoute
+  '/organisations/create': typeof appOrganisationsCreateRoute
+  '/organisations/$organisationId': typeof appOrganisationsOrganisationIdindexRouteWithChildren
+  '/organisations/$organisationId/projects': typeof appProjectsProjectsindexRouteWithChildren
+  '/organisations/$organisationId/projects/': typeof appProjectsProjectsRoute
+  '/organisations/$organisationId/projects/create': typeof appProjectsCreateRoute
+  '/organisations/$organisationId/projects/$projectId': typeof appProjectsProjectIdindexRouteWithChildren
+  '/organisations/$organisationId/projects/$projectId/': typeof appProjectsProjectIdRoute
+  '/organisations/$organisationId/projects/$projectId/documents': typeof appDocumentsDocumentsindexRouteWithChildren
+  '/organisations/$organisationId/projects/$projectId/documents/create': typeof appDocumentsCreateRoute
+  '/organisations/$organisationId/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentIdindexRouteWithChildren
+  '/organisations/$organisationId/projects/$projectId/documents/$documentId/': typeof appDocumentsDocumentIdRoute
+  '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions': typeof appRevisionsRevisionsindexRouteWithChildren
+  '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/$revisionId': typeof appRevisionsRevisionIdRoute
+  '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/create': typeof appRevisionsCreateRoute
+  '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/diff': typeof appRevisionsDiffRoute
 }
 
 export interface FileRoutesByTo {
@@ -374,16 +467,19 @@ export interface FileRoutesByTo {
   '': typeof layoutsAuthenticatedRouteWithChildren
   '/authenticate': typeof publicAuthenticateRoute
   '/nns': typeof appNnsNnsRoute
-  '/projects': typeof appProjectsProjectsRoute
-  '/projects/create': typeof appProjectsCreateRoute
-  '/projects/$projectId': typeof appProjectsProjectIdRoute
-  '/projects/$projectId/documents': typeof appDocumentsDocumentsindexRouteWithChildren
-  '/projects/$projectId/documents/create': typeof appDocumentsCreateRoute
-  '/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentIdRoute
-  '/projects/$projectId/documents/$documentId/revisions': typeof appRevisionsRevisionsindexRouteWithChildren
-  '/projects/$projectId/documents/$documentId/revisions/$revisionId': typeof appRevisionsRevisionIdRoute
-  '/projects/$projectId/documents/$documentId/revisions/create': typeof appRevisionsCreateRoute
-  '/projects/$projectId/documents/$documentId/revisions/diff': typeof appRevisionsDiffRoute
+  '/organisations': typeof appOrganisationsOrganisationsRoute
+  '/organisations/create': typeof appOrganisationsCreateRoute
+  '/organisations/$organisationId': typeof appOrganisationsOrganisationIdindexRouteWithChildren
+  '/organisations/$organisationId/projects': typeof appProjectsProjectsRoute
+  '/organisations/$organisationId/projects/create': typeof appProjectsCreateRoute
+  '/organisations/$organisationId/projects/$projectId': typeof appProjectsProjectIdRoute
+  '/organisations/$organisationId/projects/$projectId/documents': typeof appDocumentsDocumentsindexRouteWithChildren
+  '/organisations/$organisationId/projects/$projectId/documents/create': typeof appDocumentsCreateRoute
+  '/organisations/$organisationId/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentIdRoute
+  '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions': typeof appRevisionsRevisionsindexRouteWithChildren
+  '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/$revisionId': typeof appRevisionsRevisionIdRoute
+  '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/create': typeof appRevisionsCreateRoute
+  '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/diff': typeof appRevisionsDiffRoute
 }
 
 export interface FileRoutesById {
@@ -392,19 +488,23 @@ export interface FileRoutesById {
   '/_authenticated': typeof layoutsAuthenticatedRouteWithChildren
   '/authenticate': typeof publicAuthenticateRoute
   '/_authenticated/nns': typeof appNnsNnsRoute
-  '/_authenticated/projects': typeof appProjectsProjectsindexRouteWithChildren
-  '/_authenticated/projects/': typeof appProjectsProjectsRoute
-  '/_authenticated/projects/create': typeof appProjectsCreateRoute
-  '/_authenticated/projects/$projectId': typeof appProjectsProjectIdindexRouteWithChildren
-  '/_authenticated/projects/$projectId/': typeof appProjectsProjectIdRoute
-  '/_authenticated/projects/$projectId/documents': typeof appDocumentsDocumentsindexRouteWithChildren
-  '/_authenticated/projects/$projectId/documents/create': typeof appDocumentsCreateRoute
-  '/_authenticated/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentIdindexRouteWithChildren
-  '/_authenticated/projects/$projectId/documents/$documentId/': typeof appDocumentsDocumentIdRoute
-  '/_authenticated/projects/$projectId/documents/$documentId/revisions': typeof appRevisionsRevisionsindexRouteWithChildren
-  '/_authenticated/projects/$projectId/documents/$documentId/revisions/$revisionId': typeof appRevisionsRevisionIdRoute
-  '/_authenticated/projects/$projectId/documents/$documentId/revisions/create': typeof appRevisionsCreateRoute
-  '/_authenticated/projects/$projectId/documents/$documentId/revisions/diff': typeof appRevisionsDiffRoute
+  '/_authenticated/organisations': typeof appOrganisationsOrganisationsindexRouteWithChildren
+  '/_authenticated/organisations/': typeof appOrganisationsOrganisationsRoute
+  '/_authenticated/organisations/create': typeof appOrganisationsCreateRoute
+  '/_authenticated/organisations/$organisationId': typeof appOrganisationsOrganisationIdindexRouteWithChildren
+  '/_authenticated/organisations/$organisationId/projects': typeof appProjectsProjectsindexRouteWithChildren
+  '/_authenticated/organisations/$organisationId/projects/': typeof appProjectsProjectsRoute
+  '/_authenticated/organisations/$organisationId/projects/create': typeof appProjectsCreateRoute
+  '/_authenticated/organisations/$organisationId/projects/$projectId': typeof appProjectsProjectIdindexRouteWithChildren
+  '/_authenticated/organisations/$organisationId/projects/$projectId/': typeof appProjectsProjectIdRoute
+  '/_authenticated/organisations/$organisationId/projects/$projectId/documents': typeof appDocumentsDocumentsindexRouteWithChildren
+  '/_authenticated/organisations/$organisationId/projects/$projectId/documents/create': typeof appDocumentsCreateRoute
+  '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentIdindexRouteWithChildren
+  '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/': typeof appDocumentsDocumentIdRoute
+  '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions': typeof appRevisionsRevisionsindexRouteWithChildren
+  '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/$revisionId': typeof appRevisionsRevisionIdRoute
+  '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/create': typeof appRevisionsCreateRoute
+  '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/diff': typeof appRevisionsDiffRoute
 }
 
 export interface FileRouteTypes {
@@ -414,54 +514,65 @@ export interface FileRouteTypes {
     | ''
     | '/authenticate'
     | '/nns'
-    | '/projects'
-    | '/projects/'
-    | '/projects/create'
-    | '/projects/$projectId'
-    | '/projects/$projectId/'
-    | '/projects/$projectId/documents'
-    | '/projects/$projectId/documents/create'
-    | '/projects/$projectId/documents/$documentId'
-    | '/projects/$projectId/documents/$documentId/'
-    | '/projects/$projectId/documents/$documentId/revisions'
-    | '/projects/$projectId/documents/$documentId/revisions/$revisionId'
-    | '/projects/$projectId/documents/$documentId/revisions/create'
-    | '/projects/$projectId/documents/$documentId/revisions/diff'
+    | '/organisations'
+    | '/organisations/'
+    | '/organisations/create'
+    | '/organisations/$organisationId'
+    | '/organisations/$organisationId/projects'
+    | '/organisations/$organisationId/projects/'
+    | '/organisations/$organisationId/projects/create'
+    | '/organisations/$organisationId/projects/$projectId'
+    | '/organisations/$organisationId/projects/$projectId/'
+    | '/organisations/$organisationId/projects/$projectId/documents'
+    | '/organisations/$organisationId/projects/$projectId/documents/create'
+    | '/organisations/$organisationId/projects/$projectId/documents/$documentId'
+    | '/organisations/$organisationId/projects/$projectId/documents/$documentId/'
+    | '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions'
+    | '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/$revisionId'
+    | '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/create'
+    | '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/diff'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | ''
     | '/authenticate'
     | '/nns'
-    | '/projects'
-    | '/projects/create'
-    | '/projects/$projectId'
-    | '/projects/$projectId/documents'
-    | '/projects/$projectId/documents/create'
-    | '/projects/$projectId/documents/$documentId'
-    | '/projects/$projectId/documents/$documentId/revisions'
-    | '/projects/$projectId/documents/$documentId/revisions/$revisionId'
-    | '/projects/$projectId/documents/$documentId/revisions/create'
-    | '/projects/$projectId/documents/$documentId/revisions/diff'
+    | '/organisations'
+    | '/organisations/create'
+    | '/organisations/$organisationId'
+    | '/organisations/$organisationId/projects'
+    | '/organisations/$organisationId/projects/create'
+    | '/organisations/$organisationId/projects/$projectId'
+    | '/organisations/$organisationId/projects/$projectId/documents'
+    | '/organisations/$organisationId/projects/$projectId/documents/create'
+    | '/organisations/$organisationId/projects/$projectId/documents/$documentId'
+    | '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions'
+    | '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/$revisionId'
+    | '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/create'
+    | '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/diff'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
     | '/authenticate'
     | '/_authenticated/nns'
-    | '/_authenticated/projects'
-    | '/_authenticated/projects/'
-    | '/_authenticated/projects/create'
-    | '/_authenticated/projects/$projectId'
-    | '/_authenticated/projects/$projectId/'
-    | '/_authenticated/projects/$projectId/documents'
-    | '/_authenticated/projects/$projectId/documents/create'
-    | '/_authenticated/projects/$projectId/documents/$documentId'
-    | '/_authenticated/projects/$projectId/documents/$documentId/'
-    | '/_authenticated/projects/$projectId/documents/$documentId/revisions'
-    | '/_authenticated/projects/$projectId/documents/$documentId/revisions/$revisionId'
-    | '/_authenticated/projects/$projectId/documents/$documentId/revisions/create'
-    | '/_authenticated/projects/$projectId/documents/$documentId/revisions/diff'
+    | '/_authenticated/organisations'
+    | '/_authenticated/organisations/'
+    | '/_authenticated/organisations/create'
+    | '/_authenticated/organisations/$organisationId'
+    | '/_authenticated/organisations/$organisationId/projects'
+    | '/_authenticated/organisations/$organisationId/projects/'
+    | '/_authenticated/organisations/$organisationId/projects/create'
+    | '/_authenticated/organisations/$organisationId/projects/$projectId'
+    | '/_authenticated/organisations/$organisationId/projects/$projectId/'
+    | '/_authenticated/organisations/$organisationId/projects/$projectId/documents'
+    | '/_authenticated/organisations/$organisationId/projects/$projectId/documents/create'
+    | '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId'
+    | '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/'
+    | '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions'
+    | '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/$revisionId'
+    | '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/create'
+    | '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/diff'
   fileRoutesById: FileRoutesById
 }
 
@@ -501,7 +612,7 @@ export const routeTree = rootRoute
       "filePath": "_layouts/_authenticated.tsx",
       "children": [
         "/_authenticated/nns",
-        "/_authenticated/projects"
+        "/_authenticated/organisations"
       ]
     },
     "/authenticate": {
@@ -511,79 +622,103 @@ export const routeTree = rootRoute
       "filePath": "app/nns/nns.tsx",
       "parent": "/_authenticated"
     },
-    "/_authenticated/projects": {
-      "filePath": "app/projects/projects.index.tsx",
+    "/_authenticated/organisations": {
+      "filePath": "app/organisations/organisations.index.tsx",
       "parent": "/_authenticated",
       "children": [
-        "/_authenticated/projects/",
-        "/_authenticated/projects/create",
-        "/_authenticated/projects/$projectId"
+        "/_authenticated/organisations/",
+        "/_authenticated/organisations/create",
+        "/_authenticated/organisations/$organisationId"
       ]
     },
-    "/_authenticated/projects/": {
+    "/_authenticated/organisations/": {
+      "filePath": "app/organisations/organisations.tsx",
+      "parent": "/_authenticated/organisations"
+    },
+    "/_authenticated/organisations/create": {
+      "filePath": "app/organisations/create.tsx",
+      "parent": "/_authenticated/organisations"
+    },
+    "/_authenticated/organisations/$organisationId": {
+      "filePath": "app/organisations/$organisationId.index.tsx",
+      "parent": "/_authenticated/organisations",
+      "children": [
+        "/_authenticated/organisations/$organisationId/projects"
+      ]
+    },
+    "/_authenticated/organisations/$organisationId/projects": {
+      "filePath": "app/projects/projects.index.tsx",
+      "parent": "/_authenticated/organisations/$organisationId",
+      "children": [
+        "/_authenticated/organisations/$organisationId/projects/",
+        "/_authenticated/organisations/$organisationId/projects/create",
+        "/_authenticated/organisations/$organisationId/projects/$projectId"
+      ]
+    },
+    "/_authenticated/organisations/$organisationId/projects/": {
       "filePath": "app/projects/projects.tsx",
-      "parent": "/_authenticated/projects"
+      "parent": "/_authenticated/organisations/$organisationId/projects"
     },
-    "/_authenticated/projects/create": {
+    "/_authenticated/organisations/$organisationId/projects/create": {
       "filePath": "app/projects/create.tsx",
-      "parent": "/_authenticated/projects"
+      "parent": "/_authenticated/organisations/$organisationId/projects"
     },
-    "/_authenticated/projects/$projectId": {
+    "/_authenticated/organisations/$organisationId/projects/$projectId": {
       "filePath": "app/projects/$projectId.index.tsx",
-      "parent": "/_authenticated/projects",
+      "parent": "/_authenticated/organisations/$organisationId/projects",
       "children": [
-        "/_authenticated/projects/$projectId/",
-        "/_authenticated/projects/$projectId/documents"
+        "/_authenticated/organisations/$organisationId/projects/$projectId/",
+        "/_authenticated/organisations/$organisationId/projects/$projectId/documents"
       ]
     },
-    "/_authenticated/projects/$projectId/": {
+    "/_authenticated/organisations/$organisationId/projects/$projectId/": {
       "filePath": "app/projects/$projectId.tsx",
-      "parent": "/_authenticated/projects/$projectId"
+      "parent": "/_authenticated/organisations/$organisationId/projects/$projectId"
     },
-    "/_authenticated/projects/$projectId/documents": {
+    "/_authenticated/organisations/$organisationId/projects/$projectId/documents": {
       "filePath": "app/documents/documents.index.tsx",
-      "parent": "/_authenticated/projects/$projectId",
+      "parent": "/_authenticated/organisations/$organisationId/projects/$projectId",
       "children": [
-        "/_authenticated/projects/$projectId/documents/create",
-        "/_authenticated/projects/$projectId/documents/$documentId"
+        "/_authenticated/organisations/$organisationId/projects/$projectId/documents/create",
+        "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId"
       ]
     },
-    "/_authenticated/projects/$projectId/documents/create": {
+    "/_authenticated/organisations/$organisationId/projects/$projectId/documents/create": {
       "filePath": "app/documents/create.tsx",
-      "parent": "/_authenticated/projects/$projectId/documents"
+      "parent": "/_authenticated/organisations/$organisationId/projects/$projectId/documents"
     },
-    "/_authenticated/projects/$projectId/documents/$documentId": {
+    "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId": {
       "filePath": "app/documents/$documentId.index.tsx",
-      "parent": "/_authenticated/projects/$projectId/documents",
+      "parent": "/_authenticated/organisations/$organisationId/projects/$projectId/documents",
       "children": [
-        "/_authenticated/projects/$projectId/documents/$documentId/",
-        "/_authenticated/projects/$projectId/documents/$documentId/revisions"
+        "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/",
+        "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions"
       ]
     },
-    "/_authenticated/projects/$projectId/documents/$documentId/": {
+    "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/": {
       "filePath": "app/documents/$documentId.tsx",
-      "parent": "/_authenticated/projects/$projectId/documents/$documentId"
+      "parent": "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId"
     },
-    "/_authenticated/projects/$projectId/documents/$documentId/revisions": {
+    "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions": {
       "filePath": "app/revisions/revisions.index.tsx",
-      "parent": "/_authenticated/projects/$projectId/documents/$documentId",
+      "parent": "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId",
       "children": [
-        "/_authenticated/projects/$projectId/documents/$documentId/revisions/$revisionId",
-        "/_authenticated/projects/$projectId/documents/$documentId/revisions/create",
-        "/_authenticated/projects/$projectId/documents/$documentId/revisions/diff"
+        "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/$revisionId",
+        "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/create",
+        "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/diff"
       ]
     },
-    "/_authenticated/projects/$projectId/documents/$documentId/revisions/$revisionId": {
+    "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/$revisionId": {
       "filePath": "app/revisions/$revisionId.tsx",
-      "parent": "/_authenticated/projects/$projectId/documents/$documentId/revisions"
+      "parent": "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions"
     },
-    "/_authenticated/projects/$projectId/documents/$documentId/revisions/create": {
+    "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/create": {
       "filePath": "app/revisions/create.tsx",
-      "parent": "/_authenticated/projects/$projectId/documents/$documentId/revisions"
+      "parent": "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions"
     },
-    "/_authenticated/projects/$projectId/documents/$documentId/revisions/diff": {
+    "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/diff": {
       "filePath": "app/revisions/diff.tsx",
-      "parent": "/_authenticated/projects/$projectId/documents/$documentId/revisions"
+      "parent": "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions"
     }
   }
 }

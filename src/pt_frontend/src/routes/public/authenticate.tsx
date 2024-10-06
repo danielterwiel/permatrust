@@ -7,7 +7,7 @@ export const Route = createFileRoute('/authenticate')({
   beforeLoad: async ({ context }) => {
     if (context.auth.authenticated) {
       throw redirect({
-        to: '/projects',
+        to: '/organisations',
         search: { page: 1 },
       });
     }
@@ -29,7 +29,7 @@ function Authenticate() {
           const result = await auth.authenticate();
           if (result) {
             navigate({
-              to: '/projects',
+              to: '/organisations',
               search: { page: 1 },
             });
           }

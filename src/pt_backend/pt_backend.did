@@ -1,3 +1,5 @@
+type UserId = principal;
+type OrganisationId = nat64;
 type ProjectId = nat64;
 type DocumentId = nat64;
 type RevisionId = nat64;
@@ -27,11 +29,59 @@ type AppError = variant {
     InvalidPageNumber: text;
 };
 
+type User = record {
+  id : UserId;
+  first_name : text;
+  last_name : text;
+  organisations : vec OrganisationId;
+};
+type UserIdResult = variant {
+    Ok : UserId;
+    Err : AppError;
+};
+type UserResult = variant {
+    Ok: User;
+    Err: AppError;
+};
+type PaginatedUsersResult = variant {
+    Ok : record {
+      vec User;
+      PaginationMetadata;
+    };
+    Err : AppError;
+};
+
+type Organisation = record {
+    id : OrganisationId;
+    name : text;
+    created_at: nat64;
+    created_by: UserId;
+    members: vec UserId;
+    projects: vec ProjectId;
+};
+type OrganisationIdResult = variant {
+    Ok : OrganisationId;
+    Err : AppError;
+};
+type OrganisationResult = variant {
+    Ok: Organisation;
+    Err: AppError;
+};
+type PaginatedOrganisationsResult = variant {
+    Ok : record {
+      vec Organisation;
+      PaginationMetadata;
+    };
+    Err : AppError;
+};
+
 type Project = record {
     id : ProjectId;
     name : text;
-    timestamp : nat64;
-    author : principal;
+    organisations: vec OrganisationId;
+    members: vec UserId;
+    created_at: nat64;
+    created_by: UserId;
     documents : vec DocumentId;
 };
 type ProjectIdResult = variant {
@@ -54,8 +104,10 @@ type Document = record {
     id : DocumentId;
     title: text;
     current_version : nat8;
+    created_at: nat64;
+    created_by: UserId;
     revisions : vec RevisionId;
-    projects : vec ProjectId;
+    project : ProjectId;
 };
 type DocumentIdResult = variant {
     Ok : DocumentId;
@@ -80,11 +132,11 @@ type PaginatedDocumentsResult = variant {
 type Revision = record {
     id : RevisionId;
     version : nat8;
+    content : vec nat8;
+    created_at: nat64;
+    created_by: UserId;
     document_id : DocumentId;
     project_id : ProjectId;
-    content : vec nat8;
-    timestamp : nat64;
-    author : principal;
 };
 type RevisionIdResult = variant {
     Ok : RevisionId;
@@ -107,9 +159,17 @@ type PaginatedRevisionsResult = variant {
 };
 
 service : {
-    create_project : (text) -> (ProjectIdResult);
-    list_projects : (PaginationInput) -> (PaginatedProjectsResult) query;
-    get_project: (ProjectId) -> (ProjectResult) query;
+    create_user : (text, text) -> (UserIdResult);
+    list_user : (PaginationInput) -> (PaginatedUsersResult) query;
+    get_user : () -> (UserResult) query;
+
+    create_organisation : (text) -> (OrganisationIdResult);
+    list_organisations : (PaginationInput) -> (PaginatedOrganisationsResult) query;
+    get_organisation : (OrganisationId) -> (OrganisationResult) query;
+
+    create_project : (OrganisationId, text) -> (ProjectIdResult);
+    list_projects : (OrganisationId, PaginationInput) -> (PaginatedProjectsResult) query;
+    get_project : (ProjectId) -> (ProjectResult) query;
 
     create_document : (ProjectId, text, vec nat8) -> (DocumentIdResult);
     list_documents : (ProjectId, PaginationInput) -> (PaginatedDocumentsResult) query;

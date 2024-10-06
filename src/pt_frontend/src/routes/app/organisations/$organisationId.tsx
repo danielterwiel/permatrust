@@ -15,47 +15,49 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-const projectsSearchSchema = z.object({
+const origanisationsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
 });
 
 export const Route = createFileRoute(
-  '/_authenticated/organisations/$organisationId/projects/$projectId/'
+  '/_authenticated/organisations/$organisationId'
 )({
-  component: ProjectDetails,
-  validateSearch: (search) => projectsSearchSchema.parse(search),
+  component: OrganisationDetails,
+  validateSearch: (search) => origanisationsSearchSchema.parse(search),
   beforeLoad: () => ({
-    getTitle: () => 'Project',
+    getTitle: () => 'Organisation',
   }),
   loaderDeps: ({ search: { page } }) => ({ page }),
-  loader: async ({ params: { projectId }, deps: { page }, context }) => {
+  loader: async ({ params: { organisationId }, deps: { page }, context }) => {
     console.log('loader');
     const pagination = {
       ...DEFAULT_PAGINATION,
       page_number: BigInt(page ?? 1),
     };
-    const documents_response = await pt_backend.list_documents(
-      BigInt(projectId),
+    const projects_response = await pt_backend.list_projects(
+      BigInt(organisationId),
       pagination
     );
-    const project_response = await pt_backend.get_project(BigInt(projectId));
-    const project_result = handleResult(project_response);
-    const documents_result = handleResult(documents_response);
-    const [documents, paginationMetaData] =
-      stringifyBigIntObject(documents_result);
-    const project = stringifyBigIntObject(project_result);
+    const origanisation_response = await pt_backend.get_organisation(
+      BigInt(organisationId)
+    );
+    const origanisation_result = handleResult(origanisation_response);
+    const projects_result = handleResult(projects_response);
+    const [projects, paginationMetaData] =
+      stringifyBigIntObject(projects_result);
+    const origanisation = stringifyBigIntObject(origanisation_result);
 
     return {
       ...context,
 
-      documents,
+      projects,
       paginationMetaData,
 
       active: {
-        project: project,
+        origanisation: origanisation,
       },
 
-      projectId,
+      organisationId,
     };
   },
   errorComponent: ({ error }) => {
@@ -63,23 +65,21 @@ export const Route = createFileRoute(
   },
 });
 
-function ProjectDetails() {
-  const { organisationId, projectId } = Route.useParams();
-  const { documents, paginationMetaData, active } = Route.useLoaderData();
+function OrganisationDetails() {
+  const { organisationId } = Route.useParams();
+  const { projects, paginationMetaData, active } = Route.useLoaderData();
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{active.project.name}</CardTitle>
+        <CardTitle>{active.origanisation.name}</CardTitle>
         <CardDescription>Documents</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex gap-4 pr-6 flex-row-reverse">
           <Link
-            to={
-              '/organisations/$organisationId/projects/$projectId/documents/create'
-            }
-            params={{ organisationId, projectId }}
+            to="/organisations/$organisationId/projects/create"
+            params={{ organisationId }}
             variant="default"
           >
             <div className="flex gap-2">
@@ -89,7 +89,7 @@ function ProjectDetails() {
           </Link>
         </div>
         <Table
-          tableData={documents}
+          tableData={projects}
           showOpenEntityButton={true}
           routePath="documents"
           paginationMetaData={paginationMetaData}

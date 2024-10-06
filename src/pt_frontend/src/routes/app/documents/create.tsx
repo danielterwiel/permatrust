@@ -1,8 +1,4 @@
-import {
-  createFileRoute,
-  useParams,
-  useNavigate,
-} from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { pt_backend } from '@/declarations/pt_backend';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -40,7 +36,7 @@ import {
 } from '@/components/ui/card';
 
 export const Route = createFileRoute(
-  '/_authenticated/projects/$projectId/documents/create'
+  '/_authenticated/organisations/$organisationId/projects/$projectId/documents/create'
 )({
   beforeLoad: () => ({
     getTitle: () => 'Create document',
@@ -63,10 +59,7 @@ const formSchema = z.object({
 
 export function CreateDocument() {
   const navigate = useNavigate();
-
-  const params = useParams({
-    from: '/_authenticated/projects/$projectId/documents/create',
-  });
+  const params = Route.useParams();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),

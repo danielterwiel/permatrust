@@ -1,7 +1,7 @@
 use ic_cdk_macros::{query, update};
 use shared::pagination::{paginate, PaginatedProjectsResult};
 use shared::pt_backend_generated::{
-    AppError, PaginationInput, Project, ProjectId, ProjectIdResult, ProjectResult,
+    AppError, OrganisationId, PaginationInput, Project, ProjectId, ProjectIdResult, ProjectResult,
 };
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -15,7 +15,7 @@ thread_local! {
 }
 
 #[update]
-fn create_project(name: String) -> ProjectIdResult {
+fn create_project(name: String, organisation_id: OrganisationId) -> ProjectIdResult {
     if name.trim().is_empty() {
         return ProjectIdResult::Err(AppError::InternalError(
             "Project name cannot be empty".to_string(),
@@ -32,8 +32,10 @@ fn create_project(name: String) -> ProjectIdResult {
     let project = Project {
         id,
         name,
-        timestamp: ic_cdk::api::time(),
-        author: caller,
+        members: vec![caller],
+        organisations: vec![organisation_id],
+        created_at: ic_cdk::api::time(),
+        created_by: caller,
         documents: vec![],
     };
 

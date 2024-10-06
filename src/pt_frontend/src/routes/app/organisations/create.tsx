@@ -1,7 +1,9 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
+import { useNavigate } from '@tanstack/react-router';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -23,12 +25,10 @@ import { Input } from '@/components/ui/input';
 import { pt_backend } from '@/declarations/pt_backend';
 import { handleResult } from '@/utils/handleResult';
 
-export const Route = createFileRoute(
-  '/_authenticated/organisations/$organisationId/projects/create'
-)({
-  component: CreateProject,
+export const Route = createFileRoute('/_authenticated/organisations/create')({
+  component: CreateOrganisation,
   beforeLoad: () => ({
-    getTitle: () => 'Create project',
+    getTitle: () => 'Create organisation',
   }),
   errorComponent: ({ error }) => {
     return <div>Error: {error.message}</div>;
@@ -37,13 +37,12 @@ export const Route = createFileRoute(
 
 const formSchema = z.object({
   name: z.string().min(2, {
-    message: 'Project name must be at least 2 characters.',
+    message: 'Organisation name must be at least 2 characters.',
   }),
 });
 
-export function CreateProject() {
+export function CreateOrganisation() {
   const navigate = useNavigate();
-  const params = Route.useParams();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -53,22 +52,17 @@ export function CreateProject() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const response = await pt_backend.create_project(
-      BigInt(params.organisationId),
-      values.name
-    );
+    const response = await pt_backend.create_organisation(values.name);
     const result = handleResult(response);
     navigate({
-      to: `/organisations/${
-        params.organisationId
-      }/projects/${result.toString()}`,
+      to: `/organisations/${result.toString()}`,
     });
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Create new project</CardTitle>
+        <CardTitle>Create a new organisation</CardTitle>
         <CardDescription>A new beginning</CardDescription>
       </CardHeader>
       <CardContent>
@@ -83,7 +77,9 @@ export function CreateProject() {
                   <FormControl>
                     <Input placeholder="Trial" {...field} />
                   </FormControl>
-                  <FormDescription>This is your project name.</FormDescription>
+                  <FormDescription>
+                    This is your organisation name.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

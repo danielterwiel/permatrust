@@ -1,4 +1,4 @@
-import { Link } from "@/components/Link";
+import { Link } from '@/components/Link';
 
 export const Sidebar = () => {
   return (
@@ -7,8 +7,12 @@ export const Sidebar = () => {
         <ul className="flex flex-row sm:flex-col">
           {(
             [
-              ["/nns", "NNS"],
-              ["/projects", "Projects"],
+              ['/nns', 'NNS'],
+              ['/organisations', 'Organisations'],
+              // TODO:
+              // ['/users', 'Users'],
+              // ['/projects', 'Projects'],
+              // ['/documents', 'Documents'],
             ] as const
           ).map(([to, label]) => {
             return (
@@ -24,7 +28,7 @@ export const Sidebar = () => {
                   }
                   preload="intent"
                   className="block py-2 px-3 text-nowrap"
-                  activeProps={{ className: "font-bold" }}
+                  activeProps={{ className: 'font-bold' }}
                 >
                   {label}
                 </Link>

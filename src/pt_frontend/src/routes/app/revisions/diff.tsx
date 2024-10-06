@@ -1,27 +1,27 @@
-import { useEffect } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
-import { z } from 'zod'
+import { useEffect } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
 
-import { MDXEditor, diffSourcePlugin } from '@mdxeditor/editor'
-import { pt_backend } from '@/declarations/pt_backend'
-import { handleResult } from '@/utils/handleResult'
+import { MDXEditor, diffSourcePlugin } from "@mdxeditor/editor";
+import { pt_backend } from "@/declarations/pt_backend";
+import { handleResult } from "@/utils/handleResult";
 
 const RevisionSchema = z.object({
   id: z.bigint(),
   content: z.union([z.array(z.number()), z.instanceof(Uint8Array)]),
-  author: z.any(), // TODO: validate Principals
   version: z.number(),
-  timestamp: z.bigint(),
+  created_at: z.bigint(),
+  created_by: z.any(), // TODO: validate Principals
   document_id: z.bigint(),
-})
+});
 
 const revisionSearchSchema = z.object({
   current: z.number(),
   theirs: z.number(),
-})
+});
 
 export const Route = createFileRoute(
-  '/_authenticated/projects/$projectId/documents/$documentId/revisions/diff',
+  "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/diff",
 )({
   component: RevisionDiff,
   validateSearch: revisionSearchSchema,
@@ -30,55 +30,55 @@ export const Route = createFileRoute(
     const response = await pt_backend.diff_revisions(
       BigInt(current),
       BigInt(theirs),
-    )
-    const revisions = handleResult(response)
-    return { revisions }
+    );
+    const revisions = handleResult(response);
+    return { revisions };
   },
   errorComponent: ({ error }) => {
-    return <div>Error: {error.message}</div>
+    return <div>Error: {error.message}</div>;
   },
-})
+});
 
 function preDecode(data: number[] | Uint8Array) {
-  const uint8Array = Array.isArray(data) ? new Uint8Array(data) : data
-  return uint8Array
+  const uint8Array = Array.isArray(data) ? new Uint8Array(data) : data;
+  return uint8Array;
 }
 
 function RevisionDiff() {
-  const { revisions } = Route.useLoaderData()
+  const { revisions } = Route.useLoaderData();
 
   useEffect(() => {
     try {
-      const validatedRevisions = z.array(RevisionSchema).parse(revisions)
-      console.log('Validated revisions', validatedRevisions)
+      const validatedRevisions = z.array(RevisionSchema).parse(revisions);
+      console.log("Validated revisions", validatedRevisions);
     } catch (error) {
-      console.error('Revision validation error:', error)
+      console.error("Revision validation error:", error);
     }
-  }, [revisions])
+  }, [revisions]);
 
-  console.log('revisions', revisions)
+  console.log("revisions", revisions);
 
-  const [current, theirs] = revisions
+  const [current, theirs] = revisions;
 
   if (!current || !theirs) {
-    return <div> TODO: hoax</div>
+    return <div> TODO: hoax</div>;
   }
 
-  const decoder = new TextDecoder()
-  const contentCurrent = decoder.decode(preDecode(current.content))
-  const contentTheirs = decoder.decode(preDecode(theirs.content))
+  const decoder = new TextDecoder();
+  const contentCurrent = decoder.decode(preDecode(current.content));
+  const contentTheirs = decoder.decode(preDecode(theirs.content));
 
   return (
     <MDXEditor
       markdown={contentCurrent}
-      onError={(error) => console.error('MDXEditor error:', error)}
+      onError={(error) => console.error("MDXEditor error:", error)}
       plugins={[
         diffSourcePlugin({
           diffMarkdown: contentTheirs,
-          viewMode: 'diff',
+          viewMode: "diff",
           readOnlyDiff: true,
         }),
       ]}
     />
-  )
+  );
 }

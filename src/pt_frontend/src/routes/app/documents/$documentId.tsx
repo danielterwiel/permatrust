@@ -24,7 +24,7 @@ const revisionsSearchSchema = z.object({
 });
 
 export const Route = createFileRoute(
-  '/_authenticated/projects/$projectId/documents/$documentId/'
+  '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/'
 )({
   component: DocumentDetails,
   validateSearch: (search) => revisionsSearchSchema.parse(search),
@@ -70,7 +70,7 @@ export const Route = createFileRoute(
 });
 
 function DocumentDetails() {
-  const { projectId, documentId } = Route.useParams();
+  const { organisationId, projectId, documentId } = Route.useParams();
   const { revisions, paginationMetaData, active } = Route.useLoaderData();
   const [selected, setSelected] = useState<Entity[]>([]);
 
@@ -87,8 +87,8 @@ function DocumentDetails() {
       <CardContent>
         <div className="flex gap-4 pr-6 flex-row-reverse">
           <Link
-            to={'/projects/$projectId/documents/$documentId/revisions/create'}
-            params={{ projectId, documentId }}
+            to="/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/create"
+            params={{ organisationId, projectId, documentId }}
             variant="default"
           >
             <div className="flex gap-2">
@@ -97,8 +97,9 @@ function DocumentDetails() {
             </div>
           </Link>
           <Link
-            to={'/projects/$projectId/documents/$documentId/revisions/diff'}
+            to="/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/diff"
             params={{
+              organisationId,
               projectId,
               documentId,
             }}
@@ -124,11 +125,6 @@ function DocumentDetails() {
               cellPreprocess: (v) => v,
             },
             {
-              id: 'author',
-              cellPreprocess: (author) =>
-                Principal.fromUint8Array(author).toString(),
-            },
-            {
               id: 'content',
               cellPreprocess: (content) => {
                 return (
@@ -141,9 +137,15 @@ function DocumentDetails() {
               },
             },
             {
-              id: 'timestamp',
+              id: 'created_by',
+              headerName: 'Created by',
+              cellPreprocess: (createdBy) =>
+                Principal.fromUint8Array(createdBy).toString(),
+            },
+            {
+              id: 'created_at',
               headerName: 'Created at',
-              cellPreprocess: (timestamp) => formatDateTime(timestamp),
+              cellPreprocess: (createdAt) => formatDateTime(createdAt),
             },
           ]}
         />

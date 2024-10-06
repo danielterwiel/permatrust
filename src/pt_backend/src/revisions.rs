@@ -30,10 +30,8 @@ pub fn create_revision(
     document_id: DocumentId,
     content: serde_bytes::ByteBuf,
 ) -> RevisionIdResult {
-    let caller = ic_cdk::caller();
-
     match get_document_by_id(document_id) {
-        Some(document) if document.projects.contains(&project_id) => {
+        Some(document) if document.project == project_id => {
             let new_revision_id = get_next_revision_id();
             let version = document.current_version + 1;
 
@@ -43,8 +41,8 @@ pub fn create_revision(
                 document_id,
                 project_id,
                 content,
-                timestamp: ic_cdk::api::time(),
-                author: caller,
+                created_at: ic_cdk::api::time(),
+                created_by: ic_cdk::caller(),
             };
 
             insert_revision(new_revision_id, new_revision.clone());
@@ -73,7 +71,7 @@ pub fn get_revisions(
     document_id: DocumentId,
 ) -> Result<Vec<Revision>, AppError> {
     if let Some(document) = get_document_by_id(document_id) {
-        if document.projects.contains(&project_id) {
+        if document.project == project_id {
             let revisions = REVISIONS.with(|revisions| {
                 revisions
                     .borrow()

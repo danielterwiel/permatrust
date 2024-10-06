@@ -35,6 +35,7 @@ file_path="./src/shared/src/pt_backend_generated.rs"
 # match and replacement separated by a ":"
 targets_and_customs=(
     "pub enum AppError {:Debug"
+    "struct Organisation {:Clone, Debug"
     "struct Project {:Clone, Debug"
     "struct Document {:Clone, Debug"
     "struct Revision {:Clone, Debug"

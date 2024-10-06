@@ -1,17 +1,17 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router';
 
 export const Route = createFileRoute(
-  '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId'
+  '/_authenticated/organisations/$organisationId'
 )({
-  component: DocumentId,
+  component: OrganisationId,
   beforeLoad: () => ({
-    getTitle: () => 'Document',
+    getTitle: () => 'Organisation',
   }),
   errorComponent: ({ error }) => {
     return <div>Error: {error.message}</div>;
   },
 });
 
-function DocumentId() {
+function OrganisationId() {
   return <Outlet />;
 }

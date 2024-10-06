@@ -16,31 +16,26 @@ import {
   CardDescription,
 } from '@/components/ui/card';
 
-const projectsSearchSchema = z.object({
+const organisationsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
 });
 
-export const Route = createFileRoute(
-  '/_authenticated/organisations/$organisationId/projects/'
-)({
-  component: Projects,
-  validateSearch: (search) => projectsSearchSchema.parse(search),
+export const Route = createFileRoute('/_authenticated/organisations/')({
+  component: Organisations,
+  validateSearch: (search) => organisationsSearchSchema.parse(search),
   loaderDeps: ({ search: { page } }) => ({ page }),
-  loader: async ({ context, params, deps: { page } }) => {
+  loader: async ({ context, deps: { page } }) => {
     const pagination = {
       ...DEFAULT_PAGINATION,
       page_number: BigInt(page ?? 1),
     };
-    const response = await pt_backend.list_projects(
-      BigInt(params.organisationId),
-      pagination
-    );
+    const response = await pt_backend.list_organisations(pagination);
     const result = handleResult(response);
-    const [projects, paginationMetaData] = stringifyBigIntObject(result);
+    const [organisations, paginationMetaData] = stringifyBigIntObject(result);
     return {
       ...context,
 
-      projects,
+      organisations,
       paginationMetaData,
     };
   },
@@ -49,40 +44,35 @@ export const Route = createFileRoute(
   },
 });
 
-function Projects() {
-  const { projects, paginationMetaData } = Route.useLoaderData();
-  const { organisationId } = Route.useParams();
+function Organisations() {
+  const { organisations, paginationMetaData } = Route.useLoaderData();
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Projects</CardTitle>
+        <CardTitle>Organisations</CardTitle>
         <CardDescription>
-          View your projects or create a new project
+          View your organisations or create a new organisation
         </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex gap-4 pr-6 flex-row-reverse">
-          <Link
-            to="/organisations/$organisationId/projects/create"
-            params={{ organisationId }}
-            variant="default"
-          >
+          <Link to="/organisations/create" variant="default">
             <div className="flex gap-2">
-              Create Project
+              Create Organisation
               <Icon name="rectangle-outline" size="md" />
             </div>
           </Link>
         </div>
         <Table
-          tableData={projects}
+          tableData={organisations}
           showOpenEntityButton={true}
           routePath=""
           paginationMetaData={paginationMetaData}
           columnConfig={[
             {
               id: 'name',
-              headerName: 'Project Name',
+              headerName: 'Organisation Name',
               cellPreprocess: (v) => v,
             },
             {

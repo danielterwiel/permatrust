@@ -19,7 +19,7 @@ fn get_next_document_id(project_id: ProjectId) -> DocumentId {
         let documents = documents.borrow();
         documents
             .iter()
-            .filter(|(_, doc)| doc.projects.contains(&project_id))
+            .filter(|(_, doc)| doc.project == project_id)
             .map(|(id, _)| *id)
             .max()
             .map_or(0, |max_id| max_id + 1)
@@ -58,7 +58,9 @@ fn create_document(
         title,
         current_version: 0,
         revisions: Vec::new(),
-        projects: vec![project_id],
+        created_by: ic_cdk::caller(),
+        created_at: ic_cdk::api::time(),
+        project: project_id,
     };
 
     insert_document(document.clone());
@@ -85,7 +87,7 @@ fn get_documents_by_project(project_id: ProjectId) -> Vec<Document> {
         documents
             .borrow()
             .values()
-            .filter(|doc| doc.projects.contains(&project_id))
+            .filter(|doc| doc.project == project_id)
             .cloned()
             .collect()
     })

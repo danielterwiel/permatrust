@@ -2,9 +2,11 @@ import type {
   Project,
   Document,
   Revision,
-} from "@/declarations/pt_backend/pt_backend.did";
+  Organisation,
+} from '@/declarations/pt_backend/pt_backend.did';
 
-export type Auth = {
+export type Selected = {
+  organisations: Organisation;
   projects: Project;
   documents: Document;
   revision: Revision;
