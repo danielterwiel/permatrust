@@ -1,5 +1,6 @@
 @import "./styles/base";
 @import "./styles/loading";
+@import "./styles/mdx-editor";
 
 @tailwind base;
 @tailwind components;

@@ -31,6 +31,13 @@ import {
 } from '@mdxeditor/editor';
 import '@mdxeditor/editor/style.css';
 import { handleResult } from '@/utils/handleResult';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 
 export const Route = createFileRoute(
   '/_authenticated/projects/$projectId/documents/create'
@@ -83,58 +90,69 @@ export function CreateDocument() {
   }
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Title</FormLabel>
-              <FormControl>
-                <Input placeholder="Document" {...field} />
-              </FormControl>
-              <FormDescription>This is your document title.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="content"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Content</FormLabel>
-              <FormControl>
-                <MDXEditor
-                  markdown="# Hello world"
-                  contentEditableClassName="prose"
-                  plugins={[
-                    headingsPlugin(),
-                    diffSourcePlugin(),
-                    toolbarPlugin({
-                      toolbarContents: () => (
-                        <>
-                          <DiffSourceToggleWrapper>
-                            <UndoRedo />
-                            <BoldItalicUnderlineToggles />
-                            <BlockTypeSelect />
-                            <ListsToggle />
-                          </DiffSourceToggleWrapper>
-                        </>
-                      ),
-                    }),
-                  ]}
-                  {...field}
-                />
-              </FormControl>
-              <FormDescription>This is your document.</FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit">Create</Button>
-      </form>
-    </Form>
+    <Card>
+      <CardHeader>
+        <CardTitle>Create a new document</CardTitle>
+        <CardDescription>A new beginning</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Document" {...field} />
+                  </FormControl>
+                  <FormDescription>
+                    This is your document title.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="content"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Content</FormLabel>
+                  <FormControl>
+                    <MDXEditor
+                      className="mdx-editor-shadncn"
+                      markdown="# Hello world"
+                      contentEditableClassName="prose"
+                      plugins={[
+                        headingsPlugin(),
+                        diffSourcePlugin(),
+                        toolbarPlugin({
+                          toolbarContents: () => (
+                            <>
+                              <DiffSourceToggleWrapper>
+                                <UndoRedo />
+                                <BoldItalicUnderlineToggles />
+                                <BlockTypeSelect />
+                                <ListsToggle />
+                              </DiffSourceToggleWrapper>
+                            </>
+                          ),
+                        }),
+                      ]}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>This is your document.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit">Create</Button>
+          </form>
+        </Form>
+      </CardContent>
+    </Card>
   );
 }

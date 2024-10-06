@@ -11,8 +11,9 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/root'
+import { Route as publicAuthenticateImport } from './routes/public/authenticate'
 import { Route as layoutsAuthenticatedImport } from './routes/_layouts/_authenticated'
-import { Route as homeImport } from './routes/home'
+import { Route as publicHomeImport } from './routes/public/home'
 import { Route as appProjectsProjectsindexImport } from './routes/app/projects/projects.index'
 import { Route as appNnsNnsImport } from './routes/app/nns/nns'
 import { Route as appProjectsProjectIdindexImport } from './routes/app/projects/$projectId.index'
@@ -30,12 +31,17 @@ import { Route as appRevisionsRevisionIdImport } from './routes/app/revisions/$r
 
 // Create/Update Routes
 
+const publicAuthenticateRoute = publicAuthenticateImport.update({
+  path: '/authenticate',
+  getParentRoute: () => rootRoute,
+} as any)
+
 const layoutsAuthenticatedRoute = layoutsAuthenticatedImport.update({
   id: '/_authenticated',
   getParentRoute: () => rootRoute,
 } as any)
 
-const homeRoute = homeImport.update({
+const publicHomeRoute = publicHomeImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
 } as any)
@@ -123,7 +129,7 @@ declare module '@tanstack/react-router' {
       id: '/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof homeImport
+      preLoaderRoute: typeof publicHomeImport
       parentRoute: typeof rootRoute
     }
     '/_authenticated': {
@@ -131,6 +137,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: ''
       preLoaderRoute: typeof layoutsAuthenticatedImport
+      parentRoute: typeof rootRoute
+    }
+    '/authenticate': {
+      id: '/authenticate'
+      path: '/authenticate'
+      fullPath: '/authenticate'
+      preLoaderRoute: typeof publicAuthenticateImport
       parentRoute: typeof rootRoute
     }
     '/_authenticated/nns': {
@@ -337,8 +350,9 @@ const layoutsAuthenticatedRouteWithChildren =
   layoutsAuthenticatedRoute._addFileChildren(layoutsAuthenticatedRouteChildren)
 
 export interface FileRoutesByFullPath {
-  '/': typeof homeRoute
+  '/': typeof publicHomeRoute
   '': typeof layoutsAuthenticatedRouteWithChildren
+  '/authenticate': typeof publicAuthenticateRoute
   '/nns': typeof appNnsNnsRoute
   '/projects': typeof appProjectsProjectsindexRouteWithChildren
   '/projects/': typeof appProjectsProjectsRoute
@@ -356,8 +370,9 @@ export interface FileRoutesByFullPath {
 }
 
 export interface FileRoutesByTo {
-  '/': typeof homeRoute
+  '/': typeof publicHomeRoute
   '': typeof layoutsAuthenticatedRouteWithChildren
+  '/authenticate': typeof publicAuthenticateRoute
   '/nns': typeof appNnsNnsRoute
   '/projects': typeof appProjectsProjectsRoute
   '/projects/create': typeof appProjectsCreateRoute
@@ -373,8 +388,9 @@ export interface FileRoutesByTo {
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
-  '/': typeof homeRoute
+  '/': typeof publicHomeRoute
   '/_authenticated': typeof layoutsAuthenticatedRouteWithChildren
+  '/authenticate': typeof publicAuthenticateRoute
   '/_authenticated/nns': typeof appNnsNnsRoute
   '/_authenticated/projects': typeof appProjectsProjectsindexRouteWithChildren
   '/_authenticated/projects/': typeof appProjectsProjectsRoute
@@ -396,6 +412,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | ''
+    | '/authenticate'
     | '/nns'
     | '/projects'
     | '/projects/'
@@ -414,6 +431,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | ''
+    | '/authenticate'
     | '/nns'
     | '/projects'
     | '/projects/create'
@@ -429,6 +447,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/authenticate'
     | '/_authenticated/nns'
     | '/_authenticated/projects'
     | '/_authenticated/projects/'
@@ -447,13 +466,15 @@ export interface FileRouteTypes {
 }
 
 export interface RootRouteChildren {
-  homeRoute: typeof homeRoute
+  publicHomeRoute: typeof publicHomeRoute
   layoutsAuthenticatedRoute: typeof layoutsAuthenticatedRouteWithChildren
+  publicAuthenticateRoute: typeof publicAuthenticateRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  homeRoute: homeRoute,
+  publicHomeRoute: publicHomeRoute,
   layoutsAuthenticatedRoute: layoutsAuthenticatedRouteWithChildren,
+  publicAuthenticateRoute: publicAuthenticateRoute,
 }
 
 export const routeTree = rootRoute
@@ -469,11 +490,12 @@ export const routeTree = rootRoute
       "filePath": "root.tsx",
       "children": [
         "/",
-        "/_authenticated"
+        "/_authenticated",
+        "/authenticate"
       ]
     },
     "/": {
-      "filePath": "home.tsx"
+      "filePath": "public/home.tsx"
     },
     "/_authenticated": {
       "filePath": "_layouts/_authenticated.tsx",
@@ -481,6 +503,9 @@ export const routeTree = rootRoute
         "/_authenticated/nns",
         "/_authenticated/projects"
       ]
+    },
+    "/authenticate": {
+      "filePath": "public/authenticate.tsx"
     },
     "/_authenticated/nns": {
       "filePath": "app/nns/nns.tsx",

@@ -1,6 +1,7 @@
-import type { Identity } from "@dfinity/agent";
-import { AuthClient, LocalStorage } from "@dfinity/auth-client";
-export type Auth = {
+import type { Identity } from '@dfinity/agent';
+import { AuthClient, LocalStorage } from '@dfinity/auth-client';
+
+export type AuthContext = {
   loggedIn: boolean;
   authenticated: boolean;
   authClient: AuthClient | undefined;
@@ -10,7 +11,7 @@ export type Auth = {
   logout: () => void;
 };
 
-export const auth: Auth = {
+export const auth: AuthContext = {
   loggedIn: false,
   authenticated: false,
   authClient: undefined,
@@ -18,7 +19,7 @@ export const auth: Auth = {
   initAuthClient: async () => {
     const client = await AuthClient.create({
       storage: new LocalStorage(),
-      keyType: "Ed25519",
+      keyType: 'Ed25519',
     });
     const isAuthenticated = await client.isAuthenticated();
     auth.authClient = client;
@@ -29,7 +30,7 @@ export const auth: Auth = {
   },
   authenticate: async () => {
     if (!auth.authClient) {
-      throw new Error("AuthClient not initialized");
+      throw new Error('AuthClient not initialized');
     }
     const loginOptions = {
       identity: auth.identity,
@@ -38,7 +39,7 @@ export const auth: Auth = {
 
     const identityProvider = import.meta.env.DEV
       ? `http://${process.env.CANISTER_ID_INTERNET_IDENTITY}.localhost:4943`
-      : "https://identity.ic0.app";
+      : 'https://identity.ic0.app';
 
     return new Promise((resolve, reject) => {
       if (!auth.authClient) {

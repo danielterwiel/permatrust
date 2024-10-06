@@ -10,6 +10,14 @@ import { handleResult } from '@/utils/handleResult';
 import { DEFAULT_PAGINATION } from '@/consts/pagination';
 import type { Entity } from '@/consts/entities';
 import { z } from 'zod';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { formatDateTime } from '@/utils/date';
 
 const revisionsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
@@ -71,74 +79,75 @@ function DocumentDetails() {
   }
 
   return (
-    <>
-      <h2>{active.document.title}</h2>
-      <h3>Revisions</h3>
-      <div className="flex gap-4 pr-6 flex-row-reverse">
-        <Link
-          to={'/projects/$projectId/documents/$documentId/revisions/create'}
-          params={{ projectId, documentId }}
-          variant="default"
-        >
-          <div className="flex gap-2">
-            Create Revision
-            <Icon name="file-stack-outline" size="md" />
-          </div>
-        </Link>
-        <Link
-          to={'/projects/$projectId/documents/$documentId/revisions/diff'}
-          params={{
-            projectId,
-            documentId,
-          }}
-          search={{
-            theirs: selected[0]?.id ? Number(selected[0].id) : undefined,
-            current: selected[1]?.id ? Number(selected[1].id) : undefined,
-          }}
-          disabled={selected.length !== 2}
-          variant="outline"
-        >
-          Diff
-        </Link>
-      </div>
-      <Table
-        tableData={revisions}
-        showOpenEntityButton={true}
-        routePath="revisions"
-        onSelectionChange={handleCheckedChange}
-        paginationMetaData={paginationMetaData}
-        columnConfig={[
-          {
-            id: 'version',
-            cellPreprocess: (v) => v,
-          },
-          {
-            id: 'author',
-            cellPreprocess: (author) =>
-              Principal.fromUint8Array(author).toString(),
-          },
-          {
-            id: 'content',
-            cellPreprocess: (content) => {
-              return (
-                <div className="truncate max-w-md">
-                  {new TextDecoder().decode(
-                    new Uint8Array(content ? Object.values(content) : [])
-                  )}
-                </div>
-              );
+    <Card>
+      <CardHeader>
+        <CardTitle>{active.document.title}</CardTitle>
+        <CardDescription>Revisions</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex gap-4 pr-6 flex-row-reverse">
+          <Link
+            to={'/projects/$projectId/documents/$documentId/revisions/create'}
+            params={{ projectId, documentId }}
+            variant="default"
+          >
+            <div className="flex gap-2">
+              Create Revision
+              <Icon name="file-stack-outline" size="md" />
+            </div>
+          </Link>
+          <Link
+            to={'/projects/$projectId/documents/$documentId/revisions/diff'}
+            params={{
+              projectId,
+              documentId,
+            }}
+            search={{
+              theirs: selected[0]?.id ? Number(selected[0].id) : undefined,
+              current: selected[1]?.id ? Number(selected[1].id) : undefined,
+            }}
+            disabled={selected.length !== 2}
+            variant={selected.length !== 2 ? 'secondary' : 'outline'}
+          >
+            Compare
+          </Link>
+        </div>
+        <Table
+          tableData={revisions}
+          showOpenEntityButton={true}
+          routePath="revisions"
+          onSelectionChange={handleCheckedChange}
+          paginationMetaData={paginationMetaData}
+          columnConfig={[
+            {
+              id: 'version',
+              cellPreprocess: (v) => v,
             },
-          },
-          {
-            id: 'timestamp',
-            headerName: 'Created at',
-            cellPreprocess: (timestamp) => {
-              const date = new Date(Number(timestamp / 1000000));
-              return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+            {
+              id: 'author',
+              cellPreprocess: (author) =>
+                Principal.fromUint8Array(author).toString(),
             },
-          },
-        ]}
-      />
-    </>
+            {
+              id: 'content',
+              cellPreprocess: (content) => {
+                return (
+                  <div className="truncate max-w-md">
+                    {new TextDecoder().decode(
+                      new Uint8Array(content ? Object.values(content) : [])
+                    )}
+                  </div>
+                );
+              },
+            },
+            {
+              id: 'timestamp',
+              headerName: 'Created at',
+              cellPreprocess: (timestamp) => formatDateTime(timestamp),
+            },
+          ]}
+        />
+      </CardContent>
+    </Card>
   );
 }

@@ -19,17 +19,19 @@ export const Route = createFileRoute('/_authenticated')({
       });
     }
     return {
+      auth: context.auth,
       getTitle: () => 'Home',
     };
   },
 });
 
 function AuthLayout() {
+  const { auth } = Route.useRouteContext();
   return (
-    <div className="min-h-screen grid grid-rows-[auto_auto_1fr_auto] sm:grid-rows-[auto_1fr_auto] grid-cols-[128px_1fr] sm:grid-cols-[128_auto]">
-      <Header />
+    <div className="grid grid-rows-[auto_auto_1fr_auto] sm:grid-rows-[auto_1fr_auto] grid-cols-[128px_1fr] sm:grid-cols-[128_auto] min-h-dvh">
+      <Header auth={auth} />
       <Sidebar />
-      <main className="col-span-2 sm:col-span-1">
+      <main className="col-span-2 sm:col-span-1 px-4">
         <Breadcrumbs />
         <Outlet />
       </main>

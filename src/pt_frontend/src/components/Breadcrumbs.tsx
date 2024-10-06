@@ -34,7 +34,7 @@ export function Breadcrumbs() {
   const breadcrumbs = filterDuplicates(crumbs, 'title');
 
   return (
-    <BreadcrumbBase>
+    <BreadcrumbBase className="pb-2">
       <BreadcrumbList>
         {breadcrumbs.map((crumb, index) => (
           <BreadcrumbItem key={crumb?.path}>

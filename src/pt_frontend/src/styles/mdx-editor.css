@@ -1,0 +1,21 @@
+@layer base {
+  .shadcn-editor-content {
+    @apply flex min-h-[80px] w-full border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .shadcn-editor-toolbar {
+    @apply flex items-center justify-between p-1 bg-muted border border-input mb-1 !rounded-b-none;
+  }
+
+  .shadcn-editor-toolbar button {
+    @apply inline-flex items-center justify-center text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-background hover:bg-accent hover:text-accent-foreground h-9 px-3;
+  }
+
+  .shadcn-editor-wrapper {
+    @apply border border-input overflow-hidden rounded-b-md;
+  }
+
+  .shadcn-editor-wrapper .mdxeditor-toolbar {
+    @apply shadcn-editor-toolbar;
+  }
+}

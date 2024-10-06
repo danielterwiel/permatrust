@@ -8,6 +8,13 @@ import { handleResult } from '@/utils/handleResult';
 import { Icon } from '@/components/ui/Icon';
 import { DEFAULT_PAGINATION } from '@/consts/pagination';
 import { z } from 'zod';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  CardDescription,
+} from '@/components/ui/card';
 
 const projectsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
@@ -15,9 +22,6 @@ const projectsSearchSchema = z.object({
 
 export const Route = createFileRoute('/_authenticated/projects/')({
   component: Projects,
-  beforeLoad: () => ({
-    getTitle: () => 'Projects',
-  }),
   validateSearch: (search) => projectsSearchSchema.parse(search),
   loaderDeps: ({ search: { page } }) => ({ page }),
   loader: async ({ context, deps: { page } }) => {
@@ -44,33 +48,41 @@ function Projects() {
   const { projects, paginationMetaData } = Route.useLoaderData();
 
   return (
-    <>
-      <div className="flex gap-4 pr-6 flex-row-reverse">
-        <Link to="/projects/create" variant="default">
-          <div className="flex gap-2">
-            Create Project
-            <Icon name="rectangle-outline" size="md" />
-          </div>
-        </Link>
-      </div>
-      <Table
-        tableData={projects}
-        showOpenEntityButton={true}
-        routePath=""
-        paginationMetaData={paginationMetaData}
-        columnConfig={[
-          {
-            id: 'name',
-            headerName: 'Project Name',
-            cellPreprocess: (v) => v,
-          },
-          {
-            id: 'author',
-            cellPreprocess: (author) =>
-              Principal.fromUint8Array(author).toString(),
-          },
-        ]}
-      />
-    </>
+    <Card>
+      <CardHeader>
+        <CardTitle>Projects</CardTitle>
+        <CardDescription>
+          View your projects or create a new project
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex gap-4 pr-6 flex-row-reverse">
+          <Link to="/projects/create" variant="default">
+            <div className="flex gap-2">
+              Create Project
+              <Icon name="rectangle-outline" size="md" />
+            </div>
+          </Link>
+        </div>
+        <Table
+          tableData={projects}
+          showOpenEntityButton={true}
+          routePath=""
+          paginationMetaData={paginationMetaData}
+          columnConfig={[
+            {
+              id: 'name',
+              headerName: 'Project Name',
+              cellPreprocess: (v) => v,
+            },
+            {
+              id: 'author',
+              cellPreprocess: (author) =>
+                Principal.fromUint8Array(author).toString(),
+            },
+          ]}
+        />
+      </CardContent>
+    </Card>
   );
 }

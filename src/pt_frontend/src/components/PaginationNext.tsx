@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Link } from '@tanstack/react-router';
+import { Link } from '@/components/Link';
 import { ChevronRightIcon } from '@radix-ui/react-icons';
 import { cn } from '@/utils/cn';
 import { buttonVariants } from '@/components/ui/button';

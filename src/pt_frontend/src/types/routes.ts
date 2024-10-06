@@ -1,4 +1,4 @@
-import type { Auth } from '@/context/auth';
+import type { AuthContext } from '@/context/auth';
 import type {
   Project,
   Document,
@@ -11,11 +11,7 @@ import type { ParseRoute } from '@tanstack/react-router';
 export type ValidRoute = ParseRoute<typeof routeTree>['parentRoute'];
 
 export type RouteContext = {
-  auth: Auth;
-
-  projects?: Project[];
-  documents?: Document[];
-  revisions?: Revision[];
+  auth: AuthContext;
 
   active: {
     project?: Project;
