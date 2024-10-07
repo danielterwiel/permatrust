@@ -29,12 +29,11 @@ export const Route = createFileRoute(
   }),
   loaderDeps: ({ search: { page } }) => ({ page }),
   loader: async ({ params: { organisationId }, deps: { page }, context }) => {
-    console.log('loader');
     const pagination = {
       ...DEFAULT_PAGINATION,
       page_number: BigInt(page ?? 1),
     };
-    const projects_response = await pt_backend.list_projects(
+    const projects_response = await pt_backend.list_projects_by_organisation_id(
       BigInt(organisationId),
       pagination
     );

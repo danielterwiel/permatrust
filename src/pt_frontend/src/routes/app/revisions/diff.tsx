@@ -1,10 +1,10 @@
-import { useEffect } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { z } from "zod";
+import { useEffect } from 'react';
+import { createFileRoute } from '@tanstack/react-router';
+import { z } from 'zod';
 
-import { MDXEditor, diffSourcePlugin } from "@mdxeditor/editor";
-import { pt_backend } from "@/declarations/pt_backend";
-import { handleResult } from "@/utils/handleResult";
+import { MDXEditor, diffSourcePlugin } from '@mdxeditor/editor';
+import { pt_backend } from '@/declarations/pt_backend';
+import { handleResult } from '@/utils/handleResult';
 
 const RevisionSchema = z.object({
   id: z.bigint(),
@@ -21,7 +21,7 @@ const revisionSearchSchema = z.object({
 });
 
 export const Route = createFileRoute(
-  "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/diff",
+  '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/diff'
 )({
   component: RevisionDiff,
   validateSearch: revisionSearchSchema,
@@ -29,7 +29,7 @@ export const Route = createFileRoute(
   loader: async ({ deps: { current, theirs } }) => {
     const response = await pt_backend.diff_revisions(
       BigInt(current),
-      BigInt(theirs),
+      BigInt(theirs)
     );
     const revisions = handleResult(response);
     return { revisions };
@@ -50,13 +50,11 @@ function RevisionDiff() {
   useEffect(() => {
     try {
       const validatedRevisions = z.array(RevisionSchema).parse(revisions);
-      console.log("Validated revisions", validatedRevisions);
+      console.log('Validated revisions', validatedRevisions);
     } catch (error) {
-      console.error("Revision validation error:", error);
+      console.error('Revision validation error:', error);
     }
   }, [revisions]);
-
-  console.log("revisions", revisions);
 
   const [current, theirs] = revisions;
 
@@ -71,11 +69,11 @@ function RevisionDiff() {
   return (
     <MDXEditor
       markdown={contentCurrent}
-      onError={(error) => console.error("MDXEditor error:", error)}
+      onError={(error) => console.error('MDXEditor error:', error)}
       plugins={[
         diffSourcePlugin({
           diffMarkdown: contentTheirs,
-          viewMode: "diff",
+          viewMode: 'diff',
           readOnlyDiff: true,
         }),
       ]}

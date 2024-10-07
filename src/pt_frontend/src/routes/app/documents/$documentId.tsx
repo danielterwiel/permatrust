@@ -1,30 +1,30 @@
-import { useState } from 'react';
-import { createFileRoute } from '@tanstack/react-router';
-import { pt_backend } from '@/declarations/pt_backend';
-import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
-import { Link } from '@/components/Link';
-import { Table } from '@/components/Table';
-import { Icon } from '@/components/ui/Icon';
-import { Principal } from '@dfinity/principal';
-import { handleResult } from '@/utils/handleResult';
-import { DEFAULT_PAGINATION } from '@/consts/pagination';
-import type { Entity } from '@/consts/entities';
-import { z } from 'zod';
+import { useState } from 'react'
+import { createFileRoute } from '@tanstack/react-router'
+import { pt_backend } from '@/declarations/pt_backend'
+import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject'
+import { Link } from '@/components/Link'
+import { Table } from '@/components/Table'
+import { Icon } from '@/components/ui/Icon'
+import { Principal } from '@dfinity/principal'
+import { handleResult } from '@/utils/handleResult'
+import { DEFAULT_PAGINATION } from '@/consts/pagination'
+import type { Entity } from '@/consts/entities'
+import { z } from 'zod'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { formatDateTime } from '@/utils/date';
+} from '@/components/ui/card'
+import { formatDateTime } from '@/utils/date'
 
 const revisionsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
-});
+})
 
 export const Route = createFileRoute(
-  '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/'
+  '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/',
 )({
   component: DocumentDetails,
   validateSearch: (search) => revisionsSearchSchema.parse(search),
@@ -37,18 +37,17 @@ export const Route = createFileRoute(
     const pagination = {
       ...DEFAULT_PAGINATION,
       page_number: BigInt(page ?? 1),
-    };
-    const revisions_response = await pt_backend.list_revisions(
-      BigInt(projectId),
+    }
+    const revisions_response = await pt_backend.list_revisions_by_document_id(
       BigInt(documentId),
-      pagination
-    );
-    const document_response = await pt_backend.get_document(BigInt(documentId));
-    const revisions_result = handleResult(revisions_response);
-    const document_result = handleResult(document_response);
+      pagination,
+    )
+    const document_response = await pt_backend.get_document(BigInt(documentId))
+    const revisions_result = handleResult(revisions_response)
+    const document_result = handleResult(document_response)
     const [revisions, paginationMetaData] =
-      stringifyBigIntObject(revisions_result);
-    const document = stringifyBigIntObject(document_result);
+      stringifyBigIntObject(revisions_result)
+    const document = stringifyBigIntObject(document_result)
 
     return {
       ...context,
@@ -62,20 +61,20 @@ export const Route = createFileRoute(
       },
 
       projectId,
-    };
+    }
   },
   errorComponent: ({ error }) => {
-    return <div>Error: {error.message}</div>;
+    return <div>Error: {error.message}</div>
   },
-});
+})
 
 function DocumentDetails() {
-  const { organisationId, projectId, documentId } = Route.useParams();
-  const { revisions, paginationMetaData, active } = Route.useLoaderData();
-  const [selected, setSelected] = useState<Entity[]>([]);
+  const { organisationId, projectId, documentId } = Route.useParams()
+  const { revisions, paginationMetaData, active } = Route.useLoaderData()
+  const [selected, setSelected] = useState<Entity[]>([])
 
   function handleCheckedChange(revisions: Entity[]) {
-    setSelected(revisions);
+    setSelected(revisions)
   }
 
   return (
@@ -130,10 +129,10 @@ function DocumentDetails() {
                 return (
                   <div className="truncate max-w-md">
                     {new TextDecoder().decode(
-                      new Uint8Array(content ? Object.values(content) : [])
+                      new Uint8Array(content ? Object.values(content) : []),
                     )}
                   </div>
-                );
+                )
               },
             },
             {
@@ -151,5 +150,5 @@ function DocumentDetails() {
         />
       </CardContent>
     </Card>
-  );
+  )
 }

@@ -12,6 +12,7 @@ export const routes = rootRoute('root.tsx', [
       route('/create', 'app/users/create.tsx'),
       route('/$userId', 'app/users/$userId.tsx'),
     ]),
+
     route('/organisations', 'app/organisations/organisations.index.tsx', [
       index('app/organisations/organisations.tsx'),
       route('/create', 'app/organisations/create.tsx'),
@@ -23,6 +24,7 @@ export const routes = rootRoute('root.tsx', [
           route('/$projectId', 'app/projects/$projectId.index.tsx', [
             index('app/projects/$projectId.tsx'),
             route('/documents', 'app/documents/documents.index.tsx', [
+              index('app/documents/documents.tsx'),
               route('/create', 'app/documents/create.tsx'),
               route('/$documentId', 'app/documents/$documentId.index.tsx', [
                 index('app/documents/$documentId.tsx'),
@@ -37,5 +39,8 @@ export const routes = rootRoute('root.tsx', [
         ]),
       ]),
     ]),
+
+    route('/projects', 'app/projects/projects.all.tsx'),
+    route('/documents', 'app/documents/documents.all.tsx'),
   ]),
 ]);

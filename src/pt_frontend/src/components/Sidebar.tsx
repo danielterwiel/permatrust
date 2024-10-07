@@ -9,10 +9,10 @@ export const Sidebar = () => {
             [
               ['/nns', 'NNS'],
               ['/organisations', 'Organisations'],
+              ['/projects', 'Projects'],
+              ['/documents', 'Documents'],
               // TODO:
               // ['/users', 'Users'],
-              // ['/projects', 'Projects'],
-              // ['/documents', 'Documents'],
             ] as const
           ).map(([to, label]) => {
             return (

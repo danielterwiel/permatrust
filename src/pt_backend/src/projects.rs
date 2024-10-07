@@ -17,6 +17,10 @@ pub fn get_next_project_id() -> u64 {
     PROJECTS.with(|projects| projects.borrow().len() as u64)
 }
 
+fn get_projects() -> Vec<Project> {
+    PROJECTS.with(|projects| projects.borrow().values().cloned().collect())
+}
+
 fn get_projects_by_organisation_id(organisation_id: OrganisationId) -> Vec<Project> {
     PROJECTS.with(|projects| {
         projects
@@ -58,7 +62,18 @@ fn create_project(organisation_id: OrganisationId, name: String) -> ProjectIdRes
 }
 
 #[query]
-fn list_projects(
+fn list_projects(pagination: PaginationInput) -> PaginatedProjectsResult {
+    let projects = get_projects();
+    match paginate(&projects, pagination.page_size, pagination.page_number) {
+        Ok((paginated_projects, pagination_metadata)) => {
+            PaginatedProjectsResult::Ok(paginated_projects, pagination_metadata)
+        }
+        Err(e) => PaginatedProjectsResult::Err(e),
+    }
+}
+
+#[query]
+fn list_projects_by_organisation_id(
     organisation_id: OrganisationId,
     pagination: PaginationInput,
 ) -> PaginatedProjectsResult {

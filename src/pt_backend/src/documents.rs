@@ -18,6 +18,10 @@ pub fn get_next_document_id() -> u64 {
     DOCUMENTS.with(|documents| documents.borrow().len() as u64)
 }
 
+fn get_documents() -> Vec<Document> {
+    DOCUMENTS.with(|documents| documents.borrow().values().cloned().collect())
+}
+
 fn get_documents_by_project(project_id: ProjectId) -> Vec<Document> {
     DOCUMENTS.with(|documents| {
         documents
@@ -86,7 +90,21 @@ fn create_document(
 }
 
 #[query]
-fn list_documents(project_id: ProjectId, pagination: PaginationInput) -> PaginatedDocumentsResult {
+fn list_documents(pagination: PaginationInput) -> PaginatedDocumentsResult {
+    let documents = get_documents();
+    match paginate(&documents, pagination.page_size, pagination.page_number) {
+        Ok((paginated_documents, pagination_metadata)) => {
+            PaginatedDocumentsResult::Ok(paginated_documents, pagination_metadata)
+        }
+        Err(e) => PaginatedDocumentsResult::Err(e),
+    }
+}
+
+#[query]
+fn list_documents_by_project_id(
+    project_id: ProjectId,
+    pagination: PaginationInput,
+) -> PaginatedDocumentsResult {
     let documents = get_documents_by_project(project_id);
 
     match paginate(&documents, pagination.page_size, pagination.page_number) {

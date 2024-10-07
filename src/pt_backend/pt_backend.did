@@ -160,7 +160,7 @@ type PaginatedRevisionsResult = variant {
 
 service : {
     create_user : (text, text) -> (UserIdResult);
-    list_user : (PaginationInput) -> (PaginatedUsersResult) query;
+    list_users : (PaginationInput) -> (PaginatedUsersResult) query;
     get_user : () -> (UserResult) query;
 
     create_organisation : (text) -> (OrganisationIdResult);
@@ -168,15 +168,18 @@ service : {
     get_organisation : (OrganisationId) -> (OrganisationResult) query;
 
     create_project : (OrganisationId, text) -> (ProjectIdResult);
-    list_projects : (OrganisationId, PaginationInput) -> (PaginatedProjectsResult) query;
+    list_projects : (PaginationInput) -> (PaginatedProjectsResult) query;
+    list_projects_by_organisation_id : (OrganisationId, PaginationInput) -> (PaginatedProjectsResult) query;
     get_project : (ProjectId) -> (ProjectResult) query;
 
     create_document : (ProjectId, text, vec nat8) -> (DocumentIdResult);
-    list_documents : (ProjectId, PaginationInput) -> (PaginatedDocumentsResult) query;
+    list_documents : (PaginationInput) -> (PaginatedDocumentsResult) query;
+    list_documents_by_project_id : (ProjectId, PaginationInput) -> (PaginatedDocumentsResult) query;
     get_document : (DocumentId) -> (DocumentResult) query;
 
     create_revision : (ProjectId, DocumentId, vec nat8) -> (RevisionIdResult);
-    list_revisions : (ProjectId, DocumentId, PaginationInput) -> (PaginatedRevisionsResult) query;
+    list_revisions: (PaginationInput) -> (PaginatedRevisionsResult) query;
+    list_revisions_by_document_id : (DocumentId, PaginationInput) -> (PaginatedRevisionsResult) query;
     diff_revisions : (RevisionId, RevisionId) -> (RevisionsResult) query;
     get_revision : (RevisionId) -> (RevisionResult) query;
 

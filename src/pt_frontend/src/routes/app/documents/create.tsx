@@ -1,10 +1,10 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { pt_backend } from '@/declarations/pt_backend';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { pt_backend } from '@/declarations/pt_backend'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import {
   Form,
   FormControl,
@@ -13,7 +13,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
+} from '@/components/ui/form'
 import {
   MDXEditor,
   UndoRedo,
@@ -24,28 +24,28 @@ import {
   diffSourcePlugin,
   headingsPlugin,
   toolbarPlugin,
-} from '@mdxeditor/editor';
-import '@mdxeditor/editor/style.css';
-import { handleResult } from '@/utils/handleResult';
+} from '@mdxeditor/editor'
+import '@mdxeditor/editor/style.css'
+import { handleResult } from '@/utils/handleResult'
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
+} from '@/components/ui/card'
 
 export const Route = createFileRoute(
-  '/_authenticated/organisations/$organisationId/projects/$projectId/documents/create'
+  '/_authenticated/organisations/$organisationId/projects/$projectId/documents/create',
 )({
   beforeLoad: () => ({
     getTitle: () => 'Create document',
   }),
   component: CreateDocument,
   errorComponent: ({ error }) => {
-    return <div>Error: {error.message}</div>;
+    return <div>Error: {error.message}</div>
   },
-});
+})
 
 const formSchema = z.object({
   title: z.string().min(2, {
@@ -55,11 +55,11 @@ const formSchema = z.object({
     message: 'Content must be at least 1 character.',
   }),
   projects: z.array(z.bigint()),
-});
+})
 
 export function CreateDocument() {
-  const navigate = useNavigate();
-  const params = Route.useParams();
+  const navigate = useNavigate()
+  const params = Route.useParams()
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -68,20 +68,20 @@ export function CreateDocument() {
       content: '',
       projects: [BigInt(params.projectId)],
     },
-  });
+  })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const encoder = new TextEncoder();
-    const content = encoder.encode(values.content);
+    const encoder = new TextEncoder()
+    const content = encoder.encode(values.content)
     const response = await pt_backend.create_document(
       BigInt(params.projectId),
       values.title,
-      content
-    );
-    const result = handleResult(response);
+      content,
+    )
+    const result = handleResult(response)
     navigate({
       to: `/organisations/${params.organisationId}/projects/${params.projectId}/documents/${result}/`,
-    });
+    })
   }
 
   return (
@@ -149,5 +149,5 @@ export function CreateDocument() {
         </Form>
       </CardContent>
     </Card>
-  );
+  )
 }

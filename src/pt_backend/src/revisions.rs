@@ -66,40 +66,32 @@ pub fn get_revision(revision_id: RevisionId) -> RevisionResult {
     })
 }
 
-pub fn get_revisions(
-    project_id: ProjectId,
-    document_id: DocumentId,
-) -> Result<Vec<Revision>, AppError> {
+pub fn get_revisions_by_document_id(document_id: DocumentId) -> Result<Vec<Revision>, AppError> {
     if let Some(document) = get_document_by_id(document_id) {
-        if document.project == project_id {
-            let revisions = REVISIONS.with(|revisions| {
-                revisions
-                    .borrow()
-                    .values()
-                    .filter(|rev| rev.project_id == project_id && rev.document_id == document_id)
-                    .cloned()
-                    .collect()
-            });
-            Ok(revisions)
-        } else {
-            Err(AppError::EntityNotFound(
-                "Document does not belong to the specified project".to_string(),
-            ))
-        }
+        let revisions = REVISIONS.with(|revisions| {
+            revisions
+                .borrow()
+                .values()
+                .filter(|rev| rev.document_id == document.id)
+                .cloned()
+                .collect()
+        });
+        Ok(revisions)
     } else {
-        // TODO: asuming REVISIONS.length == 0. Probably needs more error handling
-        Ok(vec![])
+        Err(AppError::EntityNotFound(
+            "Document does not belong to the specified project".to_string(),
+        ))
     }
 }
 
+// TODO: filter on caller();
 #[query]
-fn list_revisions(
-    project_id: ProjectId,
+fn list_revisions_by_document_id(
     document_id: DocumentId,
     pagination: PaginationInput,
 ) -> PaginatedRevisionsResult {
     let revisions =
-        get_revisions(project_id, document_id).expect("Something went wrong getting revision");
+        get_revisions_by_document_id(document_id).expect("Something went wrong getting revision");
 
     match paginate(&revisions, pagination.page_size, pagination.page_number) {
         Ok((paginated_revisions, pagination_metadata)) => {

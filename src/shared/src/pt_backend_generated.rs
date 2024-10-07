@@ -169,20 +169,29 @@ impl Service {
   pub async fn list_all_documents(&self) -> Result<(DocumentsResult,)> {
     ic_cdk::call(self.0, "list_all_documents", ()).await
   }
-  pub async fn list_documents(&self, arg0: ProjectId, arg1: PaginationInput) -> Result<(PaginatedDocumentsResult,)> {
-    ic_cdk::call(self.0, "list_documents", (arg0,arg1,)).await
+  pub async fn list_documents(&self, arg0: PaginationInput) -> Result<(PaginatedDocumentsResult,)> {
+    ic_cdk::call(self.0, "list_documents", (arg0,)).await
+  }
+  pub async fn list_documents_by_project_id(&self, arg0: ProjectId, arg1: PaginationInput) -> Result<(PaginatedDocumentsResult,)> {
+    ic_cdk::call(self.0, "list_documents_by_project_id", (arg0,arg1,)).await
   }
   pub async fn list_organisations(&self, arg0: PaginationInput) -> Result<(PaginatedOrganisationsResult,)> {
     ic_cdk::call(self.0, "list_organisations", (arg0,)).await
   }
-  pub async fn list_projects(&self, arg0: OrganisationId, arg1: PaginationInput) -> Result<(PaginatedProjectsResult,)> {
-    ic_cdk::call(self.0, "list_projects", (arg0,arg1,)).await
+  pub async fn list_projects(&self, arg0: PaginationInput) -> Result<(PaginatedProjectsResult,)> {
+    ic_cdk::call(self.0, "list_projects", (arg0,)).await
   }
-  pub async fn list_revisions(&self, arg0: ProjectId, arg1: DocumentId, arg2: PaginationInput) -> Result<(PaginatedRevisionsResult,)> {
-    ic_cdk::call(self.0, "list_revisions", (arg0,arg1,arg2,)).await
+  pub async fn list_projects_by_organisation_id(&self, arg0: OrganisationId, arg1: PaginationInput) -> Result<(PaginatedProjectsResult,)> {
+    ic_cdk::call(self.0, "list_projects_by_organisation_id", (arg0,arg1,)).await
   }
-  pub async fn list_user(&self, arg0: PaginationInput) -> Result<(PaginatedUsersResult,)> {
-    ic_cdk::call(self.0, "list_user", (arg0,)).await
+  pub async fn list_revisions(&self, arg0: PaginationInput) -> Result<(PaginatedRevisionsResult,)> {
+    ic_cdk::call(self.0, "list_revisions", (arg0,)).await
+  }
+  pub async fn list_revisions_by_document_id(&self, arg0: DocumentId, arg1: PaginationInput) -> Result<(PaginatedRevisionsResult,)> {
+    ic_cdk::call(self.0, "list_revisions_by_document_id", (arg0,arg1,)).await
+  }
+  pub async fn list_users(&self, arg0: PaginationInput) -> Result<(PaginatedUsersResult,)> {
+    ic_cdk::call(self.0, "list_users", (arg0,)).await
   }
 }
 

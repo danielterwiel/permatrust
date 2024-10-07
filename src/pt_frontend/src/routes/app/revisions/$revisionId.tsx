@@ -1,9 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { pt_backend } from "@/declarations/pt_backend";
-import { stringifyBigIntObject } from "@/utils/stringifyBigIntObject";
-import { MDXEditor, headingsPlugin } from "@mdxeditor/editor";
-import { handleResult } from "@/utils/handleResult";
-import { formatDateTime } from "@/utils/date";
+import { createFileRoute } from '@tanstack/react-router'
+import { pt_backend } from '@/declarations/pt_backend'
+import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject'
+import { MDXEditor, headingsPlugin } from '@mdxeditor/editor'
+import { handleResult } from '@/utils/handleResult'
+import { formatDateTime } from '@/utils/date'
 
 import {
   Card,
@@ -11,32 +11,32 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from '@/components/ui/card'
 
 export const Route = createFileRoute(
-  "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/$revisionId",
+  '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/$revisionId',
 )({
   component: RevisionDetails,
   beforeLoad: () => ({
-    getTitle: () => "Revision",
+    getTitle: () => 'Revision',
   }),
   loader: async ({ params: { revisionId }, context }) => {
-    const response = await pt_backend.get_revision(BigInt(revisionId));
-    const result = handleResult(response);
-    const revision = stringifyBigIntObject(result);
+    const response = await pt_backend.get_revision(BigInt(revisionId))
+    const result = handleResult(response)
+    const revision = stringifyBigIntObject(result)
     const active = {
       ...context.active,
       revision,
-    };
-    return { revision, active };
+    }
+    return { revision, active }
   },
   errorComponent: ({ error }) => {
-    return <div>Error: {error.message}</div>;
+    return <div>Error: {error.message}</div>
   },
-});
+})
 
 function RevisionDetails() {
-  const { revision, active } = Route.useLoaderData();
+  const { revision, active } = Route.useLoaderData()
 
   return (
     <Card>
@@ -56,9 +56,9 @@ function RevisionDetails() {
               revision?.content ? Object.values(revision?.content) : [],
             ),
           )}
-          onError={(error) => console.error("MDXEditor error:", error)}
+          onError={(error) => console.error('MDXEditor error:', error)}
         />
       </CardContent>
     </Card>
-  );
+  )
 }

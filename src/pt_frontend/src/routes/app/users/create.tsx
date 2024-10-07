@@ -59,7 +59,6 @@ export function CreateProject() {
       values.last_name
     );
     const result = handleResult(response);
-    console.log('handle backend validation', result);
     navigate({ to: `/organisations` });
   }
 

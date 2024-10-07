@@ -16,7 +16,9 @@ import { Route as layoutsAuthenticatedImport } from './routes/_layouts/_authenti
 import { Route as publicHomeImport } from './routes/public/home'
 import { Route as appUsersUsersindexImport } from './routes/app/users/users.index'
 import { Route as appOrganisationsOrganisationsindexImport } from './routes/app/organisations/organisations.index'
+import { Route as appProjectsProjectsallImport } from './routes/app/projects/projects.all'
 import { Route as appNnsNnsImport } from './routes/app/nns/nns'
+import { Route as appDocumentsDocumentsallImport } from './routes/app/documents/documents.all'
 import { Route as appOrganisationsOrganisationIdindexImport } from './routes/app/organisations/$organisationId.index'
 import { Route as appUsersCreateImport } from './routes/app/users/create'
 import { Route as appUsersUserIdImport } from './routes/app/users/$userId'
@@ -32,6 +34,7 @@ import { Route as appDocumentsDocumentsindexImport } from './routes/app/document
 import { Route as appProjectsProjectIdImport } from './routes/app/projects/$projectId'
 import { Route as appDocumentsDocumentIdindexImport } from './routes/app/documents/$documentId.index'
 import { Route as appDocumentsCreateImport } from './routes/app/documents/create'
+import { Route as appDocumentsDocumentsImport } from './routes/app/documents/documents'
 import { Route as appRevisionsRevisionsindexImport } from './routes/app/revisions/revisions.index'
 import { Route as appDocumentsDocumentIdImport } from './routes/app/documents/$documentId'
 import { Route as appRevisionsDiffImport } from './routes/app/revisions/diff'
@@ -66,8 +69,18 @@ const appOrganisationsOrganisationsindexRoute =
     getParentRoute: () => layoutsAuthenticatedRoute,
   } as any)
 
+const appProjectsProjectsallRoute = appProjectsProjectsallImport.update({
+  path: '/projects',
+  getParentRoute: () => layoutsAuthenticatedRoute,
+} as any)
+
 const appNnsNnsRoute = appNnsNnsImport.update({
   path: '/nns',
+  getParentRoute: () => layoutsAuthenticatedRoute,
+} as any)
+
+const appDocumentsDocumentsallRoute = appDocumentsDocumentsallImport.update({
+  path: '/documents',
   getParentRoute: () => layoutsAuthenticatedRoute,
 } as any)
 
@@ -152,6 +165,11 @@ const appDocumentsCreateRoute = appDocumentsCreateImport.update({
   getParentRoute: () => appDocumentsDocumentsindexRoute,
 } as any)
 
+const appDocumentsDocumentsRoute = appDocumentsDocumentsImport.update({
+  path: '/',
+  getParentRoute: () => appDocumentsDocumentsindexRoute,
+} as any)
+
 const appRevisionsRevisionsindexRoute = appRevisionsRevisionsindexImport.update(
   {
     path: '/revisions',
@@ -204,11 +222,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof publicAuthenticateImport
       parentRoute: typeof rootRoute
     }
+    '/_authenticated/documents': {
+      id: '/_authenticated/documents'
+      path: '/documents'
+      fullPath: '/documents'
+      preLoaderRoute: typeof appDocumentsDocumentsallImport
+      parentRoute: typeof layoutsAuthenticatedImport
+    }
     '/_authenticated/nns': {
       id: '/_authenticated/nns'
       path: '/nns'
       fullPath: '/nns'
       preLoaderRoute: typeof appNnsNnsImport
+      parentRoute: typeof layoutsAuthenticatedImport
+    }
+    '/_authenticated/projects': {
+      id: '/_authenticated/projects'
+      path: '/projects'
+      fullPath: '/projects'
+      preLoaderRoute: typeof appProjectsProjectsallImport
       parentRoute: typeof layoutsAuthenticatedImport
     }
     '/_authenticated/organisations': {
@@ -316,6 +348,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appDocumentsDocumentsindexImport
       parentRoute: typeof appProjectsProjectIdindexImport
     }
+    '/_authenticated/organisations/$organisationId/projects/$projectId/documents/': {
+      id: '/_authenticated/organisations/$organisationId/projects/$projectId/documents/'
+      path: '/'
+      fullPath: '/organisations/$organisationId/projects/$projectId/documents/'
+      preLoaderRoute: typeof appDocumentsDocumentsImport
+      parentRoute: typeof appDocumentsDocumentsindexImport
+    }
     '/_authenticated/organisations/$organisationId/projects/$projectId/documents/create': {
       id: '/_authenticated/organisations/$organisationId/projects/$projectId/documents/create'
       path: '/create'
@@ -406,12 +445,14 @@ const appDocumentsDocumentIdindexRouteWithChildren =
   )
 
 interface appDocumentsDocumentsindexRouteChildren {
+  appDocumentsDocumentsRoute: typeof appDocumentsDocumentsRoute
   appDocumentsCreateRoute: typeof appDocumentsCreateRoute
   appDocumentsDocumentIdindexRoute: typeof appDocumentsDocumentIdindexRouteWithChildren
 }
 
 const appDocumentsDocumentsindexRouteChildren: appDocumentsDocumentsindexRouteChildren =
   {
+    appDocumentsDocumentsRoute: appDocumentsDocumentsRoute,
     appDocumentsCreateRoute: appDocumentsCreateRoute,
     appDocumentsDocumentIdindexRoute:
       appDocumentsDocumentIdindexRouteWithChildren,
@@ -508,13 +549,17 @@ const appUsersUsersindexRouteWithChildren =
   appUsersUsersindexRoute._addFileChildren(appUsersUsersindexRouteChildren)
 
 interface layoutsAuthenticatedRouteChildren {
+  appDocumentsDocumentsallRoute: typeof appDocumentsDocumentsallRoute
   appNnsNnsRoute: typeof appNnsNnsRoute
+  appProjectsProjectsallRoute: typeof appProjectsProjectsallRoute
   appOrganisationsOrganisationsindexRoute: typeof appOrganisationsOrganisationsindexRouteWithChildren
   appUsersUsersindexRoute: typeof appUsersUsersindexRouteWithChildren
 }
 
 const layoutsAuthenticatedRouteChildren: layoutsAuthenticatedRouteChildren = {
+  appDocumentsDocumentsallRoute: appDocumentsDocumentsallRoute,
   appNnsNnsRoute: appNnsNnsRoute,
+  appProjectsProjectsallRoute: appProjectsProjectsallRoute,
   appOrganisationsOrganisationsindexRoute:
     appOrganisationsOrganisationsindexRouteWithChildren,
   appUsersUsersindexRoute: appUsersUsersindexRouteWithChildren,
@@ -527,7 +572,9 @@ export interface FileRoutesByFullPath {
   '/': typeof publicHomeRoute
   '': typeof layoutsAuthenticatedRouteWithChildren
   '/authenticate': typeof publicAuthenticateRoute
+  '/documents': typeof appDocumentsDocumentsallRoute
   '/nns': typeof appNnsNnsRoute
+  '/projects': typeof appProjectsProjectsallRoute
   '/organisations': typeof appOrganisationsOrganisationsindexRouteWithChildren
   '/users': typeof appUsersUsersindexRouteWithChildren
   '/organisations/': typeof appOrganisationsOrganisationsRoute
@@ -543,6 +590,7 @@ export interface FileRoutesByFullPath {
   '/organisations/$organisationId/projects/$projectId': typeof appProjectsProjectIdindexRouteWithChildren
   '/organisations/$organisationId/projects/$projectId/': typeof appProjectsProjectIdRoute
   '/organisations/$organisationId/projects/$projectId/documents': typeof appDocumentsDocumentsindexRouteWithChildren
+  '/organisations/$organisationId/projects/$projectId/documents/': typeof appDocumentsDocumentsRoute
   '/organisations/$organisationId/projects/$projectId/documents/create': typeof appDocumentsCreateRoute
   '/organisations/$organisationId/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentIdindexRouteWithChildren
   '/organisations/$organisationId/projects/$projectId/documents/$documentId/': typeof appDocumentsDocumentIdRoute
@@ -556,7 +604,9 @@ export interface FileRoutesByTo {
   '/': typeof publicHomeRoute
   '': typeof layoutsAuthenticatedRouteWithChildren
   '/authenticate': typeof publicAuthenticateRoute
+  '/documents': typeof appDocumentsDocumentsallRoute
   '/nns': typeof appNnsNnsRoute
+  '/projects': typeof appProjectsProjectsallRoute
   '/organisations': typeof appOrganisationsOrganisationsRoute
   '/users': typeof appUsersUsersRoute
   '/organisations/create': typeof appOrganisationsCreateRoute
@@ -566,7 +616,7 @@ export interface FileRoutesByTo {
   '/organisations/$organisationId/projects': typeof appProjectsProjectsRoute
   '/organisations/$organisationId/projects/create': typeof appProjectsCreateRoute
   '/organisations/$organisationId/projects/$projectId': typeof appProjectsProjectIdRoute
-  '/organisations/$organisationId/projects/$projectId/documents': typeof appDocumentsDocumentsindexRouteWithChildren
+  '/organisations/$organisationId/projects/$projectId/documents': typeof appDocumentsDocumentsRoute
   '/organisations/$organisationId/projects/$projectId/documents/create': typeof appDocumentsCreateRoute
   '/organisations/$organisationId/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentIdRoute
   '/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions': typeof appRevisionsRevisionsindexRouteWithChildren
@@ -580,7 +630,9 @@ export interface FileRoutesById {
   '/': typeof publicHomeRoute
   '/_authenticated': typeof layoutsAuthenticatedRouteWithChildren
   '/authenticate': typeof publicAuthenticateRoute
+  '/_authenticated/documents': typeof appDocumentsDocumentsallRoute
   '/_authenticated/nns': typeof appNnsNnsRoute
+  '/_authenticated/projects': typeof appProjectsProjectsallRoute
   '/_authenticated/organisations': typeof appOrganisationsOrganisationsindexRouteWithChildren
   '/_authenticated/users': typeof appUsersUsersindexRouteWithChildren
   '/_authenticated/organisations/': typeof appOrganisationsOrganisationsRoute
@@ -596,6 +648,7 @@ export interface FileRoutesById {
   '/_authenticated/organisations/$organisationId/projects/$projectId': typeof appProjectsProjectIdindexRouteWithChildren
   '/_authenticated/organisations/$organisationId/projects/$projectId/': typeof appProjectsProjectIdRoute
   '/_authenticated/organisations/$organisationId/projects/$projectId/documents': typeof appDocumentsDocumentsindexRouteWithChildren
+  '/_authenticated/organisations/$organisationId/projects/$projectId/documents/': typeof appDocumentsDocumentsRoute
   '/_authenticated/organisations/$organisationId/projects/$projectId/documents/create': typeof appDocumentsCreateRoute
   '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentIdindexRouteWithChildren
   '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/': typeof appDocumentsDocumentIdRoute
@@ -611,7 +664,9 @@ export interface FileRouteTypes {
     | '/'
     | ''
     | '/authenticate'
+    | '/documents'
     | '/nns'
+    | '/projects'
     | '/organisations'
     | '/users'
     | '/organisations/'
@@ -627,6 +682,7 @@ export interface FileRouteTypes {
     | '/organisations/$organisationId/projects/$projectId'
     | '/organisations/$organisationId/projects/$projectId/'
     | '/organisations/$organisationId/projects/$projectId/documents'
+    | '/organisations/$organisationId/projects/$projectId/documents/'
     | '/organisations/$organisationId/projects/$projectId/documents/create'
     | '/organisations/$organisationId/projects/$projectId/documents/$documentId'
     | '/organisations/$organisationId/projects/$projectId/documents/$documentId/'
@@ -639,7 +695,9 @@ export interface FileRouteTypes {
     | '/'
     | ''
     | '/authenticate'
+    | '/documents'
     | '/nns'
+    | '/projects'
     | '/organisations'
     | '/users'
     | '/organisations/create'
@@ -661,7 +719,9 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/authenticate'
+    | '/_authenticated/documents'
     | '/_authenticated/nns'
+    | '/_authenticated/projects'
     | '/_authenticated/organisations'
     | '/_authenticated/users'
     | '/_authenticated/organisations/'
@@ -677,6 +737,7 @@ export interface FileRouteTypes {
     | '/_authenticated/organisations/$organisationId/projects/$projectId'
     | '/_authenticated/organisations/$organisationId/projects/$projectId/'
     | '/_authenticated/organisations/$organisationId/projects/$projectId/documents'
+    | '/_authenticated/organisations/$organisationId/projects/$projectId/documents/'
     | '/_authenticated/organisations/$organisationId/projects/$projectId/documents/create'
     | '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId'
     | '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/'
@@ -722,7 +783,9 @@ export const routeTree = rootRoute
     "/_authenticated": {
       "filePath": "_layouts/_authenticated.tsx",
       "children": [
+        "/_authenticated/documents",
         "/_authenticated/nns",
+        "/_authenticated/projects",
         "/_authenticated/organisations",
         "/_authenticated/users"
       ]
@@ -730,8 +793,16 @@ export const routeTree = rootRoute
     "/authenticate": {
       "filePath": "public/authenticate.tsx"
     },
+    "/_authenticated/documents": {
+      "filePath": "app/documents/documents.all.tsx",
+      "parent": "/_authenticated"
+    },
     "/_authenticated/nns": {
       "filePath": "app/nns/nns.tsx",
+      "parent": "/_authenticated"
+    },
+    "/_authenticated/projects": {
+      "filePath": "app/projects/projects.all.tsx",
       "parent": "/_authenticated"
     },
     "/_authenticated/organisations": {
@@ -817,9 +888,14 @@ export const routeTree = rootRoute
       "filePath": "app/documents/documents.index.tsx",
       "parent": "/_authenticated/organisations/$organisationId/projects/$projectId",
       "children": [
+        "/_authenticated/organisations/$organisationId/projects/$projectId/documents/",
         "/_authenticated/organisations/$organisationId/projects/$projectId/documents/create",
         "/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId"
       ]
+    },
+    "/_authenticated/organisations/$organisationId/projects/$projectId/documents/": {
+      "filePath": "app/documents/documents.tsx",
+      "parent": "/_authenticated/organisations/$organisationId/projects/$projectId/documents"
     },
     "/_authenticated/organisations/$organisationId/projects/$projectId/documents/create": {
       "filePath": "app/documents/create.tsx",
