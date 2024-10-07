@@ -1,9 +1,7 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { useNavigate } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -25,10 +23,10 @@ import { Input } from '@/components/ui/input';
 import { pt_backend } from '@/declarations/pt_backend';
 import { handleResult } from '@/utils/handleResult';
 
-export const Route = createFileRoute('/_authenticated/organisations/create')({
-  component: CreateOrganisation,
+export const Route = createFileRoute('/_authenticated/users/create')({
+  component: CreateProject,
   beforeLoad: () => ({
-    getTitle: () => 'Create organisation',
+    getTitle: () => 'Create user',
   }),
   errorComponent: ({ error }) => {
     return <div>Error: {error.message}</div>;
@@ -36,33 +34,39 @@ export const Route = createFileRoute('/_authenticated/organisations/create')({
 });
 
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: 'Organisation name must be at least 2 characters.',
+  first_name: z.string().min(1, {
+    message: 'First name must be at least 1 character.',
+  }),
+  last_name: z.string().min(1, {
+    message: 'Last name must be at least 1 character.',
   }),
 });
 
-export function CreateOrganisation() {
+export function CreateProject() {
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
+      first_name: '',
+      last_name: '',
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const response = await pt_backend.create_organisation(values.name);
+    const response = await pt_backend.create_user(
+      values.first_name,
+      values.last_name
+    );
     const result = handleResult(response);
-    navigate({
-      to: `/organisations/${result.toString()}`,
-    });
+    console.log('handle backend validation', result);
+    navigate({ to: `/organisations` });
   }
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Create a new organisation</CardTitle>
+        <CardTitle>Create new user</CardTitle>
         <CardDescription>A new beginning</CardDescription>
       </CardHeader>
       <CardContent>
@@ -70,16 +74,28 @@ export function CreateOrganisation() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
               control={form.control}
-              name="name"
+              name="first_name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Name</FormLabel>
+                  <FormLabel>First name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Acme" {...field} />
+                    <Input placeholder="John" {...field} />
                   </FormControl>
-                  <FormDescription>
-                    This is your organisation name.
-                  </FormDescription>
+                  <FormDescription>Your first name.</FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="last_name"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Doe" {...field} />
+                  </FormControl>
+                  <FormDescription>Your last name.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

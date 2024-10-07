@@ -79,7 +79,9 @@ export function CreateDocument() {
       content
     );
     const result = handleResult(response);
-    navigate({ to: `/projects/${params.projectId}/documents/${result}/` });
+    navigate({
+      to: `/organisations/${params.organisationId}/projects/${params.projectId}/documents/${result}/`,
+    });
   }
 
   return (

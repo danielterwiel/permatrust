@@ -9,3 +9,5 @@ mod documents;
 mod organisations;
 mod projects;
 mod revisions;
+mod users;
+

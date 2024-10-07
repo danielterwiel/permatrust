@@ -1,13 +1,14 @@
 import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
+import { pt_backend } from '@/declarations/pt_backend';
 import { Header } from '@/components/Header';
 import { Sidebar } from '@/components/Sidebar';
 import { Breadcrumbs } from '@/components/Breadcrumbs';
+import { handleResult } from '@/utils/handleResult';
+import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
 
 export const Route = createFileRoute('/_authenticated')({
   component: AuthLayout,
   beforeLoad: async ({ context, location }) => {
-    // TODO: do not run every time
-    console.log('initAuthClient should run once');
     await context.auth.initAuthClient();
 
     if (!context.auth.authenticated) {
@@ -22,6 +23,27 @@ export const Route = createFileRoute('/_authenticated')({
       auth: context.auth,
       getTitle: () => 'Home',
     };
+  },
+  loader: async ({ context, location }) => {
+    const response = await pt_backend.get_user();
+    let result;
+    try {
+      result = handleResult(response);
+    } catch (error) {
+      console.log('errror get_user', error);
+      if (location.href !== '/users/create') {
+        throw redirect({
+          to: '/users/create',
+        });
+      }
+    }
+
+    const user = stringifyBigIntObject(result);
+    const active = {
+      ...context.active,
+      user,
+    };
+    return { user, active };
   },
 });
 

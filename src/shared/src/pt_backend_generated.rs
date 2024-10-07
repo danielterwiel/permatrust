@@ -76,7 +76,7 @@ pub struct Project {
 pub enum ProjectResult { Ok(Project), Err(AppError) }
 #[derive(CandidType, Deserialize)]
 pub enum RevisionResult { Ok(Revision), Err(AppError) }
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct User {
   pub id: UserId,
   pub first_name: String,

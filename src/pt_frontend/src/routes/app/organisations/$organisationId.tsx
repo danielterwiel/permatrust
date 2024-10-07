@@ -15,15 +15,15 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-const origanisationsSearchSchema = z.object({
+const projectsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
 });
 
 export const Route = createFileRoute(
-  '/_authenticated/organisations/$organisationId'
+  '/_authenticated/organisations/$organisationId/'
 )({
   component: OrganisationDetails,
-  validateSearch: (search) => origanisationsSearchSchema.parse(search),
+  validateSearch: (search) => projectsSearchSchema.parse(search),
   beforeLoad: () => ({
     getTitle: () => 'Organisation',
   }),
@@ -54,7 +54,7 @@ export const Route = createFileRoute(
       paginationMetaData,
 
       active: {
-        origanisation: origanisation,
+        origanisation,
       },
 
       organisationId,
@@ -73,7 +73,7 @@ function OrganisationDetails() {
     <Card>
       <CardHeader>
         <CardTitle>{active.origanisation.name}</CardTitle>
-        <CardDescription>Documents</CardDescription>
+        <CardDescription>Organisation</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex gap-4 pr-6 flex-row-reverse">
@@ -83,7 +83,7 @@ function OrganisationDetails() {
             variant="default"
           >
             <div className="flex gap-2">
-              Create Document
+              Create project
               <Icon name="file-outline" size="md" />
             </div>
           </Link>
@@ -91,18 +91,12 @@ function OrganisationDetails() {
         <Table
           tableData={projects}
           showOpenEntityButton={true}
-          routePath="documents"
+          routePath="projects"
           paginationMetaData={paginationMetaData}
           columnConfig={[
             {
-              id: 'title',
-              headerName: 'Document Title',
+              id: 'name',
               cellPreprocess: (title) => title,
-            },
-            {
-              id: 'current_version',
-              headerName: 'Version',
-              cellPreprocess: (version) => version,
             },
           ]}
         />

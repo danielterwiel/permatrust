@@ -17,6 +17,9 @@ export const auth: AuthContext = {
   authClient: undefined,
   identity: undefined,
   initAuthClient: async () => {
+    if (auth.authenticated) {
+      return true;
+    }
     const client = await AuthClient.create({
       storage: new LocalStorage(),
       keyType: 'Ed25519',

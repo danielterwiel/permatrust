@@ -4,7 +4,6 @@ export function handleResult<T, E>(result: { Ok: T } | { Err: E }): T {
   if ('Ok' in result) {
     return result.Ok;
   } else {
-    console.error('Error occurred:', result.Err);
     throw notFound({ data: 'Resource not found or an error occurred' });
   }
 }

@@ -1,13 +1,24 @@
 use ic_cdk::println;
-use shared::pt_backend_generated::{Document, Organisation, Project, Revision};
+use shared::pt_backend_generated::{Document, Organisation, Project, Revision, User};
 use std::cell::RefCell;
 use std::env;
 use std::fmt::Debug;
 
+pub struct LoggableUser<'a>(&'a User);
 pub struct LoggableOrganisation<'a>(&'a Organisation);
 pub struct LoggableProject<'a>(&'a Project);
 pub struct LoggableDocument<'a>(&'a Document);
 pub struct LoggableRevision<'a>(&'a Revision);
+
+impl<'a> std::fmt::Display for LoggableUser<'a> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "User {{ id: {}, first_name: {}, last_name: {} }}",
+            self.0.id, self.0.first_name, self.0.last_name
+        )
+    }
+}
 
 impl<'a> std::fmt::Display for LoggableOrganisation<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -47,6 +58,10 @@ impl<'a> std::fmt::Display for LoggableRevision<'a> {
             self.0.id, self.0.document_id
         )
     }
+}
+
+pub fn loggable_user(user: &User) -> LoggableUser {
+    LoggableUser(user)
 }
 
 pub fn loggable_organisation(organistation: &Organisation) -> LoggableOrganisation {

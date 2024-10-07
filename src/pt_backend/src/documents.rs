@@ -14,15 +14,18 @@ thread_local! {
     pub static DOCUMENTS: RefCell<HashMap<DocumentId, Document>> = RefCell::new(HashMap::new());
 }
 
-fn get_next_document_id(project_id: ProjectId) -> DocumentId {
+pub fn get_next_document_id() -> u64 {
+    DOCUMENTS.with(|documents| documents.borrow().len() as u64)
+}
+
+fn get_documents_by_project(project_id: ProjectId) -> Vec<Document> {
     DOCUMENTS.with(|documents| {
-        let documents = documents.borrow();
         documents
-            .iter()
-            .filter(|(_, doc)| doc.project == project_id)
-            .map(|(id, _)| *id)
-            .max()
-            .map_or(0, |max_id| max_id + 1)
+            .borrow()
+            .values()
+            .filter(|doc| doc.project == project_id)
+            .cloned()
+            .collect()
     })
 }
 
@@ -51,7 +54,7 @@ fn create_document(
     title: String,
     content: serde_bytes::ByteBuf,
 ) -> DocumentIdResult {
-    let document_id = get_next_document_id(project_id);
+    let document_id = get_next_document_id();
 
     let document = Document {
         id: document_id,
@@ -80,17 +83,6 @@ fn create_document(
             DocumentIdResult::Err(err)
         }
     }
-}
-
-fn get_documents_by_project(project_id: ProjectId) -> Vec<Document> {
-    DOCUMENTS.with(|documents| {
-        documents
-            .borrow()
-            .values()
-            .filter(|doc| doc.project == project_id)
-            .cloned()
-            .collect()
-    })
 }
 
 #[query]

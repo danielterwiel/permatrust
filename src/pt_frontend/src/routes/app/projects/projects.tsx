@@ -15,6 +15,7 @@ import {
   CardContent,
   CardDescription,
 } from '@/components/ui/card';
+import { formatDateTime } from '@/utils/date';
 
 const projectsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
@@ -94,8 +95,7 @@ function Projects() {
             {
               id: 'created_at',
               headerName: 'Created at',
-              cellPreprocess: (createdAt) =>
-                Principal.fromUint8Array(createdAt).toString(),
+              cellPreprocess: (createdAt) => formatDateTime(createdAt),
             },
           ]}
         />

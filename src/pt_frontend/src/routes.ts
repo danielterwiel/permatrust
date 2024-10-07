@@ -7,11 +7,16 @@ export const routes = rootRoute('root.tsx', [
   route('/authenticate', 'public/authenticate.tsx'),
   layout('authenticated', '_layouts/_authenticated.tsx', [
     route('/nns', 'app/nns/nns.tsx'),
-    // route('/users', 'app/users/users.tsx'),
+    route('/users', 'app/users/users.index.tsx', [
+      index('app/users/users.tsx'),
+      route('/create', 'app/users/create.tsx'),
+      route('/$userId', 'app/users/$userId.tsx'),
+    ]),
     route('/organisations', 'app/organisations/organisations.index.tsx', [
       index('app/organisations/organisations.tsx'),
       route('/create', 'app/organisations/create.tsx'),
       route('/$organisationId', 'app/organisations/$organisationId.index.tsx', [
+        index('app/organisations/$organisationId.tsx'),
         route('/projects', 'app/projects/projects.index.tsx', [
           index('app/projects/projects.tsx'),
           route('/create', 'app/projects/create.tsx'),

@@ -1,9 +1,10 @@
 use crate::pt_backend_generated::{
     AppError, Document, Organisation, PageNumber, PageSize, PaginationMetadata, Project, Revision,
-    TotalItems,
+    TotalItems, User,
 };
 use candid::{self, CandidType, Deserialize};
 
+pub type PaginatedUsersResult = PaginatedResult<User>;
 pub type PaginatedOrganisationsResult = PaginatedResult<Organisation>;
 pub type PaginatedProjectsResult = PaginatedResult<Project>;
 pub type PaginatedDocumentsResult = PaginatedResult<Document>;

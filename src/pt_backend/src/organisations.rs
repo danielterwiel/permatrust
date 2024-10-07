@@ -12,11 +12,14 @@ use crate::logger::{log_info, loggable_organisation};
 
 thread_local! {
     static ORGANISATIONS: RefCell<HashMap<OrganisationId, Organisation>> = RefCell::new(HashMap::new());
-    static NEXT_ID: RefCell<OrganisationId> = RefCell::new(0);
+}
+
+pub fn get_next_organisation_id() -> u64 {
+    ORGANISATIONS.with(|organisations| organisations.borrow().len() as u64)
 }
 
 #[update]
-fn create_organisation(name: String, organisation_id: OrganisationId) -> OrganisationIdResult {
+fn create_organisation(name: String) -> OrganisationIdResult {
     if name.trim().is_empty() {
         return OrganisationIdResult::Err(AppError::InternalError(
             "Organisation name cannot be empty".to_string(),
@@ -24,11 +27,7 @@ fn create_organisation(name: String, organisation_id: OrganisationId) -> Organis
     }
 
     let caller = ic_cdk::caller();
-    let id = NEXT_ID.with(|next_id| {
-        let current_id = *next_id.borrow();
-        *next_id.borrow_mut() += 1;
-        current_id
-    });
+    let id = get_next_organisation_id();
 
     let organisation = Organisation {
         id,
