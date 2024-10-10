@@ -1,9 +1,9 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { pt_backend } from '@/declarations/pt_backend'
-import { useForm } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { Button } from '@/components/ui/button'
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { pt_backend } from '@/declarations/pt_backend';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
@@ -12,35 +12,41 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
+} from '@/components/ui/form';
 import {
   MDXEditor,
   UndoRedo,
   BoldItalicUnderlineToggles,
+  DiffSourceToggleWrapper,
+  BlockTypeSelect,
+  ListsToggle,
   headingsPlugin,
+  diffSourcePlugin,
   toolbarPlugin,
-} from '@mdxeditor/editor'
-import '@mdxeditor/editor/style.css'
+} from '@mdxeditor/editor';
+import '@mdxeditor/editor/style.css';
 
 export const Route = createFileRoute(
-  '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/create',
+  '/_authenticated/projects/$projectId/documents/$documentId/revisions/create'
 )({
   component: CreateRevision,
   beforeLoad: () => ({
     getTitle: () => 'Create revision',
   }),
-})
+});
 
 const formSchema = z.object({
   content: z.string().min(1, {
     message: 'Content must be at least 1 character.',
   }),
   projects: z.array(z.bigint()),
-})
+});
 
 export function CreateRevision() {
-  const navigate = useNavigate()
-  const params = Route.useParams()
+  const navigate = useNavigate();
+  const params = Route.useParams();
+
+  console.log('params', params);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,21 +54,24 @@ export function CreateRevision() {
       content: '',
       projects: [BigInt(params.projectId)],
     },
-  })
+  });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const encoder = new TextEncoder()
-    const content = encoder.encode(values.content)
+    const encoder = new TextEncoder();
+    const content = encoder.encode(values.content);
+
+    console.log('params', params);
 
     const response = await pt_backend.create_revision(
       BigInt(params.projectId),
       BigInt(params.documentId),
-      content,
-    )
-    console.log('TODO: handle result', response)
+      content
+    );
+    console.log('TODO: handle result', response);
     navigate({
-      to: `/organisations/${params.organisationId}/projects/${params.projectId}/documents/${params.documentId}/`,
-    })
+      to: '/projects/$projectId/documents/$documentId',
+      params,
+    });
   }
 
   return (
@@ -80,13 +89,15 @@ export function CreateRevision() {
                   contentEditableClassName="prose"
                   plugins={[
                     headingsPlugin(),
+                    diffSourcePlugin(),
                     toolbarPlugin({
                       toolbarContents: () => (
-                        <>
-                          {' '}
+                        <DiffSourceToggleWrapper>
                           <UndoRedo />
                           <BoldItalicUnderlineToggles />
-                        </>
+                          <BlockTypeSelect />
+                          <ListsToggle />
+                        </DiffSourceToggleWrapper>
                       ),
                     }),
                   ]}
@@ -101,5 +112,5 @@ export function CreateRevision() {
         <Button type="submit">Create</Button>
       </form>
     </Form>
-  )
+  );
 }

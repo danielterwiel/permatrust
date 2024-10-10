@@ -1,23 +1,21 @@
-import { Link } from '@/components/Link'
-import { createFileRoute } from '@tanstack/react-router'
-import { pt_backend } from '@/declarations/pt_backend'
-import { Table } from '@/components/Table'
-import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject'
-import { handleResult } from '@/utils/handleResult'
-import { Icon } from '@/components/ui/Icon'
-import { DEFAULT_PAGINATION } from '@/consts/pagination'
-import { z } from 'zod'
+import { createFileRoute } from '@tanstack/react-router';
+import { pt_backend } from '@/declarations/pt_backend';
+import { Table } from '@/components/Table';
+import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
+import { handleResult } from '@/utils/handleResult';
+import { DEFAULT_PAGINATION } from '@/consts/pagination';
+import { z } from 'zod';
 import {
   Card,
   CardHeader,
   CardTitle,
   CardContent,
   CardDescription,
-} from '@/components/ui/card'
+} from '@/components/ui/card';
 
 const documentsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
-})
+});
 
 export const Route = createFileRoute('/_authenticated/documents')({
   component: Documents,
@@ -27,24 +25,24 @@ export const Route = createFileRoute('/_authenticated/documents')({
     const pagination = {
       ...DEFAULT_PAGINATION,
       page_number: BigInt(page ?? 1),
-    }
-    const response = await pt_backend.list_documents(pagination)
-    const result = handleResult(response)
-    const [documents, paginationMetaData] = stringifyBigIntObject(result)
+    };
+    const response = await pt_backend.list_documents(pagination);
+    const result = handleResult(response);
+    const [documents, paginationMetaData] = stringifyBigIntObject(result);
     return {
       ...context,
 
       documents,
       paginationMetaData,
-    }
+    };
   },
   errorComponent: ({ error }) => {
-    return <div>Error: {error.message}</div>
+    return <div>Error: {error.message}</div>;
   },
-})
+});
 
 function Documents() {
-  const { documents, paginationMetaData } = Route.useLoaderData()
+  const { documents, paginationMetaData } = Route.useLoaderData();
 
   return (
     <Card>
@@ -55,8 +53,8 @@ function Documents() {
       <CardContent>
         <Table
           tableData={documents}
-          showOpenEntityButton={true}
-          routePath=""
+          openLinkTo="/projects/$projectId/documents/$documentId"
+          openLinkParamsNormalisation={{ projectId: 'project' }}
           paginationMetaData={paginationMetaData}
           columnConfig={[
             {
@@ -73,5 +71,5 @@ function Documents() {
         />
       </CardContent>
     </Card>
-  )
+  );
 }

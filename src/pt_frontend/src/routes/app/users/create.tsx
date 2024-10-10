@@ -21,7 +21,6 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { pt_backend } from '@/declarations/pt_backend';
-import { handleResult } from '@/utils/handleResult';
 
 export const Route = createFileRoute('/_authenticated/users/create')({
   component: CreateProject,
@@ -54,11 +53,7 @@ export function CreateProject() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const response = await pt_backend.create_user(
-      values.first_name,
-      values.last_name
-    );
-    const result = handleResult(response);
+    await pt_backend.create_user(values.first_name, values.last_name);
     navigate({ to: `/organisations` });
   }
 

@@ -19,9 +19,7 @@ const projectsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
 });
 
-export const Route = createFileRoute(
-  '/_authenticated/organisations/$organisationId/projects/$projectId/'
-)({
+export const Route = createFileRoute('/_authenticated/projects/$projectId/')({
   component: ProjectDetails,
   validateSearch: (search) => projectsSearchSchema.parse(search),
   beforeLoad: () => ({
@@ -63,7 +61,7 @@ export const Route = createFileRoute(
 });
 
 function ProjectDetails() {
-  const { organisationId, projectId } = Route.useParams();
+  const { projectId } = Route.useParams();
   const { documents, paginationMetaData, active } = Route.useLoaderData();
 
   return (
@@ -75,10 +73,8 @@ function ProjectDetails() {
       <CardContent>
         <div className="flex gap-4 pr-6 flex-row-reverse">
           <Link
-            to={
-              '/organisations/$organisationId/projects/$projectId/documents/create'
-            }
-            params={{ organisationId, projectId }}
+            to="/projects/$projectId/documents/create"
+            params={{ projectId }}
             variant="default"
           >
             <div className="flex gap-2">
@@ -89,8 +85,7 @@ function ProjectDetails() {
         </div>
         <Table
           tableData={documents}
-          showOpenEntityButton={true}
-          routePath="documents"
+          openLinkTo="/projects/$projectId/documents/$documentId"
           paginationMetaData={paginationMetaData}
           columnConfig={[
             {

@@ -16,9 +16,9 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Link } from '@/components/Link';
 import type { Entity } from '@/consts/entities';
-import type { ValidRoute } from '@/types/routes';
 import type { PaginationMetadata } from '@/declarations/pt_backend/pt_backend.did';
 import { Pagination } from './Pagination';
+import type { ToPathOption } from '@tanstack/react-router';
 
 type TableDataItem = Entity;
 export type TableData = Entity[];
@@ -30,10 +30,27 @@ interface ColumnConfigItem {
   cellPreprocess?: (value: any) => any;
 }
 
+function enrichKeyValues(
+  row: { original: Entity },
+  mapping: Record<string, string>
+): Record<string, string | number> {
+  return Object.fromEntries(
+    Object.entries(mapping).map(([key, value]) => {
+      const originalValue = row.original[value as keyof Entity];
+      return [
+        key,
+        typeof originalValue === 'bigint' || typeof originalValue === 'object'
+          ? String(originalValue)
+          : originalValue,
+      ];
+    })
+  );
+}
+
 interface TableProps {
   tableData?: TableData;
-  showOpenEntityButton?: boolean;
-  routePath?: ValidRoute;
+  openLinkTo?: ToPathOption;
+  openLinkParamsNormalisation?: Record<string, string>;
   onSelectionChange?: (selectedRows: TableDataItem[]) => void;
   columnConfig?: ColumnConfigItem[];
   paginationMetaData?: PaginationMetadata;
@@ -43,8 +60,8 @@ export const Table: React.FC<TableProps> = ({
   tableData = [],
   onSelectionChange,
   columnConfig = [],
-  routePath = '',
-  showOpenEntityButton = false,
+  openLinkTo,
+  openLinkParamsNormalisation,
   paginationMetaData,
 }) => {
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
@@ -176,30 +193,42 @@ export const Table: React.FC<TableProps> = ({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="whitespace-nowrap">
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-                {showOpenEntityButton && (
-                  <TableCell>
-                    <div className="flex justify-end">
-                      <Link
-                        to={
-                          `${routePath ? `${routePath}/` : ''}${row.getValue(
-                            'id'
-                          )}` as ValidRoute // TODO: make stricter
-                        }
-                      >
-                        Open
-                      </Link>
-                    </div>
-                  </TableCell>
-                )}
-              </TableRow>
-            ))}
+            {table.getRowModel().rows.map((row) => {
+              const openLinkParam = openLinkTo?.split('$').at(-1);
+
+              const openLinkRowParams = openLinkParamsNormalisation
+                ? enrichKeyValues(row, openLinkParamsNormalisation)
+                : {};
+
+              return (
+                <TableRow key={row.id}>
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id} className="whitespace-nowrap">
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                  {openLinkTo && (
+                    <TableCell>
+                      <div className="flex justify-end">
+                        <Link
+                          to={openLinkTo}
+                          params={(prev) => ({
+                            ...prev,
+                            [openLinkParam]: row.id,
+                            ...openLinkRowParams,
+                          })}
+                        >
+                          Open
+                        </Link>
+                      </div>
+                    </TableCell>
+                  )}
+                </TableRow>
+              );
+            })}
           </TableBody>
         </TableBase>
         <div className="pt-16">

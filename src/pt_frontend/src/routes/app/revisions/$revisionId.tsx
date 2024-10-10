@@ -14,7 +14,7 @@ import {
 } from '@/components/ui/card'
 
 export const Route = createFileRoute(
-  '/_authenticated/organisations/$organisationId/projects/$projectId/documents/$documentId/revisions/$revisionId',
+  '/_authenticated/projects/$projectId/documents/$documentId/revisions/$revisionId',
 )({
   component: RevisionDetails,
   beforeLoad: () => ({

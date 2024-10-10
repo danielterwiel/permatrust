@@ -11,6 +11,8 @@ export const Route = createFileRoute('/_authenticated')({
   beforeLoad: async ({ context, location }) => {
     await context.auth.initAuthClient();
 
+    console.log('context', context);
+
     if (!context.auth.authenticated) {
       throw redirect({
         to: '/',

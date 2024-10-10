@@ -67,8 +67,7 @@ function Organisations() {
         </div>
         <Table
           tableData={organisations}
-          showOpenEntityButton={true}
-          routePath=""
+          openLinkTo="/organisations/$organisationId"
           paginationMetaData={paginationMetaData}
           columnConfig={[
             {

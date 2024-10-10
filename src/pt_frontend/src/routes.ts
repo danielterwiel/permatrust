@@ -18,29 +18,30 @@ export const routes = rootRoute('root.tsx', [
       route('/create', 'app/organisations/create.tsx'),
       route('/$organisationId', 'app/organisations/$organisationId.index.tsx', [
         index('app/organisations/$organisationId.tsx'),
-        route('/projects', 'app/projects/projects.index.tsx', [
-          index('app/projects/projects.tsx'),
-          route('/create', 'app/projects/create.tsx'),
-          route('/$projectId', 'app/projects/$projectId.index.tsx', [
-            index('app/projects/$projectId.tsx'),
-            route('/documents', 'app/documents/documents.index.tsx', [
-              index('app/documents/documents.tsx'),
-              route('/create', 'app/documents/create.tsx'),
-              route('/$documentId', 'app/documents/$documentId.index.tsx', [
-                index('app/documents/$documentId.tsx'),
-                route('/revisions', 'app/revisions/revisions.index.tsx', [
-                  route('/$revisionId', 'app/revisions/$revisionId.tsx'),
-                  route('/create', 'app/revisions/create.tsx'),
-                  route('/diff', 'app/revisions/diff.tsx'),
-                ]),
-              ]),
+      ]),
+    ]),
+
+    route('/projects', 'app/projects/projects.index.tsx', [
+      index('app/projects/projects.all.tsx'),
+      // index('app/projects/projects.tsx'),
+      route('/create', 'app/projects/create.tsx'),
+      route('/$projectId', 'app/projects/$projectId.index.tsx', [
+        index('app/projects/$projectId.tsx'),
+        route('/documents', 'app/documents/documents.index.tsx', [
+          index('app/documents/documents.tsx'),
+          route('/create', 'app/documents/create.tsx'),
+          route('/$documentId', 'app/documents/$documentId.index.tsx', [
+            index('app/documents/$documentId.tsx'),
+            route('/revisions', 'app/revisions/revisions.index.tsx', [
+              route('/$revisionId', 'app/revisions/$revisionId.tsx'),
+              route('/create', 'app/revisions/create.tsx'),
+              route('/diff', 'app/revisions/diff.tsx'),
             ]),
           ]),
         ]),
       ]),
     ]),
 
-    route('/projects', 'app/projects/projects.all.tsx'),
     route('/documents', 'app/documents/documents.all.tsx'),
   ]),
 ]);

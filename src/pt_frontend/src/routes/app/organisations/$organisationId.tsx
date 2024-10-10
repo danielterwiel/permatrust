@@ -14,6 +14,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { Principal } from '@dfinity/principal';
+import { formatDateTime } from '@/utils/date';
 
 const projectsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
@@ -77,7 +79,7 @@ function OrganisationDetails() {
       <CardContent>
         <div className="flex gap-4 pr-6 flex-row-reverse">
           <Link
-            to="/organisations/$organisationId/projects/create"
+            to="/projects/create"
             params={{ organisationId }}
             variant="default"
           >
@@ -89,13 +91,24 @@ function OrganisationDetails() {
         </div>
         <Table
           tableData={projects}
-          showOpenEntityButton={true}
-          routePath="projects"
+          openLinkTo="/projects/$projectId"
           paginationMetaData={paginationMetaData}
           columnConfig={[
             {
               id: 'name',
-              cellPreprocess: (title) => title,
+              headerName: 'Project Name',
+              cellPreprocess: (v) => v,
+            },
+            {
+              id: 'created_by',
+              headerName: 'Created by',
+              cellPreprocess: (createdBy) =>
+                Principal.fromUint8Array(createdBy).toString(),
+            },
+            {
+              id: 'created_at',
+              headerName: 'Created at',
+              cellPreprocess: (createdAt) => formatDateTime(createdAt),
             },
           ]}
         />

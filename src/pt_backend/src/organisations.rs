@@ -1,3 +1,4 @@
+use candid::Principal;
 use ic_cdk_macros::{query, update};
 use shared::pagination::{paginate, PaginatedOrganisationsResult};
 use shared::pt_backend_generated::{
@@ -16,6 +17,17 @@ thread_local! {
 
 pub fn get_next_organisation_id() -> u64 {
     ORGANISATIONS.with(|organisations| organisations.borrow().len() as u64)
+}
+
+fn get_organisations_by_user_id(user_id: Principal) -> Vec<Organisation> {
+    ORGANISATIONS.with(|organisations| {
+        organisations
+            .borrow()
+            .values()
+            .filter(|org| org.members.contains(&user_id))
+            .cloned()
+            .collect()
+    })
 }
 
 #[update]
@@ -49,8 +61,8 @@ fn create_organisation(name: String) -> OrganisationIdResult {
 
 #[query]
 fn list_organisations(pagination: PaginationInput) -> PaginatedOrganisationsResult {
-    let organisations = ORGANISATIONS
-        .with(|organisations| organisations.borrow().values().cloned().collect::<Vec<_>>());
+    let user_id = ic_cdk::caller();
+    let organisations = get_organisations_by_user_id(user_id);
 
     match paginate(&organisations, pagination.page_size, pagination.page_number) {
         Ok((paginated_organisations, pagination_metadata)) => {
