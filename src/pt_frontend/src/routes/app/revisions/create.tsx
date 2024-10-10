@@ -89,7 +89,6 @@ export function CreateRevision() {
                   contentEditableClassName="prose"
                   plugins={[
                     headingsPlugin(),
-                    diffSourcePlugin(),
                     toolbarPlugin({
                       toolbarContents: () => (
                         <DiffSourceToggleWrapper>
@@ -100,6 +99,7 @@ export function CreateRevision() {
                         </DiffSourceToggleWrapper>
                       ),
                     }),
+                    diffSourcePlugin(),
                   ]}
                   {...field}
                 />
