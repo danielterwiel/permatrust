@@ -1,19 +1,19 @@
-import { Link, createFileRoute } from "@tanstack/react-router";
-import type { Row } from "@tanstack/react-table";
-import { pt_backend } from "@/declarations/pt_backend";
-import { Table } from "@/components/Table";
-import { stringifyBigIntObject } from "@/utils/stringifyBigIntObject";
-import { handleResult } from "@/utils/handleResult";
-import { DEFAULT_PAGINATION } from "@/consts/pagination";
-import { z } from "zod";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import type { Document } from "@/declarations/pt_backend/pt_backend.did";
+import { Link, createFileRoute } from '@tanstack/react-router';
+import type { Row } from '@tanstack/react-table';
+import { pt_backend } from '@/declarations/pt_backend';
+import { Table } from '@/components/Table';
+import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
+import { handleResult } from '@/utils/handleResult';
+import { DEFAULT_PAGINATION } from '@/consts/pagination';
+import { z } from 'zod';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import type { Document } from '@/declarations/pt_backend/pt_backend.did';
 
 const documentsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
 });
 
-export const Route = createFileRoute("/_authenticated/documents")({
+export const Route = createFileRoute('/_authenticated/documents')({
   component: Documents,
   validateSearch: (search) => documentsSearchSchema.parse(search),
   loaderDeps: ({ search: { page } }) => ({ page }),
@@ -66,13 +66,13 @@ function Documents() {
           paginationMetaData={paginationMetaData}
           columnConfig={[
             {
-              id: "title",
-              headerName: "Document Title",
+              id: 'title',
+              headerName: 'Document Title',
               cellPreprocess: (title) => title,
             },
             {
-              id: "current_version",
-              headerName: "Version",
+              id: 'current_version',
+              headerName: 'Version',
               cellPreprocess: (version) => version,
             },
           ]}

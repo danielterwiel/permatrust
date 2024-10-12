@@ -1,25 +1,25 @@
-import { Link } from "@/components/Link";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { pt_backend } from "@/declarations/pt_backend";
-import { Table } from "@/components/Table";
-import { stringifyBigIntObject } from "@/utils/stringifyBigIntObject";
-import { Principal } from "@dfinity/principal";
-import { handleResult } from "@/utils/handleResult";
-import { Icon } from "@/components/ui/Icon";
-import { DEFAULT_PAGINATION } from "@/consts/pagination";
-import { z } from "zod";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { formatDateTime } from "@/utils/date";
-import { storage } from "@/utils/localStorage";
-import type { Row } from "@tanstack/react-table";
-import type { Organisation } from "@/declarations/pt_backend/pt_backend.did";
+import { Link } from '@/components/Link';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { pt_backend } from '@/declarations/pt_backend';
+import { Table } from '@/components/Table';
+import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
+import { Principal } from '@dfinity/principal';
+import { handleResult } from '@/utils/handleResult';
+import { Icon } from '@/components/ui/Icon';
+import { DEFAULT_PAGINATION } from '@/consts/pagination';
+import { z } from 'zod';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { formatDateTime } from '@/utils/date';
+import { storage } from '@/utils/localStorage';
+import type { Row } from '@tanstack/react-table';
+import type { Organisation } from '@/declarations/pt_backend/pt_backend.did';
 
 const organisationsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
 });
 
-export const Route = createFileRoute("/_authenticated/organisations/")({
+export const Route = createFileRoute('/_authenticated/organisations/')({
   component: Organisations,
   validateSearch: (search) => organisationsSearchSchema.parse(search),
   loaderDeps: ({ search: { page } }) => ({ page }),
@@ -43,22 +43,17 @@ export const Route = createFileRoute("/_authenticated/organisations/")({
   },
 });
 
-const RowActions = (row: Row<Organisation>) => {
-  const navigate = useNavigate();
-  const setOrganisationIdLocalStorage = () => {
-    storage.setItem("activeOrganisationId", row.id);
-    navigate({ to: `/organisations/${row.id}` });
-  };
-
-  return <Button onClick={setOrganisationIdLocalStorage}>Open</Button>;
-};
-
 function Organisations() {
   const { organisations, paginationMetaData } = Route.useLoaderData();
   const navigate = useNavigate();
-  const setOrganisationIdLocalStorage = (id: string) => {
-    storage.setItem("activeOrganisationId", id);
-    navigate({ to: `/organisations/${id}` });
+
+  const RowActions = (row: Row<Organisation>) => {
+    const setOrganisationIdLocalStorage = () => {
+      storage.setItem('activeOrganisationId', row.id);
+      navigate({ to: `/organisations/${row.id}` });
+    };
+
+    return <Button onClick={setOrganisationIdLocalStorage}>Open</Button>;
   };
 
   return (
@@ -81,19 +76,19 @@ function Organisations() {
           paginationMetaData={paginationMetaData}
           columnConfig={[
             {
-              id: "name",
-              headerName: "Name",
+              id: 'name',
+              headerName: 'Name',
               cellPreprocess: (v) => v,
             },
             {
-              id: "created_by",
-              headerName: "Created by",
+              id: 'created_by',
+              headerName: 'Created by',
               cellPreprocess: (createdBy) =>
                 Principal.fromUint8Array(createdBy).toString(),
             },
             {
-              id: "created_at",
-              headerName: "Created at",
+              id: 'created_at',
+              headerName: 'Created at',
               cellPreprocess: (createdAt) => formatDateTime(createdAt),
             },
           ]}

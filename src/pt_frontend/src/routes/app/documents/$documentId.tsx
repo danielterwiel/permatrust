@@ -64,22 +64,6 @@ export const Route = createFileRoute(
   },
 });
 
-const RowActions = (row: Row<Revision>) => {
-  const { projectId, documentId } = Route.useParams();
-  return (
-    <Link
-      to="/projects/$projectId/documents/$documentId/revisions/$revisionId"
-      params={{
-        documentId,
-        projectId,
-        revisionId: row.id,
-      }}
-    >
-      Open
-    </Link>
-  );
-};
-
 function DocumentDetails() {
   const { projectId, documentId } = Route.useParams();
   const { revisions, paginationMetaData, active } = Route.useLoaderData();
@@ -88,6 +72,21 @@ function DocumentDetails() {
   function handleCheckedChange(revisions: Entity[]) {
     setSelected(revisions);
   }
+
+  const RowActions = (row: Row<Revision>) => {
+    return (
+      <Link
+        to="/projects/$projectId/documents/$documentId/revisions/$revisionId"
+        params={{
+          documentId,
+          projectId,
+          revisionId: row.id,
+        }}
+      >
+        Open
+      </Link>
+    );
+  };
 
   return (
     <Card>
