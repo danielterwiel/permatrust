@@ -749,6 +749,7 @@ dependencies = [
  "ic-cdk",
  "ic-cdk-macros",
  "ic-stable-structures",
+ "petgraph",
  "serde",
  "serde_bytes",
  "serde_json",
@@ -946,8 +947,10 @@ dependencies = [
  "candid",
  "dotenv",
  "ic-cdk",
+ "petgraph",
  "serde",
  "serde_bytes",
+ "serde_json",
 ]
 
 [[package]]

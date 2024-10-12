@@ -1,4 +1,5 @@
 import type {
+  Workflow,
   User,
   Project,
   Document,
@@ -6,4 +7,10 @@ import type {
   Organisation,
 } from '@/declarations/pt_backend/pt_backend.did';
 
-export type Entity = User | Organisation | Project | Document | Revision;
+export type Entity =
+  | User
+  | Workflow
+  | Organisation
+  | Project
+  | Document
+  | Revision;

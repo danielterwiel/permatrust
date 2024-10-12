@@ -1,25 +1,25 @@
-import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { pt_backend } from "@/declarations/pt_backend";
-import { Header } from "@/components/Header";
-import { Sidebar } from "@/components/Sidebar";
-import { Breadcrumbs } from "@/components/Breadcrumbs";
-import { handleResult } from "@/utils/handleResult";
-import { stringifyBigIntObject } from "@/utils/stringifyBigIntObject";
-import { DEFAULT_PAGINATION } from "@/consts/pagination";
-import { storage } from "@/utils/localStorage";
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
+import { pt_backend } from '@/declarations/pt_backend';
+import { Header } from '@/components/Header';
+import { Sidebar } from '@/components/Sidebar';
+import { Breadcrumbs } from '@/components/Breadcrumbs';
+import { handleResult } from '@/utils/handleResult';
+import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
+import { DEFAULT_PAGINATION } from '@/consts/pagination';
+import { storage } from '@/utils/localStorage';
 import type {
   OrganisationResult,
   UserResult,
-} from "@/declarations/pt_backend/pt_backend.did";
+} from '@/declarations/pt_backend/pt_backend.did';
 
-export const Route = createFileRoute("/_authenticated")({
+export const Route = createFileRoute('/_authenticated')({
   component: AuthLayout,
   beforeLoad: async ({ context, location }) => {
     await context.auth.initAuthClient();
 
     if (!context.auth.authenticated) {
       throw redirect({
-        to: "/",
+        to: '/',
         search: {
           redirect: location.href,
         },
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/_authenticated")({
     }
     return {
       auth: context.auth,
-      getTitle: () => "Home",
+      getTitle: () => 'Home',
     };
   },
   loader: async ({ context, location }) => {
@@ -37,14 +37,14 @@ export const Route = createFileRoute("/_authenticated")({
     try {
       userResult = handleResult(userResponse);
     } catch (error) {
-      if (location.href !== "/users/create") {
+      if (location.href !== '/users/create') {
         throw redirect({
-          to: "/users/create",
+          to: '/users/create',
         });
       }
     }
 
-    const organisationId = storage.getItem("activeOrganisationId");
+    const organisationId = storage.getItem('activeOrganisationId');
 
     let organisationsResult: unknown;
     if (!organisationId) {
@@ -53,12 +53,12 @@ export const Route = createFileRoute("/_authenticated")({
       try {
         organisationsResult = handleResult(organisationsResponse);
         throw redirect({
-          to: "/organisations",
+          to: '/organisations',
         });
       } catch (error) {
-        if (location.href !== "/organisations/create") {
+        if (location.href !== '/organisations/create') {
           throw redirect({
-            to: "/organisations/create",
+            to: '/organisations/create',
           });
         }
       }

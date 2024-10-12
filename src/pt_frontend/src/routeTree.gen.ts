@@ -14,30 +14,35 @@ import { Route as rootRoute } from './routes/root'
 import { Route as publicAuthenticateImport } from './routes/public/authenticate'
 import { Route as layoutsAuthenticatedImport } from './routes/_layouts/_authenticated'
 import { Route as publicHomeImport } from './routes/public/home'
+import { Route as appWorkflowsWorkflowsindexImport } from './routes/app/workflows/workflows.index'
 import { Route as appUsersUsersindexImport } from './routes/app/users/users.index'
 import { Route as appProjectsProjectsindexImport } from './routes/app/projects/projects.index'
 import { Route as appOrganisationsOrganisationsindexImport } from './routes/app/organisations/organisations.index'
 import { Route as appNnsNnsImport } from './routes/app/nns/nns'
 import { Route as appDocumentsDocumentsallImport } from './routes/app/documents/documents.all'
+import { Route as appWorkflowsWorkflowIdindexImport } from './routes/app/workflows/$workflowId.index'
 import { Route as appProjectsProjectIdindexImport } from './routes/app/projects/$projectId.index'
 import { Route as appOrganisationsOrganisationIdindexImport } from './routes/app/organisations/$organisationId.index'
-import { Route as appUsersCreateImport } from './routes/app/users/create'
+import { Route as appWorkflowsWorkflowscreateImport } from './routes/app/workflows/workflows.create'
+import { Route as appUsersUserscreateImport } from './routes/app/users/users.create'
 import { Route as appUsersUserIdImport } from './routes/app/users/$userId'
-import { Route as appProjectsCreateImport } from './routes/app/projects/create'
-import { Route as appOrganisationsCreateImport } from './routes/app/organisations/create'
-import { Route as appUsersUsersImport } from './routes/app/users/users'
+import { Route as appProjectsProjectscreateImport } from './routes/app/projects/projects.create'
+import { Route as appOrganisationsOrganisationscreateImport } from './routes/app/organisations/organisations.create'
+import { Route as appWorkflowsWorkflowsallImport } from './routes/app/workflows/workflows.all'
+import { Route as appUsersUsersallImport } from './routes/app/users/users.all'
 import { Route as appProjectsProjectsallImport } from './routes/app/projects/projects.all'
 import { Route as appOrganisationsOrganisationsImport } from './routes/app/organisations/organisations'
 import { Route as appDocumentsDocumentsindexImport } from './routes/app/documents/documents.index'
+import { Route as appWorkflowsWorkflowIdImport } from './routes/app/workflows/$workflowId'
 import { Route as appProjectsProjectIdImport } from './routes/app/projects/$projectId'
 import { Route as appOrganisationsOrganisationIdImport } from './routes/app/organisations/$organisationId'
 import { Route as appDocumentsDocumentIdindexImport } from './routes/app/documents/$documentId.index'
-import { Route as appDocumentsCreateImport } from './routes/app/documents/create'
+import { Route as appDocumentsDocumentscreateImport } from './routes/app/documents/documents.create'
 import { Route as appDocumentsDocumentsImport } from './routes/app/documents/documents'
 import { Route as appRevisionsRevisionsindexImport } from './routes/app/revisions/revisions.index'
 import { Route as appDocumentsDocumentIdImport } from './routes/app/documents/$documentId'
-import { Route as appRevisionsDiffImport } from './routes/app/revisions/diff'
-import { Route as appRevisionsCreateImport } from './routes/app/revisions/create'
+import { Route as appRevisionsRevisionsdiffImport } from './routes/app/revisions/revisions.diff'
+import { Route as appRevisionsRevisionscreateImport } from './routes/app/revisions/revisions.create'
 import { Route as appRevisionsRevisionIdImport } from './routes/app/revisions/$revisionId'
 
 // Create/Update Routes
@@ -56,6 +61,13 @@ const publicHomeRoute = publicHomeImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
 } as any)
+
+const appWorkflowsWorkflowsindexRoute = appWorkflowsWorkflowsindexImport.update(
+  {
+    path: '/workflows',
+    getParentRoute: () => layoutsAuthenticatedRoute,
+  } as any,
+)
 
 const appUsersUsersindexRoute = appUsersUsersindexImport.update({
   path: '/users',
@@ -83,6 +95,12 @@ const appDocumentsDocumentsallRoute = appDocumentsDocumentsallImport.update({
   getParentRoute: () => layoutsAuthenticatedRoute,
 } as any)
 
+const appWorkflowsWorkflowIdindexRoute =
+  appWorkflowsWorkflowIdindexImport.update({
+    path: '/$workflowId',
+    getParentRoute: () => appWorkflowsWorkflowsindexRoute,
+  } as any)
+
 const appProjectsProjectIdindexRoute = appProjectsProjectIdindexImport.update({
   path: '/$projectId',
   getParentRoute: () => appProjectsProjectsindexRoute,
@@ -94,7 +112,13 @@ const appOrganisationsOrganisationIdindexRoute =
     getParentRoute: () => appOrganisationsOrganisationsindexRoute,
   } as any)
 
-const appUsersCreateRoute = appUsersCreateImport.update({
+const appWorkflowsWorkflowscreateRoute =
+  appWorkflowsWorkflowscreateImport.update({
+    path: '/create',
+    getParentRoute: () => appWorkflowsWorkflowsindexRoute,
+  } as any)
+
+const appUsersUserscreateRoute = appUsersUserscreateImport.update({
   path: '/create',
   getParentRoute: () => appUsersUsersindexRoute,
 } as any)
@@ -104,17 +128,23 @@ const appUsersUserIdRoute = appUsersUserIdImport.update({
   getParentRoute: () => appUsersUsersindexRoute,
 } as any)
 
-const appProjectsCreateRoute = appProjectsCreateImport.update({
+const appProjectsProjectscreateRoute = appProjectsProjectscreateImport.update({
   path: '/create',
   getParentRoute: () => appProjectsProjectsindexRoute,
 } as any)
 
-const appOrganisationsCreateRoute = appOrganisationsCreateImport.update({
-  path: '/create',
-  getParentRoute: () => appOrganisationsOrganisationsindexRoute,
+const appOrganisationsOrganisationscreateRoute =
+  appOrganisationsOrganisationscreateImport.update({
+    path: '/create',
+    getParentRoute: () => appOrganisationsOrganisationsindexRoute,
+  } as any)
+
+const appWorkflowsWorkflowsallRoute = appWorkflowsWorkflowsallImport.update({
+  path: '/',
+  getParentRoute: () => appWorkflowsWorkflowsindexRoute,
 } as any)
 
-const appUsersUsersRoute = appUsersUsersImport.update({
+const appUsersUsersallRoute = appUsersUsersallImport.update({
   path: '/',
   getParentRoute: () => appUsersUsersindexRoute,
 } as any)
@@ -137,6 +167,11 @@ const appDocumentsDocumentsindexRoute = appDocumentsDocumentsindexImport.update(
   } as any,
 )
 
+const appWorkflowsWorkflowIdRoute = appWorkflowsWorkflowIdImport.update({
+  path: '/',
+  getParentRoute: () => appWorkflowsWorkflowIdindexRoute,
+} as any)
+
 const appProjectsProjectIdRoute = appProjectsProjectIdImport.update({
   path: '/',
   getParentRoute: () => appProjectsProjectIdindexRoute,
@@ -154,10 +189,11 @@ const appDocumentsDocumentIdindexRoute =
     getParentRoute: () => appDocumentsDocumentsindexRoute,
   } as any)
 
-const appDocumentsCreateRoute = appDocumentsCreateImport.update({
-  path: '/create',
-  getParentRoute: () => appDocumentsDocumentsindexRoute,
-} as any)
+const appDocumentsDocumentscreateRoute =
+  appDocumentsDocumentscreateImport.update({
+    path: '/create',
+    getParentRoute: () => appDocumentsDocumentsindexRoute,
+  } as any)
 
 const appDocumentsDocumentsRoute = appDocumentsDocumentsImport.update({
   path: '/',
@@ -176,15 +212,16 @@ const appDocumentsDocumentIdRoute = appDocumentsDocumentIdImport.update({
   getParentRoute: () => appDocumentsDocumentIdindexRoute,
 } as any)
 
-const appRevisionsDiffRoute = appRevisionsDiffImport.update({
+const appRevisionsRevisionsdiffRoute = appRevisionsRevisionsdiffImport.update({
   path: '/diff',
   getParentRoute: () => appRevisionsRevisionsindexRoute,
 } as any)
 
-const appRevisionsCreateRoute = appRevisionsCreateImport.update({
-  path: '/create',
-  getParentRoute: () => appRevisionsRevisionsindexRoute,
-} as any)
+const appRevisionsRevisionscreateRoute =
+  appRevisionsRevisionscreateImport.update({
+    path: '/create',
+    getParentRoute: () => appRevisionsRevisionsindexRoute,
+  } as any)
 
 const appRevisionsRevisionIdRoute = appRevisionsRevisionIdImport.update({
   path: '/$revisionId',
@@ -251,6 +288,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appUsersUsersindexImport
       parentRoute: typeof layoutsAuthenticatedImport
     }
+    '/_authenticated/workflows': {
+      id: '/_authenticated/workflows'
+      path: '/workflows'
+      fullPath: '/workflows'
+      preLoaderRoute: typeof appWorkflowsWorkflowsindexImport
+      parentRoute: typeof layoutsAuthenticatedImport
+    }
     '/_authenticated/organisations/': {
       id: '/_authenticated/organisations/'
       path: '/'
@@ -269,21 +313,28 @@ declare module '@tanstack/react-router' {
       id: '/_authenticated/users/'
       path: '/'
       fullPath: '/users/'
-      preLoaderRoute: typeof appUsersUsersImport
+      preLoaderRoute: typeof appUsersUsersallImport
       parentRoute: typeof appUsersUsersindexImport
+    }
+    '/_authenticated/workflows/': {
+      id: '/_authenticated/workflows/'
+      path: '/'
+      fullPath: '/workflows/'
+      preLoaderRoute: typeof appWorkflowsWorkflowsallImport
+      parentRoute: typeof appWorkflowsWorkflowsindexImport
     }
     '/_authenticated/organisations/create': {
       id: '/_authenticated/organisations/create'
       path: '/create'
       fullPath: '/organisations/create'
-      preLoaderRoute: typeof appOrganisationsCreateImport
+      preLoaderRoute: typeof appOrganisationsOrganisationscreateImport
       parentRoute: typeof appOrganisationsOrganisationsindexImport
     }
     '/_authenticated/projects/create': {
       id: '/_authenticated/projects/create'
       path: '/create'
       fullPath: '/projects/create'
-      preLoaderRoute: typeof appProjectsCreateImport
+      preLoaderRoute: typeof appProjectsProjectscreateImport
       parentRoute: typeof appProjectsProjectsindexImport
     }
     '/_authenticated/users/$userId': {
@@ -297,8 +348,15 @@ declare module '@tanstack/react-router' {
       id: '/_authenticated/users/create'
       path: '/create'
       fullPath: '/users/create'
-      preLoaderRoute: typeof appUsersCreateImport
+      preLoaderRoute: typeof appUsersUserscreateImport
       parentRoute: typeof appUsersUsersindexImport
+    }
+    '/_authenticated/workflows/create': {
+      id: '/_authenticated/workflows/create'
+      path: '/create'
+      fullPath: '/workflows/create'
+      preLoaderRoute: typeof appWorkflowsWorkflowscreateImport
+      parentRoute: typeof appWorkflowsWorkflowsindexImport
     }
     '/_authenticated/organisations/$organisationId': {
       id: '/_authenticated/organisations/$organisationId'
@@ -314,6 +372,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appProjectsProjectIdindexImport
       parentRoute: typeof appProjectsProjectsindexImport
     }
+    '/_authenticated/workflows/$workflowId': {
+      id: '/_authenticated/workflows/$workflowId'
+      path: '/$workflowId'
+      fullPath: '/workflows/$workflowId'
+      preLoaderRoute: typeof appWorkflowsWorkflowIdindexImport
+      parentRoute: typeof appWorkflowsWorkflowsindexImport
+    }
     '/_authenticated/organisations/$organisationId/': {
       id: '/_authenticated/organisations/$organisationId/'
       path: '/'
@@ -327,6 +392,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/projects/$projectId/'
       preLoaderRoute: typeof appProjectsProjectIdImport
       parentRoute: typeof appProjectsProjectIdindexImport
+    }
+    '/_authenticated/workflows/$workflowId/': {
+      id: '/_authenticated/workflows/$workflowId/'
+      path: '/'
+      fullPath: '/workflows/$workflowId/'
+      preLoaderRoute: typeof appWorkflowsWorkflowIdImport
+      parentRoute: typeof appWorkflowsWorkflowIdindexImport
     }
     '/_authenticated/projects/$projectId/documents': {
       id: '/_authenticated/projects/$projectId/documents'
@@ -346,7 +418,7 @@ declare module '@tanstack/react-router' {
       id: '/_authenticated/projects/$projectId/documents/create'
       path: '/create'
       fullPath: '/projects/$projectId/documents/create'
-      preLoaderRoute: typeof appDocumentsCreateImport
+      preLoaderRoute: typeof appDocumentsDocumentscreateImport
       parentRoute: typeof appDocumentsDocumentsindexImport
     }
     '/_authenticated/projects/$projectId/documents/$documentId': {
@@ -381,14 +453,14 @@ declare module '@tanstack/react-router' {
       id: '/_authenticated/projects/$projectId/documents/$documentId/revisions/create'
       path: '/create'
       fullPath: '/projects/$projectId/documents/$documentId/revisions/create'
-      preLoaderRoute: typeof appRevisionsCreateImport
+      preLoaderRoute: typeof appRevisionsRevisionscreateImport
       parentRoute: typeof appRevisionsRevisionsindexImport
     }
     '/_authenticated/projects/$projectId/documents/$documentId/revisions/diff': {
       id: '/_authenticated/projects/$projectId/documents/$documentId/revisions/diff'
       path: '/diff'
       fullPath: '/projects/$projectId/documents/$documentId/revisions/diff'
-      preLoaderRoute: typeof appRevisionsDiffImport
+      preLoaderRoute: typeof appRevisionsRevisionsdiffImport
       parentRoute: typeof appRevisionsRevisionsindexImport
     }
   }
@@ -412,14 +484,15 @@ const appOrganisationsOrganisationIdindexRouteWithChildren =
 
 interface appOrganisationsOrganisationsindexRouteChildren {
   appOrganisationsOrganisationsRoute: typeof appOrganisationsOrganisationsRoute
-  appOrganisationsCreateRoute: typeof appOrganisationsCreateRoute
+  appOrganisationsOrganisationscreateRoute: typeof appOrganisationsOrganisationscreateRoute
   appOrganisationsOrganisationIdindexRoute: typeof appOrganisationsOrganisationIdindexRouteWithChildren
 }
 
 const appOrganisationsOrganisationsindexRouteChildren: appOrganisationsOrganisationsindexRouteChildren =
   {
     appOrganisationsOrganisationsRoute: appOrganisationsOrganisationsRoute,
-    appOrganisationsCreateRoute: appOrganisationsCreateRoute,
+    appOrganisationsOrganisationscreateRoute:
+      appOrganisationsOrganisationscreateRoute,
     appOrganisationsOrganisationIdindexRoute:
       appOrganisationsOrganisationIdindexRouteWithChildren,
   }
@@ -431,15 +504,15 @@ const appOrganisationsOrganisationsindexRouteWithChildren =
 
 interface appRevisionsRevisionsindexRouteChildren {
   appRevisionsRevisionIdRoute: typeof appRevisionsRevisionIdRoute
-  appRevisionsCreateRoute: typeof appRevisionsCreateRoute
-  appRevisionsDiffRoute: typeof appRevisionsDiffRoute
+  appRevisionsRevisionscreateRoute: typeof appRevisionsRevisionscreateRoute
+  appRevisionsRevisionsdiffRoute: typeof appRevisionsRevisionsdiffRoute
 }
 
 const appRevisionsRevisionsindexRouteChildren: appRevisionsRevisionsindexRouteChildren =
   {
     appRevisionsRevisionIdRoute: appRevisionsRevisionIdRoute,
-    appRevisionsCreateRoute: appRevisionsCreateRoute,
-    appRevisionsDiffRoute: appRevisionsDiffRoute,
+    appRevisionsRevisionscreateRoute: appRevisionsRevisionscreateRoute,
+    appRevisionsRevisionsdiffRoute: appRevisionsRevisionsdiffRoute,
   }
 
 const appRevisionsRevisionsindexRouteWithChildren =
@@ -466,14 +539,14 @@ const appDocumentsDocumentIdindexRouteWithChildren =
 
 interface appDocumentsDocumentsindexRouteChildren {
   appDocumentsDocumentsRoute: typeof appDocumentsDocumentsRoute
-  appDocumentsCreateRoute: typeof appDocumentsCreateRoute
+  appDocumentsDocumentscreateRoute: typeof appDocumentsDocumentscreateRoute
   appDocumentsDocumentIdindexRoute: typeof appDocumentsDocumentIdindexRouteWithChildren
 }
 
 const appDocumentsDocumentsindexRouteChildren: appDocumentsDocumentsindexRouteChildren =
   {
     appDocumentsDocumentsRoute: appDocumentsDocumentsRoute,
-    appDocumentsCreateRoute: appDocumentsCreateRoute,
+    appDocumentsDocumentscreateRoute: appDocumentsDocumentscreateRoute,
     appDocumentsDocumentIdindexRoute:
       appDocumentsDocumentIdindexRouteWithChildren,
   }
@@ -502,14 +575,14 @@ const appProjectsProjectIdindexRouteWithChildren =
 
 interface appProjectsProjectsindexRouteChildren {
   appProjectsProjectsallRoute: typeof appProjectsProjectsallRoute
-  appProjectsCreateRoute: typeof appProjectsCreateRoute
+  appProjectsProjectscreateRoute: typeof appProjectsProjectscreateRoute
   appProjectsProjectIdindexRoute: typeof appProjectsProjectIdindexRouteWithChildren
 }
 
 const appProjectsProjectsindexRouteChildren: appProjectsProjectsindexRouteChildren =
   {
     appProjectsProjectsallRoute: appProjectsProjectsallRoute,
-    appProjectsCreateRoute: appProjectsCreateRoute,
+    appProjectsProjectscreateRoute: appProjectsProjectscreateRoute,
     appProjectsProjectIdindexRoute: appProjectsProjectIdindexRouteWithChildren,
   }
 
@@ -519,19 +592,52 @@ const appProjectsProjectsindexRouteWithChildren =
   )
 
 interface appUsersUsersindexRouteChildren {
-  appUsersUsersRoute: typeof appUsersUsersRoute
+  appUsersUsersallRoute: typeof appUsersUsersallRoute
   appUsersUserIdRoute: typeof appUsersUserIdRoute
-  appUsersCreateRoute: typeof appUsersCreateRoute
+  appUsersUserscreateRoute: typeof appUsersUserscreateRoute
 }
 
 const appUsersUsersindexRouteChildren: appUsersUsersindexRouteChildren = {
-  appUsersUsersRoute: appUsersUsersRoute,
+  appUsersUsersallRoute: appUsersUsersallRoute,
   appUsersUserIdRoute: appUsersUserIdRoute,
-  appUsersCreateRoute: appUsersCreateRoute,
+  appUsersUserscreateRoute: appUsersUserscreateRoute,
 }
 
 const appUsersUsersindexRouteWithChildren =
   appUsersUsersindexRoute._addFileChildren(appUsersUsersindexRouteChildren)
+
+interface appWorkflowsWorkflowIdindexRouteChildren {
+  appWorkflowsWorkflowIdRoute: typeof appWorkflowsWorkflowIdRoute
+}
+
+const appWorkflowsWorkflowIdindexRouteChildren: appWorkflowsWorkflowIdindexRouteChildren =
+  {
+    appWorkflowsWorkflowIdRoute: appWorkflowsWorkflowIdRoute,
+  }
+
+const appWorkflowsWorkflowIdindexRouteWithChildren =
+  appWorkflowsWorkflowIdindexRoute._addFileChildren(
+    appWorkflowsWorkflowIdindexRouteChildren,
+  )
+
+interface appWorkflowsWorkflowsindexRouteChildren {
+  appWorkflowsWorkflowsallRoute: typeof appWorkflowsWorkflowsallRoute
+  appWorkflowsWorkflowscreateRoute: typeof appWorkflowsWorkflowscreateRoute
+  appWorkflowsWorkflowIdindexRoute: typeof appWorkflowsWorkflowIdindexRouteWithChildren
+}
+
+const appWorkflowsWorkflowsindexRouteChildren: appWorkflowsWorkflowsindexRouteChildren =
+  {
+    appWorkflowsWorkflowsallRoute: appWorkflowsWorkflowsallRoute,
+    appWorkflowsWorkflowscreateRoute: appWorkflowsWorkflowscreateRoute,
+    appWorkflowsWorkflowIdindexRoute:
+      appWorkflowsWorkflowIdindexRouteWithChildren,
+  }
+
+const appWorkflowsWorkflowsindexRouteWithChildren =
+  appWorkflowsWorkflowsindexRoute._addFileChildren(
+    appWorkflowsWorkflowsindexRouteChildren,
+  )
 
 interface layoutsAuthenticatedRouteChildren {
   appDocumentsDocumentsallRoute: typeof appDocumentsDocumentsallRoute
@@ -539,6 +645,7 @@ interface layoutsAuthenticatedRouteChildren {
   appOrganisationsOrganisationsindexRoute: typeof appOrganisationsOrganisationsindexRouteWithChildren
   appProjectsProjectsindexRoute: typeof appProjectsProjectsindexRouteWithChildren
   appUsersUsersindexRoute: typeof appUsersUsersindexRouteWithChildren
+  appWorkflowsWorkflowsindexRoute: typeof appWorkflowsWorkflowsindexRouteWithChildren
 }
 
 const layoutsAuthenticatedRouteChildren: layoutsAuthenticatedRouteChildren = {
@@ -548,6 +655,7 @@ const layoutsAuthenticatedRouteChildren: layoutsAuthenticatedRouteChildren = {
     appOrganisationsOrganisationsindexRouteWithChildren,
   appProjectsProjectsindexRoute: appProjectsProjectsindexRouteWithChildren,
   appUsersUsersindexRoute: appUsersUsersindexRouteWithChildren,
+  appWorkflowsWorkflowsindexRoute: appWorkflowsWorkflowsindexRouteWithChildren,
 }
 
 const layoutsAuthenticatedRouteWithChildren =
@@ -562,26 +670,31 @@ export interface FileRoutesByFullPath {
   '/organisations': typeof appOrganisationsOrganisationsindexRouteWithChildren
   '/projects': typeof appProjectsProjectsindexRouteWithChildren
   '/users': typeof appUsersUsersindexRouteWithChildren
+  '/workflows': typeof appWorkflowsWorkflowsindexRouteWithChildren
   '/organisations/': typeof appOrganisationsOrganisationsRoute
   '/projects/': typeof appProjectsProjectsallRoute
-  '/users/': typeof appUsersUsersRoute
-  '/organisations/create': typeof appOrganisationsCreateRoute
-  '/projects/create': typeof appProjectsCreateRoute
+  '/users/': typeof appUsersUsersallRoute
+  '/workflows/': typeof appWorkflowsWorkflowsallRoute
+  '/organisations/create': typeof appOrganisationsOrganisationscreateRoute
+  '/projects/create': typeof appProjectsProjectscreateRoute
   '/users/$userId': typeof appUsersUserIdRoute
-  '/users/create': typeof appUsersCreateRoute
+  '/users/create': typeof appUsersUserscreateRoute
+  '/workflows/create': typeof appWorkflowsWorkflowscreateRoute
   '/organisations/$organisationId': typeof appOrganisationsOrganisationIdindexRouteWithChildren
   '/projects/$projectId': typeof appProjectsProjectIdindexRouteWithChildren
+  '/workflows/$workflowId': typeof appWorkflowsWorkflowIdindexRouteWithChildren
   '/organisations/$organisationId/': typeof appOrganisationsOrganisationIdRoute
   '/projects/$projectId/': typeof appProjectsProjectIdRoute
+  '/workflows/$workflowId/': typeof appWorkflowsWorkflowIdRoute
   '/projects/$projectId/documents': typeof appDocumentsDocumentsindexRouteWithChildren
   '/projects/$projectId/documents/': typeof appDocumentsDocumentsRoute
-  '/projects/$projectId/documents/create': typeof appDocumentsCreateRoute
+  '/projects/$projectId/documents/create': typeof appDocumentsDocumentscreateRoute
   '/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentIdindexRouteWithChildren
   '/projects/$projectId/documents/$documentId/': typeof appDocumentsDocumentIdRoute
   '/projects/$projectId/documents/$documentId/revisions': typeof appRevisionsRevisionsindexRouteWithChildren
   '/projects/$projectId/documents/$documentId/revisions/$revisionId': typeof appRevisionsRevisionIdRoute
-  '/projects/$projectId/documents/$documentId/revisions/create': typeof appRevisionsCreateRoute
-  '/projects/$projectId/documents/$documentId/revisions/diff': typeof appRevisionsDiffRoute
+  '/projects/$projectId/documents/$documentId/revisions/create': typeof appRevisionsRevisionscreateRoute
+  '/projects/$projectId/documents/$documentId/revisions/diff': typeof appRevisionsRevisionsdiffRoute
 }
 
 export interface FileRoutesByTo {
@@ -592,20 +705,23 @@ export interface FileRoutesByTo {
   '/nns': typeof appNnsNnsRoute
   '/organisations': typeof appOrganisationsOrganisationsRoute
   '/projects': typeof appProjectsProjectsallRoute
-  '/users': typeof appUsersUsersRoute
-  '/organisations/create': typeof appOrganisationsCreateRoute
-  '/projects/create': typeof appProjectsCreateRoute
+  '/users': typeof appUsersUsersallRoute
+  '/workflows': typeof appWorkflowsWorkflowsallRoute
+  '/organisations/create': typeof appOrganisationsOrganisationscreateRoute
+  '/projects/create': typeof appProjectsProjectscreateRoute
   '/users/$userId': typeof appUsersUserIdRoute
-  '/users/create': typeof appUsersCreateRoute
+  '/users/create': typeof appUsersUserscreateRoute
+  '/workflows/create': typeof appWorkflowsWorkflowscreateRoute
   '/organisations/$organisationId': typeof appOrganisationsOrganisationIdRoute
   '/projects/$projectId': typeof appProjectsProjectIdRoute
+  '/workflows/$workflowId': typeof appWorkflowsWorkflowIdRoute
   '/projects/$projectId/documents': typeof appDocumentsDocumentsRoute
-  '/projects/$projectId/documents/create': typeof appDocumentsCreateRoute
+  '/projects/$projectId/documents/create': typeof appDocumentsDocumentscreateRoute
   '/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentIdRoute
   '/projects/$projectId/documents/$documentId/revisions': typeof appRevisionsRevisionsindexRouteWithChildren
   '/projects/$projectId/documents/$documentId/revisions/$revisionId': typeof appRevisionsRevisionIdRoute
-  '/projects/$projectId/documents/$documentId/revisions/create': typeof appRevisionsCreateRoute
-  '/projects/$projectId/documents/$documentId/revisions/diff': typeof appRevisionsDiffRoute
+  '/projects/$projectId/documents/$documentId/revisions/create': typeof appRevisionsRevisionscreateRoute
+  '/projects/$projectId/documents/$documentId/revisions/diff': typeof appRevisionsRevisionsdiffRoute
 }
 
 export interface FileRoutesById {
@@ -618,26 +734,31 @@ export interface FileRoutesById {
   '/_authenticated/organisations': typeof appOrganisationsOrganisationsindexRouteWithChildren
   '/_authenticated/projects': typeof appProjectsProjectsindexRouteWithChildren
   '/_authenticated/users': typeof appUsersUsersindexRouteWithChildren
+  '/_authenticated/workflows': typeof appWorkflowsWorkflowsindexRouteWithChildren
   '/_authenticated/organisations/': typeof appOrganisationsOrganisationsRoute
   '/_authenticated/projects/': typeof appProjectsProjectsallRoute
-  '/_authenticated/users/': typeof appUsersUsersRoute
-  '/_authenticated/organisations/create': typeof appOrganisationsCreateRoute
-  '/_authenticated/projects/create': typeof appProjectsCreateRoute
+  '/_authenticated/users/': typeof appUsersUsersallRoute
+  '/_authenticated/workflows/': typeof appWorkflowsWorkflowsallRoute
+  '/_authenticated/organisations/create': typeof appOrganisationsOrganisationscreateRoute
+  '/_authenticated/projects/create': typeof appProjectsProjectscreateRoute
   '/_authenticated/users/$userId': typeof appUsersUserIdRoute
-  '/_authenticated/users/create': typeof appUsersCreateRoute
+  '/_authenticated/users/create': typeof appUsersUserscreateRoute
+  '/_authenticated/workflows/create': typeof appWorkflowsWorkflowscreateRoute
   '/_authenticated/organisations/$organisationId': typeof appOrganisationsOrganisationIdindexRouteWithChildren
   '/_authenticated/projects/$projectId': typeof appProjectsProjectIdindexRouteWithChildren
+  '/_authenticated/workflows/$workflowId': typeof appWorkflowsWorkflowIdindexRouteWithChildren
   '/_authenticated/organisations/$organisationId/': typeof appOrganisationsOrganisationIdRoute
   '/_authenticated/projects/$projectId/': typeof appProjectsProjectIdRoute
+  '/_authenticated/workflows/$workflowId/': typeof appWorkflowsWorkflowIdRoute
   '/_authenticated/projects/$projectId/documents': typeof appDocumentsDocumentsindexRouteWithChildren
   '/_authenticated/projects/$projectId/documents/': typeof appDocumentsDocumentsRoute
-  '/_authenticated/projects/$projectId/documents/create': typeof appDocumentsCreateRoute
+  '/_authenticated/projects/$projectId/documents/create': typeof appDocumentsDocumentscreateRoute
   '/_authenticated/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentIdindexRouteWithChildren
   '/_authenticated/projects/$projectId/documents/$documentId/': typeof appDocumentsDocumentIdRoute
   '/_authenticated/projects/$projectId/documents/$documentId/revisions': typeof appRevisionsRevisionsindexRouteWithChildren
   '/_authenticated/projects/$projectId/documents/$documentId/revisions/$revisionId': typeof appRevisionsRevisionIdRoute
-  '/_authenticated/projects/$projectId/documents/$documentId/revisions/create': typeof appRevisionsCreateRoute
-  '/_authenticated/projects/$projectId/documents/$documentId/revisions/diff': typeof appRevisionsDiffRoute
+  '/_authenticated/projects/$projectId/documents/$documentId/revisions/create': typeof appRevisionsRevisionscreateRoute
+  '/_authenticated/projects/$projectId/documents/$documentId/revisions/diff': typeof appRevisionsRevisionsdiffRoute
 }
 
 export interface FileRouteTypes {
@@ -651,17 +772,22 @@ export interface FileRouteTypes {
     | '/organisations'
     | '/projects'
     | '/users'
+    | '/workflows'
     | '/organisations/'
     | '/projects/'
     | '/users/'
+    | '/workflows/'
     | '/organisations/create'
     | '/projects/create'
     | '/users/$userId'
     | '/users/create'
+    | '/workflows/create'
     | '/organisations/$organisationId'
     | '/projects/$projectId'
+    | '/workflows/$workflowId'
     | '/organisations/$organisationId/'
     | '/projects/$projectId/'
+    | '/workflows/$workflowId/'
     | '/projects/$projectId/documents'
     | '/projects/$projectId/documents/'
     | '/projects/$projectId/documents/create'
@@ -681,12 +807,15 @@ export interface FileRouteTypes {
     | '/organisations'
     | '/projects'
     | '/users'
+    | '/workflows'
     | '/organisations/create'
     | '/projects/create'
     | '/users/$userId'
     | '/users/create'
+    | '/workflows/create'
     | '/organisations/$organisationId'
     | '/projects/$projectId'
+    | '/workflows/$workflowId'
     | '/projects/$projectId/documents'
     | '/projects/$projectId/documents/create'
     | '/projects/$projectId/documents/$documentId'
@@ -704,17 +833,22 @@ export interface FileRouteTypes {
     | '/_authenticated/organisations'
     | '/_authenticated/projects'
     | '/_authenticated/users'
+    | '/_authenticated/workflows'
     | '/_authenticated/organisations/'
     | '/_authenticated/projects/'
     | '/_authenticated/users/'
+    | '/_authenticated/workflows/'
     | '/_authenticated/organisations/create'
     | '/_authenticated/projects/create'
     | '/_authenticated/users/$userId'
     | '/_authenticated/users/create'
+    | '/_authenticated/workflows/create'
     | '/_authenticated/organisations/$organisationId'
     | '/_authenticated/projects/$projectId'
+    | '/_authenticated/workflows/$workflowId'
     | '/_authenticated/organisations/$organisationId/'
     | '/_authenticated/projects/$projectId/'
+    | '/_authenticated/workflows/$workflowId/'
     | '/_authenticated/projects/$projectId/documents'
     | '/_authenticated/projects/$projectId/documents/'
     | '/_authenticated/projects/$projectId/documents/create'
@@ -766,7 +900,8 @@ export const routeTree = rootRoute
         "/_authenticated/nns",
         "/_authenticated/organisations",
         "/_authenticated/projects",
-        "/_authenticated/users"
+        "/_authenticated/users",
+        "/_authenticated/workflows"
       ]
     },
     "/authenticate": {
@@ -807,6 +942,15 @@ export const routeTree = rootRoute
         "/_authenticated/users/create"
       ]
     },
+    "/_authenticated/workflows": {
+      "filePath": "app/workflows/workflows.index.tsx",
+      "parent": "/_authenticated",
+      "children": [
+        "/_authenticated/workflows/",
+        "/_authenticated/workflows/create",
+        "/_authenticated/workflows/$workflowId"
+      ]
+    },
     "/_authenticated/organisations/": {
       "filePath": "app/organisations/organisations.tsx",
       "parent": "/_authenticated/organisations"
@@ -816,15 +960,19 @@ export const routeTree = rootRoute
       "parent": "/_authenticated/projects"
     },
     "/_authenticated/users/": {
-      "filePath": "app/users/users.tsx",
+      "filePath": "app/users/users.all.tsx",
       "parent": "/_authenticated/users"
     },
+    "/_authenticated/workflows/": {
+      "filePath": "app/workflows/workflows.all.tsx",
+      "parent": "/_authenticated/workflows"
+    },
     "/_authenticated/organisations/create": {
-      "filePath": "app/organisations/create.tsx",
+      "filePath": "app/organisations/organisations.create.tsx",
       "parent": "/_authenticated/organisations"
     },
     "/_authenticated/projects/create": {
-      "filePath": "app/projects/create.tsx",
+      "filePath": "app/projects/projects.create.tsx",
       "parent": "/_authenticated/projects"
     },
     "/_authenticated/users/$userId": {
@@ -832,8 +980,12 @@ export const routeTree = rootRoute
       "parent": "/_authenticated/users"
     },
     "/_authenticated/users/create": {
-      "filePath": "app/users/create.tsx",
+      "filePath": "app/users/users.create.tsx",
       "parent": "/_authenticated/users"
+    },
+    "/_authenticated/workflows/create": {
+      "filePath": "app/workflows/workflows.create.tsx",
+      "parent": "/_authenticated/workflows"
     },
     "/_authenticated/organisations/$organisationId": {
       "filePath": "app/organisations/$organisationId.index.tsx",
@@ -850,6 +1002,13 @@ export const routeTree = rootRoute
         "/_authenticated/projects/$projectId/documents"
       ]
     },
+    "/_authenticated/workflows/$workflowId": {
+      "filePath": "app/workflows/$workflowId.index.tsx",
+      "parent": "/_authenticated/workflows",
+      "children": [
+        "/_authenticated/workflows/$workflowId/"
+      ]
+    },
     "/_authenticated/organisations/$organisationId/": {
       "filePath": "app/organisations/$organisationId.tsx",
       "parent": "/_authenticated/organisations/$organisationId"
@@ -857,6 +1016,10 @@ export const routeTree = rootRoute
     "/_authenticated/projects/$projectId/": {
       "filePath": "app/projects/$projectId.tsx",
       "parent": "/_authenticated/projects/$projectId"
+    },
+    "/_authenticated/workflows/$workflowId/": {
+      "filePath": "app/workflows/$workflowId.tsx",
+      "parent": "/_authenticated/workflows/$workflowId"
     },
     "/_authenticated/projects/$projectId/documents": {
       "filePath": "app/documents/documents.index.tsx",
@@ -872,7 +1035,7 @@ export const routeTree = rootRoute
       "parent": "/_authenticated/projects/$projectId/documents"
     },
     "/_authenticated/projects/$projectId/documents/create": {
-      "filePath": "app/documents/create.tsx",
+      "filePath": "app/documents/documents.create.tsx",
       "parent": "/_authenticated/projects/$projectId/documents"
     },
     "/_authenticated/projects/$projectId/documents/$documentId": {
@@ -901,11 +1064,11 @@ export const routeTree = rootRoute
       "parent": "/_authenticated/projects/$projectId/documents/$documentId/revisions"
     },
     "/_authenticated/projects/$projectId/documents/$documentId/revisions/create": {
-      "filePath": "app/revisions/create.tsx",
+      "filePath": "app/revisions/revisions.create.tsx",
       "parent": "/_authenticated/projects/$projectId/documents/$documentId/revisions"
     },
     "/_authenticated/projects/$projectId/documents/$documentId/revisions/diff": {
-      "filePath": "app/revisions/diff.tsx",
+      "filePath": "app/revisions/revisions.diff.tsx",
       "parent": "/_authenticated/projects/$projectId/documents/$documentId/revisions"
     }
   }

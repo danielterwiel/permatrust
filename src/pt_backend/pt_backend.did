@@ -1,4 +1,5 @@
 type UserId = principal;
+type WorkflowId = nat64;
 type OrganisationId = nat64;
 type ProjectId = nat64;
 type DocumentId = nat64;
@@ -25,6 +26,7 @@ type AppError = variant {
     Unauthorized : null;
     EntityNotFound : text;
     InternalError : text;
+    InvalidInput: text;
     InvalidPageSize : text;
     InvalidPageNumber: text;
 };
@@ -49,6 +51,42 @@ type PaginatedUsersResult = variant {
       PaginationMetadata;
     };
     Err : AppError;
+};
+
+type StateId = text;
+type EventId = text;
+type Edge = record{ 0: nat64; 1: nat64; 2: EventId};
+type WorkflowGraph = record {
+    nodes: vec StateId;
+    edges: vec Edge;
+};
+type Workflow = record {
+  id : WorkflowId;
+  name: text;
+  current_state: StateId;
+  graph: WorkflowGraph;
+  project_id: ProjectId;
+};
+type WorkflowIdResult = variant {
+    Ok : WorkflowId;
+    Err : AppError;
+};
+type WorkflowResult = variant {
+    Ok: Workflow;
+    Err: AppError;
+};
+type PaginatedWorkflowsResult = variant {
+    Ok : record {
+      vec Workflow;
+      PaginationMetadata;
+    };
+    Err : AppError;
+};
+type CreateWorkflowInput = record {
+    name: text;
+    project_id: ProjectId;
+    graph_json: text;
+    initial_state: StateId;
 };
 
 type Organisation = record {
@@ -162,6 +200,11 @@ service : {
     create_user : (text, text) -> (UserIdResult);
     list_users : (PaginationInput) -> (PaginatedUsersResult) query;
     get_user : () -> (UserResult) query;
+
+
+    create_workflow: (CreateWorkflowInput) -> (WorkflowIdResult);
+    list_workflows: (PaginationInput) -> (PaginatedWorkflowsResult) query;
+    get_workflow: (WorkflowId) -> (WorkflowResult) query;
 
     create_organisation : (text) -> (OrganisationIdResult);
     list_organisations : (PaginationInput) -> (PaginatedOrganisationsResult) query;
