@@ -1,39 +1,80 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { z } from 'zod'
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from '@/components/ui/card'
+import { createFileRoute, Link } from '@tanstack/react-router';
+import { z } from 'zod';
+import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import { DEFAULT_PAGINATION } from '@/consts/pagination';
+import { handleResult } from '@/utils/handleResult';
+import { pt_backend } from '@/declarations/pt_backend';
+import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
+import { Table } from '@/components/Table';
+import type { Row } from '@tanstack/react-table';
+import type { User } from '@/declarations/pt_backend/pt_backend.did';
 
-const projectsSearchSchema = z.object({
+const usersSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
-})
+});
 
 export const Route = createFileRoute('/_authenticated/users/')({
   component: Users,
-  validateSearch: (search) => projectsSearchSchema.parse(search),
+  validateSearch: (search) => usersSearchSchema.parse(search),
   loaderDeps: ({ search: { page } }) => ({ page }),
-  loader: async ({ context }) => {
+  loader: async ({ context, deps: { page } }) => {
+    const pagination = {
+      ...DEFAULT_PAGINATION,
+      page_number: BigInt(page ?? 1),
+    };
+    const response = await pt_backend.list_users(pagination);
+    const result = handleResult(response);
+    const [users, paginationMetaData] = stringifyBigIntObject(result);
     return {
       ...context,
-    }
+
+      users,
+      paginationMetaData,
+    };
   },
   errorComponent: ({ error }) => {
-    return <div>Error: {error.message}</div>
+    return <div>Error: {error.message}</div>;
   },
-})
+});
+
+const RowActions = (row: Row<User>) => {
+  return (
+    <Link
+      to="/users/$userId"
+      params={{
+        userId: row.id,
+      }}
+    >
+      Open
+    </Link>
+  );
+};
 
 function Users() {
+  const { users, paginationMetaData } = Route.useLoaderData();
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Users</CardTitle>
-        <CardDescription>
-          TODO: don't know what to do with this page
-        </CardDescription>
+        <Table<User>
+          tableData={users}
+          actions={RowActions}
+          paginationMetaData={paginationMetaData}
+          columnConfig={[
+            {
+              id: 'first_name',
+              headerName: 'First name',
+              cellPreprocess: (firstName) => firstName,
+            },
+            {
+              id: 'last_name',
+              headerName: 'Last name',
+              cellPreprocess: (lastName) => lastName,
+            },
+          ]}
+        />
       </CardHeader>
     </Card>
-  )
+  );
 }

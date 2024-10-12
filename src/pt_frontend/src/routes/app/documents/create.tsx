@@ -3,8 +3,10 @@ import { pt_backend } from '@/declarations/pt_backend';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Loading } from '@/components/Loading';
 import {
   Form,
   FormControl,
@@ -27,13 +29,7 @@ import {
 } from '@mdxeditor/editor';
 import '@mdxeditor/editor/style.css';
 import { handleResult } from '@/utils/handleResult';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const Route = createFileRoute(
   '/_authenticated/projects/$projectId/documents/create'
@@ -58,6 +54,7 @@ const formSchema = z.object({
 });
 
 export function CreateDocument() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const params = Route.useParams();
 
@@ -71,6 +68,7 @@ export function CreateDocument() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true);
     const encoder = new TextEncoder();
     const content = encoder.encode(values.content);
     const response = await pt_backend.create_document(
@@ -79,6 +77,7 @@ export function CreateDocument() {
       content
     );
     const result = handleResult(response);
+    setIsSubmitting(false);
     navigate({
       to: `/projects/$projectId/documents/$documentId`,
       params: {
@@ -92,7 +91,6 @@ export function CreateDocument() {
     <Card>
       <CardHeader>
         <CardTitle>Create a new document</CardTitle>
-        <CardDescription>A new beginning</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -146,7 +144,15 @@ export function CreateDocument() {
                 </FormItem>
               )}
             />
-            <Button type="submit">Create</Button>
+            <Button type="submit">
+              {isSubmitting ? (
+                <Button disabled={true}>
+                  <Loading text="Submitting..." className="place-items-start" />
+                </Button>
+              ) : (
+                'Submit'
+              )}
+            </Button>
           </form>
         </Form>
       </CardContent>

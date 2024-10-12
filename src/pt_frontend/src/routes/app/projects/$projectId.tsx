@@ -1,29 +1,25 @@
-import { Link } from '@/components/Link';
-import { createFileRoute } from '@tanstack/react-router';
-import { pt_backend } from '@/declarations/pt_backend';
-import { Table } from '@/components/Table';
-import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
-import { handleResult } from '@/utils/handleResult';
-import { Icon } from '@/components/ui/Icon';
-import { DEFAULT_PAGINATION } from '@/consts/pagination';
-import { z } from 'zod';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Link } from "@/components/Link";
+import { createFileRoute } from "@tanstack/react-router";
+import { pt_backend } from "@/declarations/pt_backend";
+import { Table } from "@/components/Table";
+import { stringifyBigIntObject } from "@/utils/stringifyBigIntObject";
+import { handleResult } from "@/utils/handleResult";
+import { Icon } from "@/components/ui/Icon";
+import { DEFAULT_PAGINATION } from "@/consts/pagination";
+import { z } from "zod";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Document } from "@/declarations/pt_backend/pt_backend.did";
+import type { Row } from "@tanstack/react-table";
 
 const projectsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
 });
 
-export const Route = createFileRoute('/_authenticated/projects/$projectId/')({
+export const Route = createFileRoute("/_authenticated/projects/$projectId/")({
   component: ProjectDetails,
   validateSearch: (search) => projectsSearchSchema.parse(search),
   beforeLoad: () => ({
-    getTitle: () => 'Project',
+    getTitle: () => "Project",
   }),
   loaderDeps: ({ search: { page } }) => ({ page }),
   loader: async ({ params: { projectId }, deps: { page }, context }) => {
@@ -33,7 +29,7 @@ export const Route = createFileRoute('/_authenticated/projects/$projectId/')({
     };
     const documents_response = await pt_backend.list_documents_by_project_id(
       BigInt(projectId),
-      pagination
+      pagination,
     );
     const project_response = await pt_backend.get_project(BigInt(projectId));
     const project_result = handleResult(project_response);
@@ -60,6 +56,20 @@ export const Route = createFileRoute('/_authenticated/projects/$projectId/')({
   },
 });
 
+const RowActions = (row: Row<Document>) => {
+  return (
+    <Link
+      to="/projects/$projectId/documents/$documentId"
+      params={{
+        projectId: row.original.project.toString(),
+        documentId: row.id,
+      }}
+    >
+      Open
+    </Link>
+  );
+};
+
 function ProjectDetails() {
   const { projectId } = Route.useParams();
   const { documents, paginationMetaData, active } = Route.useLoaderData();
@@ -68,7 +78,6 @@ function ProjectDetails() {
     <Card>
       <CardHeader>
         <CardTitle>{active.project.name}</CardTitle>
-        <CardDescription>Documents</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex gap-4 pr-6 flex-row-reverse">
@@ -83,19 +92,19 @@ function ProjectDetails() {
             </div>
           </Link>
         </div>
-        <Table
+        <Table<Document>
           tableData={documents}
-          openLinkTo="/projects/$projectId/documents/$documentId"
           paginationMetaData={paginationMetaData}
+          actions={RowActions}
           columnConfig={[
             {
-              id: 'title',
-              headerName: 'Document Title',
+              id: "title",
+              headerName: "Document Title",
               cellPreprocess: (title) => title,
             },
             {
-              id: 'current_version',
-              headerName: 'Version',
+              id: "current_version",
+              headerName: "Version",
               cellPreprocess: (version) => version,
             },
           ]}

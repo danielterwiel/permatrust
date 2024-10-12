@@ -4,6 +4,7 @@ import {
   flexRender,
   getCoreRowModel,
   type ColumnDef,
+  type Row,
 } from '@tanstack/react-table';
 import {
   Table as TableBase,
@@ -14,14 +15,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Link } from '@/components/Link';
 import type { Entity } from '@/consts/entities';
 import type { PaginationMetadata } from '@/declarations/pt_backend/pt_backend.did';
 import { Pagination } from './Pagination';
-import type { ToPathOption } from '@tanstack/react-router';
-
-type TableDataItem = Entity;
-export type TableData = Entity[];
 
 interface ColumnConfigItem {
   id: string;
@@ -30,46 +26,27 @@ interface ColumnConfigItem {
   cellPreprocess?: (value: any) => any;
 }
 
-function enrichKeyValues(
-  row: { original: Entity },
-  mapping: Record<string, string>
-): Record<string, string | number> {
-  return Object.fromEntries(
-    Object.entries(mapping).map(([key, value]) => {
-      const originalValue = row.original[value as keyof Entity];
-      return [
-        key,
-        typeof originalValue === 'bigint' || typeof originalValue === 'object'
-          ? String(originalValue)
-          : originalValue,
-      ];
-    })
-  );
-}
-
-interface TableProps {
-  tableData?: TableData;
-  openLinkTo?: ToPathOption;
-  openLinkParamsNormalisation?: Record<string, string>;
-  onSelectionChange?: (selectedRows: TableDataItem[]) => void;
+interface TableProps<T extends Entity = Entity> {
+  tableData?: T[];
+  onSelectionChange?: (selectedRows: T[]) => void;
   columnConfig?: ColumnConfigItem[];
   paginationMetaData?: PaginationMetadata;
+  actions?: React.ReactNode | ((row: Row<T>) => React.ReactNode);
 }
 
-export const Table: React.FC<TableProps> = ({
+export const Table = <T extends Entity = Entity>({
   tableData = [],
   onSelectionChange,
   columnConfig = [],
-  openLinkTo,
-  openLinkParamsNormalisation,
   paginationMetaData,
-}) => {
+  actions,
+}: TableProps<T>) => {
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
 
   const camelCaseToHumanReadable = useCallback((input: string) => {
     const spaced = input.replace(
       /([a-z])([A-Z])|([A-Z]+)([A-Z][a-z])/g,
-      '$1$3 $2$4'
+      '$1$3 $2$4',
     );
     const capitalized = spaced.charAt(0).toUpperCase() + spaced.slice(1);
     return capitalized;
@@ -82,8 +59,8 @@ export const Table: React.FC<TableProps> = ({
     return Object.keys(tableData[0] ?? {});
   }, [tableData]);
 
-  const columns: ColumnDef<TableDataItem>[] = useMemo(() => {
-    const selectColumn: ColumnDef<TableDataItem> = {
+  const columns: ColumnDef<T>[] = useMemo(() => {
+    const selectColumn: ColumnDef<T> = {
       id: 'select',
       header: ({ table }) => (
         <Checkbox
@@ -107,7 +84,7 @@ export const Table: React.FC<TableProps> = ({
 
     const allColumns = headers.map((header: string) => {
       const config = columnConfig.find((col) => col.id === header);
-      const columnDef: ColumnDef<TableDataItem> = {
+      const columnDef: ColumnDef<T> = {
         accessorKey: header,
         header: config?.headerName || camelCaseToHumanReadable(header),
         cell: config?.cellPreprocess
@@ -134,7 +111,7 @@ export const Table: React.FC<TableProps> = ({
     return initialVisibility;
   });
 
-  const table = useReactTable({
+  const table = useReactTable<T>({
     data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
@@ -146,7 +123,6 @@ export const Table: React.FC<TableProps> = ({
     onColumnVisibilityChange: setColumnVisibility,
   });
 
-  // Use a ref to track if the row selection has changed to avoid infinite re-renders
   const previousSelection = useRef(rowSelection);
 
   useEffect(() => {
@@ -182,7 +158,7 @@ export const Table: React.FC<TableProps> = ({
                       ? null
                       : flexRender(
                           header.column.columnDef.header,
-                          header.getContext()
+                          header.getContext(),
                         )}
                   </TableHead>
                 ))}
@@ -193,42 +169,22 @@ export const Table: React.FC<TableProps> = ({
             ))}
           </TableHeader>
           <TableBody>
-            {table.getRowModel().rows.map((row) => {
-              const openLinkParam = openLinkTo?.split('$').at(-1);
-
-              const openLinkRowParams = openLinkParamsNormalisation
-                ? enrichKeyValues(row, openLinkParamsNormalisation)
-                : {};
-
-              return (
-                <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="whitespace-nowrap">
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
-                  {openLinkTo && (
-                    <TableCell>
-                      <div className="flex justify-end">
-                        <Link
-                          to={openLinkTo}
-                          params={(prev) => ({
-                            ...prev,
-                            [openLinkParam]: row.id,
-                            ...openLinkRowParams,
-                          })}
-                        >
-                          Open
-                        </Link>
-                      </div>
-                    </TableCell>
-                  )}
-                </TableRow>
-              );
-            })}
+            {table.getRowModel().rows.map((row) => (
+              <TableRow key={row.id}>
+                {row.getVisibleCells().map((cell) => (
+                  <TableCell key={cell.id} className="whitespace-nowrap">
+                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                  </TableCell>
+                ))}
+                {actions && (
+                  <TableCell>
+                    <div className="flex justify-end pr-4">
+                      {typeof actions === 'function' ? actions(row) : actions}
+                    </div>
+                  </TableCell>
+                )}
+              </TableRow>
+            ))}
           </TableBody>
         </TableBase>
         <div className="pt-16">

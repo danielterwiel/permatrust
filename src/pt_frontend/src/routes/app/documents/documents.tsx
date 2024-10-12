@@ -3,26 +3,20 @@ import { createFileRoute } from '@tanstack/react-router';
 import { pt_backend } from '@/declarations/pt_backend';
 import { Table } from '@/components/Table';
 import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
-import { Principal } from '@dfinity/principal';
 import { handleResult } from '@/utils/handleResult';
 import { Icon } from '@/components/ui/Icon';
 import { DEFAULT_PAGINATION } from '@/consts/pagination';
 import { z } from 'zod';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
-} from '@/components/ui/card';
-import { formatDateTime } from '@/utils/date';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import type { Row } from '@tanstack/react-table';
+import type { Document } from '@/declarations/pt_backend/pt_backend.did';
 
 const documentsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
 });
 
 export const Route = createFileRoute(
-  '/_authenticated/projects/$projectId/documents/'
+  '/_authenticated/projects/$projectId/documents/',
 )({
   component: Documents,
   validateSearch: (search) => documentsSearchSchema.parse(search),
@@ -34,7 +28,7 @@ export const Route = createFileRoute(
     };
     const response = await pt_backend.list_documents_by_project_id(
       BigInt(params.projectId),
-      pagination
+      pagination,
     );
     const result = handleResult(response);
     const [documents, paginationMetaData] = stringifyBigIntObject(result);
@@ -50,6 +44,20 @@ export const Route = createFileRoute(
   },
 });
 
+const RowActions = (row: Row<Document>) => {
+  return (
+    <Link
+      to="/projects/$projectId/documents/$documentId"
+      params={{
+        projectId: row.original.project.toString(),
+        documentId: row.id,
+      }}
+    >
+      Open
+    </Link>
+  );
+};
+
 function Documents() {
   const { documents, paginationMetaData } = Route.useLoaderData();
   const { projectId } = Route.useParams();
@@ -58,9 +66,6 @@ function Documents() {
     <Card>
       <CardHeader>
         <CardTitle>Documents</CardTitle>
-        <CardDescription>
-          View your documents or create a new document
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex gap-4 pr-6 flex-row-reverse">
@@ -75,9 +80,9 @@ function Documents() {
             </div>
           </Link>
         </div>
-        <Table
+        <Table<Document>
           tableData={documents}
-          openLinkTo="/projects/$projectId/documents/$documentId"
+          actions={RowActions}
           paginationMetaData={paginationMetaData}
           columnConfig={[
             {

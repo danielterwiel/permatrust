@@ -1,46 +1,45 @@
-import { Link } from '@/components/Link';
-import { createFileRoute } from '@tanstack/react-router';
-import { pt_backend } from '@/declarations/pt_backend';
-import { Table } from '@/components/Table';
-import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
-import { handleResult } from '@/utils/handleResult';
-import { Icon } from '@/components/ui/Icon';
-import { DEFAULT_PAGINATION } from '@/consts/pagination';
-import { z } from 'zod';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
-import { Principal } from '@dfinity/principal';
-import { formatDateTime } from '@/utils/date';
+import { Link } from "@/components/Link";
+import { createFileRoute } from "@tanstack/react-router";
+import { pt_backend } from "@/declarations/pt_backend";
+import { Table } from "@/components/Table";
+import { stringifyBigIntObject } from "@/utils/stringifyBigIntObject";
+import { handleResult } from "@/utils/handleResult";
+import { Icon } from "@/components/ui/Icon";
+import { DEFAULT_PAGINATION } from "@/consts/pagination";
+import { z } from "zod";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Principal } from "@dfinity/principal";
+import { formatDateTime } from "@/utils/date";
+import { storage } from "@/utils/localStorage";
+
+import type { Row } from "@tanstack/react-table";
+import type { Project } from "@/declarations/pt_backend/pt_backend.did";
 
 const projectsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
 });
 
 export const Route = createFileRoute(
-  '/_authenticated/organisations/$organisationId/'
+  "/_authenticated/organisations/$organisationId/",
 )({
   component: OrganisationDetails,
   validateSearch: (search) => projectsSearchSchema.parse(search),
   beforeLoad: () => ({
-    getTitle: () => 'Organisation',
+    getTitle: () => "Organisation",
   }),
   loaderDeps: ({ search: { page } }) => ({ page }),
-  loader: async ({ params: { organisationId }, deps: { page }, context }) => {
+  loader: async ({ deps: { page }, context }) => {
+    const organisationId = storage.getItem("activeOrganisationId") as string;
     const pagination = {
       ...DEFAULT_PAGINATION,
       page_number: BigInt(page ?? 1),
     };
     const projects_response = await pt_backend.list_projects_by_organisation_id(
       BigInt(organisationId),
-      pagination
+      pagination,
     );
     const origanisation_response = await pt_backend.get_organisation(
-      BigInt(organisationId)
+      BigInt(organisationId),
     );
     const origanisation_result = handleResult(origanisation_response);
     const projects_result = handleResult(projects_response);
@@ -66,6 +65,19 @@ export const Route = createFileRoute(
   },
 });
 
+const RowActions = (row: Row<Project>) => {
+  return (
+    <Link
+      to="/projects/$projectId"
+      params={{
+        projectId: row.id,
+      }}
+    >
+      Open
+    </Link>
+  );
+};
+
 function OrganisationDetails() {
   const { organisationId } = Route.useParams();
   const { projects, paginationMetaData, active } = Route.useLoaderData();
@@ -74,7 +86,6 @@ function OrganisationDetails() {
     <Card>
       <CardHeader>
         <CardTitle>{active.origanisation.name}</CardTitle>
-        <CardDescription>Organisation</CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex gap-4 pr-6 flex-row-reverse">
@@ -89,25 +100,25 @@ function OrganisationDetails() {
             </div>
           </Link>
         </div>
-        <Table
+        <Table<Project>
           tableData={projects}
-          openLinkTo="/projects/$projectId"
+          actions={RowActions}
           paginationMetaData={paginationMetaData}
           columnConfig={[
             {
-              id: 'name',
-              headerName: 'Project Name',
+              id: "name",
+              headerName: "Project Name",
               cellPreprocess: (v) => v,
             },
             {
-              id: 'created_by',
-              headerName: 'Created by',
+              id: "created_by",
+              headerName: "Created by",
               cellPreprocess: (createdBy) =>
                 Principal.fromUint8Array(createdBy).toString(),
             },
             {
-              id: 'created_at',
-              headerName: 'Created at',
+              id: "created_at",
+              headerName: "Created at",
               cellPreprocess: (createdAt) => formatDateTime(createdAt),
             },
           ]}

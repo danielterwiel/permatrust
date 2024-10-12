@@ -12,13 +12,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { pt_backend } from '@/declarations/pt_backend';
 
@@ -61,7 +55,6 @@ export function CreateProject() {
     <Card>
       <CardHeader>
         <CardTitle>Create new user</CardTitle>
-        <CardDescription>A new beginning</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>

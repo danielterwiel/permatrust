@@ -1,23 +1,19 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { pt_backend } from '@/declarations/pt_backend';
-import { Table } from '@/components/Table';
-import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
-import { handleResult } from '@/utils/handleResult';
-import { DEFAULT_PAGINATION } from '@/consts/pagination';
-import { z } from 'zod';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
-} from '@/components/ui/card';
+import { Link, createFileRoute } from "@tanstack/react-router";
+import type { Row } from "@tanstack/react-table";
+import { pt_backend } from "@/declarations/pt_backend";
+import { Table } from "@/components/Table";
+import { stringifyBigIntObject } from "@/utils/stringifyBigIntObject";
+import { handleResult } from "@/utils/handleResult";
+import { DEFAULT_PAGINATION } from "@/consts/pagination";
+import { z } from "zod";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import type { Document } from "@/declarations/pt_backend/pt_backend.did";
 
 const documentsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
 });
 
-export const Route = createFileRoute('/_authenticated/documents')({
+export const Route = createFileRoute("/_authenticated/documents")({
   component: Documents,
   validateSearch: (search) => documentsSearchSchema.parse(search),
   loaderDeps: ({ search: { page } }) => ({ page }),
@@ -41,6 +37,20 @@ export const Route = createFileRoute('/_authenticated/documents')({
   },
 });
 
+const RowActions = (row: Row<Document>) => {
+  return (
+    <Link
+      to="/projects/$projectId/documents/$documentId"
+      params={{
+        projectId: row.original.project.toString(),
+        documentId: row.id,
+      }}
+    >
+      Open
+    </Link>
+  );
+};
+
 function Documents() {
   const { documents, paginationMetaData } = Route.useLoaderData();
 
@@ -48,23 +58,21 @@ function Documents() {
     <Card>
       <CardHeader>
         <CardTitle>Documents</CardTitle>
-        <CardDescription>View all your documents</CardDescription>
       </CardHeader>
       <CardContent>
-        <Table
+        <Table<Document>
           tableData={documents}
-          openLinkTo="/projects/$projectId/documents/$documentId"
-          openLinkParamsNormalisation={{ projectId: 'project' }}
+          actions={RowActions}
           paginationMetaData={paginationMetaData}
           columnConfig={[
             {
-              id: 'title',
-              headerName: 'Document Title',
+              id: "title",
+              headerName: "Document Title",
               cellPreprocess: (title) => title,
             },
             {
-              id: 'current_version',
-              headerName: 'Version',
+              id: "current_version",
+              headerName: "Version",
               cellPreprocess: (version) => version,
             },
           ]}

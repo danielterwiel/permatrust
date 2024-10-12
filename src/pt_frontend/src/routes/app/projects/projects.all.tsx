@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, Link } from '@tanstack/react-router';
 import { pt_backend } from '@/declarations/pt_backend';
 import { Table } from '@/components/Table';
 import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
@@ -6,14 +6,10 @@ import { Principal } from '@dfinity/principal';
 import { handleResult } from '@/utils/handleResult';
 import { DEFAULT_PAGINATION } from '@/consts/pagination';
 import { z } from 'zod';
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  CardDescription,
-} from '@/components/ui/card';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { formatDateTime } from '@/utils/date';
+import type { Row } from '@tanstack/react-table';
+import type { Project } from '@/declarations/pt_backend/pt_backend.did';
 
 const projectsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
@@ -43,6 +39,19 @@ export const Route = createFileRoute('/_authenticated/projects/')({
   },
 });
 
+const RowActions = (row: Row<Project>) => {
+  return (
+    <Link
+      to="/projects/$projectId"
+      params={{
+        projectId: row.id,
+      }}
+    >
+      Open
+    </Link>
+  );
+};
+
 function Projects() {
   const { projects, paginationMetaData } = Route.useLoaderData();
 
@@ -50,12 +59,11 @@ function Projects() {
     <Card>
       <CardHeader>
         <CardTitle>Projects</CardTitle>
-        <CardDescription>View all your projects</CardDescription>
       </CardHeader>
       <CardContent>
-        <Table
+        <Table<Project>
           tableData={projects}
-          openLinkTo="/projects/$projectId"
+          actions={RowActions}
           paginationMetaData={paginationMetaData}
           columnConfig={[
             {

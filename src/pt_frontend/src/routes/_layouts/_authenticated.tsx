@@ -1,21 +1,25 @@
-import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
-import { pt_backend } from '@/declarations/pt_backend';
-import { Header } from '@/components/Header';
-import { Sidebar } from '@/components/Sidebar';
-import { Breadcrumbs } from '@/components/Breadcrumbs';
-import { handleResult } from '@/utils/handleResult';
-import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
+import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
+import { pt_backend } from "@/declarations/pt_backend";
+import { Header } from "@/components/Header";
+import { Sidebar } from "@/components/Sidebar";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { handleResult } from "@/utils/handleResult";
+import { stringifyBigIntObject } from "@/utils/stringifyBigIntObject";
+import { DEFAULT_PAGINATION } from "@/consts/pagination";
+import { storage } from "@/utils/localStorage";
+import type {
+  OrganisationResult,
+  UserResult,
+} from "@/declarations/pt_backend/pt_backend.did";
 
-export const Route = createFileRoute('/_authenticated')({
+export const Route = createFileRoute("/_authenticated")({
   component: AuthLayout,
   beforeLoad: async ({ context, location }) => {
     await context.auth.initAuthClient();
 
-    console.log('context', context);
-
     if (!context.auth.authenticated) {
       throw redirect({
-        to: '/',
+        to: "/",
         search: {
           redirect: location.href,
         },
@@ -23,27 +27,49 @@ export const Route = createFileRoute('/_authenticated')({
     }
     return {
       auth: context.auth,
-      getTitle: () => 'Home',
+      getTitle: () => "Home",
     };
   },
   loader: async ({ context, location }) => {
-    const response = await pt_backend.get_user();
-    let result;
+    const userResponse = await pt_backend.get_user();
+
+    let userResult: unknown;
     try {
-      result = handleResult(response);
+      userResult = handleResult(userResponse);
     } catch (error) {
-      console.log('errror get_user', error);
-      if (location.href !== '/users/create') {
+      if (location.href !== "/users/create") {
         throw redirect({
-          to: '/users/create',
+          to: "/users/create",
         });
       }
     }
 
-    const user = stringifyBigIntObject(result);
+    const organisationId = storage.getItem("activeOrganisationId");
+
+    let organisationsResult: unknown;
+    if (!organisationId) {
+      const organisationsResponse =
+        await pt_backend.list_organisations(DEFAULT_PAGINATION);
+      try {
+        organisationsResult = handleResult(organisationsResponse);
+        throw redirect({
+          to: "/organisations",
+        });
+      } catch (error) {
+        if (location.href !== "/organisations/create") {
+          throw redirect({
+            to: "/organisations/create",
+          });
+        }
+      }
+    }
+
+    const user = stringifyBigIntObject(userResult);
+    const organisations = stringifyBigIntObject(organisationsResult);
     const active = {
       ...context.active,
       user,
+      organisations,
     };
     return { user, active };
   },

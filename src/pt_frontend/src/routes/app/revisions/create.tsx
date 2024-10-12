@@ -1,9 +1,12 @@
+import { useState, Suspense } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { pt_backend } from '@/declarations/pt_backend';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
+import { Loading } from '@/components/Loading';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Form,
   FormControl,
@@ -43,10 +46,9 @@ const formSchema = z.object({
 });
 
 export function CreateRevision() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const params = Route.useParams();
-
-  console.log('params', params);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -57,21 +59,21 @@ export function CreateRevision() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true);
     const encoder = new TextEncoder();
     const content = encoder.encode(values.content);
 
-    console.log('params', params);
-
-    const response = await pt_backend.create_revision(
+    await pt_backend.create_revision(
       BigInt(params.projectId),
       BigInt(params.documentId),
       content
     );
-    console.log('TODO: handle result', response);
+
     navigate({
       to: '/projects/$projectId/documents/$documentId',
       params,
     });
+    setIsSubmitting(false);
   }
 
   return (
@@ -109,7 +111,13 @@ export function CreateRevision() {
             </FormItem>
           )}
         />
-        <Button type="submit">Create</Button>
+        {isSubmitting ? (
+          <Button disabled={true}>
+            <Loading text="Saving..." />
+          </Button>
+        ) : (
+          <Button type="submit">Save</Button>
+        )}
       </form>
     </Form>
   );

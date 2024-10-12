@@ -14,13 +14,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { pt_backend } from '@/declarations/pt_backend';
 import { handleResult } from '@/utils/handleResult';
@@ -63,7 +57,6 @@ export function CreateOrganisation() {
     <Card>
       <CardHeader>
         <CardTitle>Create a new organisation</CardTitle>
-        <CardDescription>A new beginning</CardDescription>
       </CardHeader>
       <CardContent>
         <Form {...form}>
