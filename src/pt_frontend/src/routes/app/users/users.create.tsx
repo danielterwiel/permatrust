@@ -3,6 +3,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/Icon';
 import {
   Form,
   FormControl,
@@ -54,7 +55,14 @@ export function CreateProject() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Create new user</CardTitle>
+        <CardTitle>
+          <Icon
+            name="users-outline"
+            size="lg"
+            className="text-muted-foreground pb-1 mr-2"
+          />
+          Create new user
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>

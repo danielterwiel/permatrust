@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { z } from 'zod';
 import { Card, CardHeader, CardTitle } from '@/components/ui/card';
+import { Icon } from '@/components/ui/Icon';
 import { DEFAULT_PAGINATION } from '@/consts/pagination';
 import { handleResult } from '@/utils/handleResult';
 import { pt_backend } from '@/declarations/pt_backend';
@@ -56,7 +57,14 @@ function Users() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Users</CardTitle>
+        <CardTitle>
+          <Icon
+            name="users-outline"
+            size="lg"
+            className="text-muted-foreground pb-1 mr-2"
+          />
+          Users
+        </CardTitle>
         <Table<User>
           tableData={users}
           actions={RowActions}

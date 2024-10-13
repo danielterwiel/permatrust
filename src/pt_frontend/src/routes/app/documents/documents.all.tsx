@@ -2,6 +2,7 @@ import { Link, createFileRoute } from '@tanstack/react-router';
 import type { Row } from '@tanstack/react-table';
 import { pt_backend } from '@/declarations/pt_backend';
 import { Table } from '@/components/Table';
+import { Icon } from '@/components/ui/Icon';
 import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
 import { handleResult } from '@/utils/handleResult';
 import { DEFAULT_PAGINATION } from '@/consts/pagination';
@@ -57,7 +58,14 @@ function Documents() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Documents</CardTitle>
+        <CardTitle>
+          <Icon
+            name="files-outline"
+            size="lg"
+            className="text-muted-foreground pb-1 mr-2"
+          />
+          Documents
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <Table<Document>

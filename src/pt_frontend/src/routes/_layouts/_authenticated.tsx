@@ -78,7 +78,7 @@ export const Route = createFileRoute('/_authenticated')({
 function AuthLayout() {
   const { auth } = Route.useRouteContext();
   return (
-    <div className="grid grid-rows-[auto_auto_1fr_auto] sm:grid-rows-[auto_1fr_auto] grid-cols-[128px_1fr] sm:grid-cols-[128_auto] min-h-dvh">
+    <div className="grid grid-rows-[auto_auto_1fr_auto] sm:grid-rows-[auto_1fr_auto] grid-cols-[172px_1fr] sm:grid-cols-[172px_auto] min-h-dvh">
       <Header auth={auth} />
       <Sidebar />
       <main className="col-span-2 sm:col-span-1 px-4">

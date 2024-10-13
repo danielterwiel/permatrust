@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/Icon';
 import { Input } from '@/components/ui/input';
 import { Loading } from '@/components/Loading';
 import {
@@ -32,7 +33,7 @@ import { handleResult } from '@/utils/handleResult';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const Route = createFileRoute(
-  '/_authenticated/projects/$projectId/documents/create'
+  '/_authenticated/projects/$projectId/documents/create',
 )({
   beforeLoad: () => ({
     getTitle: () => 'Create document',
@@ -74,7 +75,7 @@ export function CreateDocument() {
     const response = await pt_backend.create_document(
       BigInt(params.projectId),
       values.title,
-      content
+      content,
     );
     const result = handleResult(response);
     setIsSubmitting(false);
@@ -90,7 +91,14 @@ export function CreateDocument() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Create a new document</CardTitle>
+        <CardTitle>
+          <Icon
+            name="file-outline"
+            size="lg"
+            className="text-muted-foreground pb-1 mr-2"
+          />
+          Create a new document
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>

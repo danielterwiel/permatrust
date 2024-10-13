@@ -59,14 +59,21 @@ function Organisations() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Organisations</CardTitle>
+        <CardTitle>
+          <Icon
+            name="buildings-outline"
+            size="lg"
+            className="text-muted-foreground pb-1 mr-2"
+          />
+          Organisations
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex gap-4 pr-6 flex-row-reverse">
           <Link to="/organisations/create" variant="default">
             <div className="flex gap-2">
+              <Icon name="building-outline" size="md" />
               Create Organisation
-              <Icon name="rectangle-outline" size="md" />
             </div>
           </Link>
         </div>

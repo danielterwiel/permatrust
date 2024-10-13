@@ -1,8 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Icon } from '@/components/ui/Icon';
 import { createFileRoute } from '@tanstack/react-router';
-// import { pt_backend } from '@/declarations/pt_backend';
-// import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
-// import { handleResult } from '@/utils/handleResult';
 
 export const Route = createFileRoute('/_authenticated/workflows/$workflowId/')({
   component: DocumentDetails,
@@ -31,7 +29,14 @@ function DocumentDetails() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Workflow ID TODO</CardTitle>
+        <CardTitle>
+          <Icon
+            name="file-orientation-outline"
+            size="lg"
+            className="text-muted-foreground pb-1 mr-2"
+          />
+          Workflow ID TODO
+        </CardTitle>
       </CardHeader>
       <CardContent>Workflow content</CardContent>
     </Card>

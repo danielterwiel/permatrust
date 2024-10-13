@@ -6,6 +6,7 @@ import { z } from 'zod';
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Icon } from '@/components/ui/Icon';
 import { Loading } from '@/components/Loading';
 import { Textarea } from '@/components/ui/textarea';
 import {
@@ -65,156 +66,71 @@ const formSchema = z.object({
     ),
 });
 
-const defaultGraphJson = `
-{
-  "id": "capa",
-  "initial": "idle",
-  "context": {
-    "projects": [],
-    "currentProject": null,
-    "currentDocument": null,
-    "currentRevision": null
+const defaultGraphJson = {
+  id: 'capa_document_process',
+  initial: 'identification',
+  context: {
+    documentRevision: 1,
+    problemDescription: '',
+    rootCause: '',
+    correctiveAction: '',
+    preventiveAction: '',
   },
-  "states": {
-    "idle": {
-      "on": {
-        "Initiate Project Creation": {
-          "target": "projectCreation"
+  states: {
+    identification: {
+      on: {
+        PROBLEM_IDENTIFIED: {
+          target: 'investigation',
+          actions: 'setProblemDescription',
         },
-        "Choose Existing Project": {
-          "target": "projectSelected",
-          "actions": [
-            {
-              "type": "Set Current Project"
-            }
-          ]
-        }
-      }
+      },
     },
-    "projectCreation": {
-      "on": {
-        "Finalize Project Creation": {
-          "target": "idle",
-          "actions": [
-            {
-              "type": "Add Project to List"
-            }
-          ]
+    investigation: {
+      on: {
+        ROOT_CAUSE_FOUND: {
+          target: 'planningCorrectiveAction',
+          actions: 'setRootCause',
         },
-        "Cancel Current Action": {
-          "target": "idle"
-        }
-      }
+      },
     },
-    "projectSelected": {
-      "on": {
-        "Initiate Document Creation": {
-          "target": "documentCreation"
+    planningCorrectiveAction: {
+      on: {
+        CORRECTIVE_ACTION_PLANNED: {
+          target: 'implementingCorrectiveAction',
+          actions: 'setCorrectiveAction',
         },
-        "Choose Existing Document": {
-          "target": "documentSelected",
-          "actions": [
-            {
-              "type": "Set Current Document"
-            }
-          ]
-        },
-        "Go Back to Previous State": {
-          "target": "idle",
-          "actions": [
-            {
-              "type": "Deselect Current Project"
-            }
-          ]
-        }
-      }
+      },
     },
-    "documentCreation": {
-      "on": {
-        "Finalize Document Creation": {
-          "target": "projectSelected",
-          "actions": [
-            {
-              "type": "Add Document to Project"
-            }
-          ]
-        },
-        "Cancel Current Action": {
-          "target": "projectSelected"
-        }
-      }
+    implementingCorrectiveAction: {
+      on: {
+        CORRECTIVE_ACTION_IMPLEMENTED: 'planningPreventiveAction',
+      },
     },
-    "documentSelected": {
-      "on": {
-        "Initiate Revision Creation": {
-          "target": "revisionCreation"
+    planningPreventiveAction: {
+      on: {
+        PREVENTIVE_ACTION_PLANNED: {
+          target: 'implementingPreventiveAction',
+          actions: 'setPreventiveAction',
         },
-        "Choose Existing Revision": {
-          "target": "revisionSelected",
-          "actions": [
-            {
-              "type": "Set Current Revision"
-            }
-          ]
-        },
-        "Go Back to Previous State": {
-          "target": "projectSelected",
-          "actions": [
-            {
-              "type": "Deselect Current Document"
-            }
-          ]
-        }
-      }
+      },
     },
-    "revisionCreation": {
-      "on": {
-        "Finalize Revision Creation": {
-          "target": "documentSelected",
-          "actions": [
-            {
-              "type": "Add Revision to Document"
-            }
-          ]
-        },
-        "Cancel Current Action": {
-          "target": "documentSelected"
-        }
-      }
+    implementingPreventiveAction: {
+      on: {
+        PREVENTIVE_ACTION_IMPLEMENTED: 'verification',
+      },
     },
-    "revisionSelected": {
-      "on": {
-        "Start Editing Revision": {
-          "target": "revisionEditing"
-        },
-        "Go Back to Previous State": {
-          "target": "documentSelected",
-          "actions": [
-            {
-              "type": "Deselect Current Revision"
-            }
-          ]
-        }
-      }
+    verification: {
+      on: {
+        ACTIONS_EFFECTIVE: 'closure',
+        ACTIONS_INEFFECTIVE: 'identification',
+      },
     },
-    "revisionEditing": {
-      "on": {
-        "Save Changes to Revision": {
-          "target": "revisionSelected",
-          "actions": [
-            {
-              "type": "Update Revision Details"
-            }
-          ]
-        },
-        "Cancel Current Action": {
-          "target": "revisionSelected"
-        }
-      }
-    }
-  }
-}
-`;
+    closure: {
+      type: 'final',
+      entry: 'incrementDocumentRevision',
+    },
+  },
+};
 
 interface XStateJson {
   id: string;
@@ -271,7 +187,7 @@ export function CreateWorkflow() {
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: '',
-      graph_json: defaultGraphJson,
+      graph_json: JSON.stringify(defaultGraphJson),
     },
   });
 
@@ -388,7 +304,14 @@ export function CreateWorkflow() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Create a new workflow</CardTitle>
+        <CardTitle>
+          <Icon
+            name="file-orientation-outline"
+            size="lg"
+            className="text-muted-foreground pb-1 mr-2"
+          />
+          Create a new workflow
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -407,26 +330,6 @@ export function CreateWorkflow() {
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="graph_json"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Graph JSON</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder='{ "id": "light", "initial": "green", "states": { ... } }'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Your JSON Graph in xstate format.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {/* Render the state machine visualization */}
             {nodes.length > 0 && (
               <FormItem>
                 <FormLabel>State Machine Visualization</FormLabel>
@@ -447,6 +350,25 @@ export function CreateWorkflow() {
                 </div>
               </FormItem>
             )}
+            <FormField
+              control={form.control}
+              name="graph_json"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Graph JSON</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder='{ "id": "light", "initial": "green", "states": { ... } }'
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Your JSON Graph in xstate format.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <Button type="submit">
               {isSubmitting ? (
                 <Button disabled={true}>

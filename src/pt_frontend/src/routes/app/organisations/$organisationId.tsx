@@ -56,8 +56,6 @@ export const Route = createFileRoute(
       active: {
         origanisation,
       },
-
-      organisationId,
     };
   },
   errorComponent: ({ error }) => {
@@ -66,7 +64,6 @@ export const Route = createFileRoute(
 });
 
 function OrganisationDetails() {
-  const { organisationId } = Route.useParams();
   const { projects, paginationMetaData, active } = Route.useLoaderData();
 
   const RowActions = (row: Row<Project>) => {
@@ -85,18 +82,21 @@ function OrganisationDetails() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{active.origanisation.name}</CardTitle>
+        <CardTitle>
+          <Icon
+            name="building-outline"
+            size="lg"
+            className="text-muted-foreground pb-1 mr-2"
+          />
+          {active.origanisation.name}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex gap-4 pr-6 flex-row-reverse">
-          <Link
-            to="/projects/create"
-            params={{ organisationId }}
-            variant="default"
-          >
+          <Link to="/projects/create" variant="default">
             <div className="flex gap-2">
+              <Icon name="briefcase-outline" size="md" />
               Create project
-              <Icon name="file-outline" size="md" />
             </div>
           </Link>
         </div>

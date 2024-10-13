@@ -65,14 +65,21 @@ function Projects() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Projects</CardTitle>
+        <CardTitle>
+          <Icon
+            name="briefcase-outline"
+            size="lg"
+            className="text-muted-foreground pb-1 mr-2"
+          />
+          Projects
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex gap-4 pr-6 flex-row-reverse">
           <Link to="/projects/create" variant="default">
             <div className="flex gap-2">
+              <Icon name="briefcase-outline" size="md" />
               Create Project
-              <Icon name="rectangle-outline" size="md" />
             </div>
           </Link>
         </div>

@@ -2,9 +2,9 @@ import { Link } from '@/components/Link';
 import { createFileRoute } from '@tanstack/react-router';
 import { pt_backend } from '@/declarations/pt_backend';
 import { Table } from '@/components/Table';
+import { Icon } from '@/components/ui/Icon';
 import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
 import { handleResult } from '@/utils/handleResult';
-import { Icon } from '@/components/ui/Icon';
 import { DEFAULT_PAGINATION } from '@/consts/pagination';
 import { z } from 'zod';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -77,7 +77,14 @@ function ProjectDetails() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{active.project.name}</CardTitle>
+        <CardTitle>
+          <Icon
+            name="briefcase-outline"
+            size="lg"
+            className="text-muted-foreground pb-1 mr-2"
+          />
+          {active.project.name}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex gap-4 pr-6 flex-row-reverse">
@@ -87,8 +94,8 @@ function ProjectDetails() {
             variant="default"
           >
             <div className="flex gap-2">
-              Create Document
               <Icon name="file-outline" size="md" />
+              Create Document
             </div>
           </Link>
         </div>

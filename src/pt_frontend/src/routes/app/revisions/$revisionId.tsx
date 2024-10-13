@@ -3,11 +3,11 @@ import { pt_backend } from '@/declarations/pt_backend';
 import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
 import { MDXEditor, headingsPlugin } from '@mdxeditor/editor';
 import { handleResult } from '@/utils/handleResult';
-
+import { Icon } from '@/components/ui/Icon';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const Route = createFileRoute(
-  '/_authenticated/projects/$projectId/documents/$documentId/revisions/$revisionId'
+  '/_authenticated/projects/$projectId/documents/$documentId/revisions/$revisionId',
 )({
   component: RevisionDetails,
   beforeLoad: () => ({
@@ -34,7 +34,14 @@ function RevisionDetails() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Revision #{active.revision?.version}</CardTitle>
+        <CardTitle>
+          <Icon
+            name="file-stack-outline"
+            size="lg"
+            className="text-muted-foreground pb-1 mr-2"
+          />
+          Revision #{active.revision?.version}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <MDXEditor
@@ -43,8 +50,8 @@ function RevisionDetails() {
           contentEditableClassName="prose"
           markdown={new TextDecoder().decode(
             new Uint8Array(
-              revision?.content ? Object.values(revision?.content) : []
-            )
+              revision?.content ? Object.values(revision?.content) : [],
+            ),
           )}
           onError={(error) => console.error('MDXEditor error:', error)}
         />

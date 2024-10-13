@@ -1,21 +1,21 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { pt_backend } from "@/declarations/pt_backend";
-import { Table } from "@/components/Table";
-import { stringifyBigIntObject } from "@/utils/stringifyBigIntObject";
-import { handleResult } from "@/utils/handleResult";
-import { DEFAULT_PAGINATION } from "@/consts/pagination";
-import { z } from "zod";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Icon } from "@/components/ui/Icon";
-import { Link } from "@/components/Link";
-import type { Row } from "@tanstack/react-table";
-import type { Workflow } from "@/declarations/pt_backend/pt_backend.did";
+import { createFileRoute } from '@tanstack/react-router';
+import { pt_backend } from '@/declarations/pt_backend';
+import { Table } from '@/components/Table';
+import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
+import { handleResult } from '@/utils/handleResult';
+import { DEFAULT_PAGINATION } from '@/consts/pagination';
+import { z } from 'zod';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Icon } from '@/components/ui/Icon';
+import { Link } from '@/components/Link';
+import type { Row } from '@tanstack/react-table';
+import type { Workflow } from '@/declarations/pt_backend/pt_backend.did';
 
 const workflowsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
 });
 
-export const Route = createFileRoute("/_authenticated/workflows/")({
+export const Route = createFileRoute('/_authenticated/workflows/')({
   component: Workflows,
   validateSearch: (search) => workflowsSearchSchema.parse(search),
   loaderDeps: ({ search: { page } }) => ({ page }),
@@ -58,13 +58,20 @@ function Workflows() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Workflows</CardTitle>
+        <CardTitle>
+          <Icon
+            name="file-orientation-outline"
+            size="lg"
+            className="text-muted-foreground pb-1 mr-2"
+          />
+          Workflows
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <Link to="/workflows/create" variant="default">
           <div className="flex gap-2">
-            Create workflow
             <Icon name="file-stack-outline" size="md" />
+            Create workflow
           </div>
         </Link>
         <Table<Workflow>
@@ -73,8 +80,8 @@ function Workflows() {
           paginationMetaData={paginationMetaData}
           columnConfig={[
             {
-              id: "name",
-              headerName: "Workflow name",
+              id: 'name',
+              headerName: 'Workflow name',
               cellPreprocess: (title) => title,
             },
           ]}

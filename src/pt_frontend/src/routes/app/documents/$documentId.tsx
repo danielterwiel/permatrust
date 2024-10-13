@@ -91,7 +91,14 @@ function DocumentDetails() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{active.document.title}</CardTitle>
+        <CardTitle>
+          <Icon
+            name="file-outline"
+            size="lg"
+            className="text-muted-foreground pb-1 mr-2"
+          />
+          {active.document.title}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex gap-4 pr-6 flex-row-reverse">
@@ -101,8 +108,8 @@ function DocumentDetails() {
             variant="default"
           >
             <div className="flex gap-2">
-              Create Revision
               <Icon name="file-stack-outline" size="md" />
+              Create Revision
             </div>
           </Link>
           <Link

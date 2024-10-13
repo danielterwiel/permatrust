@@ -65,7 +65,14 @@ function Documents() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Documents</CardTitle>
+        <CardTitle>
+          <Icon
+            name="files-outline"
+            size="lg"
+            className="text-muted-foreground pb-1 mr-2"
+          />
+          Documents
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex gap-4 pr-6 flex-row-reverse">
@@ -75,8 +82,8 @@ function Documents() {
             variant="default"
           >
             <div className="flex gap-2">
-              Create document
               <Icon name="file-outline" size="md" />
+              Create document
             </div>
           </Link>
         </div>

@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Icon } from '@/components/ui/Icon';
 import { pt_backend } from '@/declarations/pt_backend';
 import { handleResult } from '@/utils/handleResult';
 
@@ -56,7 +57,14 @@ export function CreateOrganisation() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Create a new organisation</CardTitle>
+        <CardTitle>
+          <Icon
+            name="building-outline"
+            size="lg"
+            className="text-muted-foreground pb-1 mr-2"
+          />
+          Create a new organisation
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>

@@ -1,13 +1,15 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { pt_backend } from '@/declarations/pt_backend';
 import { Table } from '@/components/Table';
 import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
 import { Principal } from '@dfinity/principal';
 import { handleResult } from '@/utils/handleResult';
-import { DEFAULT_PAGINATION } from '@/consts/pagination';
 import { z } from 'zod';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Icon } from '@/components/ui/Icon';
+import { Link } from '@/components/Link';
 import { formatDateTime } from '@/utils/date';
+import { DEFAULT_PAGINATION } from '@/consts/pagination';
 import type { Row } from '@tanstack/react-table';
 import type { Project } from '@/declarations/pt_backend/pt_backend.did';
 
@@ -58,9 +60,23 @@ function Projects() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Projects</CardTitle>
+        <CardTitle>
+          <Icon
+            name="briefcase-outline"
+            size="lg"
+            className="text-muted-foreground pb-1 mr-2"
+          />
+          Projects
+        </CardTitle>
       </CardHeader>
       <CardContent>
+        <div className="flex gap-4 pr-6 flex-row-reverse">
+          <Link to="/projects/create" variant="default">
+            <div className="flex gap-2">
+              <Icon name="briefcase-outline" size="md" /> Create project
+            </div>
+          </Link>
+        </div>
         <Table<Project>
           tableData={projects}
           actions={RowActions}

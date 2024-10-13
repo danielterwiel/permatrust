@@ -1,22 +1,27 @@
 import { Link } from '@/components/Link';
+import { Icon } from '@/components/ui/Icon';
 
 export const Sidebar = () => {
   return (
-    <aside className="col-span-2 sm:col-span-1">
+    <aside className="col-span-2 sm:col-span-1 p-2 md:p-4">
       <nav>
         <ul className="flex flex-row sm:flex-col">
           {(
             [
-              ['/nns', 'NNS'],
-              ['/organisations', 'Organisations'],
-              ['/projects', 'Projects'],
-              ['/documents', 'Documents'],
-              ['/users', 'Users'],
-              ['/workflows', 'Workflows'],
+              ['/nns', 'NNS', 'infinity-outline'],
+              ['/organisations', 'Organisations', 'building-outline'],
+              ['/projects', 'Projects', 'briefcase-outline'],
+              ['/documents', 'Documents', 'file-outline'],
+              ['/users', 'Users', 'users-outline'],
+              ['/workflows', 'Workflows', 'file-orientation-outline'],
             ] as const
-          ).map(([to, label]) => {
+          ).map(([to, label, icon]) => {
             return (
               <li key={to}>
+                <Icon
+                  name={icon}
+                  className="hidden md:inline text-muted-foreground"
+                />
                 <Link
                   to={to}
                   activeOptions={
