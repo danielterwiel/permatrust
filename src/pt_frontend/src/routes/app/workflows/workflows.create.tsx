@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { pt_backend } from '@/declarations/pt_backend';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { useState, useEffect } from 'react';
@@ -63,16 +63,28 @@ const formSchema = z.object({
     ),
 });
 
-const defaultGraphJson = {
+interface Transition {
+  target: string;
+  actions?: string | string[];
+}
+
+interface StateConfig {
+  on?: {
+    [event: string]: Transition | Transition[];
+  };
+}
+
+interface MachineConfig {
+  id: string;
+  initial: string;
+  states: {
+    [stateId: string]: StateConfig;
+  };
+}
+
+const defaultGraphJson: MachineConfig = {
   id: 'capa_document_process',
   initial: 'identification',
-  context: {
-    documentRevision: 1,
-    problemDescription: '',
-    rootCause: '',
-    correctiveAction: '',
-    preventiveAction: '',
-  },
   states: {
     identification: {
       on: {
@@ -100,7 +112,9 @@ const defaultGraphJson = {
     },
     implementingCorrectiveAction: {
       on: {
-        CORRECTIVE_ACTION_IMPLEMENTED: 'planningPreventiveAction',
+        CORRECTIVE_ACTION_IMPLEMENTED: {
+          target: 'planningPreventiveAction',
+        },
       },
     },
     planningPreventiveAction: {
@@ -113,66 +127,26 @@ const defaultGraphJson = {
     },
     implementingPreventiveAction: {
       on: {
-        PREVENTIVE_ACTION_IMPLEMENTED: 'verification',
+        PREVENTIVE_ACTION_IMPLEMENTED: {
+          target: 'verification',
+        },
       },
     },
     verification: {
       on: {
-        ACTIONS_EFFECTIVE: 'closure',
-        ACTIONS_INEFFECTIVE: 'identification',
+        ACTIONS_EFFECTIVE: {
+          target: 'closure',
+        },
+        ACTIONS_INEFFECTIVE: {
+          target: 'identification',
+        },
       },
     },
     closure: {
-      type: 'final',
-      entry: 'incrementDocumentRevision',
+      // Final state
     },
   },
 };
-
-interface XStateJson {
-  id: string;
-  initial: string;
-  states: {
-    [key: string]: {
-      on?: {
-        [event: string]: string;
-      };
-    };
-  };
-}
-
-interface WorkflowGraph {
-  nodes: string[];
-  edges: [number, number, string][];
-}
-
-function transformXStateToWorkflowGraph(xstateJson: XStateJson): WorkflowGraph {
-  const nodes = Object.keys(xstateJson.states);
-  const stateIndexMap: { [state: string]: number } = {};
-  nodes.forEach((state, index) => {
-    stateIndexMap[state] = index;
-  });
-
-  const edges: [number, number, string][] = [];
-
-  for (const state of nodes) {
-    const stateConfig = xstateJson.states[state] ?? {};
-    if (stateConfig.on) {
-      for (const [event, targetState] of Object.entries(stateConfig.on)) {
-        const sourceIndex = stateIndexMap[state];
-        const targetIndex = stateIndexMap[targetState as string];
-        if (sourceIndex !== undefined && targetIndex !== undefined) {
-          edges.push([sourceIndex, targetIndex, event]);
-        }
-      }
-    }
-  }
-
-  return {
-    nodes,
-    edges,
-  };
-}
 
 export function CreateWorkflow() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -185,16 +159,20 @@ export function CreateWorkflow() {
     disabled: isSubmitting,
     defaultValues: {
       name: '',
-      graph_json: JSON.stringify(defaultGraphJson),
+      graph_json: JSON.stringify(defaultGraphJson, null, 2),
     },
   });
 
+  const graphJsonValue = useWatch({
+    control: form.control,
+    name: 'graph_json',
+  });
+
   useEffect(() => {
-    const graphJson = form.watch('graph_json');
     try {
-      const xstateJson = JSON.parse(graphJson);
+      const machineConfig: MachineConfig = JSON.parse(graphJsonValue);
       const { nodes: newNodes, edges: newEdges } =
-        generateGraphElements(xstateJson);
+        generateGraphElements(machineConfig);
       setNodes(newNodes);
       setEdges(newEdges);
     } catch (error) {
@@ -202,14 +180,13 @@ export function CreateWorkflow() {
       setNodes([]);
       setEdges([]);
     }
-  }, [form.watch('graph_json')]);
+  }, [graphJsonValue]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
-
     try {
-      const xstateJson = JSON.parse(values.graph_json);
-      const graphJsonObject = transformXStateToWorkflowGraph(xstateJson);
+      const machineConfig: MachineConfig = JSON.parse(values.graph_json);
+      const graphJsonObject = generateWorkflowGraph(machineConfig);
       const graph_json = JSON.stringify(graphJsonObject);
 
       console.log('Transformed graph_json:', graph_json);
@@ -218,11 +195,10 @@ export function CreateWorkflow() {
         project_id: BigInt(0),
         name: values.name,
         graph_json,
-        initial_state: xstateJson.initial,
+        initial_state: machineConfig.initial,
       });
 
       const result = handleResult(response);
-      setIsSubmitting(false);
 
       navigate({
         to: '/workflows/$workflowId',
@@ -232,13 +208,13 @@ export function CreateWorkflow() {
       });
     } catch (error) {
       console.error('Error:', error);
-      setIsSubmitting(false);
       // Handle the error (e.g., show a message to the user)
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
-  // Function to generate graph elements for reactflow
-  function generateGraphElements(machineConfig: XStateJson): {
+  function generateGraphElements(machineConfig: MachineConfig): {
     nodes: Node[];
     edges: Edge[];
   } {
@@ -249,54 +225,61 @@ export function CreateWorkflow() {
       stateNodes.push({
         id: stateId,
         data: { label: stateId },
-        position: { x: index * 150, y: index * 100 }, // Improved positioning
+        position: { x: index * 150, y: 0 },
         type: 'default',
       });
 
       if (state.on) {
-        Object.entries(state.on).forEach(([event, target]) => {
-          if (typeof target === 'string') {
+        Object.entries(state.on).forEach(([event, transitions]) => {
+          const transitionArray = Array.isArray(transitions)
+            ? transitions
+            : [transitions];
+          transitionArray.forEach((transition) => {
             stateEdges.push({
-              id: `${stateId}-${event}-${target}`,
+              id: `${stateId}-${event}-${transition.target}`,
               source: stateId,
-              target,
+              target: transition.target,
               label: event,
               animated: true,
             });
-          } else if (Array.isArray(target)) {
-            target.forEach((t) => {
-              if (typeof t === 'string') {
-                stateEdges.push({
-                  id: `${stateId}-${event}-${t}`,
-                  source: stateId,
-                  target: t,
-                  label: event,
-                  animated: true,
-                });
-              } else if (t.target) {
-                stateEdges.push({
-                  id: `${stateId}-${event}-${t.target}`,
-                  source: stateId,
-                  target: t.target,
-                  label: event,
-                  animated: true,
-                });
-              }
-            });
-          } else if (typeof target === 'object' && target.target) {
-            stateEdges.push({
-              id: `${stateId}-${event}-${target.target}`,
-              source: stateId,
-              target: target.target,
-              label: event,
-              animated: true,
-            });
-          }
+          });
         });
       }
     });
 
     return { nodes: stateNodes, edges: stateEdges };
+  }
+
+  function generateWorkflowGraph(machineConfig: MachineConfig) {
+    const nodes = Object.keys(machineConfig.states);
+    const stateIndexMap: { [state: string]: number } = {};
+    nodes.forEach((state, index) => {
+      stateIndexMap[state] = index;
+    });
+
+    const edges: [number, number, string][] = [];
+
+    for (const [stateId, state] of Object.entries(machineConfig.states)) {
+      if (state.on) {
+        for (const [event, transitions] of Object.entries(state.on)) {
+          const transitionArray = Array.isArray(transitions)
+            ? transitions
+            : [transitions];
+          transitionArray.forEach((transition) => {
+            const sourceIndex = stateIndexMap[stateId];
+            const targetIndex = stateIndexMap[transition.target];
+            if (sourceIndex !== undefined && targetIndex !== undefined) {
+              edges.push([sourceIndex, targetIndex, event]);
+            }
+          });
+        }
+      }
+    }
+
+    return {
+      nodes,
+      edges,
+    };
   }
 
   return (
@@ -330,7 +313,7 @@ export function CreateWorkflow() {
             />
             {nodes.length > 0 && (
               <FormItem>
-                <FormLabel>State Machine Visualization</FormLabel>
+                <FormLabel>Workflow Visualization</FormLabel>
                 <div style={{ height: '400px', width: '100%' }}>
                   <ReactFlowProvider>
                     <ReactFlow
@@ -361,21 +344,19 @@ export function CreateWorkflow() {
                     />
                   </FormControl>
                   <FormDescription>
-                    Your JSON Graph in xstate format.
+                    Your JSON Graph in the specified format.
                   </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            {isSubmitting ? (
-              <Button disabled={true}>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? (
                 <Loading text="Creating..." className="place-items-start" />
-              </Button>
-            ) : (
-              <Button type="submit" disabled={isSubmitting}>
-                Create
-              </Button>
-            )}
+              ) : (
+                'Create'
+              )}
+            </Button>
           </form>
         </Form>
       </CardContent>
