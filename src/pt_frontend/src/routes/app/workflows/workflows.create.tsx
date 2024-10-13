@@ -65,27 +65,156 @@ const formSchema = z.object({
     ),
 });
 
-const defaultGraphJson = `{
-  "id": "light",
-  "initial": "green",
+const defaultGraphJson = `
+{
+  "id": "capa",
+  "initial": "idle",
+  "context": {
+    "projects": [],
+    "currentProject": null,
+    "currentDocument": null,
+    "currentRevision": null
+  },
   "states": {
-    "green": {
+    "idle": {
       "on": {
-        "TIMER": "yellow"
+        "Initiate Project Creation": {
+          "target": "projectCreation"
+        },
+        "Choose Existing Project": {
+          "target": "projectSelected",
+          "actions": [
+            {
+              "type": "Set Current Project"
+            }
+          ]
+        }
       }
     },
-    "yellow": {
+    "projectCreation": {
       "on": {
-        "TIMER": "red"
+        "Finalize Project Creation": {
+          "target": "idle",
+          "actions": [
+            {
+              "type": "Add Project to List"
+            }
+          ]
+        },
+        "Cancel Current Action": {
+          "target": "idle"
+        }
       }
     },
-    "red": {
+    "projectSelected": {
       "on": {
-        "TIMER": "green"
+        "Initiate Document Creation": {
+          "target": "documentCreation"
+        },
+        "Choose Existing Document": {
+          "target": "documentSelected",
+          "actions": [
+            {
+              "type": "Set Current Document"
+            }
+          ]
+        },
+        "Go Back to Previous State": {
+          "target": "idle",
+          "actions": [
+            {
+              "type": "Deselect Current Project"
+            }
+          ]
+        }
+      }
+    },
+    "documentCreation": {
+      "on": {
+        "Finalize Document Creation": {
+          "target": "projectSelected",
+          "actions": [
+            {
+              "type": "Add Document to Project"
+            }
+          ]
+        },
+        "Cancel Current Action": {
+          "target": "projectSelected"
+        }
+      }
+    },
+    "documentSelected": {
+      "on": {
+        "Initiate Revision Creation": {
+          "target": "revisionCreation"
+        },
+        "Choose Existing Revision": {
+          "target": "revisionSelected",
+          "actions": [
+            {
+              "type": "Set Current Revision"
+            }
+          ]
+        },
+        "Go Back to Previous State": {
+          "target": "projectSelected",
+          "actions": [
+            {
+              "type": "Deselect Current Document"
+            }
+          ]
+        }
+      }
+    },
+    "revisionCreation": {
+      "on": {
+        "Finalize Revision Creation": {
+          "target": "documentSelected",
+          "actions": [
+            {
+              "type": "Add Revision to Document"
+            }
+          ]
+        },
+        "Cancel Current Action": {
+          "target": "documentSelected"
+        }
+      }
+    },
+    "revisionSelected": {
+      "on": {
+        "Start Editing Revision": {
+          "target": "revisionEditing"
+        },
+        "Go Back to Previous State": {
+          "target": "documentSelected",
+          "actions": [
+            {
+              "type": "Deselect Current Revision"
+            }
+          ]
+        }
+      }
+    },
+    "revisionEditing": {
+      "on": {
+        "Save Changes to Revision": {
+          "target": "revisionSelected",
+          "actions": [
+            {
+              "type": "Update Revision Details"
+            }
+          ]
+        },
+        "Cancel Current Action": {
+          "target": "revisionSelected"
+        }
       }
     }
   }
-}`;
+}
+`;
 
 interface XStateJson {
   id: string;
@@ -195,30 +324,62 @@ export function CreateWorkflow() {
   }
 
   // Function to generate graph elements for reactflow
-  function generateGraphElements(machineConfig: XStateJson) {
-    const machine = createMachine(machineConfig);
+  function generateGraphElements(machineConfig: XStateJson): {
+    nodes: Node[];
+    edges: Edge[];
+  } {
     const stateNodes: Node[] = [];
     const stateEdges: Edge[] = [];
 
-    Object.entries(machine.states).forEach(([stateId, state], index) => {
+    Object.entries(machineConfig.states).forEach(([stateId, state], index) => {
       stateNodes.push({
         id: stateId,
         data: { label: stateId },
-        position: { x: index * 150, y: 0 },
+        position: { x: index * 150, y: index * 100 }, // Improved positioning
         type: 'default',
       });
 
-      Object.entries(state.on || {}).forEach(([event, target]) => {
-        if (typeof target === 'string') {
-          stateEdges.push({
-            id: `${stateId}-${event}-${target}`,
-            source: stateId,
-            target: target,
-            label: event,
-            animated: true,
-          });
-        }
-      });
+      if (state.on) {
+        Object.entries(state.on).forEach(([event, target]) => {
+          if (typeof target === 'string') {
+            stateEdges.push({
+              id: `${stateId}-${event}-${target}`,
+              source: stateId,
+              target,
+              label: event,
+              animated: true,
+            });
+          } else if (Array.isArray(target)) {
+            target.forEach((t) => {
+              if (typeof t === 'string') {
+                stateEdges.push({
+                  id: `${stateId}-${event}-${t}`,
+                  source: stateId,
+                  target: t,
+                  label: event,
+                  animated: true,
+                });
+              } else if (t.target) {
+                stateEdges.push({
+                  id: `${stateId}-${event}-${t.target}`,
+                  source: stateId,
+                  target: t.target,
+                  label: event,
+                  animated: true,
+                });
+              }
+            });
+          } else if (typeof target === 'object' && target.target) {
+            stateEdges.push({
+              id: `${stateId}-${event}-${target.target}`,
+              source: stateId,
+              target: target.target,
+              label: event,
+              animated: true,
+            });
+          }
+        });
+      }
     });
 
     return { nodes: stateNodes, edges: stateEdges };
@@ -271,7 +432,14 @@ export function CreateWorkflow() {
                 <FormLabel>State Machine Visualization</FormLabel>
                 <div style={{ height: '400px', width: '100%' }}>
                   <ReactFlowProvider>
-                    <ReactFlow nodes={nodes} edges={edges} fitView>
+                    <ReactFlow
+                      nodes={nodes}
+                      edges={edges}
+                      fitView
+                      nodesDraggable={false}
+                      nodesConnectable={false}
+                      elementsSelectable={false}
+                    >
                       <Background />
                       <Controls />
                     </ReactFlow>
