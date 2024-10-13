@@ -112,7 +112,7 @@ export function CreateProject() {
                 <Loading text="Creating..." />
               </Button>
             ) : (
-              <Button type="submit">Create</Button>
+              <Button type="submit">Create user</Button>
             )}
           </form>
         </Form>

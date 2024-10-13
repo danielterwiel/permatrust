@@ -64,6 +64,7 @@ function ProjectDetails() {
     return (
       <Link
         to="/projects/$projectId/documents/$documentId"
+        variant="outline"
         params={{
           projectId: row.original.project.toString(),
           documentId: row.id,

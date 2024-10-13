@@ -155,10 +155,10 @@ export function CreateDocument() {
             />
             {isSubmitting ? (
               <Button disabled={true}>
-                <Loading text="Submitting..." className="place-items-start" />
+                <Loading text="Creating..." className="place-items-start" />
               </Button>
             ) : (
-              <Button type="submit">Submit</Button>
+              <Button type="submit">Create document</Button>
             )}
           </form>
         </Form>

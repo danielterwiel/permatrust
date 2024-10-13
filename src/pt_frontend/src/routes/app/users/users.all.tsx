@@ -1,18 +1,19 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
-import { z } from 'zod';
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
-import { Icon } from '@/components/ui/Icon';
-import { DEFAULT_PAGINATION } from '@/consts/pagination';
-import { handleResult } from '@/utils/handleResult';
-import { pt_backend } from '@/declarations/pt_backend';
-import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
-import { Table } from '@/components/Table';
-import type { Row } from '@tanstack/react-table';
-import type { User } from '@/declarations/pt_backend/pt_backend.did';
+import { createFileRoute } from '@tanstack/react-router'
+import { z } from 'zod'
+import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import { Icon } from '@/components/ui/Icon'
+import { Link } from '@/components/Link'
+import { DEFAULT_PAGINATION } from '@/consts/pagination'
+import { handleResult } from '@/utils/handleResult'
+import { pt_backend } from '@/declarations/pt_backend'
+import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject'
+import { Table } from '@/components/Table'
+import type { Row } from '@tanstack/react-table'
+import type { User } from '@/declarations/pt_backend/pt_backend.did'
 
 const usersSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
-});
+})
 
 export const Route = createFileRoute('/_authenticated/users/')({
   component: Users,
@@ -22,37 +23,38 @@ export const Route = createFileRoute('/_authenticated/users/')({
     const pagination = {
       ...DEFAULT_PAGINATION,
       page_number: BigInt(page ?? 1),
-    };
-    const response = await pt_backend.list_users(pagination);
-    const result = handleResult(response);
-    const [users, paginationMetaData] = stringifyBigIntObject(result);
+    }
+    const response = await pt_backend.list_users(pagination)
+    const result = handleResult(response)
+    const [users, paginationMetaData] = stringifyBigIntObject(result)
     return {
       ...context,
 
       users,
       paginationMetaData,
-    };
+    }
   },
   errorComponent: ({ error }) => {
-    return <div>Error: {error.message}</div>;
+    return <div>Error: {error.message}</div>
   },
-});
+})
 
 const RowActions = (row: Row<User>) => {
   return (
     <Link
       to="/users/$userId"
+      variant="outline"
       params={{
         userId: row.id,
       }}
     >
       Open
     </Link>
-  );
-};
+  )
+}
 
 function Users() {
-  const { users, paginationMetaData } = Route.useLoaderData();
+  const { users, paginationMetaData } = Route.useLoaderData()
 
   return (
     <Card>
@@ -84,5 +86,5 @@ function Users() {
         />
       </CardHeader>
     </Card>
-  );
+  )
 }

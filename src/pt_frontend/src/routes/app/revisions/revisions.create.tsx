@@ -122,7 +122,7 @@ export function CreateRevision() {
           </Button>
         ) : (
           <Button disabled={isSubmitting} type="submit">
-            Save
+            Create revision
           </Button>
         )}
       </form>

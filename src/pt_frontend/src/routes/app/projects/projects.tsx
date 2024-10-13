@@ -50,6 +50,7 @@ const RowActions = (row: Row<Project>) => {
   return (
     <Link
       to="/projects/$projectId"
+      variant="outline"
       params={{
         projectId: row.id,
       }}

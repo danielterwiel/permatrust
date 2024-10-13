@@ -45,6 +45,7 @@ const RowActions = (row: Row<Project>) => {
   return (
     <Link
       to="/projects/$projectId"
+      variant="outline"
       params={{
         projectId: row.id,
       }}
@@ -58,49 +59,57 @@ function Projects() {
   const { projects, paginationMetaData } = Route.useLoaderData();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          <Icon
-            name="briefcase-outline"
-            size="lg"
-            className="text-muted-foreground pb-1 mr-2"
+    <>
+      <div className="text-right pb-4">
+        <Link
+          to="/projects/create"
+          variant="default"
+          className="h-7 gap-1"
+          size="sm"
+        >
+          <Icon name="briefcase-outline" size="sm" />
+          <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+            Create project
+          </span>
+        </Link>
+      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <Icon
+              name="briefcase-outline"
+              size="lg"
+              className="text-muted-foreground pb-1 mr-2"
+            />
+            Projects
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table<Project>
+            tableData={projects}
+            actions={RowActions}
+            paginationMetaData={paginationMetaData}
+            columnConfig={[
+              {
+                id: 'name',
+                headerName: 'Project Name',
+                cellPreprocess: (v) => v,
+              },
+              {
+                id: 'created_by',
+                headerName: 'Created by',
+                cellPreprocess: (createdBy) =>
+                  Principal.fromUint8Array(createdBy).toString(),
+              },
+              {
+                id: 'created_at',
+                headerName: 'Created at',
+                cellPreprocess: (createdAt) => formatDateTime(createdAt),
+              },
+            ]}
           />
-          Projects
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex gap-4 pr-6 flex-row-reverse">
-          <Link to="/projects/create" variant="default">
-            <div className="flex gap-2">
-              <Icon name="briefcase-outline" size="md" /> Create project
-            </div>
-          </Link>
-        </div>
-        <Table<Project>
-          tableData={projects}
-          actions={RowActions}
-          paginationMetaData={paginationMetaData}
-          columnConfig={[
-            {
-              id: 'name',
-              headerName: 'Project Name',
-              cellPreprocess: (v) => v,
-            },
-            {
-              id: 'created_by',
-              headerName: 'Created by',
-              cellPreprocess: (createdBy) =>
-                Principal.fromUint8Array(createdBy).toString(),
-            },
-            {
-              id: 'created_at',
-              headerName: 'Created at',
-              cellPreprocess: (createdAt) => formatDateTime(createdAt),
-            },
-          ]}
-        />
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </>
   );
 }

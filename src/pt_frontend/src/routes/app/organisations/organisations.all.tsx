@@ -53,54 +53,65 @@ function Organisations() {
       navigate({ to: `/organisations/${row.id}` });
     };
 
-    return <Button onClick={setOrganisationIdLocalStorage}>Open</Button>;
+    return (
+      <Button variant="outline" onClick={setOrganisationIdLocalStorage}>
+        Open
+      </Button>
+    );
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          <Icon
-            name="buildings-outline"
-            size="lg"
-            className="text-muted-foreground pb-1 mr-2"
+    <>
+      <div className="text-right pb-4">
+        <Link
+          to="/organisations/create"
+          variant="default"
+          className="h-7 gap-1"
+          size="sm"
+        >
+          <Icon name="building-outline" size="sm" />
+          <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+            Create Organisation
+          </span>
+        </Link>
+      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <Icon
+              name="buildings-outline"
+              size="lg"
+              className="text-muted-foreground pb-1 mr-2"
+            />
+            Organisations
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table
+            tableData={organisations}
+            actions={RowActions}
+            paginationMetaData={paginationMetaData}
+            columnConfig={[
+              {
+                id: 'name',
+                headerName: 'Name',
+                cellPreprocess: (v) => v,
+              },
+              {
+                id: 'created_by',
+                headerName: 'Created by',
+                cellPreprocess: (createdBy) =>
+                  Principal.fromUint8Array(createdBy).toString(),
+              },
+              {
+                id: 'created_at',
+                headerName: 'Created at',
+                cellPreprocess: (createdAt) => formatDateTime(createdAt),
+              },
+            ]}
           />
-          Organisations
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex gap-4 pr-6 flex-row-reverse">
-          <Link to="/organisations/create" variant="default">
-            <div className="flex gap-2">
-              <Icon name="building-outline" size="md" />
-              Create Organisation
-            </div>
-          </Link>
-        </div>
-        <Table
-          tableData={organisations}
-          actions={RowActions}
-          paginationMetaData={paginationMetaData}
-          columnConfig={[
-            {
-              id: 'name',
-              headerName: 'Name',
-              cellPreprocess: (v) => v,
-            },
-            {
-              id: 'created_by',
-              headerName: 'Created by',
-              cellPreprocess: (createdBy) =>
-                Principal.fromUint8Array(createdBy).toString(),
-            },
-            {
-              id: 'created_at',
-              headerName: 'Created at',
-              cellPreprocess: (createdAt) => formatDateTime(createdAt),
-            },
-          ]}
-        />
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </>
   );
 }

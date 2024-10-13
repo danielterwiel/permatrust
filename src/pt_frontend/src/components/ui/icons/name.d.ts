@@ -8,6 +8,7 @@
 	| "file-outline"
 	| "file-stack-outline"
 	| "files-outline"
+	| "git-compare-outline"
 	| "infinity-outline"
 	| "user-outline"
 	| "users-outline";

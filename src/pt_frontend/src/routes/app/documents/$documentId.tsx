@@ -77,6 +77,7 @@ function DocumentDetails() {
     return (
       <Link
         to="/projects/$projectId/documents/$documentId/revisions/$revisionId"
+        variant="outline"
         params={{
           documentId,
           projectId,
@@ -89,81 +90,89 @@ function DocumentDetails() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          <Icon
-            name="file-outline"
-            size="lg"
-            className="text-muted-foreground pb-1 mr-2"
-          />
-          {active.document.title}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex gap-4 pr-6 flex-row-reverse">
-          <Link
-            to="/projects/$projectId/documents/$documentId/revisions/create"
-            params={{ projectId, documentId }}
-            variant="default"
-          >
-            <div className="flex gap-2">
-              <Icon name="file-stack-outline" size="md" />
-              Create Revision
-            </div>
-          </Link>
-          <Link
-            to="/projects/$projectId/documents/$documentId/revisions/diff"
-            params={{
-              projectId,
-              documentId,
-            }}
-            search={{
-              theirs: selected[0]?.id ? Number(selected[0].id) : undefined,
-              current: selected[1]?.id ? Number(selected[1].id) : undefined,
-            }}
-            disabled={selected.length !== 2}
-            variant={selected.length !== 2 ? 'secondary' : 'outline'}
-          >
+    <>
+      <div className="flex gap-4 pr-6 flex-row-reverse text-right pb-4">
+        <Link
+          to="/projects/$projectId/documents/$documentId/revisions/create"
+          params={{ projectId, documentId }}
+          variant="default"
+          className="h-7 gap-1"
+          size="sm"
+        >
+          <Icon name="file-stack-outline" size="sm" />
+          <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+            Create revision
+          </span>
+        </Link>
+        <Link
+          to="/projects/$projectId/documents/$documentId/revisions/diff"
+          params={{
+            projectId,
+            documentId,
+          }}
+          search={{
+            theirs: selected[0]?.id ? Number(selected[0].id) : undefined,
+            current: selected[1]?.id ? Number(selected[1].id) : undefined,
+          }}
+          disabled={selected.length !== 2}
+          variant={selected.length !== 2 ? 'secondary' : 'outline'}
+          className="h-7 gap-1"
+        >
+          <Icon name="git-compare-outline" size="sm" />
+          <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
             Compare
-          </Link>
-        </div>
-        <Table<Revision>
-          tableData={revisions}
-          onSelectionChange={handleCheckedChange}
-          paginationMetaData={paginationMetaData}
-          actions={RowActions}
-          columnConfig={[
-            {
-              id: 'version',
-              cellPreprocess: (v) => v,
-            },
-            {
-              id: 'content',
-              cellPreprocess: (content) => {
-                return (
-                  <div className="truncate max-w-md">
-                    {new TextDecoder().decode(
-                      new Uint8Array(content ? Object.values(content) : []),
-                    )}
-                  </div>
-                );
+          </span>
+        </Link>
+      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <Icon
+              name="file-outline"
+              size="lg"
+              className="text-muted-foreground pb-1 mr-2"
+            />
+            {active.document.title}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table<Revision>
+            tableData={revisions}
+            onSelectionChange={handleCheckedChange}
+            paginationMetaData={paginationMetaData}
+            actions={RowActions}
+            columnConfig={[
+              {
+                id: 'version',
+                cellPreprocess: (v) => v,
               },
-            },
-            {
-              id: 'created_by',
-              headerName: 'Created by',
-              cellPreprocess: (createdBy) =>
-                Principal.fromUint8Array(createdBy).toString(),
-            },
-            {
-              id: 'created_at',
-              headerName: 'Created at',
-              cellPreprocess: (createdAt) => formatDateTime(createdAt),
-            },
-          ]}
-        />
-      </CardContent>
-    </Card>
+              {
+                id: 'content',
+                cellPreprocess: (content) => {
+                  return (
+                    <div className="truncate max-w-md">
+                      {new TextDecoder().decode(
+                        new Uint8Array(content ? Object.values(content) : []),
+                      )}
+                    </div>
+                  );
+                },
+              },
+              {
+                id: 'created_by',
+                headerName: 'Created by',
+                cellPreprocess: (createdBy) =>
+                  Principal.fromUint8Array(createdBy).toString(),
+              },
+              {
+                id: 'created_at',
+                headerName: 'Created at',
+                cellPreprocess: (createdAt) => formatDateTime(createdAt),
+              },
+            ]}
+          />
+        </CardContent>
+      </Card>
+    </>
   );
 }

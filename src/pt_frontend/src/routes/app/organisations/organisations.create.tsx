@@ -85,7 +85,7 @@ export function CreateOrganisation() {
                 </FormItem>
               )}
             />
-            <Button type="submit">Create</Button>
+            <Button type="submit">Create organisation</Button>
           </form>
         </Form>
       </CardContent>

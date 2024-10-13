@@ -43,6 +43,7 @@ const RowActions = (row: Row<Workflow>) => {
   return (
     <Link
       to="/workflows/$workflowId"
+      variant="outline"
       params={{
         workflowId: row.id,
       }}
@@ -56,39 +57,46 @@ function Workflows() {
   const { workflows, paginationMetaData } = Route.useLoaderData();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          <Icon
-            name="file-orientation-outline"
-            size="lg"
-            className="text-muted-foreground pb-1 mr-2"
+    <>
+      <div className="text-right pb-4">
+        <Link
+          to="/workflows/create"
+          variant="default"
+          className="h-7 gap-1"
+          size="sm"
+        >
+          <Icon name="file-orientation-outline" size="sm" />
+          <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+            Create workflow
+          </span>
+        </Link>
+      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <Icon
+              name="file-orientation-outline"
+              size="lg"
+              className="text-muted-foreground pb-1 mr-2"
+            />
+            Workflows
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table<Workflow>
+            tableData={workflows}
+            actions={RowActions}
+            paginationMetaData={paginationMetaData}
+            columnConfig={[
+              {
+                id: 'name',
+                headerName: 'Workflow name',
+                cellPreprocess: (title) => title,
+              },
+            ]}
           />
-          Workflows
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex gap-4 pr-6 flex-row-reverse">
-          <Link to="/workflows/create" variant="default">
-            <div className="flex gap-2">
-              <Icon name="briefcase-outline" size="md" />
-              Create workflow
-            </div>
-          </Link>
-        </div>
-        <Table<Workflow>
-          tableData={workflows}
-          actions={RowActions}
-          paginationMetaData={paginationMetaData}
-          columnConfig={[
-            {
-              id: 'name',
-              headerName: 'Workflow name',
-              cellPreprocess: (title) => title,
-            },
-          ]}
-        />
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </>
   );
 }
