@@ -68,12 +68,14 @@ function Workflows() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Link to="/workflows/create" variant="default">
-          <div className="flex gap-2">
-            <Icon name="file-stack-outline" size="md" />
-            Create workflow
-          </div>
-        </Link>
+        <div className="flex gap-4 pr-6 flex-row-reverse">
+          <Link to="/workflows/create" variant="default">
+            <div className="flex gap-2">
+              <Icon name="briefcase-outline" size="md" />
+              Create workflow
+            </div>
+          </Link>
+        </div>
         <Table<Workflow>
           tableData={workflows}
           actions={RowActions}

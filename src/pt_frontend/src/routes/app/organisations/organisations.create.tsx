@@ -63,7 +63,7 @@ export function CreateOrganisation() {
             size="lg"
             className="text-muted-foreground pb-1 mr-2"
           />
-          Create a new organisation
+          Create new organisation
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -76,7 +76,7 @@ export function CreateOrganisation() {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Acme" {...field} />
+                    <Input placeholder="e.g. Acme" {...field} />
                   </FormControl>
                   <FormDescription>
                     This is your organisation name.

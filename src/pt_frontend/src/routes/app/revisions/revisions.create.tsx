@@ -1,4 +1,4 @@
-import { useState, Suspense } from 'react';
+import { useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { pt_backend } from '@/declarations/pt_backend';
 import { useForm } from 'react-hook-form';
@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/components/Loading';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   Form,
   FormControl,
@@ -30,7 +29,7 @@ import {
 import '@mdxeditor/editor/style.css';
 
 export const Route = createFileRoute(
-  '/_authenticated/projects/$projectId/documents/$documentId/revisions/create'
+  '/_authenticated/projects/$projectId/documents/$documentId/revisions/create',
 )({
   component: CreateRevision,
   beforeLoad: () => ({
@@ -52,6 +51,7 @@ export function CreateRevision() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    disabled: isSubmitting,
     defaultValues: {
       content: '',
       projects: [BigInt(params.projectId)],
@@ -59,21 +59,26 @@ export function CreateRevision() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
-    const encoder = new TextEncoder();
-    const content = encoder.encode(values.content);
+    try {
+      setIsSubmitting(true);
+      const encoder = new TextEncoder();
+      const content = encoder.encode(values.content);
 
-    await pt_backend.create_revision(
-      BigInt(params.projectId),
-      BigInt(params.documentId),
-      content
-    );
+      await pt_backend.create_revision(
+        BigInt(params.projectId),
+        BigInt(params.documentId),
+        content,
+      );
 
-    navigate({
-      to: '/projects/$projectId/documents/$documentId',
-      params,
-    });
-    setIsSubmitting(false);
+      navigate({
+        to: '/projects/$projectId/documents/$documentId',
+        params,
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -116,7 +121,9 @@ export function CreateRevision() {
             <Loading text="Saving..." />
           </Button>
         ) : (
-          <Button type="submit">Save</Button>
+          <Button disabled={isSubmitting} type="submit">
+            Save
+          </Button>
         )}
       </form>
     </Form>

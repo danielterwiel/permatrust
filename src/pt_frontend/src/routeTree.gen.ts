@@ -31,7 +31,7 @@ import { Route as appOrganisationsOrganisationscreateImport } from './routes/app
 import { Route as appWorkflowsWorkflowsallImport } from './routes/app/workflows/workflows.all'
 import { Route as appUsersUsersallImport } from './routes/app/users/users.all'
 import { Route as appProjectsProjectsallImport } from './routes/app/projects/projects.all'
-import { Route as appOrganisationsOrganisationsImport } from './routes/app/organisations/organisations'
+import { Route as appOrganisationsOrganisationsallImport } from './routes/app/organisations/organisations.all'
 import { Route as appDocumentsDocumentsindexImport } from './routes/app/documents/documents.index'
 import { Route as appWorkflowsWorkflowIdImport } from './routes/app/workflows/$workflowId'
 import { Route as appProjectsProjectIdImport } from './routes/app/projects/$projectId'
@@ -154,8 +154,8 @@ const appProjectsProjectsallRoute = appProjectsProjectsallImport.update({
   getParentRoute: () => appProjectsProjectsindexRoute,
 } as any)
 
-const appOrganisationsOrganisationsRoute =
-  appOrganisationsOrganisationsImport.update({
+const appOrganisationsOrganisationsallRoute =
+  appOrganisationsOrganisationsallImport.update({
     path: '/',
     getParentRoute: () => appOrganisationsOrganisationsindexRoute,
   } as any)
@@ -299,7 +299,7 @@ declare module '@tanstack/react-router' {
       id: '/_authenticated/organisations/'
       path: '/'
       fullPath: '/organisations/'
-      preLoaderRoute: typeof appOrganisationsOrganisationsImport
+      preLoaderRoute: typeof appOrganisationsOrganisationsallImport
       parentRoute: typeof appOrganisationsOrganisationsindexImport
     }
     '/_authenticated/projects/': {
@@ -483,14 +483,15 @@ const appOrganisationsOrganisationIdindexRouteWithChildren =
   )
 
 interface appOrganisationsOrganisationsindexRouteChildren {
-  appOrganisationsOrganisationsRoute: typeof appOrganisationsOrganisationsRoute
+  appOrganisationsOrganisationsallRoute: typeof appOrganisationsOrganisationsallRoute
   appOrganisationsOrganisationscreateRoute: typeof appOrganisationsOrganisationscreateRoute
   appOrganisationsOrganisationIdindexRoute: typeof appOrganisationsOrganisationIdindexRouteWithChildren
 }
 
 const appOrganisationsOrganisationsindexRouteChildren: appOrganisationsOrganisationsindexRouteChildren =
   {
-    appOrganisationsOrganisationsRoute: appOrganisationsOrganisationsRoute,
+    appOrganisationsOrganisationsallRoute:
+      appOrganisationsOrganisationsallRoute,
     appOrganisationsOrganisationscreateRoute:
       appOrganisationsOrganisationscreateRoute,
     appOrganisationsOrganisationIdindexRoute:
@@ -671,7 +672,7 @@ export interface FileRoutesByFullPath {
   '/projects': typeof appProjectsProjectsindexRouteWithChildren
   '/users': typeof appUsersUsersindexRouteWithChildren
   '/workflows': typeof appWorkflowsWorkflowsindexRouteWithChildren
-  '/organisations/': typeof appOrganisationsOrganisationsRoute
+  '/organisations/': typeof appOrganisationsOrganisationsallRoute
   '/projects/': typeof appProjectsProjectsallRoute
   '/users/': typeof appUsersUsersallRoute
   '/workflows/': typeof appWorkflowsWorkflowsallRoute
@@ -703,7 +704,7 @@ export interface FileRoutesByTo {
   '/authenticate': typeof publicAuthenticateRoute
   '/documents': typeof appDocumentsDocumentsallRoute
   '/nns': typeof appNnsNnsRoute
-  '/organisations': typeof appOrganisationsOrganisationsRoute
+  '/organisations': typeof appOrganisationsOrganisationsallRoute
   '/projects': typeof appProjectsProjectsallRoute
   '/users': typeof appUsersUsersallRoute
   '/workflows': typeof appWorkflowsWorkflowsallRoute
@@ -735,7 +736,7 @@ export interface FileRoutesById {
   '/_authenticated/projects': typeof appProjectsProjectsindexRouteWithChildren
   '/_authenticated/users': typeof appUsersUsersindexRouteWithChildren
   '/_authenticated/workflows': typeof appWorkflowsWorkflowsindexRouteWithChildren
-  '/_authenticated/organisations/': typeof appOrganisationsOrganisationsRoute
+  '/_authenticated/organisations/': typeof appOrganisationsOrganisationsallRoute
   '/_authenticated/projects/': typeof appProjectsProjectsallRoute
   '/_authenticated/users/': typeof appUsersUsersallRoute
   '/_authenticated/workflows/': typeof appWorkflowsWorkflowsallRoute
@@ -952,7 +953,7 @@ export const routeTree = rootRoute
       ]
     },
     "/_authenticated/organisations/": {
-      "filePath": "app/organisations/organisations.tsx",
+      "filePath": "app/organisations/organisations.all.tsx",
       "parent": "/_authenticated/organisations"
     },
     "/_authenticated/projects/": {

@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/Icon';
+import { Loading } from '@/components/Loading';
 import {
   Form,
   FormControl,
@@ -18,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { pt_backend } from '@/declarations/pt_backend';
 import { handleResult } from '@/utils/handleResult';
 import { storage } from '@/utils/localStorage';
+import { useState } from 'react';
 
 export const Route = createFileRoute('/_authenticated/projects/create')({
   component: CreateProject,
@@ -36,28 +38,37 @@ const formSchema = z.object({
 });
 
 export function CreateProject() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    disabled: isSubmitting,
     defaultValues: {
       name: '',
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const organisationId = storage.getItem('activeOrganisationId') as string;
-    const response = await pt_backend.create_project(
-      BigInt(organisationId),
-      values.name,
-    );
-    const result = handleResult(response);
-    navigate({
-      to: '/projects/$projectId',
-      params: {
-        projectId: result.toString(),
-      },
-    });
+    setIsSubmitting(true);
+    try {
+      const organisationId = storage.getItem('activeOrganisationId') as string;
+      const response = await pt_backend.create_project(
+        BigInt(organisationId),
+        values.name,
+      );
+      const result = handleResult(response);
+      navigate({
+        to: '/projects/$projectId',
+        params: {
+          projectId: result.toString(),
+        },
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -82,14 +93,22 @@ export function CreateProject() {
                 <FormItem>
                   <FormLabel>Name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Trial" {...field} />
+                    <Input placeholder="e.g. Clinical trial" {...field} />
                   </FormControl>
                   <FormDescription>This is your project name.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit">Create</Button>
+            {isSubmitting ? (
+              <Button disabled={true}>
+                <Loading text="Creating..." />
+              </Button>
+            ) : (
+              <Button type="submit" disabled={isSubmitting}>
+                Create
+              </Button>
+            )}
           </form>
         </Form>
       </CardContent>

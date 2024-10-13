@@ -85,8 +85,8 @@ function AuthLayout() {
         <Breadcrumbs />
         <Outlet />
       </main>
-      <footer className="col-span-1 sm:col-span-2">
-        (c) permatrust - 2024
+      <footer className="col-span-1 sm:col-span-2 p-2">
+        © permatrust - 2024
       </footer>
     </div>
   );

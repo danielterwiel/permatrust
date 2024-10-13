@@ -20,9 +20,6 @@ import {
 } from '@/components/ui/form';
 import { handleResult } from '@/utils/handleResult';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-
-// Import necessary modules from xstate, xstate-graph, and reactflow
-import { createMachine } from 'xstate';
 import ReactFlow, {
   ReactFlowProvider,
   Background,
@@ -185,6 +182,7 @@ export function CreateWorkflow() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    disabled: isSubmitting,
     defaultValues: {
       name: '',
       graph_json: JSON.stringify(defaultGraphJson),
@@ -310,7 +308,7 @@ export function CreateWorkflow() {
             size="lg"
             className="text-muted-foreground pb-1 mr-2"
           />
-          Create a new workflow
+          Create new workflow
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -323,7 +321,7 @@ export function CreateWorkflow() {
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="CAPA" {...field} />
+                    <Input placeholder="e.g. CAPA" {...field} />
                   </FormControl>
                   <FormDescription>This is your workflow name.</FormDescription>
                   <FormMessage />
@@ -369,15 +367,15 @@ export function CreateWorkflow() {
                 </FormItem>
               )}
             />
-            <Button type="submit">
-              {isSubmitting ? (
-                <Button disabled={true}>
-                  <Loading text="Creating..." className="place-items-start" />
-                </Button>
-              ) : (
-                'Create'
-              )}
-            </Button>
+            {isSubmitting ? (
+              <Button disabled={true}>
+                <Loading text="Creating..." className="place-items-start" />
+              </Button>
+            ) : (
+              <Button type="submit" disabled={isSubmitting}>
+                Create
+              </Button>
+            )}
           </form>
         </Form>
       </CardContent>

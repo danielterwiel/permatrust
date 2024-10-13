@@ -61,6 +61,7 @@ export function CreateDocument() {
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    disabled: isSubmitting,
     defaultValues: {
       title: '',
       content: '',
@@ -97,7 +98,7 @@ export function CreateDocument() {
             size="lg"
             className="text-muted-foreground pb-1 mr-2"
           />
-          Create a new document
+          Create new document
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -110,7 +111,7 @@ export function CreateDocument() {
                 <FormItem>
                   <FormLabel>Title</FormLabel>
                   <FormControl>
-                    <Input placeholder="Document" {...field} />
+                    <Input placeholder="e.g. Leaflet" {...field} />
                   </FormControl>
                   <FormDescription>
                     This is your document title.
@@ -152,15 +153,13 @@ export function CreateDocument() {
                 </FormItem>
               )}
             />
-            <Button type="submit">
-              {isSubmitting ? (
-                <Button disabled={true}>
-                  <Loading text="Submitting..." className="place-items-start" />
-                </Button>
-              ) : (
-                'Submit'
-              )}
-            </Button>
+            {isSubmitting ? (
+              <Button disabled={true}>
+                <Loading text="Submitting..." className="place-items-start" />
+              </Button>
+            ) : (
+              <Button type="submit">Submit</Button>
+            )}
           </form>
         </Form>
       </CardContent>

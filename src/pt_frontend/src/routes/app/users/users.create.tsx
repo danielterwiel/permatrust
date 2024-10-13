@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/Icon';
+import { Loading } from '@/components/Loading';
 import {
   Form,
   FormControl,
@@ -16,6 +17,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { pt_backend } from '@/declarations/pt_backend';
+import { useState } from 'react';
 
 export const Route = createFileRoute('/_authenticated/users/create')({
   component: CreateProject,
@@ -37,10 +39,12 @@ const formSchema = z.object({
 });
 
 export function CreateProject() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    disabled: isSubmitting,
     defaultValues: {
       first_name: '',
       last_name: '',
@@ -48,8 +52,16 @@ export function CreateProject() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    await pt_backend.create_user(values.first_name, values.last_name);
-    navigate({ to: `/organisations` });
+    try {
+      setIsSubmitting(true);
+      await pt_backend.create_user(values.first_name, values.last_name);
+      navigate({ to: `/organisations` });
+      setIsSubmitting(false);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -74,7 +86,7 @@ export function CreateProject() {
                 <FormItem>
                   <FormLabel>First name</FormLabel>
                   <FormControl>
-                    <Input placeholder="John" {...field} />
+                    <Input placeholder="e.g. John" {...field} />
                   </FormControl>
                   <FormDescription>Your first name.</FormDescription>
                   <FormMessage />
@@ -88,14 +100,20 @@ export function CreateProject() {
                 <FormItem>
                   <FormLabel>Last name</FormLabel>
                   <FormControl>
-                    <Input placeholder="Doe" {...field} />
+                    <Input placeholder="e.g. Hooks" {...field} />
                   </FormControl>
                   <FormDescription>Your last name.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            <Button type="submit">Create</Button>
+            {isSubmitting ? (
+              <Button disabled={true}>
+                <Loading text="Creating..." />
+              </Button>
+            ) : (
+              <Button type="submit">Create</Button>
+            )}
           </form>
         </Form>
       </CardContent>
