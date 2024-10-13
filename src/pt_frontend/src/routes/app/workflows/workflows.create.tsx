@@ -1,12 +1,13 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { pt_backend } from '@/declarations/pt_backend';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Loading } from '@/components/Loading';
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { pt_backend } from "@/declarations/pt_backend";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Loading } from "@/components/Loading";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Form,
   FormControl,
@@ -15,13 +16,13 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { handleResult } from '@/utils/handleResult';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+} from "@/components/ui/form";
+import { handleResult } from "@/utils/handleResult";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export const Route = createFileRoute('/_authenticated/workflows/create')({
+export const Route = createFileRoute("/_authenticated/workflows/create")({
   beforeLoad: () => ({
-    getTitle: () => 'Create workflow',
+    getTitle: () => "Create workflow",
   }),
   component: CreateWorkflow,
   errorComponent: ({ error }) => {
@@ -31,34 +32,77 @@ export const Route = createFileRoute('/_authenticated/workflows/create')({
 
 const formSchema = z.object({
   name: z.string().min(2, {
-    message: 'Workflow must be at least 2 characters.',
+    message: "Workflow must be at least 2 characters.",
   }),
-  graphJson: z.string().min(3, {
-    message: 'Graph JSON must be at least 3 characters.',
-  }),
+  graph_json: z
+    .string()
+    .min(3, {
+      message: "Graph JSON must be at least 3 characters.",
+    })
+    .refine(
+      (value) => {
+        try {
+          JSON.parse(value);
+          return true;
+        } catch {
+          return false;
+        }
+      },
+      {
+        message: "Invalid JSON format.",
+      },
+    ),
 });
 
-const graphJson = JSON.stringify({
-  id: 'light',
-  initial: 'green',
-  states: {
-    green: {
-      on: {
-        TIMER: 'yellow',
-      },
+const defaultGraphJson = `{
+  "id": "light",
+  "initial": "green",
+  "states": {
+    "green": {
+      "on": {
+        "TIMER": "yellow"
+      }
     },
-    yellow: {
-      on: {
-        TIMER: 'red',
-      },
+    "yellow": {
+      "on": {
+        "TIMER": "red"
+      }
     },
-    red: {
-      on: {
-        TIMER: 'green',
-      },
-    },
-  },
-});
+    "red": {
+      "on": {
+        "TIMER": "green"
+      }
+    }
+  }
+}`;
+
+function transformXStateToWorkflowGraph(xstateJson: any): any {
+  const nodes = Object.keys(xstateJson.states);
+  const stateIndexMap: { [state: string]: number } = {};
+  nodes.forEach((state, index) => {
+    stateIndexMap[state] = index;
+  });
+
+  const edges: [number, number, string][] = [];
+
+  for (const state of nodes) {
+    const stateConfig = xstateJson.states[state];
+    if (stateConfig.on) {
+      for (const [event, targetState] of Object.entries(stateConfig.on)) {
+        const sourceIndex = stateIndexMap[state];
+        const targetIndex = stateIndexMap[targetState as string];
+        if (sourceIndex !== undefined && targetIndex !== undefined) {
+          edges.push([sourceIndex, targetIndex, event]);
+        }
+      }
+    }
+  }
+
+  return {
+    nodes,
+    edges,
+  };
+}
 
 export function CreateWorkflow() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,28 +111,42 @@ export function CreateWorkflow() {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
-      graphJson: '',
+      name: "",
+      graph_json: defaultGraphJson,
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
 
-    const response = await pt_backend.create_workflow({
-      project_id: BigInt(0), // TODO: impl Picker
-      name: values.name,
-      graph_json: graphJson,
-      initial_state: 'HOAX',
-    });
-    const result = handleResult(response);
-    setIsSubmitting(false);
-    navigate({
-      to: `/workflows/$workflowId`,
-      params: {
-        workflowId: result.toString(),
-      },
-    });
+    try {
+      const xstateJson = JSON.parse(values.graph_json);
+      const graphJsonObject = transformXStateToWorkflowGraph(xstateJson);
+      const graph_json = JSON.stringify(graphJsonObject);
+
+      console.log("Transformed graph_json:", graph_json);
+
+      const response = await pt_backend.create_workflow({
+        project_id: BigInt(0),
+        name: values.name,
+        graph_json,
+        initial_state: xstateJson.initial,
+      });
+
+      const result = handleResult(response);
+      setIsSubmitting(false);
+
+      navigate({
+        to: "/workflows/$workflowId",
+        params: {
+          workflowId: result.toString(),
+        },
+      });
+    } catch (error) {
+      console.error("Error:", error);
+      setIsSubmitting(false);
+      // Handle the error (e.g., show a message to the user)
+    }
   }
 
   return (
@@ -113,13 +171,32 @@ export function CreateWorkflow() {
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="graph_json"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Graph JSON</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder='{ "id": "light", "initial": "green", "states": { ... } }'
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    Your JSON Graph in xstate format.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <Button type="submit">
               {isSubmitting ? (
                 <Button disabled={true}>
-                  <Loading text="Submitting..." className="place-items-start" />
+                  <Loading text="Creating..." className="place-items-start" />
                 </Button>
               ) : (
-                'Submit'
+                "Create"
               )}
             </Button>
           </form>
