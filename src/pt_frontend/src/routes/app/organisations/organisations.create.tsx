@@ -1,9 +1,10 @@
+import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { useNavigate } from '@tanstack/react-router';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-
+import { Loading } from '@/components/Loading';
 import { Button } from '@/components/ui/button';
 import {
   Form,
@@ -38,6 +39,7 @@ const formSchema = z.object({
 
 export function CreateOrganisation() {
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -47,11 +49,20 @@ export function CreateOrganisation() {
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    const response = await pt_backend.create_organisation(values.name);
-    const result = handleResult(response);
-    navigate({
-      to: `/organisations/${result.toString()}`,
-    });
+    try {
+      setIsSubmitting(true);
+
+      const response = await pt_backend.create_organisation(values.name);
+      const result = handleResult(response);
+
+      navigate({
+        to: `/organisations/${result.toString()}`,
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   return (
@@ -85,7 +96,15 @@ export function CreateOrganisation() {
                 </FormItem>
               )}
             />
-            <Button type="submit">Create organisation</Button>
+            {isSubmitting ? (
+              <Button disabled={true}>
+                <Loading text="Creating..." />
+              </Button>
+            ) : (
+              <Button disabled={isSubmitting} type="submit">
+                Create organisation
+              </Button>
+            )}
           </form>
         </Form>
       </CardContent>
