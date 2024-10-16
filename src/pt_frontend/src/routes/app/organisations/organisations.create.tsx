@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { createFileRoute } from '@tanstack/react-router';
-import { useNavigate } from '@tanstack/react-router';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { Loading } from '@/components/Loading';
-import { Button } from '@/components/ui/button';
+import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Loading } from "@/components/Loading";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -14,17 +14,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Icon } from '@/components/ui/Icon';
-import { pt_backend } from '@/declarations/pt_backend';
-import { handleResult } from '@/utils/handleResult';
+} from "@/components/ui/form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Icon } from "@/components/ui/Icon";
+import { handleResult } from "@/utils/handleResult";
 
-export const Route = createFileRoute('/_authenticated/organisations/create')({
+export const Route = createFileRoute("/_authenticated/organisations/create")({
   component: CreateOrganisation,
   beforeLoad: () => ({
-    getTitle: () => 'Create organisation',
+    getTitle: () => "Create organisation",
   }),
   errorComponent: ({ error }) => {
     return <div>Error: {error.message}</div>;
@@ -33,18 +32,21 @@ export const Route = createFileRoute('/_authenticated/organisations/create')({
 
 const formSchema = z.object({
   name: z.string().min(2, {
-    message: 'Organisation name must be at least 2 characters.',
+    message: "Organisation name must be at least 2 characters.",
   }),
 });
 
 export function CreateOrganisation() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { api } = Route.useRouteContext({
+    select: ({ api }) => ({ api }),
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: '',
+      name: "",
     },
   });
 
@@ -52,7 +54,7 @@ export function CreateOrganisation() {
     try {
       setIsSubmitting(true);
 
-      const response = await pt_backend.create_organisation(values.name);
+      const response = await api.call.create_organisation(values.name);
       const result = handleResult(response);
 
       navigate({

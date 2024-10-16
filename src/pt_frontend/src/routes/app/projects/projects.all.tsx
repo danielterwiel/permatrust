@@ -1,23 +1,21 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { pt_backend } from '@/declarations/pt_backend';
-import { Table } from '@/components/Table';
-import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
-import { Principal } from '@dfinity/principal';
-import { handleResult } from '@/utils/handleResult';
-import { z } from 'zod';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Icon } from '@/components/ui/Icon';
-import { Link } from '@/components/Link';
-import { formatDateTime } from '@/utils/date';
-import { DEFAULT_PAGINATION } from '@/consts/pagination';
-import type { Row } from '@tanstack/react-table';
-import type { Project } from '@/declarations/pt_backend/pt_backend.did';
+import { createFileRoute } from "@tanstack/react-router";
+import { Table } from "@/components/Table";
+import { Principal } from "@dfinity/principal";
+import { handleResult } from "@/utils/handleResult";
+import { z } from "zod";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Icon } from "@/components/ui/Icon";
+import { Link } from "@/components/Link";
+import { formatDateTime } from "@/utils/date";
+import { DEFAULT_PAGINATION } from "@/consts/pagination";
+import type { Row } from "@tanstack/react-table";
+import type { Project } from "@/declarations/pt_backend/pt_backend.did";
 
 const projectsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
 });
 
-export const Route = createFileRoute('/_authenticated/projects/')({
+export const Route = createFileRoute("/_authenticated/projects/")({
   component: Projects,
   validateSearch: (search) => projectsSearchSchema.parse(search),
   loaderDeps: ({ search: { page } }) => ({ page }),
@@ -26,9 +24,9 @@ export const Route = createFileRoute('/_authenticated/projects/')({
       ...DEFAULT_PAGINATION,
       page_number: BigInt(page ?? 1),
     };
-    const response = await pt_backend.list_projects(pagination);
+    const response = await context.api.call.list_projects(pagination);
     const result = handleResult(response);
-    const [projects, paginationMetaData] = stringifyBigIntObject(result);
+    const [projects, paginationMetaData] = result;
     return {
       ...context,
 
@@ -91,19 +89,18 @@ function Projects() {
             paginationMetaData={paginationMetaData}
             columnConfig={[
               {
-                id: 'name',
-                headerName: 'Project Name',
+                id: "name",
+                headerName: "Project Name",
                 cellPreprocess: (v) => v,
               },
               {
-                id: 'created_by',
-                headerName: 'Created by',
-                cellPreprocess: (createdBy) =>
-                  Principal.fromUint8Array(createdBy).toString(),
+                id: "created_by",
+                headerName: "Created by",
+                cellPreprocess: (createdBy) => createdBy.toString(),
               },
               {
-                id: 'created_at',
-                headerName: 'Created at',
+                id: "created_at",
+                headerName: "Created at",
                 cellPreprocess: (createdAt) => formatDateTime(createdAt),
               },
             ]}

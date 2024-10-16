@@ -4,7 +4,7 @@ import { Link } from '@/components/Link';
 export const Route = createFileRoute('/')({
   component: Authenticate,
   beforeLoad: async ({ context }) => {
-    if (context.auth.authenticated) {
+    if (context.auth.isAuthenticated) {
       throw redirect({
         to: '/organisations',
       });

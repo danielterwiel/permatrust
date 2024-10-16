@@ -1,25 +1,23 @@
-import { Link } from '@/components/Link';
-import { createFileRoute } from '@tanstack/react-router';
-import { pt_backend } from '@/declarations/pt_backend';
-import { Table } from '@/components/Table';
-import { Icon } from '@/components/ui/Icon';
-import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
-import { handleResult } from '@/utils/handleResult';
-import { DEFAULT_PAGINATION } from '@/consts/pagination';
-import { z } from 'zod';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { Document } from '@/declarations/pt_backend/pt_backend.did';
-import type { Row } from '@tanstack/react-table';
+import { Link } from "@/components/Link";
+import { createFileRoute } from "@tanstack/react-router";
+import { Table } from "@/components/Table";
+import { Icon } from "@/components/ui/Icon";
+import { handleResult } from "@/utils/handleResult";
+import { DEFAULT_PAGINATION } from "@/consts/pagination";
+import { z } from "zod";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import type { Document } from "@/declarations/pt_backend/pt_backend.did";
+import type { Row } from "@tanstack/react-table";
 
 const projectsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
 });
 
-export const Route = createFileRoute('/_authenticated/projects/$projectId/')({
+export const Route = createFileRoute("/_authenticated/projects/$projectId/")({
   component: ProjectDetails,
   validateSearch: (search) => projectsSearchSchema.parse(search),
   beforeLoad: () => ({
-    getTitle: () => 'Project',
+    getTitle: () => "Project",
   }),
   loaderDeps: ({ search: { page } }) => ({ page }),
   loader: async ({ params: { projectId }, deps: { page }, context }) => {
@@ -27,16 +25,17 @@ export const Route = createFileRoute('/_authenticated/projects/$projectId/')({
       ...DEFAULT_PAGINATION,
       page_number: BigInt(page ?? 1),
     };
-    const documents_response = await pt_backend.list_documents_by_project_id(
+    const documents_response =
+      await context.api.call.list_documents_by_project_id(
+        BigInt(projectId),
+        pagination,
+      );
+    const project_response = await context.api.call.get_project(
       BigInt(projectId),
-      pagination,
     );
-    const project_response = await pt_backend.get_project(BigInt(projectId));
-    const project_result = handleResult(project_response);
+    const project = handleResult(project_response);
     const documents_result = handleResult(documents_response);
-    const [documents, paginationMetaData] =
-      stringifyBigIntObject(documents_result);
-    const project = stringifyBigIntObject(project_result);
+    const [documents, paginationMetaData] = documents_result;
 
     return {
       ...context,
@@ -45,7 +44,7 @@ export const Route = createFileRoute('/_authenticated/projects/$projectId/')({
       paginationMetaData,
 
       active: {
-        project: project,
+        project,
       },
 
       projectId,
@@ -106,13 +105,13 @@ function ProjectDetails() {
           actions={RowActions}
           columnConfig={[
             {
-              id: 'title',
-              headerName: 'Document Title',
+              id: "title",
+              headerName: "Document Title",
               cellPreprocess: (title) => title,
             },
             {
-              id: 'current_version',
-              headerName: 'Version',
+              id: "current_version",
+              headerName: "Version",
               cellPreprocess: (version) => version,
             },
           ]}

@@ -1,13 +1,13 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { pt_backend } from '@/declarations/pt_backend';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/Icon';
-import { Input } from '@/components/ui/input';
-import { Loading } from '@/components/Loading';
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { pt_backend } from "@/declarations/pt_backend";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/Icon";
+import { Input } from "@/components/ui/input";
+import { Loading } from "@/components/Loading";
 import {
   Form,
   FormControl,
@@ -16,7 +16,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
+} from "@/components/ui/form";
 import {
   MDXEditor,
   UndoRedo,
@@ -27,16 +27,16 @@ import {
   diffSourcePlugin,
   headingsPlugin,
   toolbarPlugin,
-} from '@mdxeditor/editor';
-import '@mdxeditor/editor/style.css';
-import { handleResult } from '@/utils/handleResult';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+} from "@mdxeditor/editor";
+import "@mdxeditor/editor/style.css";
+import { handleResult } from "@/utils/handleResult";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const Route = createFileRoute(
-  '/_authenticated/projects/$projectId/documents/create',
+  "/_authenticated/projects/$projectId/documents/create",
 )({
   beforeLoad: () => ({
-    getTitle: () => 'Create document',
+    getTitle: () => "Create document",
   }),
   component: CreateDocument,
   errorComponent: ({ error }) => {
@@ -46,10 +46,10 @@ export const Route = createFileRoute(
 
 const formSchema = z.object({
   title: z.string().min(2, {
-    message: 'Project name must be at least 2 characters.',
+    message: "Project name must be at least 2 characters.",
   }),
   content: z.string().min(1, {
-    message: 'Content must be at least 1 character.',
+    message: "Content must be at least 1 character.",
   }),
   projects: z.array(z.bigint()),
 });
@@ -58,13 +58,16 @@ export function CreateDocument() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const params = Route.useParams();
+  const context = Route.useRouteContext({
+    select: ({ api }) => ({ api }),
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     disabled: isSubmitting,
     defaultValues: {
-      title: '',
-      content: '',
+      title: "",
+      content: "",
       projects: [BigInt(params.projectId)],
     },
   });
@@ -73,7 +76,7 @@ export function CreateDocument() {
     setIsSubmitting(true);
     const encoder = new TextEncoder();
     const content = encoder.encode(values.content);
-    const response = await pt_backend.create_document(
+    const response = await context.api.call.create_document(
       BigInt(params.projectId),
       values.title,
       content,
@@ -81,7 +84,7 @@ export function CreateDocument() {
     const result = handleResult(response);
     setIsSubmitting(false);
     navigate({
-      to: `/projects/$projectId/documents/$documentId`,
+      to: "/projects/$projectId/documents/$documentId",
       params: {
         projectId: params.projectId,
         documentId: result.toString(),

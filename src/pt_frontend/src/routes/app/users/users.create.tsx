@@ -1,10 +1,10 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/Icon';
-import { Loading } from '@/components/Loading';
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Icon } from "@/components/ui/Icon";
+import { Loading } from "@/components/Loading";
 import {
   Form,
   FormControl,
@@ -13,16 +13,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { pt_backend } from '@/declarations/pt_backend';
-import { useState } from 'react';
+} from "@/components/ui/form";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { pt_backend } from "@/declarations/pt_backend";
+import { useState } from "react";
 
-export const Route = createFileRoute('/_authenticated/users/create')({
+export const Route = createFileRoute("/_authenticated/users/create")({
   component: CreateProject,
   beforeLoad: () => ({
-    getTitle: () => 'Create user',
+    getTitle: () => "Create user",
   }),
   errorComponent: ({ error }) => {
     return <div>Error: {error.message}</div>;
@@ -31,31 +31,34 @@ export const Route = createFileRoute('/_authenticated/users/create')({
 
 const formSchema = z.object({
   first_name: z.string().min(1, {
-    message: 'First name must be at least 1 character.',
+    message: "First name must be at least 1 character.",
   }),
   last_name: z.string().min(1, {
-    message: 'Last name must be at least 1 character.',
+    message: "Last name must be at least 1 character.",
   }),
 });
 
 export function CreateProject() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const { api } = Route.useRouteContext({
+    select: ({ api }) => ({ api }),
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     disabled: isSubmitting,
     defaultValues: {
-      first_name: '',
-      last_name: '',
+      first_name: "",
+      last_name: "",
     },
   });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
       setIsSubmitting(true);
-      await pt_backend.create_user(values.first_name, values.last_name);
-      navigate({ to: `/organisations` });
+      await api.call.create_user(values.first_name, values.last_name);
+      navigate({ to: "/organisations" });
       setIsSubmitting(false);
     } catch (error) {
       console.error(error);

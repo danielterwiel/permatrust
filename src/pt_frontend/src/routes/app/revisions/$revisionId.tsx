@@ -1,22 +1,19 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { pt_backend } from '@/declarations/pt_backend';
-import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
-import { MDXEditor, headingsPlugin } from '@mdxeditor/editor';
-import { handleResult } from '@/utils/handleResult';
-import { Icon } from '@/components/ui/Icon';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { createFileRoute } from "@tanstack/react-router";
+import { MDXEditor, headingsPlugin } from "@mdxeditor/editor";
+import { handleResult } from "@/utils/handleResult";
+import { Icon } from "@/components/ui/Icon";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const Route = createFileRoute(
-  '/_authenticated/projects/$projectId/documents/$documentId/revisions/$revisionId',
+  "/_authenticated/projects/$projectId/documents/$documentId/revisions/$revisionId",
 )({
   component: RevisionDetails,
   beforeLoad: () => ({
-    getTitle: () => 'Revision',
+    getTitle: () => "Revision",
   }),
   loader: async ({ params: { revisionId }, context }) => {
-    const response = await pt_backend.get_revision(BigInt(revisionId));
-    const result = handleResult(response);
-    const revision = stringifyBigIntObject(result);
+    const response = await context.api.call.get_revision(BigInt(revisionId));
+    const revision = handleResult(response);
     const active = {
       ...context.active,
       revision,
@@ -53,7 +50,7 @@ function RevisionDetails() {
               revision?.content ? Object.values(revision?.content) : [],
             ),
           )}
-          onError={(error) => console.error('MDXEditor error:', error)}
+          onError={(error) => console.error("MDXEditor error:", error)}
         />
       </CardContent>
     </Card>

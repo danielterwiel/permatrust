@@ -1,39 +1,37 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { pt_backend } from '@/declarations/pt_backend';
-import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
-import { handleResult } from '@/utils/handleResult';
-import { formatDateTime } from '@/utils/date';
-import { storage } from '@/utils/localStorage';
-import { z } from 'zod';
-import { DEFAULT_PAGINATION } from '@/consts/pagination';
-import { Link } from '@/components/Link';
-import { Table } from '@/components/Table';
-import { Principal } from '@dfinity/principal';
-import { Icon } from '@/components/ui/Icon';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import type { Row } from '@tanstack/react-table';
-import type { Project } from '@/declarations/pt_backend/pt_backend.did';
+import { createFileRoute } from "@tanstack/react-router";
+import { handleResult } from "@/utils/handleResult";
+import { formatDateTime } from "@/utils/date";
+import { storage } from "@/utils/localStorage";
+import { z } from "zod";
+import { DEFAULT_PAGINATION } from "@/consts/pagination";
+import { Link } from "@/components/Link";
+import { Table } from "@/components/Table";
+import { Principal } from "@dfinity/principal";
+import { Icon } from "@/components/ui/Icon";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import type { Row } from "@tanstack/react-table";
+import type { Project } from "@/declarations/pt_backend/pt_backend.did";
 
 const projectsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
 });
 
-export const Route = createFileRoute('/_authenticated/projects/')({
+export const Route = createFileRoute("/_authenticated/projects/")({
   component: Projects,
   validateSearch: (search) => projectsSearchSchema.parse(search),
   loaderDeps: ({ search: { page } }) => ({ page }),
   loader: async ({ context, deps: { page } }) => {
-    const organisationId = storage.getItem('activeOrganisationId') as string;
+    const organisationId = storage.getItem("activeOrganisationId") as string;
     const pagination = {
       ...DEFAULT_PAGINATION,
       page_number: BigInt(page ?? 1),
     };
-    const response = await pt_backend.list_projects_by_organisation_id(
+    const response = await context.api.call.list_projects_by_organisation_id(
       BigInt(organisationId),
       pagination,
     );
     const result = handleResult(response);
-    const [projects, paginationMetaData] = stringifyBigIntObject(result);
+    const [projects, paginationMetaData] = result;
     return {
       ...context,
 
@@ -90,19 +88,18 @@ function Projects() {
           paginationMetaData={paginationMetaData}
           columnConfig={[
             {
-              id: 'name',
-              headerName: 'Project Name',
+              id: "name",
+              headerName: "Project Name",
               cellPreprocess: (v) => v,
             },
             {
-              id: 'created_by',
-              headerName: 'Created by',
-              cellPreprocess: (createdBy) =>
-                Principal.fromUint8Array(createdBy).toString(),
+              id: "created_by",
+              headerName: "Created by",
+              cellPreprocess: (createdBy) => createdBy.toString(),
             },
             {
-              id: 'created_at',
-              headerName: 'Created at',
+              id: "created_at",
+              headerName: "Created at",
               cellPreprocess: (createdAt) => formatDateTime(createdAt),
             },
           ]}

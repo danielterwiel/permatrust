@@ -1,13 +1,13 @@
-import { createFileRoute, redirect } from '@tanstack/react-router';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from '@tanstack/react-router';
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/authenticate')({
+export const Route = createFileRoute("/authenticate")({
   component: Authenticate,
   beforeLoad: async ({ context }) => {
-    if (context.auth.authenticated) {
+    if (context.auth.isAuthenticated) {
       throw redirect({
-        to: '/organisations',
+        to: "/organisations",
         search: { page: 1 },
       });
     }
@@ -25,11 +25,12 @@ function Authenticate() {
     <div className="grid place-items-center min-h-dvh pb-36">
       <Button
         onClick={async () => {
-          await auth.initAuthClient();
-          const result = await auth.authenticate();
+          await auth.initializeAuth();
+          const result = await auth.login();
+          console.log("result", result);
           if (result) {
             navigate({
-              to: '/organisations',
+              to: "/organisations",
               search: { page: 1 },
             });
           }

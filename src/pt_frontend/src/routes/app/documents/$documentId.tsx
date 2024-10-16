@@ -1,26 +1,24 @@
-import { Link } from '@/components/Link';
-import { Table } from '@/components/Table';
-import { Icon } from '@/components/ui/Icon';
-import { Principal } from '@dfinity/principal';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useState } from 'react';
-import { createFileRoute } from '@tanstack/react-router';
-import { pt_backend } from '@/declarations/pt_backend';
-import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
-import { handleResult } from '@/utils/handleResult';
-import { z } from 'zod';
-import { formatDateTime } from '@/utils/date';
-import { DEFAULT_PAGINATION } from '@/consts/pagination';
-import type { Row } from '@tanstack/react-table';
-import type { Entity } from '@/consts/entities';
-import type { Revision } from '@/declarations/pt_backend/pt_backend.did';
+import { Link } from "@/components/Link";
+import { Table } from "@/components/Table";
+import { Icon } from "@/components/ui/Icon";
+import { Principal } from "@dfinity/principal";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { handleResult } from "@/utils/handleResult";
+import { z } from "zod";
+import { formatDateTime } from "@/utils/date";
+import { DEFAULT_PAGINATION } from "@/consts/pagination";
+import type { Row } from "@tanstack/react-table";
+import type { Entity } from "@/consts/entities";
+import type { Revision } from "@/declarations/pt_backend/pt_backend.did";
 
 const revisionsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
 });
 
 export const Route = createFileRoute(
-  '/_authenticated/projects/$projectId/documents/$documentId/',
+  "/_authenticated/projects/$projectId/documents/$documentId/",
 )({
   component: DocumentDetails,
   validateSearch: (search) => revisionsSearchSchema.parse(search),
@@ -34,16 +32,17 @@ export const Route = createFileRoute(
       ...DEFAULT_PAGINATION,
       page_number: BigInt(page ?? 1),
     };
-    const revisions_response = await pt_backend.list_revisions_by_document_id(
+    const revisions_response =
+      await context.api.call.list_revisions_by_document_id(
+        BigInt(documentId),
+        pagination,
+      );
+    const document_response = await context.api.call.get_document(
       BigInt(documentId),
-      pagination,
     );
-    const document_response = await pt_backend.get_document(BigInt(documentId));
     const revisions_result = handleResult(revisions_response);
-    const document_result = handleResult(document_response);
-    const [revisions, paginationMetaData] =
-      stringifyBigIntObject(revisions_result);
-    const document = stringifyBigIntObject(document_result);
+    const document = handleResult(document_response);
+    const [revisions, paginationMetaData] = revisions_result;
 
     return {
       ...context,
@@ -115,7 +114,7 @@ function DocumentDetails() {
             current: selected[1]?.id ? Number(selected[1].id) : undefined,
           }}
           disabled={selected.length !== 2}
-          variant={selected.length !== 2 ? 'secondary' : 'outline'}
+          variant={selected.length !== 2 ? "secondary" : "outline"}
           className="h-7 gap-1"
         >
           <Icon name="git-compare-outline" size="sm" />
@@ -143,11 +142,11 @@ function DocumentDetails() {
             actions={RowActions}
             columnConfig={[
               {
-                id: 'version',
+                id: "version",
                 cellPreprocess: (v) => v,
               },
               {
-                id: 'content',
+                id: "content",
                 cellPreprocess: (content) => {
                   return (
                     <div className="truncate max-w-md">
@@ -159,14 +158,13 @@ function DocumentDetails() {
                 },
               },
               {
-                id: 'created_by',
-                headerName: 'Created by',
-                cellPreprocess: (createdBy) =>
-                  Principal.fromUint8Array(createdBy).toString(),
+                id: "created_by",
+                headerName: "Created by",
+                cellPreprocess: (createdBy) => createdBy.toString(),
               },
               {
-                id: 'created_at',
-                headerName: 'Created at',
+                id: "created_at",
+                headerName: "Created at",
                 cellPreprocess: (createdAt) => formatDateTime(createdAt),
               },
             ]}

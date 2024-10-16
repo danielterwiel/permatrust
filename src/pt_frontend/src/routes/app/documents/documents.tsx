@@ -1,22 +1,20 @@
-import { Link } from '@/components/Link';
-import { createFileRoute } from '@tanstack/react-router';
-import { pt_backend } from '@/declarations/pt_backend';
-import { Table } from '@/components/Table';
-import { stringifyBigIntObject } from '@/utils/stringifyBigIntObject';
-import { handleResult } from '@/utils/handleResult';
-import { Icon } from '@/components/ui/Icon';
-import { DEFAULT_PAGINATION } from '@/consts/pagination';
-import { z } from 'zod';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import type { Row } from '@tanstack/react-table';
-import type { Document } from '@/declarations/pt_backend/pt_backend.did';
+import { Link } from "@/components/Link";
+import { createFileRoute } from "@tanstack/react-router";
+import { Table } from "@/components/Table";
+import { handleResult } from "@/utils/handleResult";
+import { Icon } from "@/components/ui/Icon";
+import { DEFAULT_PAGINATION } from "@/consts/pagination";
+import { z } from "zod";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import type { Row } from "@tanstack/react-table";
+import type { Document } from "@/declarations/pt_backend/pt_backend.did";
 
 const documentsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
 });
 
 export const Route = createFileRoute(
-  '/_authenticated/projects/$projectId/documents/',
+  "/_authenticated/projects/$projectId/documents/",
 )({
   component: Documents,
   validateSearch: (search) => documentsSearchSchema.parse(search),
@@ -26,12 +24,12 @@ export const Route = createFileRoute(
       ...DEFAULT_PAGINATION,
       page_number: BigInt(page ?? 1),
     };
-    const response = await pt_backend.list_documents_by_project_id(
+    const response = await context.api.call.list_documents_by_project_id(
       BigInt(params.projectId),
       pagination,
     );
     const result = handleResult(response);
-    const [documents, paginationMetaData] = stringifyBigIntObject(result);
+    const [documents, paginationMetaData] = result;
     return {
       ...context,
 
@@ -94,13 +92,13 @@ function Documents() {
           paginationMetaData={paginationMetaData}
           columnConfig={[
             {
-              id: 'title',
-              headerName: 'Document Title',
+              id: "title",
+              headerName: "Document Title",
               cellPreprocess: (title) => title,
             },
             {
-              id: 'current_version',
-              headerName: 'Version',
+              id: "current_version",
+              headerName: "Version",
               cellPreprocess: (version) => version,
             },
           ]}

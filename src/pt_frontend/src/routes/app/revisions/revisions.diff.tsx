@@ -1,10 +1,10 @@
-import { useEffect } from 'react';
-import { createFileRoute } from '@tanstack/react-router';
-import { z } from 'zod';
+import { useEffect } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
 
-import { MDXEditor, headingsPlugin, diffSourcePlugin } from '@mdxeditor/editor';
-import { pt_backend } from '@/declarations/pt_backend';
-import { handleResult } from '@/utils/handleResult';
+import { MDXEditor, headingsPlugin, diffSourcePlugin } from "@mdxeditor/editor";
+import { pt_backend } from "@/declarations/pt_backend";
+import { handleResult } from "@/utils/handleResult";
 
 const RevisionSchema = z.object({
   id: z.bigint(),
@@ -21,15 +21,15 @@ const revisionSearchSchema = z.object({
 });
 
 export const Route = createFileRoute(
-  '/_authenticated/projects/$projectId/documents/$documentId/revisions/diff'
+  "/_authenticated/projects/$projectId/documents/$documentId/revisions/diff",
 )({
   component: RevisionDiff,
   validateSearch: revisionSearchSchema,
   loaderDeps: ({ search: { current, theirs } }) => ({ current, theirs }),
-  loader: async ({ deps: { current, theirs } }) => {
-    const response = await pt_backend.diff_revisions(
+  loader: async ({ context, deps: { current, theirs } }) => {
+    const response = await context.api.call.diff_revisions(
       BigInt(current),
-      BigInt(theirs)
+      BigInt(theirs),
     );
     const revisions = handleResult(response);
     return { revisions };
@@ -50,9 +50,9 @@ function RevisionDiff() {
   useEffect(() => {
     try {
       const validatedRevisions = z.array(RevisionSchema).parse(revisions);
-      console.log('Validated revisions', validatedRevisions);
+      console.log("Validated revisions", validatedRevisions);
     } catch (error) {
-      console.error('Revision validation error:', error);
+      console.error("Revision validation error:", error);
     }
   }, [revisions]);
 
@@ -66,17 +66,17 @@ function RevisionDiff() {
   const contentCurrent = decoder.decode(preDecode(current.content));
   const contentTheirs = decoder.decode(preDecode(theirs.content));
 
-  console.log('contentCurrent', typeof contentCurrent);
+  console.log("contentCurrent", typeof contentCurrent);
 
   return (
     <MDXEditor
       markdown={contentCurrent}
-      onError={(error) => console.error('MDXEditor error:', error)}
+      onError={(error) => console.error("MDXEditor error:", error)}
       plugins={[
         headingsPlugin(),
         diffSourcePlugin({
           diffMarkdown: contentTheirs,
-          viewMode: 'diff',
+          viewMode: "diff",
         }),
       ]}
     />

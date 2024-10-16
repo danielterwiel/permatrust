@@ -1,15 +1,15 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Icon } from '@/components/ui/Icon';
-import { createFileRoute } from '@tanstack/react-router';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Icon } from "@/components/ui/Icon";
+import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/_authenticated/workflows/$workflowId/')({
+export const Route = createFileRoute("/_authenticated/workflows/$workflowId/")({
   component: DocumentDetails,
   loader: async ({ context }) => {
     // const { workflowId } = Route.useParams();
 
-    // const workflow_response = await pt_backend.get_workflow(BigInt(workflowId))
+    // const workflow_response = await context.api.call.get_workflow(BigInt(workflowId))
     // const workflow_result = handleResult(workflow_response)
-    // const workflow = stringifyBigIntObject(workflow_result)
+    // const workflow = workflow_result
 
     return {
       ...context,

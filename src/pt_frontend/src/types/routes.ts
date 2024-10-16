@@ -1,4 +1,5 @@
 import type { AuthContext } from '@/context/auth';
+import type { ApiContext } from '@/context/api';
 import type {
   Project,
   Document,
@@ -12,6 +13,7 @@ export type ValidRoute = ParseRoute<typeof routeTree>['parentRoute'];
 
 export type RouteContext = {
   auth: AuthContext;
+  api: ApiContext;
 
   active: {
     project?: Project;

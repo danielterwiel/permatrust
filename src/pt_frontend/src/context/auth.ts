@@ -1,69 +1,88 @@
 import type { Identity } from '@dfinity/agent';
 import { AuthClient, LocalStorage } from '@dfinity/auth-client';
+import { createAuthenticatedActorWrapper } from './api';
+import { router } from '@/router';
+
+const canisterId = process.env.CANISTER_ID_PT_BACKEND;
 
 export type AuthContext = {
-  loggedIn: boolean;
-  authenticated: boolean;
-  authClient: AuthClient | undefined;
+  isAuthenticated: boolean;
   identity: Identity | undefined;
-  initAuthClient: () => Promise<boolean>;
-  authenticate: () => Promise<boolean>;
+
+  initializeAuth: () => Promise<boolean>;
+
+  login: () => Promise<boolean>;
   logout: () => void;
 };
 
 export const auth: AuthContext = {
-  loggedIn: false,
-  authenticated: false,
-  authClient: undefined,
+  isAuthenticated: false,
   identity: undefined,
-  initAuthClient: async () => {
-    if (auth.authenticated) {
-      return true;
-    }
-    const client = await AuthClient.create({
-      storage: new LocalStorage(),
-      keyType: 'Ed25519',
-    });
-    const isAuthenticated = await client.isAuthenticated();
-    auth.authClient = client;
-    auth.authenticated = isAuthenticated;
-    auth.loggedIn = isAuthenticated;
-    auth.identity = client.getIdentity();
-    return isAuthenticated;
-  },
-  authenticate: async () => {
-    if (!auth.authClient) {
-      throw new Error('AuthClient not initialized');
-    }
-    const loginOptions = {
-      identity: auth.identity,
-      maxTimeToLive: BigInt(8 * 24 * 3600 * 1e9), // 8 days in nanoseconds
-    };
 
-    const identityProvider = import.meta.env.DEV
-      ? `http://${process.env.CANISTER_ID_INTERNET_IDENTITY}.localhost:4943`
-      : 'https://identity.ic0.app';
-
-    return new Promise((resolve, reject) => {
-      if (!auth.authClient) {
-        reject(false);
-      }
-      auth.authClient?.login({
-        ...loginOptions,
-        identityProvider,
-        onSuccess: () => {
-          auth.authenticated = true;
-          resolve(true);
-        },
-        onError: (err) => {
-          reject(err);
-        },
-      });
-    });
-  },
-  logout: () => {
-    auth.loggedIn = false;
-    auth.authenticated = false;
-    auth.authClient?.logout();
-  },
+  initializeAuth,
+  login,
+  logout,
 };
+
+let authClient: AuthClient | null = null;
+
+export async function initializeAuth(): Promise<boolean> {
+  if (auth.isAuthenticated) {
+    return true;
+  }
+  if (!canisterId) {
+    throw new Error('Canister ID not set');
+  }
+  authClient = await AuthClient.create({
+    storage: new LocalStorage(),
+    keyType: 'Ed25519',
+  });
+  auth.isAuthenticated = await authClient.isAuthenticated();
+  auth.identity = authClient.getIdentity();
+  router.invalidate();
+  await createAuthenticatedActorWrapper(canisterId, authClient);
+  router.invalidate();
+  return auth.isAuthenticated;
+}
+
+async function login(): Promise<boolean> {
+  if (!authClient) {
+    throw new Error('AuthClient not initialized. Call initializeAuth() first.');
+  }
+  if (!canisterId) {
+    throw new Error('Canister ID not set');
+  }
+
+  const identityProvider = import.meta.env.DEV
+    ? `http://${process.env.CANISTER_ID_INTERNET_IDENTITY}.localhost:4943`
+    : 'https://identity.ic0.app';
+
+  const loginOptions = {
+    identityProvider,
+    maxTimeToLive: BigInt(1 * 3600 * 1e9), // 1 hour in nanoseconds
+  };
+
+  return new Promise<boolean>((resolve, reject) => {
+    authClient?.login({
+      ...loginOptions,
+      onSuccess: async () => {
+        if (!authClient) {
+          return reject('AuthClient got lost during login');
+        }
+        auth.isAuthenticated = true;
+        auth.identity = authClient.getIdentity();
+        await createAuthenticatedActorWrapper(canisterId, authClient);
+        router.invalidate();
+        resolve(true);
+      },
+      onError: (err) => {
+        reject(err);
+      },
+    });
+  });
+}
+
+function logout(): void {
+  auth.isAuthenticated = false;
+  authClient?.logout();
+}

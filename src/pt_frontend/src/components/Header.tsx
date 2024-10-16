@@ -6,7 +6,7 @@ import type { AuthContext } from '@/context/auth';
 
 function RouterSpinner() {
   const isLoading = useRouterState({ select: (s) => s.status === 'pending' });
-  // TODO: too ugly, implement something more flashy: SVG motion gradients?
+  // TODO: too ugly, implement something more subtly flashy: SVG motion gradients?
   return isLoading ? <Loading text="Loading" /> : null;
 }
 

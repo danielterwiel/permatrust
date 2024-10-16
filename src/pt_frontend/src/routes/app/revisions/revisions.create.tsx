@@ -1,11 +1,11 @@
-import { useState } from 'react';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { pt_backend } from '@/declarations/pt_backend';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Loading } from '@/components/Loading';
+import { useState } from "react";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { pt_backend } from "@/declarations/pt_backend";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/Loading";
 import {
   Form,
   FormControl,
@@ -14,7 +14,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
+} from "@/components/ui/form";
 import {
   MDXEditor,
   UndoRedo,
@@ -25,21 +25,21 @@ import {
   headingsPlugin,
   diffSourcePlugin,
   toolbarPlugin,
-} from '@mdxeditor/editor';
-import '@mdxeditor/editor/style.css';
+} from "@mdxeditor/editor";
+import "@mdxeditor/editor/style.css";
 
 export const Route = createFileRoute(
-  '/_authenticated/projects/$projectId/documents/$documentId/revisions/create',
+  "/_authenticated/projects/$projectId/documents/$documentId/revisions/create",
 )({
   component: CreateRevision,
   beforeLoad: () => ({
-    getTitle: () => 'Create revision',
+    getTitle: () => "Create revision",
   }),
 });
 
 const formSchema = z.object({
   content: z.string().min(1, {
-    message: 'Content must be at least 1 character.',
+    message: "Content must be at least 1 character.",
   }),
   projects: z.array(z.bigint()),
 });
@@ -48,12 +48,15 @@ export function CreateRevision() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const params = Route.useParams();
+  const { api } = Route.useRouteContext({
+    select: ({ api }) => ({ api }),
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     disabled: isSubmitting,
     defaultValues: {
-      content: '',
+      content: "",
       projects: [BigInt(params.projectId)],
     },
   });
@@ -64,14 +67,14 @@ export function CreateRevision() {
       const encoder = new TextEncoder();
       const content = encoder.encode(values.content);
 
-      await pt_backend.create_revision(
+      await api.call.create_revision(
         BigInt(params.projectId),
         BigInt(params.documentId),
         content,
       );
 
       navigate({
-        to: '/projects/$projectId/documents/$documentId',
+        to: "/projects/$projectId/documents/$documentId",
         params,
       });
     } catch (error) {
