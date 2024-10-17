@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_authenticated/organisations')({
-  component: OrganisationId,
+  component: Organisations,
   beforeLoad: () => ({
     getTitle: () => 'Organisations',
   }),
@@ -10,6 +10,6 @@ export const Route = createFileRoute('/_authenticated/organisations')({
   },
 });
 
-function OrganisationId() {
+function Organisations() {
   return <Outlet />;
 }

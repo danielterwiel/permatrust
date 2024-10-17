@@ -1,24 +1,24 @@
-import { Link } from "@/components/Link";
-import { Table } from "@/components/Table";
-import { Icon } from "@/components/ui/Icon";
-import { Principal } from "@dfinity/principal";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
-import { handleResult } from "@/utils/handleResult";
-import { z } from "zod";
-import { formatDateTime } from "@/utils/date";
-import { DEFAULT_PAGINATION } from "@/consts/pagination";
-import type { Row } from "@tanstack/react-table";
-import type { Entity } from "@/consts/entities";
-import type { Revision } from "@/declarations/pt_backend/pt_backend.did";
+import { Link } from '@/components/Link';
+import { Table } from '@/components/Table';
+import { Icon } from '@/components/ui/Icon';
+import { Principal } from '@dfinity/principal';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
+import { createFileRoute } from '@tanstack/react-router';
+import { handleResult } from '@/utils/handleResult';
+import { z } from 'zod';
+import { formatDateTime } from '@/utils/date';
+import { DEFAULT_PAGINATION } from '@/consts/pagination';
+import type { Row } from '@tanstack/react-table';
+import type { Entity } from '@/consts/entities';
+import type { Revision } from '@/declarations/pt_backend/pt_backend.did';
 
 const revisionsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
 });
 
 export const Route = createFileRoute(
-  "/_authenticated/projects/$projectId/documents/$documentId/",
+  '/_authenticated/projects/$projectId/documents/$documentId/',
 )({
   component: DocumentDetails,
   validateSearch: (search) => revisionsSearchSchema.parse(search),
@@ -90,7 +90,7 @@ function DocumentDetails() {
 
   return (
     <>
-      <div className="flex gap-4 pr-6 flex-row-reverse text-right pb-4">
+      <div className="flex gap-4 flex-row-reverse items-end pb-4">
         <Link
           to="/projects/$projectId/documents/$documentId/revisions/create"
           params={{ projectId, documentId }}
@@ -114,7 +114,7 @@ function DocumentDetails() {
             current: selected[1]?.id ? Number(selected[1].id) : undefined,
           }}
           disabled={selected.length !== 2}
-          variant={selected.length !== 2 ? "secondary" : "outline"}
+          variant={selected.length !== 2 ? 'secondary' : 'outline'}
           className="h-7 gap-1"
         >
           <Icon name="git-compare-outline" size="sm" />
@@ -142,11 +142,11 @@ function DocumentDetails() {
             actions={RowActions}
             columnConfig={[
               {
-                id: "version",
+                id: 'version',
                 cellPreprocess: (v) => v,
               },
               {
-                id: "content",
+                id: 'content',
                 cellPreprocess: (content) => {
                   return (
                     <div className="truncate max-w-md">
@@ -158,13 +158,13 @@ function DocumentDetails() {
                 },
               },
               {
-                id: "created_by",
-                headerName: "Created by",
+                id: 'created_by',
+                headerName: 'Created by',
                 cellPreprocess: (createdBy) => createdBy.toString(),
               },
               {
-                id: "created_at",
-                headerName: "Created at",
+                id: 'created_at',
+                headerName: 'Created at',
                 cellPreprocess: (createdAt) => formatDateTime(createdAt),
               },
             ]}

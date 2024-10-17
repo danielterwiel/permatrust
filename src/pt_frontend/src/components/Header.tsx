@@ -22,7 +22,7 @@ export const Header = ({ auth }: { auth: AuthContext }) => {
       <div className="p-2">
         <Link to="/">permatrust</Link>
       </div>
-      <div className="p-4">
+      <div className="p-4 pt-8 flex items-center gap-4">
         <RouterSpinner />
         <Button variant="outline" onClick={logout}>
           Logout

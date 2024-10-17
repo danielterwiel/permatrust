@@ -1,21 +1,21 @@
-import { createFileRoute } from "@tanstack/react-router";
-import type { Row } from "@tanstack/react-table";
-import { Table } from "@/components/Table";
-import { Icon } from "@/components/ui/Icon";
-import { Link } from "@/components/Link";
-import { Button } from "@/components/ui/button";
-import { handleResult } from "@/utils/handleResult";
-import { DEFAULT_PAGINATION } from "@/consts/pagination";
-import { z } from "zod";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import type { Document } from "@/declarations/pt_backend/pt_backend.did";
-import { storage } from "@/utils/localStorage";
-import { useState } from "react";
+import { createFileRoute } from '@tanstack/react-router';
+import type { Row } from '@tanstack/react-table';
+import { Table } from '@/components/Table';
+import { Icon } from '@/components/ui/Icon';
+import { Link } from '@/components/Link';
+import { Button } from '@/components/ui/button';
+import { handleResult } from '@/utils/handleResult';
+import { DEFAULT_PAGINATION } from '@/consts/pagination';
+import { z } from 'zod';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import type { Document } from '@/declarations/pt_backend/pt_backend.did';
+import { storage } from '@/utils/localStorage';
+import { useState } from 'react';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -24,18 +24,18 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from '@/components/ui/select';
 
 const documentsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
 });
 
-export const Route = createFileRoute("/_authenticated/documents")({
+export const Route = createFileRoute('/_authenticated/documents')({
   component: Documents,
   validateSearch: (search) => documentsSearchSchema.parse(search),
   loaderDeps: ({ search: { page } }) => ({ page }),
   loader: async ({ context, deps: { page } }) => {
-    const organisationId = storage.getItem("activeOrganisationId") as string;
+    const organisationId = storage.getItem('activeOrganisationId') as string;
     const projects_response =
       await context.api.call.list_projects_by_organisation_id(
         BigInt(organisationId),
@@ -157,13 +157,13 @@ function Documents() {
             paginationMetaData={paginationMetaData}
             columnConfig={[
               {
-                id: "title",
-                headerName: "Document Title",
+                id: 'title',
+                headerName: 'Document Title',
                 cellPreprocess: (title) => title,
               },
               {
-                id: "current_version",
-                headerName: "Version",
+                id: 'current_version',
+                headerName: 'Version',
                 cellPreprocess: (version) => version,
               },
             ]}

@@ -1,11 +1,11 @@
-import * as React from 'react';
-import { Link } from '@/components/Link';
-import { ChevronRightIcon } from '@radix-ui/react-icons';
-import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/components/ui/button';
+import type * as React from "react";
+import { Link } from "@/components/Link";
+import { ChevronRightIcon } from "@radix-ui/react-icons";
+import { cn } from "@/utils/cn";
+import { buttonVariants } from "@/components/ui/button";
 
 interface PaginationNextProps
-  extends Omit<React.ComponentProps<typeof Link>, 'search'> {
+  extends Omit<React.ComponentProps<typeof Link>, "search"> {
   className?: string;
 
   search?: { page?: number };
@@ -19,8 +19,9 @@ export function PaginationNext({
   return (
     <Link
       {...props}
-      search={search as any} // Cast to any to bypass type checking on a generic component as Pagination
-      className={cn(buttonVariants({ variant: 'outline' }), className)}
+      // biome-ignore lint/suspicious/noExplicitAny: Cast to any to bypass type checking on a generic component as Pagination
+      search={search as any}
+      className={cn(buttonVariants({ variant: "outline" }), className)}
     >
       <ChevronRightIcon />
     </Link>

@@ -19,6 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Icon } from "@/components/ui/Icon";
 import { handleResult } from "@/utils/handleResult";
+import { storage } from '@/utils/localStorage'
 
 export const Route = createFileRoute("/_authenticated/organisations/create")({
   component: CreateOrganisation,
@@ -56,6 +57,7 @@ export function CreateOrganisation() {
 
       const response = await api.call.create_organisation(values.name);
       const result = handleResult(response);
+      storage.setItem("activeOrganisationId", row.id);
 
       navigate({
         to: `/organisations/${result.toString()}`,

@@ -1,10 +1,10 @@
-import * as React from 'react';
-import { Link } from '@/components/Link';
-import { cn } from '@/utils/cn';
-import { buttonVariants } from '@/components/ui/button';
+import type * as React from "react";
+import { Link } from "@/components/Link";
+import { cn } from "@/utils/cn";
+import { buttonVariants } from "@/components/ui/button";
 
 interface PaginationLinkProps
-  extends Omit<React.ComponentProps<typeof Link>, 'search'> {
+  extends Omit<React.ComponentProps<typeof Link>, "search"> {
   search?: { page?: number };
   isActive?: boolean;
   className?: string;
@@ -20,10 +20,11 @@ export function PaginationLink({
   return (
     <Link
       {...props}
-      search={search as any} // Cast to any to bypass type checking on a generic component as Pagination
+      // biome-ignore lint/suspicious/noExplicitAny: Cast to any to bypass type checking on a generic component as Pagination
+      search={search as any}
       className={cn(
-        buttonVariants({ variant: isActive ? 'default' : 'outline' }),
-        className
+        buttonVariants({ variant: isActive ? "default" : "outline" }),
+        className,
       )}
     >
       {children}
