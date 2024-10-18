@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { Loading } from "@/components/Loading";
 import { useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/authenticate")({
@@ -20,24 +22,34 @@ function Authenticate() {
     select: ({ auth }) => ({ auth }),
   });
   const navigate = useNavigate();
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+
+  const authenticate = async () => {
+    setIsAuthenticating(true);
+    await auth.initializeAuth();
+    const result = await auth.login();
+    if (result) {
+      navigate({
+        to: "/projects",
+        search: { page: 1 },
+      });
+    }
+    // TODO: error handling
+    setIsAuthenticating(false);
+  }
 
   return (
     <div className="grid place-items-center min-h-dvh pb-36">
-      <Button
-        onClick={async () => {
-          await auth.initializeAuth();
-          const result = await auth.login();
-          console.log("result", result);
-          if (result) {
-            navigate({
-              to: "/organisations",
-              search: { page: 1 },
-            });
-          }
-        }}
-      >
-        Authenticate
-      </Button>
+
+      {isAuthenticating ? (
+        <Button disabled={true}>
+          <Loading text="Authenticating..." />
+        </Button>
+      ) : (
+        <Button disabled={isAuthenticating} type="submit" onClick={authenticate}>
+          Authenticate
+        </Button>
+      )}
     </div>
   );
 }

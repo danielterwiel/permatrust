@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# TODO: one day this should be replaced by ast-grep or some magic rust macro
+# that I cannot figure out.
+
 add_traits() {
     local file="$1"
     shift
@@ -36,7 +39,7 @@ file_path="./src/shared/src/pt_backend_generated.rs"
 targets_and_customs=(
     "pub enum AppError {:Debug"
     "struct User {:Clone, Debug"
-    "struct Edge {:Clone, Debug"
+    "struct Edge \(:Clone, Debug" # NOTE the "(" in stead of "{" because Edge is a oneliner
     "struct WorkflowGraph {:Clone, Debug"
     "struct Workflow {:Clone, Debug"
     "struct Organisation {:Clone, Debug"

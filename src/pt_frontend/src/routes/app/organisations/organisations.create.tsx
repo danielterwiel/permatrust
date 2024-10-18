@@ -57,7 +57,7 @@ export function CreateOrganisation() {
 
       const response = await api.call.create_organisation(values.name);
       const result = handleResult(response);
-      storage.setItem("activeOrganisationId", row.id);
+      storage.setItem("activeOrganisationId", response);
 
       navigate({
         to: `/organisations/${result.toString()}`,

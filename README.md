@@ -3,8 +3,7 @@
 ## Getting started
 
 ```sh
-chmod +x build-utils/replace-allow.sh
-chmod +x build-utils/build-shared.sh
+chmod +x scripts/build-shared.sh
 dfx start --clean
 dfx nns import
 npm run build:shared

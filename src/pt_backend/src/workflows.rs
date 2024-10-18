@@ -3,9 +3,9 @@ use serde::{Deserialize, Serialize};
 use shared::pagination::paginate;
 use shared::pt_backend_generated::{
     AppError, CreateWorkflowInput, Edge, EventId, PaginatedWorkflowsResult, PaginationInput,
-    StateId, Workflow, WorkflowGraph, WorkflowGraphExt, WorkflowId, WorkflowIdResult,
-    WorkflowResult,
+    StateId, Workflow, WorkflowGraph, WorkflowId, WorkflowIdResult, WorkflowResult,
 };
+use shared::pt_backend_generated_traits::WorkflowGraphExt;
 use std::cell::RefCell;
 use std::collections::HashMap;
 
