@@ -18,8 +18,8 @@ export const Route = createFileRoute("/authenticate")({
 });
 
 function Authenticate() {
-  const { auth } = Route.useRouteContext({
-    select: ({ auth }) => ({ auth }),
+  const { auth, } = Route.useRouteContext({
+    select: ({ auth, }) => ({ auth, }),
   });
   const navigate = useNavigate();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
@@ -30,7 +30,7 @@ function Authenticate() {
     const result = await auth.login();
     if (result) {
       navigate({
-        to: "/projects",
+        to: "/organisations",
         search: { page: 1 },
       });
     }

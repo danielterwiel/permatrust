@@ -49,8 +49,7 @@ function RevisionDiff() {
 
   useEffect(() => {
     try {
-      const validatedRevisions = z.array(RevisionSchema).parse(revisions);
-      console.log("Validated revisions", validatedRevisions);
+      z.array(RevisionSchema).parse(revisions);
     } catch (error) {
       console.error("Revision validation error:", error);
     }
@@ -65,8 +64,6 @@ function RevisionDiff() {
   const decoder = new TextDecoder();
   const contentCurrent = decoder.decode(preDecode(current.content));
   const contentTheirs = decoder.decode(preDecode(theirs.content));
-
-  console.log("contentCurrent", typeof contentCurrent);
 
   return (
     <MDXEditor

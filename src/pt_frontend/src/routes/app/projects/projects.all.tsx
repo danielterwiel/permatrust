@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Table } from "@/components/Table";
-import { Principal } from "@dfinity/principal";
 import { handleResult } from "@/utils/handleResult";
 import { z } from "zod";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -28,7 +27,7 @@ export const Route = createFileRoute("/_authenticated/projects/")({
     const result = handleResult(response);
     const [projects, paginationMetaData] = result;
     return {
-      ...context,
+      context,
 
       projects,
       paginationMetaData,
@@ -55,6 +54,8 @@ const RowActions = (row: Row<Project>) => {
 
 function Projects() {
   const { projects, paginationMetaData } = Route.useLoaderData();
+  console.log('PPRRRROJECTS', projects);
+  console.log('paginationMetaData', paginationMetaData);
 
   return (
     <>

@@ -27,6 +27,9 @@ export const Route = createFileRoute("/_authenticated/organisations/")({
     };
     const response = await context.api.call.list_organisations(pagination);
     const result = handleResult(response);
+    if (!result) {
+      throw new Error("Failed to fetch organisations");
+    }
     const [organisations, paginationMetaData] = result;
 
     return {

@@ -20,6 +20,7 @@ export const auth: AuthContext = {
   identity: undefined,
 
   initializeAuth,
+
   login,
   logout,
 };
@@ -38,10 +39,10 @@ export async function initializeAuth(): Promise<boolean> {
     keyType: 'Ed25519',
   });
   auth.isAuthenticated = await authClient.isAuthenticated();
-  auth.identity = authClient.getIdentity();
-  router.invalidate();
-  await createAuthenticatedActorWrapper(canisterId, authClient);
-  router.invalidate();
+  if (auth.isAuthenticated) {
+    auth.identity = authClient.getIdentity();
+    await createAuthenticatedActorWrapper(canisterId, authClient);
+  }
   return auth.isAuthenticated;
 }
 

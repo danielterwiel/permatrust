@@ -40,10 +40,10 @@ async function createAuthenticatedActor(
 }
 
 // Function to wrap an actor with authentication checks
-function wrapWithAuth<T extends ActorSubclass<_SERVICE>>(
+async function wrapWithAuth<T extends ActorSubclass<_SERVICE>>(
   actor: T,
   authClient: AuthClient,
-): T {
+): Promise<T> {
   return new Proxy(actor, {
     get(target, prop, receiver) {
       const original = Reflect.get(target, prop, receiver);
@@ -70,8 +70,7 @@ export async function createAuthenticatedActorWrapper(
     createActor,
     authClient,
   );
-
-  const call = wrapWithAuth(actor, authClient);
+  const call = await wrapWithAuth(actor, authClient);
   api.call = call;
   router.invalidate();
   return call;

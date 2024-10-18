@@ -192,8 +192,6 @@ export function CreateWorkflow() {
       const graphJsonObject = generateWorkflowGraph(machineConfig);
       const graph_json = JSON.stringify(graphJsonObject);
 
-      console.log("Transformed graph_json:", graph_json);
-
       const response = await api.call.create_workflow({
         project_id: BigInt(0),
         name: values.name,
