@@ -1,6 +1,7 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { Header } from "@/components/Header";
+import { RouterSpinner } from "@/components/RouterSpinner";
 import { Sidebar } from "@/components/Sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { handleResult } from "@/utils/handleResult";
 import { DEFAULT_PAGINATION } from "@/consts/pagination";
@@ -52,18 +53,19 @@ export const Route = createFileRoute("/_authenticated")({
 });
 
 function AuthLayout() {
-  const { auth } = Route.useRouteContext();
   return (
-    <div className="grid grid-rows-[auto_auto_1fr_auto] sm:grid-rows-[auto_1fr_auto] grid-cols-[172px_1fr] sm:grid-cols-[172px_auto] min-h-dvh">
-      <Header auth={auth} />
+    <SidebarProvider>
+      <RouterSpinner />
       <Sidebar />
-      <main className="col-span-2 sm:col-span-1 px-4">
-        <Breadcrumbs />
-        <Outlet />
+      <main className="grid grid-cols-1 grid-rows-[auto_1fr] h-screen pr-8 pt-4 w-full">
+        <div className="grid grid-cols-[auto_1fr] gap-4">
+          <SidebarTrigger />
+          <Breadcrumbs />
+          <div className="col-span-2">
+            <Outlet />
+          </div>
+        </div>
       </main>
-      <footer className="col-span-1 sm:col-span-2 p-2">
-        © permatrust - 2024
-      </footer>
-    </div>
+    </SidebarProvider>
   );
 }

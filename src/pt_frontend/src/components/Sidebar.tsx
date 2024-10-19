@@ -1,47 +1,63 @@
-import { Link } from '@/components/Link';
+import { Link } from '@tanstack/react-router';
 import { Icon } from '@/components/ui/Icon';
 
-export const Sidebar = () => {
+import {
+  Sidebar as SidebarBase,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar"
+
+const items = [
+  ['/nns', 'NNS', 'infinity-outline'],
+  ['/organisations', 'Organisations', 'building-outline'],
+  ['/projects', 'Projects', 'briefcase-outline'],
+  ['/documents', 'Documents', 'file-outline'],
+  ['/users', 'Users', 'users-outline'],
+  ['/workflows', 'Workflows', 'file-orientation-outline'],
+] as const
+
+export function Sidebar() {
   return (
-    <aside className="col-span-2 sm:col-span-1 p-2 md:p-4">
-      <nav>
-        <ul className="flex flex-row sm:flex-col">
-          {(
-            [
-              ['/nns', 'NNS', 'infinity-outline'],
-              ['/organisations', 'Organisations', 'building-outline'],
-              ['/projects', 'Projects', 'briefcase-outline'],
-              ['/documents', 'Documents', 'file-outline'],
-              ['/users', 'Users', 'users-outline'],
-              ['/workflows', 'Workflows', 'file-orientation-outline'],
-            ] as const
-          ).map(([to, label, icon]) => {
-            return (
-              <li key={to}>
-                <Icon
-                  name={icon}
-                  className="hidden md:inline text-muted-foreground"
-                />
-                <Link
-                  to={to}
-                  activeOptions={
-                    {
-                      // If the route points to the root of it's parent,
-                      // make sure it's only active if it's exact
-                      // exact: to === '.',
-                    }
-                  }
-                  preload="intent"
-                  className="block py-2 px-3 text-nowrap"
-                  activeProps={{ className: 'font-bold' }}
-                >
-                  {label}
-                </Link>
-              </li>
-            );
-          })}
-        </ul>
-      </nav>
-    </aside>
-  );
-};
+    <SidebarBase>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupLabel>PermaTrust</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {items.map(([to, title, icon]) => (
+                <SidebarMenuItem key={title}>
+                  <SidebarMenuButton asChild>
+                    <Link
+                      to={to}
+                      activeOptions={
+                        {
+                          // If the route points to the root of it's parent,
+                          // make sure it's only active if it's exact
+                          // exact: to === '.',
+                        }
+                      }
+                      preload="intent"
+                      className="block py-2 px-3 text-nowrap"
+                      activeProps={{ className: 'font-bold' }}
+                    >
+                      <Icon
+                        name={icon}
+                        className="hidden md:inline text-muted-foreground"
+                      />
+                      {title}
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+    </SidebarBase>
+  )
+}
