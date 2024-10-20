@@ -19,7 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Icon } from "@/components/ui/Icon";
 import { handleResult } from "@/utils/handleResult";
-import { storage } from '@/utils/localStorage'
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 export const Route = createFileRoute("/_authenticated/organisations/create")({
   component: CreateOrganisation,
@@ -38,6 +38,7 @@ const formSchema = z.object({
 });
 
 export function CreateOrganisation() {
+  const [_organisationId, setOrganisationId] = useLocalStorage('activeOrganisationId', -1);
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { api } = Route.useRouteContext({
@@ -57,7 +58,7 @@ export function CreateOrganisation() {
 
       const response = await api.call.create_organisation(values.name);
       const result = handleResult(response);
-      storage.setItem("activeOrganisationId", response);
+      setOrganisationId(response);
 
       navigate({
         to: `/organisations/${result.toString()}`,

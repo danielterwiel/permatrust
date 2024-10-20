@@ -1,5 +1,4 @@
 import { createFileRoute, Outlet, redirect } from "@tanstack/react-router";
-import { RouterSpinner } from "@/components/RouterSpinner";
 import { Sidebar } from "@/components/Sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { Breadcrumbs } from "@/components/Breadcrumbs";
@@ -10,6 +9,7 @@ import { storage } from "@/utils/localStorage";
 export const Route = createFileRoute("/_authenticated")({
   component: AuthLayout,
   beforeLoad: async ({ context, location }) => {
+    const activeOrganisationId = storage.getItem('activeOrganisationId', '');
     const defaultReturn = {
       context,
       getTitle: () => "Home",
@@ -24,8 +24,7 @@ export const Route = createFileRoute("/_authenticated")({
         },
       });
     }
-    const organisationId = storage.getItem("activeOrganisationId");
-    if (organisationId) {
+    if (activeOrganisationId) {
       return defaultReturn;
     }
     const userResponse = await context.api.call.get_user();
@@ -47,17 +46,25 @@ export const Route = createFileRoute("/_authenticated")({
     }
     return defaultReturn
   },
+  loader: ({ context }) => {
+    if (!context.auth.isAuthenticated) {
+      throw redirect({ to: "/authenticate" })
+    }
+  },
   errorComponent: ({ error }) => {
     return <div>Error: {error.message}</div>;
   },
 });
 
 function AuthLayout() {
+  const { auth, } = Route.useRouteContext({
+    select: ({ auth, }) => ({ auth, }),
+  });
+
   return (
     <SidebarProvider>
-      <RouterSpinner />
-      <Sidebar />
-      <main className="grid grid-cols-1 grid-rows-[auto_1fr] h-screen pr-8 pt-4 w-full">
+      <Sidebar auth={auth} />
+      <main className="grid grid-cols-1 grid-rows-[auto_1fr] h-screen p-4 md:px-8 pt-4 w-full">
         <div className="grid grid-cols-[auto_1fr] gap-4">
           <SidebarTrigger />
           <Breadcrumbs />

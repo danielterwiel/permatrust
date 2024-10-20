@@ -3,7 +3,6 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Loading } from "@/components/Loading";
 import { useNavigate } from "@tanstack/react-router";
-
 export const Route = createFileRoute("/authenticate")({
   component: Authenticate,
   beforeLoad: async ({ context }) => {
@@ -27,6 +26,13 @@ function Authenticate() {
   const authenticate = async () => {
     setIsAuthenticating(true);
     await auth.initializeAuth();
+    if (auth.isAuthenticated) {
+      navigate({
+        to: "/organisations",
+        search: { page: 1 },
+      });
+      return
+    }
     const result = await auth.login();
     if (result) {
       navigate({

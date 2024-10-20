@@ -8,9 +8,9 @@ import { z } from "zod";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/utils/date";
-import { storage } from "@/utils/localStorage";
 import type { Row } from "@tanstack/react-table";
 import type { Organisation } from "@/declarations/pt_backend/pt_backend.did";
+import { useLocalStorage } from '@/hooks/useLocalStorage'
 
 const organisationsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
@@ -46,11 +46,12 @@ export const Route = createFileRoute("/_authenticated/organisations/")({
 
 function Organisations() {
   const { organisations, paginationMetaData } = Route.useLoaderData();
+  const [_activeOrganisationId, setActiveOrganisationId] = useLocalStorage('activeOrganisationId', '');
   const navigate = useNavigate();
 
   const RowActions = (row: Row<Organisation>) => {
     const setOrganisationIdLocalStorage = () => {
-      storage.setItem("activeOrganisationId", row.id);
+      setActiveOrganisationId(row.id);
       navigate({ to: `/organisations/${row.id}` });
     };
 

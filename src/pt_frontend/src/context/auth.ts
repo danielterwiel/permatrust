@@ -42,6 +42,7 @@ export async function initializeAuth(): Promise<boolean> {
   if (auth.isAuthenticated) {
     auth.identity = authClient.getIdentity();
     await createAuthenticatedActorWrapper(canisterId, authClient);
+    router.invalidate();
   }
   return auth.isAuthenticated;
 }
@@ -86,4 +87,5 @@ async function login(): Promise<boolean> {
 function logout(): void {
   auth.isAuthenticated = false;
   authClient?.logout();
+  router.invalidate();
 }

@@ -54,8 +54,6 @@ const RowActions = (row: Row<Project>) => {
 
 function Projects() {
   const { projects, paginationMetaData } = Route.useLoaderData();
-  console.log('PPRRRROJECTS', projects);
-  console.log('paginationMetaData', paginationMetaData);
 
   return (
     <>

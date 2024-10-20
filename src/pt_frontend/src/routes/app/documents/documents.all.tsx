@@ -5,11 +5,11 @@ import { Icon } from '@/components/ui/Icon';
 import { Link } from '@/components/Link';
 import { Button } from '@/components/ui/button';
 import { handleResult } from '@/utils/handleResult';
+import { storage } from '@/utils/localStorage';
 import { DEFAULT_PAGINATION } from '@/consts/pagination';
 import { z } from 'zod';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import type { Document } from '@/declarations/pt_backend/pt_backend.did';
-import { storage } from '@/utils/localStorage';
 import { useState } from 'react';
 import {
   Popover,
@@ -35,10 +35,13 @@ export const Route = createFileRoute('/_authenticated/documents')({
   validateSearch: (search) => documentsSearchSchema.parse(search),
   loaderDeps: ({ search: { page } }) => ({ page }),
   loader: async ({ context, deps: { page } }) => {
-    const organisationId = storage.getItem('activeOrganisationId') as string;
+    const activeOrganisationId = storage.getItem('activeOrganisationId', '');
+    if (!activeOrganisationId) {
+      throw new Error("No activeOrganisationId found")
+    }
     const projects_response =
       await context.api.call.list_projects_by_organisation_id(
-        BigInt(organisationId),
+        BigInt(activeOrganisationId),
         DEFAULT_PAGINATION, // TODO: does not handle more than 10 projects
       );
     const projects_result = handleResult(projects_response);
