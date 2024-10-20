@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Table } from "@/components/Table";
-import { handleResult } from "@/utils/handleResult";
 import { z } from "zod";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Icon } from "@/components/ui/Icon";
@@ -23,9 +22,8 @@ export const Route = createFileRoute("/_authenticated/projects/")({
       ...DEFAULT_PAGINATION,
       page_number: BigInt(page ?? 1),
     };
-    const response = await context.api.call.list_projects(pagination);
-    const result = handleResult(response);
-    const [projects, paginationMetaData] = result;
+    const [projects, paginationMetaData] =
+      await context.api.call.list_projects(pagination);
     return {
       context,
 

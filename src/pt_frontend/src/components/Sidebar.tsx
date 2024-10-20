@@ -26,7 +26,7 @@ export function Sidebar({ auth }: { auth: AuthContext }) {
       ["/nns", "NNS", "infinity-outline"],
       ["/organisations", "Organisations", "building-outline"],
       ["/projects", "Projects", "briefcase-outline"],
-      ["/documents", "Documents", "file-outline"],
+      ["/documents", "Documents", "files-outline"],
       ["/users", "Users", "users-outline"],
       ["/workflows", "Workflows", "file-orientation-outline"],
     ] as const;

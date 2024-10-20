@@ -5,6 +5,30 @@ type ProjectId = nat64;
 type DocumentId = nat64;
 type RevisionId = nat64;
 
+type DocumentField = variant {
+    Title: null;
+    CreatedAt: null;
+    ProjectId: null;
+};
+type FilterOperator = variant {
+    Equals: null;
+    Contains: null;
+    GreaterThan: null;
+    LessThan: null;
+};
+type FilterCriteria = record {
+    field: DocumentField;
+    operator: FilterOperator;
+    value: text;
+};
+type SortOrder = variant {
+    Asc: null;
+    Desc: null;
+};
+type SortCriteria = record {
+    field: DocumentField;
+    order: SortOrder;
+};
 type PageSize = nat64;
 type PageNumber = nat64;
 type TotalPages = nat64;
@@ -12,6 +36,13 @@ type TotalItems = nat64;
 type PaginationInput = record {
     page_size: PageSize;
     page_number: PageNumber;
+};
+type DocPaginationInput = record {
+    page_size: PageSize;
+    page_number: PageNumber;
+
+    filters : opt vec FilterCriteria;
+    sort : opt SortCriteria;
 };
 type PaginationMetadata = record {
     page_size : PageSize;
@@ -201,7 +232,6 @@ service : {
     list_users : (PaginationInput) -> (PaginatedUsersResult) query;
     get_user : () -> (UserResult) query;
 
-
     create_workflow: (CreateWorkflowInput) -> (WorkflowIdResult);
     list_workflows: (PaginationInput) -> (PaginatedWorkflowsResult) query;
     get_workflow: (WorkflowId) -> (WorkflowResult) query;
@@ -216,7 +246,7 @@ service : {
     get_project : (ProjectId) -> (ProjectResult) query;
 
     create_document : (ProjectId, text, vec nat8) -> (DocumentIdResult);
-    list_documents : (PaginationInput) -> (PaginatedDocumentsResult) query;
+    list_documents : (DocPaginationInput) -> (PaginatedDocumentsResult) query;
     list_documents_by_project_id : (ProjectId, PaginationInput) -> (PaginatedDocumentsResult) query;
     get_document : (DocumentId) -> (DocumentResult) query;
 

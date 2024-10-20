@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MDXEditor, headingsPlugin } from "@mdxeditor/editor";
-import { handleResult } from "@/utils/handleResult";
 import { Icon } from "@/components/ui/Icon";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -12,8 +11,7 @@ export const Route = createFileRoute(
     getTitle: () => "Revision",
   }),
   loader: async ({ params: { revisionId }, context }) => {
-    const response = await context.api.call.get_revision(BigInt(revisionId));
-    const revision = handleResult(response);
+    const revision = await context.api.call.get_revision(BigInt(revisionId));
     const active = {
       ...context.active,
       revision,

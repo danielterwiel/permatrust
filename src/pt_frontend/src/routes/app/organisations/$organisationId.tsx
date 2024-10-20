@@ -1,7 +1,6 @@
 import { Link } from "@/components/Link";
 import { createFileRoute } from "@tanstack/react-router";
 import { Table } from "@/components/Table";
-import { handleResult } from "@/utils/handleResult";
 import { Icon } from "@/components/ui/Icon";
 import { DEFAULT_PAGINATION } from "@/consts/pagination";
 import { z } from "zod";
@@ -25,23 +24,19 @@ export const Route = createFileRoute(
     getTitle: () => "Organisation",
   }),
   loaderDeps: ({ search: { page } }) => ({ page }),
-  loader: async ({ deps: { page }, context }) => {
-    const activeOrganisationId = storage.getItem("activeOrganisationId", "");
+  loader: async ({ deps: { page }, context, params }) => {
     const pagination = {
       ...DEFAULT_PAGINATION,
       page_number: BigInt(page ?? 1),
     };
-    const projects_response =
+    const [projects, paginationMetaData] =
       await context.api.call.list_projects_by_organisation_id(
-        BigInt(parseInt(activeOrganisationId)),
+        BigInt(Number.parseInt(params.organisationId)),
         pagination,
       );
-    const origanisation_response = await context.api.call.get_organisation(
-      BigInt(parseInt(activeOrganisationId)),
+    const origanisation = await context.api.call.get_organisation(
+      BigInt(Number.parseInt(params.organisationId)),
     );
-    const origanisation = handleResult(origanisation_response);
-    const projects_result = handleResult(projects_response);
-    const [projects, paginationMetaData] = projects_result;
 
     return {
       ...context,

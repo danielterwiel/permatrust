@@ -16,8 +16,7 @@ import {
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useLocalStorage } from '@/hooks/useLocalStorage'
-import { handleResult } from "@/utils/handleResult";
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 import { useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/projects/create")({
@@ -38,7 +37,7 @@ const formSchema = z.object({
 
 export function CreateProject() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [organisationId] = useLocalStorage('activeOrganisationId', '');
+  const [activeOrganisationId] = useLocalStorage("activeOrganisationId", "");
   const navigate = useNavigate();
   const { api } = Route.useRouteContext({
     select: ({ api }) => ({ api }),
@@ -55,15 +54,14 @@ export function CreateProject() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     try {
-      const response = await api.call.create_project(
-        BigInt(organisationId),
+      const projectId = await api.call.create_project(
+        BigInt(activeOrganisationId),
         values.name,
       );
-      const result = handleResult(response);
       navigate({
         to: "/projects/$projectId",
         params: {
-          projectId: result.toString(),
+          projectId: projectId.toString(),
         },
       });
     } catch (error) {

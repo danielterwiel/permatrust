@@ -5,15 +5,17 @@ import { type ActorSubclass, HttpAgent } from "@dfinity/agent";
 import { createActor } from "@/declarations/pt_backend";
 import { router } from "@/router";
 
+import { notFound } from "@tanstack/react-router";
+import type { AppError } from "@/declarations/pt_backend/pt_backend.did";
+
 type CreateActorFn = typeof createActor;
 
 export type ApiContext = {
-  call: ActorSubclass<_SERVICE>;
+  call: WrappedActor<_SERVICE>;
 };
 
 export const api: ApiContext = {
-  // Initialize call to prevent optional chaining on every canister method call
-  call: {} as ActorSubclass<_SERVICE>,
+  call: {} as WrappedActor<_SERVICE>,
 };
 
 async function createAuthenticatedAgent(
@@ -61,17 +63,85 @@ async function wrapWithAuth<T extends ActorSubclass<_SERVICE>>(
   }) as T;
 }
 
+type Result<T> = { Ok: T } | { Err: AppError };
+
+type ErrorHandler<E> = (error: E) => void;
+
+type ResultHandler<T> = {
+  onOk?: (value: T) => void;
+  onErr?: ErrorHandler<AppError>;
+};
+
+export function handleResult<T>(
+  result: Result<T>,
+  handlers: ResultHandler<T> = {},
+): T {
+  if ("Ok" in result) {
+    if (handlers.onOk) {
+      handlers.onOk(result.Ok);
+    }
+    return result.Ok;
+  }
+
+  if (handlers.onErr) {
+    handlers.onErr(result.Err);
+  }
+
+  throw notFound({
+    data: `An error occurred: ${JSON.stringify(result.Err)}`,
+  });
+}
+
+type WrappedActor<T> = {
+  [K in keyof T]: T[K] extends (...args: infer A) => Promise<Result<infer R>>
+    ? (...args: [...A, ResultHandler<R>?]) => Promise<R>
+    : T[K];
+};
+
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+function wrapActor<T extends Record<string, any>>(actor: T): WrappedActor<T> {
+  const wrappedActor: Partial<WrappedActor<T>> = {};
+
+  for (const key in actor) {
+    const method = actor[key];
+
+    if (typeof method === "function") {
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      wrappedActor[key] = (async (...args: any[]) => {
+        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        let handlers: ResultHandler<any> | undefined;
+        const lastArg = args[args.length - 1];
+        if (
+          lastArg &&
+          typeof lastArg === "object" &&
+          ("onOk" in lastArg || "onErr" in lastArg)
+        ) {
+          handlers = args.pop();
+        }
+
+        const result = await method(...args);
+        return handleResult(result, handlers);
+      }) as WrappedActor<T>[typeof key];
+    } else {
+      wrappedActor[key] = method;
+    }
+  }
+
+  return wrappedActor as WrappedActor<T>;
+}
+
 export async function createAuthenticatedActorWrapper(
   canisterId: string,
   authClient: AuthClient,
-): Promise<ActorSubclass<_SERVICE>> {
+): Promise<WrappedActor<_SERVICE>> {
   const actor = await createAuthenticatedActor(
     canisterId,
     createActor,
     authClient,
   );
-  const call = await wrapWithAuth(actor, authClient);
-  api.call = call;
+  const callWithAuth = await wrapWithAuth(actor, authClient);
+  const wrappedCall = wrapActor(callWithAuth);
+  api.call = wrappedCall;
   router.invalidate();
-  return call;
+  return wrappedCall;
 }

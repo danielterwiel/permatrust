@@ -4,7 +4,6 @@ import { z } from "zod";
 
 import { MDXEditor, headingsPlugin, diffSourcePlugin } from "@mdxeditor/editor";
 import { pt_backend } from "@/declarations/pt_backend";
-import { handleResult } from "@/utils/handleResult";
 
 const RevisionSchema = z.object({
   id: z.bigint(),
@@ -27,11 +26,10 @@ export const Route = createFileRoute(
   validateSearch: revisionSearchSchema,
   loaderDeps: ({ search: { current, theirs } }) => ({ current, theirs }),
   loader: async ({ context, deps: { current, theirs } }) => {
-    const response = await context.api.call.diff_revisions(
+    const revisions = await context.api.call.diff_revisions(
       BigInt(current),
       BigInt(theirs),
     );
-    const revisions = handleResult(response);
     return { revisions };
   },
   errorComponent: ({ error }) => {

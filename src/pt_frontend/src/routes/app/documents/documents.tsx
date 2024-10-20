@@ -1,13 +1,17 @@
 import { Link } from "@/components/Link";
 import { createFileRoute } from "@tanstack/react-router";
 import { Table } from "@/components/Table";
-import { handleResult } from "@/utils/handleResult";
 import { Icon } from "@/components/ui/Icon";
 import { DEFAULT_PAGINATION } from "@/consts/pagination";
 import { z } from "zod";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import type { Row } from "@tanstack/react-table";
-import type { Document } from "@/declarations/pt_backend/pt_backend.did";
+import type {
+  Document,
+  SortCriteria,
+  FilterCriteria,
+  SortOrder,
+} from "@/declarations/pt_backend/pt_backend.did";
 
 const documentsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
@@ -23,13 +27,20 @@ export const Route = createFileRoute(
     const pagination = {
       ...DEFAULT_PAGINATION,
       page_number: BigInt(page ?? 1),
+
+      filters: [[]] as [FilterCriteria[]],
+      sort: [
+        {
+          field: { Title: null },
+          order: { Asc: null } as SortOrder,
+        },
+      ] as [SortCriteria],
     };
-    const response = await context.api.call.list_documents_by_project_id(
-      BigInt(params.projectId),
-      pagination,
-    );
-    const result = handleResult(response);
-    const [documents, paginationMetaData] = result;
+    const [documents, paginationMetaData] =
+      await context.api.call.list_documents_by_project_id(
+        BigInt(params.projectId),
+        pagination,
+      );
     return {
       ...context,
 

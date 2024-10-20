@@ -18,7 +18,6 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { handleResult } from "@/utils/handleResult";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ReactFlow, {
   ReactFlowProvider,
@@ -192,19 +191,17 @@ export function CreateWorkflow() {
       const graphJsonObject = generateWorkflowGraph(machineConfig);
       const graph_json = JSON.stringify(graphJsonObject);
 
-      const response = await api.call.create_workflow({
+      const workflowId = await api.call.create_workflow({
         project_id: BigInt(0),
         name: values.name,
         graph_json,
         initial_state: machineConfig.initial,
       });
 
-      const result = handleResult(response);
-
       navigate({
         to: "/workflows/$workflowId",
         params: {
-          workflowId: result.toString(),
+          workflowId: workflowId.toString(),
         },
       });
     } catch (error) {

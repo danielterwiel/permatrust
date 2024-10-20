@@ -1,7 +1,6 @@
 import { Link } from "@/components/Link";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Table } from "@/components/Table";
-import { handleResult } from "@/utils/handleResult";
 import { Icon } from "@/components/ui/Icon";
 import { DEFAULT_PAGINATION } from "@/consts/pagination";
 import { z } from "zod";
@@ -10,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { formatDateTime } from "@/utils/date";
 import type { Row } from "@tanstack/react-table";
 import type { Organisation } from "@/declarations/pt_backend/pt_backend.did";
-import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { useLocalStorage } from "@/hooks/useLocalStorage";
 
 const organisationsSearchSchema = z.object({
   page: z.number().int().nonnegative().optional(),
@@ -25,12 +24,8 @@ export const Route = createFileRoute("/_authenticated/organisations/")({
       ...DEFAULT_PAGINATION,
       page_number: BigInt(page ?? 1),
     };
-    const response = await context.api.call.list_organisations(pagination);
-    const result = handleResult(response);
-    if (!result) {
-      throw new Error("Failed to fetch organisations");
-    }
-    const [organisations, paginationMetaData] = result;
+    const [organisations, paginationMetaData] =
+      await context.api.call.list_organisations(pagination);
 
     return {
       ...context,
@@ -46,7 +41,10 @@ export const Route = createFileRoute("/_authenticated/organisations/")({
 
 function Organisations() {
   const { organisations, paginationMetaData } = Route.useLoaderData();
-  const [_activeOrganisationId, setActiveOrganisationId] = useLocalStorage('activeOrganisationId', '');
+  const [_activeOrganisationId, setActiveOrganisationId] = useLocalStorage(
+    "activeOrganisationId",
+    "",
+  );
   const navigate = useNavigate();
 
   const RowActions = (row: Row<Organisation>) => {

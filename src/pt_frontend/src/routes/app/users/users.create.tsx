@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { pt_backend } from "@/declarations/pt_backend";
 import { useState } from "react";
 
 export const Route = createFileRoute("/_authenticated/users/create")({

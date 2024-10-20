@@ -46,6 +46,11 @@ targets_and_customs=(
     "struct Project {:Clone, Debug"
     "struct Document {:Clone, Debug"
     "struct Revision {:Clone, Debug"
+    "struct FilterCriteria {:Clone, Debug"
+    "struct SortCriteria {:Clone, Debug"
+    "pub enum SortOrder {:Clone, Debug"
+    "pub enum DocumentField {:Clone, Debug"
+    "pub enum FilterOperator {:Clone, Debug"
 )
 
 add_traits "$file_path" "${targets_and_customs[@]}"

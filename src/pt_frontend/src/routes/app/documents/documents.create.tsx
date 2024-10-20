@@ -29,7 +29,6 @@ import {
   toolbarPlugin,
 } from "@mdxeditor/editor";
 import "@mdxeditor/editor/style.css";
-import { handleResult } from "@/utils/handleResult";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const Route = createFileRoute(
@@ -76,18 +75,17 @@ export function CreateDocument() {
     setIsSubmitting(true);
     const encoder = new TextEncoder();
     const content = encoder.encode(values.content);
-    const response = await context.api.call.create_document(
+    const documentId = await context.api.call.create_document(
       BigInt(params.projectId),
       values.title,
       content,
     );
-    const result = handleResult(response);
     setIsSubmitting(false);
     navigate({
       to: "/projects/$projectId/documents/$documentId",
       params: {
         projectId: params.projectId,
-        documentId: result.toString(),
+        documentId: documentId.toString(),
       },
     });
   }

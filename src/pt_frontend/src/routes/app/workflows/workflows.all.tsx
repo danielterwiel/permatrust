@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Table } from "@/components/Table";
-import { handleResult } from "@/utils/handleResult";
 import { DEFAULT_PAGINATION } from "@/consts/pagination";
 import { z } from "zod";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -22,9 +21,8 @@ export const Route = createFileRoute("/_authenticated/workflows/")({
       ...DEFAULT_PAGINATION,
       page_number: BigInt(page ?? 1),
     };
-    const response = await context.api.call.list_workflows(pagination);
-    const result = handleResult(response);
-    const [workflows, paginationMetaData] = result;
+    const [workflows, paginationMetaData] =
+      await context.api.call.list_workflows(pagination);
     return {
       ...context,
 

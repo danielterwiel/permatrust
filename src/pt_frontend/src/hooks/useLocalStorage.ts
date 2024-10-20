@@ -19,8 +19,6 @@ export function useLocalStorage<T>(
       const valueToStore =
         value instanceof Function ? value(storedValue) : value;
 
-      console.log("ls setValue", valueToStore);
-
       setStoredValue(valueToStore);
 
       if (typeof globalThis !== "undefined") {

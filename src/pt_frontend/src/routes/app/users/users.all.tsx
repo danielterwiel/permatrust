@@ -4,7 +4,6 @@ import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Icon } from "@/components/ui/Icon";
 import { Link } from "@/components/Link";
 import { DEFAULT_PAGINATION } from "@/consts/pagination";
-import { handleResult } from "@/utils/handleResult";
 import { Table } from "@/components/Table";
 import type { Row } from "@tanstack/react-table";
 import type { User } from "@/declarations/pt_backend/pt_backend.did";
@@ -22,9 +21,8 @@ export const Route = createFileRoute("/_authenticated/users/")({
       ...DEFAULT_PAGINATION,
       page_number: BigInt(page ?? 1),
     };
-    const response = await context.api.call.list_users(pagination);
-    const result = handleResult(response);
-    const [users, paginationMetaData] = result;
+    const [users, paginationMetaData] =
+      await context.api.call.list_users(pagination);
     return {
       ...context,
 

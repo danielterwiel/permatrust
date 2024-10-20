@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { handleResult } from "@/utils/handleResult";
 import { formatDateTime } from "@/utils/date";
 import { storage } from "@/utils/localStorage";
 import { z } from "zod";
@@ -21,17 +20,16 @@ export const Route = createFileRoute("/_authenticated/projects/")({
   validateSearch: (search) => projectsSearchSchema.parse(search),
   loaderDeps: ({ search: { page } }) => ({ page }),
   loader: async ({ context, deps: { page } }) => {
-    const organisationId = storage.getItem("activeOrganisationId") as string;
+    const organisationId = storage.getItem("activeOrganisationId", "");
     const pagination = {
       ...DEFAULT_PAGINATION,
       page_number: BigInt(page ?? 1),
     };
-    const response = await context.api.call.list_projects_by_organisation_id(
-      BigInt(organisationId),
-      pagination,
-    );
-    const result = handleResult(response);
-    const [projects, paginationMetaData] = result;
+    const [projects, paginationMetaData] =
+      await context.api.call.list_projects_by_organisation_id(
+        BigInt(organisationId),
+        pagination,
+      );
     return {
       ...context,
 

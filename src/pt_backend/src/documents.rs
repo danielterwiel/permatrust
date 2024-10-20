@@ -1,9 +1,9 @@
 use crate::logger::{log_info, loggable_document};
 use ic_cdk_macros::{query, update};
-use shared::pagination::{paginate, PaginatedDocumentsResult};
+use shared::pagination::{paginate_doc, PaginatedDocumentsResult};
 use shared::pt_backend_generated::{
-    AppError, Document, DocumentId, DocumentIdResult, DocumentResult, PaginationInput, ProjectId,
-    RevisionId, RevisionIdResult,
+    AppError, DocPaginationInput, Document, DocumentId, DocumentIdResult, DocumentResult,
+    FilterCriteria, ProjectId, RevisionId, RevisionIdResult,
 };
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -90,9 +90,18 @@ fn create_document(
 }
 
 #[query]
-fn list_documents(pagination: PaginationInput) -> PaginatedDocumentsResult {
+fn list_documents(pagination: DocPaginationInput) -> PaginatedDocumentsResult {
+    #[derive(Clone)]
+    struct FilterCriteria;
     let documents = get_documents();
-    match paginate(&documents, pagination.page_size, pagination.page_number) {
+
+    match paginate_doc(
+        &documents,
+        pagination.page_size,
+        pagination.page_number,
+        pagination.filters.clone(),
+        pagination.sort.clone(),
+    ) {
         Ok((paginated_documents, pagination_metadata)) => {
             PaginatedDocumentsResult::Ok(paginated_documents, pagination_metadata)
         }
@@ -103,11 +112,17 @@ fn list_documents(pagination: PaginationInput) -> PaginatedDocumentsResult {
 #[query]
 fn list_documents_by_project_id(
     project_id: ProjectId,
-    pagination: PaginationInput,
+    pagination: DocPaginationInput,
 ) -> PaginatedDocumentsResult {
     let documents = get_documents_by_project(project_id);
 
-    match paginate(&documents, pagination.page_size, pagination.page_number) {
+    match paginate_doc(
+        &documents,
+        pagination.page_size,
+        pagination.page_number,
+        pagination.filters.clone(),
+        pagination.sort.clone(),
+    ) {
         Ok((paginated_documents, pagination_metadata)) => {
             PaginatedDocumentsResult::Ok(paginated_documents, pagination_metadata)
         }
