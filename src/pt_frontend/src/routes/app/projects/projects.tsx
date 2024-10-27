@@ -1,29 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { formatDateTime } from "@/utils/date";
+import { formatDateTime } from "@/utils/formatDateTime";
 import { storage } from "@/utils/localStorage";
 import { z } from "zod";
 import { DEFAULT_PAGINATION } from "@/consts/pagination";
 import { Link } from "@/components/Link";
 import { Table } from "@/components/Table";
-import { Principal } from "@dfinity/principal";
 import { Icon } from "@/components/ui/Icon";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import type { Row } from "@tanstack/react-table";
 import type { Project } from "@/declarations/pt_backend/pt_backend.did";
 
 const projectsSearchSchema = z.object({
-  page: z.number().int().nonnegative().optional(),
+  page_number: z.number().int().nonnegative().optional(),
 });
 
 export const Route = createFileRoute("/_authenticated/projects/")({
   component: Projects,
   validateSearch: (search) => projectsSearchSchema.parse(search),
-  loaderDeps: ({ search: { page } }) => ({ page }),
-  loader: async ({ context, deps: { page } }) => {
+  loaderDeps: ({ search: { page_number } }) => ({ page_number }),
+  loader: async ({ context, deps: { page_number } }) => {
     const organisationId = storage.getItem("activeOrganisationId", "");
     const pagination = {
       ...DEFAULT_PAGINATION,
-      page_number: BigInt(page ?? 1),
+      page_number: page_number ?? 1,
     };
     const [projects, paginationMetaData] =
       await context.api.call.list_projects_by_organisation_id(

@@ -26,7 +26,7 @@ export function Pagination({
   const currentPage = Number(page_number);
 
   // Hide pagination when there are no items or only one page
-  if (total_items === BigInt(0) || totalPages <= 1) {
+  if (total_items === 0 || totalPages <= 1) {
     return null;
   }
 
@@ -48,7 +48,7 @@ export function Pagination({
         totalPages - 3,
         totalPages - 2,
         totalPages - 1,
-        totalPages
+        totalPages,
       );
     } else {
       pageNumbers.push(
@@ -58,7 +58,7 @@ export function Pagination({
         currentPage,
         currentPage + 1,
         'ellipsis',
-        totalPages
+        totalPages,
       );
     }
   }
@@ -72,7 +72,9 @@ export function Pagination({
               <PaginationPrevious
                 to=""
                 search={
-                  currentPage - 1 === 1 ? undefined : { page: currentPage - 1 }
+                  currentPage - 1 === 1
+                    ? undefined
+                    : { page_number: currentPage - 1 }
                 }
               >
                 Previous
@@ -94,19 +96,21 @@ export function Pagination({
               <PaginationItem key={pageNumber}>
                 <PaginationLink
                   to=""
-                  search={pageNumber === 1 ? undefined : { page: pageNumber }}
+                  search={
+                    pageNumber === 1 ? undefined : { page_number: pageNumber }
+                  }
                   isActive={pageNumber === currentPage}
                 >
                   {pageNumber}
                 </PaginationLink>
               </PaginationItem>
-            )
+            ),
           )}
         </div>
         <div className="flex justify-end w-24">
           {has_next_page && (
             <PaginationItem>
-              <PaginationNext to="" search={{ page: currentPage + 1 }}>
+              <PaginationNext to="" search={{ page_number: currentPage + 1 }}>
                 Next
               </PaginationNext>
             </PaginationItem>

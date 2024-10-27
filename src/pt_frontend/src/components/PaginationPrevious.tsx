@@ -3,12 +3,13 @@ import { Link } from "@/components/Link";
 import { ChevronLeftIcon } from "@radix-ui/react-icons";
 import { cn } from "@/utils/cn";
 import { buttonVariants } from "@/components/ui/button";
+import type { PaginationInput } from "@/declarations/pt_backend/pt_backend.did";
 
 interface PaginationPreviousProps
   extends Omit<React.ComponentProps<typeof Link>, "search"> {
   className?: string;
 
-  search?: { page?: number };
+  search?: Pick<PaginationInput, "page_number">;
 }
 
 export function PaginationPrevious({

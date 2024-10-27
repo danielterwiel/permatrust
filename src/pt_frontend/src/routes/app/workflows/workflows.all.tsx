@@ -1,33 +1,74 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { Table } from "@/components/Table";
-import { DEFAULT_PAGINATION } from "@/consts/pagination";
-import { z } from "zod";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Icon } from "@/components/ui/Icon";
-import { Link } from "@/components/Link";
-import type { Row } from "@tanstack/react-table";
-import type { Workflow } from "@/declarations/pt_backend/pt_backend.did";
+import { z } from 'zod';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { Table } from '@/components/Table';
+import { Icon } from '@/components/ui/Icon';
+import { Link } from '@/components/Link';
+import { FilterInput } from '@/components/FilterInput';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { buildPaginationInput } from '@/utils/buildPaginationInput';
+import { buildFilterField } from '@/utils/buildFilterField';
+import { paginationInputSchema } from '@/schemas/pagination';
+import type { Row } from '@tanstack/react-table';
+import type {
+  Workflow,
+  PaginationInput,
+  Sort,
+  SortCriteria,
+} from '@/declarations/pt_backend/pt_backend.did';
+import type { FilterCriteria } from '@/types/pagination';
+import {
+  DEFAULT_PAGINATION,
+  FILTER_FIELD,
+  FILTER_OPERATOR,
+  SORT_ORDER,
+} from '@/consts/pagination';
+import { ENTITY, ENTITY_NAME } from '@/consts/entities';
+
+const DEFAULT_FILTERS: [FilterCriteria[]] = [
+  [
+    {
+      value: '',
+      entity: ENTITY.Workflow,
+      field: buildFilterField(ENTITY_NAME.Workflow, FILTER_FIELD.Workflow.Name),
+      operator: FILTER_OPERATOR.Contains,
+    },
+  ],
+];
+
+const DEFAULT_SORT: [SortCriteria] = [
+  {
+    field: buildFilterField(ENTITY_NAME.Workflow, FILTER_FIELD.Workflow.Name),
+    order: SORT_ORDER.Asc,
+  },
+];
 
 const workflowsSearchSchema = z.object({
-  page: z.number().int().nonnegative().optional(),
+  pagination: paginationInputSchema.optional(),
 });
 
-export const Route = createFileRoute("/_authenticated/workflows/")({
+const DEFAULT_WORKFLOW_PAGINATION: PaginationInput = {
+  page_number: DEFAULT_PAGINATION.page_number,
+  page_size: DEFAULT_PAGINATION.page_size,
+  filters: DEFAULT_FILTERS,
+  sort: DEFAULT_SORT,
+};
+
+export const Route = createFileRoute('/_authenticated/workflows/')({
   component: Workflows,
   validateSearch: (search) => workflowsSearchSchema.parse(search),
-  loaderDeps: ({ search: { page } }) => ({ page }),
-  loader: async ({ context, deps: { page } }) => {
-    const pagination = {
-      ...DEFAULT_PAGINATION,
-      page_number: BigInt(page ?? 1),
-    };
+  loaderDeps: ({ search: { pagination } }) => ({ pagination }),
+  loader: async ({ context, deps: { pagination } }) => {
+    const workflowPagination = buildPaginationInput(
+      DEFAULT_WORKFLOW_PAGINATION,
+      pagination,
+    );
     const [workflows, paginationMetaData] =
-      await context.api.call.list_workflows(pagination);
+      await context.api.call.list_workflows(workflowPagination);
     return {
-      ...context,
-
+      context,
       workflows,
       paginationMetaData,
+      pagination: workflowPagination,
     };
   },
   errorComponent: ({ error }) => {
@@ -50,11 +91,30 @@ const RowActions = (row: Row<Workflow>) => {
 };
 
 function Workflows() {
-  const { workflows, paginationMetaData } = Route.useLoaderData();
+  const { workflows, pagination, paginationMetaData } = Route.useLoaderData();
+  const navigate = useNavigate();
 
   return (
     <>
-      <div className="text-right pb-4">
+      <div className="flex items-center justify-between pb-4">
+        {pagination.filters[0]?.map((filterCriteria) => (
+          <FilterInput
+            key={filterCriteria.entity.toString()}
+            filterCriteria={filterCriteria}
+            placeholder="Filter name..."
+            onChange={(filterCriteria: FilterCriteria) => {
+              navigate({
+                to: '/workflows',
+                search: {
+                  pagination: {
+                    ...pagination,
+                    filters: [[filterCriteria]],
+                  },
+                },
+              });
+            }}
+          />
+        ))}
         <Link
           to="/workflows/create"
           variant="default"
@@ -83,11 +143,24 @@ function Workflows() {
             tableData={workflows}
             actions={RowActions}
             paginationMetaData={paginationMetaData}
+            entityName={ENTITY_NAME.Workflow}
+            sort={pagination.sort}
+            onSortingChange={(newSort: Sort) => {
+              navigate({
+                to: '/workflows',
+                search: {
+                  pagination: {
+                    ...pagination,
+                    sort: newSort,
+                  },
+                },
+              });
+            }}
             columnConfig={[
               {
-                id: "name",
-                headerName: "Workflow name",
-                cellPreprocess: (title) => title,
+                id: 'name',
+                headerName: 'Workflow name',
+                cellPreprocess: (name) => name,
               },
             ]}
           />

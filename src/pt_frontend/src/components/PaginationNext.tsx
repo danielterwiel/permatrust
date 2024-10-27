@@ -8,7 +8,7 @@ interface PaginationNextProps
   extends Omit<React.ComponentProps<typeof Link>, "search"> {
   className?: string;
 
-  search?: { page?: number };
+  search?: { page_number?: number };
 }
 
 export function PaginationNext({

@@ -47,7 +47,13 @@ fn create_user(first_name: String, last_name: String) -> UserIdResult {
 fn list_users(pagination: PaginationInput) -> PaginatedUsersResult {
     let users = USERS.with(|users| users.borrow().values().cloned().collect::<Vec<_>>());
 
-    match paginate(&users, pagination.page_size, pagination.page_number) {
+    match paginate(
+        &users,
+        pagination.page_size,
+        pagination.page_number,
+        pagination.filters,
+        pagination.sort,
+    ) {
         Ok((paginated_users, pagination_metadata)) => {
             PaginatedUsersResult::Ok(paginated_users, pagination_metadata)
         }

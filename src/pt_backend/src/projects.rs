@@ -64,7 +64,13 @@ fn create_project(organisation_id: OrganisationId, name: String) -> ProjectIdRes
 #[query]
 fn list_projects(pagination: PaginationInput) -> PaginatedProjectsResult {
     let projects = get_projects();
-    match paginate(&projects, pagination.page_size, pagination.page_number) {
+    match paginate(
+        &projects,
+        pagination.page_size,
+        pagination.page_number,
+        pagination.filters,
+        pagination.sort,
+    ) {
         Ok((paginated_projects, pagination_metadata)) => {
             PaginatedProjectsResult::Ok(paginated_projects, pagination_metadata)
         }
@@ -78,7 +84,13 @@ fn list_projects_by_organisation_id(
     pagination: PaginationInput,
 ) -> PaginatedProjectsResult {
     let projects = get_projects_by_organisation_id(organisation_id);
-    match paginate(&projects, pagination.page_size, pagination.page_number) {
+    match paginate(
+        &projects,
+        pagination.page_size,
+        pagination.page_number,
+        pagination.filters,
+        pagination.sort,
+    ) {
         Ok((paginated_projects, pagination_metadata)) => {
             PaginatedProjectsResult::Ok(paginated_projects, pagination_metadata)
         }

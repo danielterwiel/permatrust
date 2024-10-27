@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
-import { Link } from "@tanstack/react-router";
-import { Icon } from "@/components/ui/Icon";
-import { Button } from "@/components/ui/button";
-import type { AuthContext } from "@/context/auth";
+import { Link } from '@tanstack/react-router';
+import { Icon } from '@/components/ui/Icon';
+import { Button } from '@/components/ui/button';
+import type { AuthContext } from '@/context/auth';
 
 import {
   Sidebar as SidebarBase,
@@ -14,25 +14,24 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarFooter,
-} from "@/components/ui/sidebar";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
+} from '@/components/ui/sidebar';
+import { useLocalStorage } from '@/hooks/useLocalStorage';
 
 export function Sidebar({ auth }: { auth: AuthContext }) {
-  const [activeOrganisationId] = useLocalStorage("activeOrganisationId", "");
-
+  const [activeOrganisationId] = useLocalStorage('activeOrganisationId', '');
 
   const items = useMemo(() => {
     const allItems = [
-      ["/nns", "NNS", "infinity-outline"],
-      ["/organisations", "Organisations", "building-outline"],
-      ["/projects", "Projects", "briefcase-outline"],
-      ["/documents", "Documents", "files-outline"],
-      ["/users", "Users", "users-outline"],
-      ["/workflows", "Workflows", "file-orientation-outline"],
+      ['/nns', 'NNS', 'infinity-outline'],
+      ['/organisations', 'Organisations', 'building-outline'],
+      ['/projects', 'Projects', 'briefcase-outline'],
+      ['/documents', 'Documents', 'files-outline'],
+      ['/users', 'Users', 'users-outline'],
+      ['/workflows', 'Workflows', 'file-orientation-outline'],
     ] as const;
 
-    return allItems.filter(item =>
-      item[1] !== "Documents" || Boolean(activeOrganisationId)
+    return allItems.filter(
+      (item) => item[1] !== 'Documents' || Boolean(activeOrganisationId),
     );
   }, [activeOrganisationId]);
   const logout = () => {
@@ -60,7 +59,7 @@ export function Sidebar({ auth }: { auth: AuthContext }) {
                       }
                       preload="intent"
                       className="block py-2 px-3 text-nowrap"
-                      activeProps={{ className: "font-bold" }}
+                      activeProps={{ className: 'font-bold' }}
                     >
                       <Icon
                         name={icon}

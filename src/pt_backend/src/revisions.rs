@@ -33,7 +33,7 @@ pub fn create_revision(
     match get_document_by_id(document_id) {
         Some(document) if document.project == project_id => {
             let new_revision_id = get_next_revision_id();
-            let version = document.current_version + 1;
+            let version = document.version + 1;
 
             let new_revision = Revision {
                 id: new_revision_id,
@@ -93,7 +93,13 @@ fn list_revisions_by_document_id(
     let revisions =
         get_revisions_by_document_id(document_id).expect("Something went wrong getting revision");
 
-    match paginate(&revisions, pagination.page_size, pagination.page_number) {
+    match paginate(
+        &revisions,
+        pagination.page_size,
+        pagination.page_number,
+        pagination.filters,
+        pagination.sort,
+    ) {
         Ok((paginated_revisions, pagination_metadata)) => {
             PaginatedRevisionsResult::Ok(paginated_revisions, pagination_metadata)
         }

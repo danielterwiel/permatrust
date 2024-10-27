@@ -1,29 +1,20 @@
-import { z } from "zod";
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { createFileRoute } from "@tanstack/react-router";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { storage } from "@/utils/localStorage";
-import { useDebounce } from "@/hooks/useDebounce";
-import { Table } from "@/components/Table";
-import { Icon } from "@/components/ui/Icon";
-import { Link } from "@/components/Link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import type { Row } from "@tanstack/react-table";
-import type {
-  Document,
-  SortCriteria,
-  FilterCriteria,
-  SortOrder,
-} from "@/declarations/pt_backend/pt_backend.did";
-import type { _SERVICE } from "@/declarations/pt_backend/pt_backend.did.d";
+import { z } from 'zod';
+import { useState } from 'react';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { getActiveOrganisationId } from '@/utils/getActiveOrganisationId';
+import { buildPaginationInput } from '@/utils/buildPaginationInput';
+import { buildFilterField } from '@/utils/buildFilterField';
+import { Table } from '@/components/Table';
+import { Icon } from '@/components/ui/Icon';
+import { Link } from '@/components/Link';
+import { Button } from '@/components/ui/button';
+import { FilterInput } from '@/components/FilterInput';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -32,77 +23,87 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { FilterCriteriaSchema } from "@/schemas/FilterCriteriaSchema";
+} from '@/components/ui/select';
+import { paginationInputSchema } from '@/schemas/pagination';
+import type { FilterCriteria } from '@/types/pagination';
+import type { Row } from '@tanstack/react-table';
+import type {
+  Document,
+  PaginationInput,
+  Sort,
+  SortCriteria,
+} from '@/declarations/pt_backend/pt_backend.did';
+import type { _SERVICE } from '@/declarations/pt_backend/pt_backend.did.d';
 import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { DEFAULT_PAGINATION } from "@/consts/pagination";
+  DEFAULT_PAGINATION,
+  FILTER_FIELD,
+  FILTER_OPERATOR,
+  SORT_ORDER,
+} from '@/consts/pagination';
+import { ENTITY, ENTITY_NAME } from '@/consts/entities';
+
+const DEFAULT_FILTERS: [FilterCriteria[]] = [
+  [
+    {
+      value: '',
+      entity: ENTITY.Document,
+      field: buildFilterField(
+        ENTITY_NAME.Document,
+        FILTER_FIELD.Document.Title,
+      ),
+      operator: FILTER_OPERATOR.Contains,
+    },
+  ],
+];
+
+const DEFAULT_SORT: [SortCriteria] = [
+  {
+    field: buildFilterField(ENTITY_NAME.Document, FILTER_FIELD.Document.Title),
+    order: SORT_ORDER.Asc,
+  },
+];
 
 const documentsSearchSchema = z.object({
-  page: z.number().int().nonnegative().optional(),
-  filters: z.array(FilterCriteriaSchema).optional(),
+  pagination: paginationInputSchema.optional(),
 });
 
-export const Route = createFileRoute("/_authenticated/documents")({
+const DEFAULT_DOCUMENT_PAGINATION: PaginationInput = {
+  page_number: DEFAULT_PAGINATION.page_number,
+  page_size: DEFAULT_PAGINATION.page_size,
+  filters: DEFAULT_FILTERS,
+  sort: DEFAULT_SORT,
+};
+
+export const Route = createFileRoute('/_authenticated/documents')({
   component: Documents,
-  validateSearch: (search) => documentsSearchSchema.parse(search),
+  validateSearch: (search) => {
+    return documentsSearchSchema.parse(search);
+  },
   beforeLoad: () => ({
-    getTitle: () => "Documents",
+    getTitle: () => 'Documents',
   }),
-  loaderDeps: ({ search: { page, filters } }) => ({ page, filters }),
-  loader: async ({ context, deps: { page, filters } }) => {
-    const activeOrganisationId = storage.getItem("activeOrganisationId", "");
-
-    if (!activeOrganisationId) {
-      throw new Error("No activeOrganisationId found");
-    }
-    const docPagination = {
-      ...DEFAULT_PAGINATION,
-      page_number: BigInt(page ?? 1),
-      filters: [
-        [
-          {
-            field: { Title: null },
-            value: filters?.[0]?.value ?? "",
-            operator: { Contains: null },
-          },
-        ],
-      ] as [FilterCriteria[]],
-      sort: [
-        {
-          field: { Title: null },
-          order: { Asc: null } as SortOrder,
-        },
-      ] as [SortCriteria],
-    };
-    const pagination = {
-      ...DEFAULT_PAGINATION,
-      page_number: BigInt(page ?? 1),
-    };
-    const [projects] = await context.api.call.list_projects_by_organisation_id(
-      BigInt(activeOrganisationId),
+  loaderDeps: ({ search: { pagination } }) => ({
+    pagination,
+  }),
+  loader: async ({ context, deps: { pagination } }) => {
+    const activeOrganisationId = getActiveOrganisationId();
+    const documentPagination = buildPaginationInput(
+      DEFAULT_DOCUMENT_PAGINATION,
       pagination,
-      {
-        onErr: (error) => {
-          console.error(error);
-        },
-      },
     );
-
+    const projectPagination = buildPaginationInput(DEFAULT_PAGINATION, {});
+    const [projects] = await context.api.call.list_projects_by_organisation_id(
+      activeOrganisationId,
+      projectPagination,
+    );
     const [documents, paginationMetaData] =
-      await context.api.call.list_documents(docPagination);
+      await context.api.call.list_documents(documentPagination);
     return {
       context,
       projects,
       documents,
       paginationMetaData,
-      page,
+      pagination: documentPagination,
     };
   },
   errorComponent: ({ error }) => {
@@ -125,91 +126,35 @@ const RowActions = (row: Row<Document>) => {
   );
 };
 
-const Filter = () => {
-  const [isQuerying, setIsQuerying] = useState(false);
-  const navigate = Route.useNavigate();
-  const search = Route.useSearch();
-
-  const formSchema = z.object({
-    filter_title: z.string(),
-  });
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    disabled: isQuerying,
-    defaultValues: {
-      filter_title: search?.filters?.[0]?.value ?? "",
-    },
-  });
-
-  const debouncedFilterTitle = useDebounce(form.watch("filter_title"), 300);
-
-  useEffect(() => {
-    if (debouncedFilterTitle !== search?.filters?.[0]?.value) {
-      onSubmit({ filter_title: debouncedFilterTitle });
-    }
-  }, [debouncedFilterTitle, search?.filters?.[0]?.value]);
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    try {
-      setIsQuerying(true);
-      navigate({
-        search: {
-          filters: [
-            {
-              field: { Title: null },
-              value: values.filter_title,
-              operator: { Contains: null },
-            },
-          ] as FilterCriteria[],
-        },
-      });
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setIsQuerying(false);
-    }
-  }
-
-  return (
-    <div className="w-full gap-4">
-      <Form {...form}>
-        <form className="flex items-center">
-          <FormField
-            control={form.control}
-            name="filter_title"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="sr-only">Filter</FormLabel>
-                <FormControl>
-                  <Input
-                    className="h-8 w-[250px] lg:w-[350px] text-sm"
-                    placeholder="Filter document title..."
-                    {...field}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      form.trigger("filter_title");
-                    }}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </form>
-      </Form>
-    </div>
-  );
-};
-
 function Documents() {
-  const { documents, projects, paginationMetaData } = Route.useLoaderData();
+  const { projects, documents, pagination, paginationMetaData } =
+    Route.useLoaderData();
   const [selectedProjectId, setSelectedProjectId] = useState<string>();
+  const navigate = useNavigate();
 
   return (
     <>
-      <div className="pb-4 flex items-center">
-        <Filter />
+      <div className="flex items-center justify-between pb-4">
+        {pagination.filters[0]?.map((filterCriteria) => {
+          return (
+            <FilterInput
+              key={filterCriteria.entity.toString()}
+              filterCriteria={filterCriteria}
+              placeholder="Filter title..."
+              onChange={(filterCriteria: FilterCriteria) => {
+                navigate({
+                  to: '/documents',
+                  search: {
+                    pagination: {
+                      ...pagination,
+                      filters: [[filterCriteria]],
+                    },
+                  },
+                });
+              }}
+            />
+          );
+        })}
         {projects.length === 1 ? (
           <Link
             to="/projects/$projectId/documents/create"
@@ -219,7 +164,7 @@ function Documents() {
             size="sm"
           >
             <Icon name="file-outline" size="sm" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap text-sm">
               Create document
             </span>
           </Link>
@@ -284,15 +229,28 @@ function Documents() {
             tableData={documents}
             actions={RowActions}
             paginationMetaData={paginationMetaData}
+            entityName={ENTITY_NAME.Document}
+            sort={pagination.sort}
+            onSortingChange={(newSort: Sort) => {
+              navigate({
+                to: '/documents',
+                search: {
+                  pagination: {
+                    ...pagination,
+                    sort: newSort,
+                  },
+                },
+              });
+            }}
             columnConfig={[
               {
-                id: "title",
-                headerName: "Document title",
+                id: 'title',
+                headerName: 'Document title',
                 cellPreprocess: (title) => title,
               },
               {
-                id: "current_version",
-                headerName: "Version",
+                id: 'version',
+                headerName: 'Version',
                 cellPreprocess: (version) => version,
               },
             ]}

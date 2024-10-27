@@ -1,13 +1,13 @@
-import { createRouter } from '@tanstack/react-router';
+import { createRouter } from "@tanstack/react-router";
 
-import { auth } from '@/context/auth';
-import { api } from '@/context/api';
-import { routeTree } from './routeTree.gen';
+import { auth } from "@/context/auth";
+import { api } from "@/context/api";
+import { routeTree } from "./routeTree.gen";
 
 export const router = createRouter({
   routeTree,
 
-  defaultPreload: 'intent',
+  defaultPreload: "intent",
   defaultStaleTime: 5000,
   context: {
     auth,

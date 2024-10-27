@@ -48,6 +48,7 @@ import { Route as appRevisionsRevisionIdImport } from './routes/app/revisions/$r
 // Create/Update Routes
 
 const publicAuthenticateRoute = publicAuthenticateImport.update({
+  id: '/authenticate',
   path: '/authenticate',
   getParentRoute: () => rootRoute,
 } as any)
@@ -58,172 +59,203 @@ const layoutsAuthenticatedRoute = layoutsAuthenticatedImport.update({
 } as any)
 
 const publicHomeRoute = publicHomeImport.update({
+  id: '/',
   path: '/',
   getParentRoute: () => rootRoute,
 } as any)
 
 const appWorkflowsWorkflowsindexRoute = appWorkflowsWorkflowsindexImport.update(
   {
+    id: '/workflows',
     path: '/workflows',
     getParentRoute: () => layoutsAuthenticatedRoute,
   } as any,
 )
 
 const appUsersUsersindexRoute = appUsersUsersindexImport.update({
+  id: '/users',
   path: '/users',
   getParentRoute: () => layoutsAuthenticatedRoute,
 } as any)
 
 const appProjectsProjectsindexRoute = appProjectsProjectsindexImport.update({
+  id: '/projects',
   path: '/projects',
   getParentRoute: () => layoutsAuthenticatedRoute,
 } as any)
 
 const appOrganisationsOrganisationsindexRoute =
   appOrganisationsOrganisationsindexImport.update({
+    id: '/organisations',
     path: '/organisations',
     getParentRoute: () => layoutsAuthenticatedRoute,
   } as any)
 
 const appNnsNnsRoute = appNnsNnsImport.update({
+  id: '/nns',
   path: '/nns',
   getParentRoute: () => layoutsAuthenticatedRoute,
 } as any)
 
 const appDocumentsDocumentsallRoute = appDocumentsDocumentsallImport.update({
+  id: '/documents',
   path: '/documents',
   getParentRoute: () => layoutsAuthenticatedRoute,
 } as any)
 
 const appWorkflowsWorkflowIdindexRoute =
   appWorkflowsWorkflowIdindexImport.update({
+    id: '/$workflowId',
     path: '/$workflowId',
     getParentRoute: () => appWorkflowsWorkflowsindexRoute,
   } as any)
 
 const appProjectsProjectIdindexRoute = appProjectsProjectIdindexImport.update({
+  id: '/$projectId',
   path: '/$projectId',
   getParentRoute: () => appProjectsProjectsindexRoute,
 } as any)
 
 const appOrganisationsOrganisationIdindexRoute =
   appOrganisationsOrganisationIdindexImport.update({
+    id: '/$organisationId',
     path: '/$organisationId',
     getParentRoute: () => appOrganisationsOrganisationsindexRoute,
   } as any)
 
 const appWorkflowsWorkflowscreateRoute =
   appWorkflowsWorkflowscreateImport.update({
+    id: '/create',
     path: '/create',
     getParentRoute: () => appWorkflowsWorkflowsindexRoute,
   } as any)
 
 const appUsersUserscreateRoute = appUsersUserscreateImport.update({
+  id: '/create',
   path: '/create',
   getParentRoute: () => appUsersUsersindexRoute,
 } as any)
 
 const appUsersUserIdRoute = appUsersUserIdImport.update({
+  id: '/$userId',
   path: '/$userId',
   getParentRoute: () => appUsersUsersindexRoute,
 } as any)
 
 const appProjectsProjectscreateRoute = appProjectsProjectscreateImport.update({
+  id: '/create',
   path: '/create',
   getParentRoute: () => appProjectsProjectsindexRoute,
 } as any)
 
 const appOrganisationsOrganisationscreateRoute =
   appOrganisationsOrganisationscreateImport.update({
+    id: '/create',
     path: '/create',
     getParentRoute: () => appOrganisationsOrganisationsindexRoute,
   } as any)
 
 const appWorkflowsWorkflowsallRoute = appWorkflowsWorkflowsallImport.update({
+  id: '/',
   path: '/',
   getParentRoute: () => appWorkflowsWorkflowsindexRoute,
 } as any)
 
 const appUsersUsersallRoute = appUsersUsersallImport.update({
+  id: '/',
   path: '/',
   getParentRoute: () => appUsersUsersindexRoute,
 } as any)
 
 const appProjectsProjectsallRoute = appProjectsProjectsallImport.update({
+  id: '/',
   path: '/',
   getParentRoute: () => appProjectsProjectsindexRoute,
 } as any)
 
 const appOrganisationsOrganisationsallRoute =
   appOrganisationsOrganisationsallImport.update({
+    id: '/',
     path: '/',
     getParentRoute: () => appOrganisationsOrganisationsindexRoute,
   } as any)
 
 const appDocumentsDocumentsindexRoute = appDocumentsDocumentsindexImport.update(
   {
+    id: '/documents',
     path: '/documents',
     getParentRoute: () => appProjectsProjectIdindexRoute,
   } as any,
 )
 
 const appWorkflowsWorkflowIdRoute = appWorkflowsWorkflowIdImport.update({
+  id: '/',
   path: '/',
   getParentRoute: () => appWorkflowsWorkflowIdindexRoute,
 } as any)
 
 const appProjectsProjectIdRoute = appProjectsProjectIdImport.update({
+  id: '/',
   path: '/',
   getParentRoute: () => appProjectsProjectIdindexRoute,
 } as any)
 
 const appOrganisationsOrganisationIdRoute =
   appOrganisationsOrganisationIdImport.update({
+    id: '/',
     path: '/',
     getParentRoute: () => appOrganisationsOrganisationIdindexRoute,
   } as any)
 
 const appDocumentsDocumentIdindexRoute =
   appDocumentsDocumentIdindexImport.update({
+    id: '/$documentId',
     path: '/$documentId',
     getParentRoute: () => appDocumentsDocumentsindexRoute,
   } as any)
 
 const appDocumentsDocumentscreateRoute =
   appDocumentsDocumentscreateImport.update({
+    id: '/create',
     path: '/create',
     getParentRoute: () => appDocumentsDocumentsindexRoute,
   } as any)
 
 const appDocumentsDocumentsRoute = appDocumentsDocumentsImport.update({
+  id: '/',
   path: '/',
   getParentRoute: () => appDocumentsDocumentsindexRoute,
 } as any)
 
 const appRevisionsRevisionsindexRoute = appRevisionsRevisionsindexImport.update(
   {
+    id: '/revisions',
     path: '/revisions',
     getParentRoute: () => appDocumentsDocumentIdindexRoute,
   } as any,
 )
 
 const appDocumentsDocumentIdRoute = appDocumentsDocumentIdImport.update({
+  id: '/',
   path: '/',
   getParentRoute: () => appDocumentsDocumentIdindexRoute,
 } as any)
 
 const appRevisionsRevisionsdiffRoute = appRevisionsRevisionsdiffImport.update({
+  id: '/diff',
   path: '/diff',
   getParentRoute: () => appRevisionsRevisionsindexRoute,
 } as any)
 
 const appRevisionsRevisionscreateRoute =
   appRevisionsRevisionscreateImport.update({
+    id: '/create',
     path: '/create',
     getParentRoute: () => appRevisionsRevisionsindexRoute,
   } as any)
 
 const appRevisionsRevisionIdRoute = appRevisionsRevisionIdImport.update({
+  id: '/$revisionId',
   path: '/$revisionId',
   getParentRoute: () => appRevisionsRevisionsindexRoute,
 } as any)

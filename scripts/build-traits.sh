@@ -48,9 +48,16 @@ targets_and_customs=(
     "struct Revision {:Clone, Debug"
     "struct FilterCriteria {:Clone, Debug"
     "struct SortCriteria {:Clone, Debug"
+    "pub enum Entity {:Clone, Debug"
     "pub enum SortOrder {:Clone, Debug"
-    "pub enum DocumentField {:Clone, Debug"
     "pub enum FilterOperator {:Clone, Debug"
+    "pub enum FilterField {:Clone, Debug"
+    "pub enum UserFilterField {:Clone, Debug"
+    "pub enum OrganisationFilterField {:Clone, Debug"
+    "pub enum ProjectFilterField {:Clone, Debug"
+    "pub enum DocumentFilterField {:Clone, Debug"
+    "pub enum RevisionFilterField {:Clone, Debug"
+    "pub enum WorkflowFilterField {:Clone, Debug"
 )
 
 add_traits "$file_path" "${targets_and_customs[@]}"

@@ -5,61 +5,100 @@ type ProjectId = nat64;
 type DocumentId = nat64;
 type RevisionId = nat64;
 
-type DocumentField = variant {
-    Title: null;
-    CreatedAt: null;
-    ProjectId: null;
+type Entity = variant {
+    Document : null;
+    Organisation : null;
+    Project : null;
+    Revision : null;
+    User : null;
+    Workflow : null;
 };
 type FilterOperator = variant {
-    Equals: null;
-    Contains: null;
-    GreaterThan: null;
-    LessThan: null;
+    Equals : null;
+    Contains : null;
+    GreaterThan : null;
+    LessThan : null;
+};
+
+type UserFilterField = variant {
+    FirstName : null;
+    LastName : null;
+};
+type OrganisationFilterField = variant {
+    CreatedAt : null;
+    Name : null;
+};
+type ProjectFilterField = variant {
+    Name : null;
+    OrganisationId : null;
+    CreatedAt : null;
+};
+type DocumentFilterField = variant {
+    Title : null;
+    ProjectId : null;
+    Version: null;
+    CreatedAt : null;
+};
+type RevisionFilterField = variant {
+    Version : null;
+    DocumentId : null;
+    ProjectId : null;
+    CreatedAt : null;
+};
+type WorkflowFilterField = variant {
+    Name : null;
+    ProjectId : null;
+};
+type FilterField = variant {
+    Document : DocumentFilterField;
+    User : UserFilterField;
+    Revision : RevisionFilterField;
+    Organisation : OrganisationFilterField;
+    Project : ProjectFilterField;
+    Workflow : WorkflowFilterField;
 };
 type FilterCriteria = record {
-    field: DocumentField;
-    operator: FilterOperator;
-    value: text;
+    entity : Entity;
+    field : FilterField;
+    operator : FilterOperator;
+    value : text;
 };
 type SortOrder = variant {
-    Asc: null;
-    Desc: null;
+    Asc : null;
+    Desc : null;
 };
 type SortCriteria = record {
-    field: DocumentField;
-    order: SortOrder;
+    field : FilterField;
+    order : SortOrder;
 };
-type PageSize = nat64;
-type PageNumber = nat64;
-type TotalPages = nat64;
-type TotalItems = nat64;
+type PageSize = nat8;
+type PageNumber = nat8;
+type TotalPages = nat8;
+type TotalItems = nat8;
+type Filters = opt vec FilterCriteria;
+type Sort = opt SortCriteria;
 type PaginationInput = record {
-    page_size: PageSize;
-    page_number: PageNumber;
-};
-type DocPaginationInput = record {
-    page_size: PageSize;
-    page_number: PageNumber;
-
-    filters : opt vec FilterCriteria;
-    sort : opt SortCriteria;
+    page_size : PageSize;
+    page_number : PageNumber;
+    filters : Filters;
+    sort : Sort;
 };
 type PaginationMetadata = record {
     page_size : PageSize;
     page_number : PageNumber;
     total_pages : TotalPages;
     total_items : TotalItems;
-    has_next_page: bool;
-    has_previous_page: bool;
+    has_next_page : bool;
+    has_previous_page : bool;
 };
 
 type AppError = variant {
     Unauthorized : null;
     EntityNotFound : text;
     InternalError : text;
-    InvalidInput: text;
+    InvalidInput : text;
     InvalidPageSize : text;
-    InvalidPageNumber: text;
+    InvalidPageNumber : text;
 };
 
 type User = record {
@@ -172,7 +211,7 @@ type PaginatedProjectsResult = variant {
 type Document = record {
     id : DocumentId;
     title: text;
-    current_version : nat8;
+    version : nat8;
     created_at: nat64;
     created_by: UserId;
     revisions : vec RevisionId;
@@ -246,7 +285,7 @@ service : {
     get_project : (ProjectId) -> (ProjectResult) query;
 
     create_document : (ProjectId, text, vec nat8) -> (DocumentIdResult);
-    list_documents : (DocPaginationInput) -> (PaginatedDocumentsResult) query;
+    list_documents : (PaginationInput) -> (PaginatedDocumentsResult) query;
     list_documents_by_project_id : (ProjectId, PaginationInput) -> (PaginatedDocumentsResult) query;
     get_document : (DocumentId) -> (DocumentResult) query;
 

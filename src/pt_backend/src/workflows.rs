@@ -112,7 +112,13 @@ fn list_workflows(pagination: PaginationInput) -> PaginatedWorkflowsResult {
     let workflows =
         WORKFLOWS.with(|workflows| workflows.borrow().values().cloned().collect::<Vec<_>>());
 
-    match paginate(&workflows, pagination.page_size, pagination.page_number) {
+    match paginate(
+        &workflows,
+        pagination.page_size,
+        pagination.page_number,
+        pagination.filters,
+        pagination.sort,
+    ) {
         Ok((paginated_workflows, pagination_metadata)) => {
             PaginatedWorkflowsResult::Ok(paginated_workflows, pagination_metadata)
         }

@@ -1,10 +1,11 @@
-import { useState, useMemo, useCallback, useRef, useEffect } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import {
   useReactTable,
   flexRender,
   getCoreRowModel,
   type ColumnDef,
   type Row,
+  type SortingState,
 } from '@tanstack/react-table';
 import {
   Table as TableBase,
@@ -15,9 +16,15 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
-import type { Entity } from '@/consts/entities';
-import type { PaginationMetadata } from '@/declarations/pt_backend/pt_backend.did';
 import { Pagination } from './Pagination';
+import { DataTableColumnHeader } from './TableColumnHeader';
+import type { Entity, EntityName } from '@/types/entities';
+import type {
+  PaginationMetadata,
+  Sort,
+} from '@/declarations/pt_backend/pt_backend.did';
+import { getSortingState } from '@/utils/getSortingState';
+import { sortingStateToSort } from '@/utils/sortingStateToSort';
 
 interface ColumnConfigItem {
   id: string;
@@ -28,29 +35,26 @@ interface ColumnConfigItem {
 
 interface TableProps<T extends Entity = Entity> {
   tableData?: T[];
-  onSelectionChange?: (selectedRows: T[]) => void;
+  entityName: EntityName;
   columnConfig?: ColumnConfigItem[];
   paginationMetaData?: PaginationMetadata;
   actions?: React.ReactNode | ((row: Row<T>) => React.ReactNode);
+  sort: Sort;
+  onSelectionChange?: (selectedRows: T[]) => void;
+  onSortingChange?: (sort: Sort) => void;
 }
 
 export const Table = <T extends Entity = Entity>({
   tableData = [],
-  onSelectionChange,
+  entityName,
   columnConfig = [],
   paginationMetaData,
   actions,
+  sort,
+  onSelectionChange,
+  onSortingChange,
 }: TableProps<T>) => {
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
-
-  const camelCaseToHumanReadable = useCallback((input: string) => {
-    const spaced = input.replace(
-      /([a-z])([A-Z])|([A-Z]+)([A-Z][a-z])/g,
-      '$1$3 $2$4',
-    );
-    const capitalized = spaced.charAt(0).toUpperCase() + spaced.slice(1);
-    return capitalized;
-  }, []);
 
   const headers = useMemo(() => {
     if (!Array.isArray(tableData) || tableData.length === 0) {
@@ -58,6 +62,14 @@ export const Table = <T extends Entity = Entity>({
     }
     return Object.keys(tableData[0] ?? {});
   }, [tableData]);
+
+  const handleSortingChange = (
+    updater: SortingState | ((prev: SortingState) => SortingState),
+  ) => {
+    const sortingState = getSortingState(updater);
+    const newSort = sortingStateToSort(entityName, sortingState);
+    onSortingChange?.(newSort);
+  };
 
   const columns: ColumnDef<T>[] = useMemo(() => {
     const selectColumn: ColumnDef<T> = {
@@ -86,7 +98,7 @@ export const Table = <T extends Entity = Entity>({
       const config = columnConfig.find((col) => col.id === header);
       const columnDef: ColumnDef<T> = {
         accessorKey: header,
-        header: config?.headerName || camelCaseToHumanReadable(header),
+        header: config?.headerName,
         cell: config?.cellPreprocess
           ? ({ getValue }) => config.cellPreprocess?.(getValue())
           : undefined,
@@ -96,7 +108,7 @@ export const Table = <T extends Entity = Entity>({
 
     // Conditionally include the selectColumn based on the presence of onSelectionChange
     return onSelectionChange ? [selectColumn, ...allColumns] : allColumns;
-  }, [headers, camelCaseToHumanReadable, columnConfig, onSelectionChange]);
+  }, [headers, columnConfig, onSelectionChange]);
 
   const [columnVisibility, setColumnVisibility] = useState(() => {
     const initialVisibility: Record<string, boolean> = {};
@@ -115,6 +127,7 @@ export const Table = <T extends Entity = Entity>({
     data: tableData,
     columns,
     getCoreRowModel: getCoreRowModel(),
+    onSortingChange: handleSortingChange,
     onRowSelectionChange: setRowSelection,
     state: {
       rowSelection,
@@ -144,7 +157,6 @@ export const Table = <T extends Entity = Entity>({
   if (!Array.isArray(tableData)) {
     return <p>Invalid data</p>;
   }
-
   return (
     <div className="grid">
       <div className="overflow-auto py-2">
@@ -152,16 +164,21 @@ export const Table = <T extends Entity = Entity>({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id} className="text-nowrap">
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext(),
-                        )}
-                  </TableHead>
-                ))}
+                {headerGroup.headers.map((header) => {
+                  return header.isPlaceholder ? null : (
+                    <TableHead key={header.id}>
+                      <DataTableColumnHeader
+                        column={header.column}
+                        title={
+                          flexRender(
+                            header.column.columnDef.header,
+                            header.getContext(),
+                          ) as string
+                        }
+                      />
+                    </TableHead>
+                  );
+                })}
                 <TableHead>
                   <div className="flex justify-end pr-4">Actions</div>
                 </TableHead>

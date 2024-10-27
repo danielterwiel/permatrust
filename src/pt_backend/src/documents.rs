@@ -1,9 +1,9 @@
 use crate::logger::{log_info, loggable_document};
 use ic_cdk_macros::{query, update};
-use shared::pagination::{paginate_doc, PaginatedDocumentsResult};
+use shared::pagination::{paginate, PaginatedDocumentsResult};
 use shared::pt_backend_generated::{
-    AppError, DocPaginationInput, Document, DocumentId, DocumentIdResult, DocumentResult,
-    FilterCriteria, ProjectId, RevisionId, RevisionIdResult,
+    AppError, Document, DocumentId, DocumentIdResult, DocumentResult, PaginationInput, ProjectId,
+    RevisionId, RevisionIdResult,
 };
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -42,7 +42,7 @@ pub fn insert_document(document: Document) {
 pub fn update_document_revision(document_id: DocumentId, version: u8, revision_id: RevisionId) {
     DOCUMENTS.with(|documents| {
         if let Some(document) = documents.borrow_mut().get_mut(&document_id) {
-            document.current_version = version;
+            document.version = version;
             document.revisions.push(revision_id);
         }
     });
@@ -63,7 +63,7 @@ fn create_document(
     let document = Document {
         id: document_id,
         title,
-        current_version: 0,
+        version: 0,
         revisions: Vec::new(),
         created_by: ic_cdk::caller(),
         created_at: ic_cdk::api::time(),
@@ -90,12 +90,10 @@ fn create_document(
 }
 
 #[query]
-fn list_documents(pagination: DocPaginationInput) -> PaginatedDocumentsResult {
-    #[derive(Clone)]
-    struct FilterCriteria;
+fn list_documents(pagination: PaginationInput) -> PaginatedDocumentsResult {
     let documents = get_documents();
 
-    match paginate_doc(
+    match paginate(
         &documents,
         pagination.page_size,
         pagination.page_number,
@@ -112,11 +110,11 @@ fn list_documents(pagination: DocPaginationInput) -> PaginatedDocumentsResult {
 #[query]
 fn list_documents_by_project_id(
     project_id: ProjectId,
-    pagination: DocPaginationInput,
+    pagination: PaginationInput,
 ) -> PaginatedDocumentsResult {
     let documents = get_documents_by_project(project_id);
 
-    match paginate_doc(
+    match paginate(
         &documents,
         pagination.page_size,
         pagination.page_number,

@@ -67,7 +67,13 @@ fn list_organisations(pagination: PaginationInput) -> PaginatedOrganisationsResu
     let user_id = ic_cdk::caller();
     let organisations = get_organisations_by_user_id(user_id);
 
-    match paginate(&organisations, pagination.page_size, pagination.page_number) {
+    match paginate(
+        &organisations,
+        pagination.page_size,
+        pagination.page_number,
+        pagination.filters,
+        pagination.sort,
+    ) {
         Ok((paginated_organisations, pagination_metadata)) => {
             PaginatedOrganisationsResult::Ok(paginated_organisations, pagination_metadata)
         }
