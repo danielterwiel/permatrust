@@ -1,4 +1,4 @@
-import type { FilterFieldEnum, FilterFieldName } from "@/types/pagination";
+import type { FilterFieldEnum, FilterFieldName } from '@/types/pagination';
 
 export function getFilterFieldName(
   filterField: FilterFieldEnum,

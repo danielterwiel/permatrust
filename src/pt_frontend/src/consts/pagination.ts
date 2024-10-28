@@ -59,7 +59,7 @@ export const SORT_ORDER = {
   Desc: { Desc: null },
 } as const;
 
-export const FILTER_FIELD_NAME = [
+export const FILTER_FIELD_NAMES = [
   ...new Set(
     Object.values(FILTER_FIELD).flatMap((fields) =>
       Object.keys(fields),

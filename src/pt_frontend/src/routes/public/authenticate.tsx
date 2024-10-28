@@ -3,13 +3,15 @@ import { createFileRoute, redirect } from '@tanstack/react-router';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/components/Loading';
 import { useNavigate } from '@tanstack/react-router';
+import { DEFAULT_PAGINATION } from '@/consts/pagination';
+
 export const Route = createFileRoute('/authenticate')({
   component: Authenticate,
   beforeLoad: async ({ context }) => {
     if (context.auth.isAuthenticated) {
       throw redirect({
         to: '/organisations',
-        search: { page_number: 1 },
+        search: { pagination: DEFAULT_PAGINATION },
       });
     }
     return context;
@@ -29,7 +31,7 @@ function Authenticate() {
     if (auth.isAuthenticated) {
       navigate({
         to: '/organisations',
-        search: { page_number: 1 },
+        search: { pagination: DEFAULT_PAGINATION },
       });
       return;
     }
@@ -37,7 +39,7 @@ function Authenticate() {
     if (result) {
       navigate({
         to: '/organisations',
-        search: { page_number: 1 },
+        search: { pagination: DEFAULT_PAGINATION },
       });
     }
     // TODO: error handling
