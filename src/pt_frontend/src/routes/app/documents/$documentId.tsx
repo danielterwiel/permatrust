@@ -22,24 +22,11 @@ import type { FilterCriteria } from '@/types/pagination';
 import {
   DEFAULT_PAGINATION,
   FILTER_FIELD,
-  FILTER_OPERATOR,
   SORT_ORDER,
 } from '@/consts/pagination';
-import { ENTITY, ENTITY_NAME } from '@/consts/entities';
+import { ENTITY_NAME } from '@/consts/entities';
 
-const DEFAULT_FILTERS: [FilterCriteria[]] = [
-  [
-    {
-      value: '',
-      entity: ENTITY.Revision,
-      field: buildFilterField(
-        ENTITY_NAME.Revision,
-        FILTER_FIELD.Revision.Version,
-      ),
-      operator: FILTER_OPERATOR.Contains,
-    },
-  ],
-];
+const DEFAULT_FILTERS: [] = [];
 
 const DEFAULT_SORT: [SortCriteria] = [
   {
@@ -63,7 +50,7 @@ const DEFAULT_REVISION_PAGINATION: PaginationInput = {
 };
 
 export const Route = createFileRoute(
-  '/_authenticated/projects/$projectId/documents/$documentId/',
+  '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/',
 )({
   component: DocumentDetails,
   validateSearch: (search) => revisionsSearchSchema.parse(search),
@@ -77,14 +64,12 @@ export const Route = createFileRoute(
       DEFAULT_REVISION_PAGINATION,
       pagination,
     );
+
     const [revisions, paginationMetaData] =
       await context.api.call.list_revisions_by_document_id(
         BigInt(documentId),
         revisionPagination,
       );
-
-    console.log('revisions', revisions);
-
     const document = await context.api.call.get_document(BigInt(documentId));
 
     return {
@@ -152,7 +137,7 @@ function DocumentDetails() {
             }}
           />
         ))}
-        <div className="flex gap-2">
+        <div className="flex gap-2 ml-auto">
           <Link
             to="/projects/$projectId/documents/$documentId/revisions/diff"
             params={{
@@ -225,10 +210,12 @@ function DocumentDetails() {
             columnConfig={[
               {
                 id: 'version',
+                headerName: 'Version',
                 cellPreprocess: (v) => v,
               },
               {
                 id: 'content',
+                headerName: 'Content',
                 cellPreprocess: (content) => {
                   return (
                     <div className="truncate max-w-md">

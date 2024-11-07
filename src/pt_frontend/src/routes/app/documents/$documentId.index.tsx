@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router'
 
 export const Route = createFileRoute(
-  '/_authenticated/projects/$projectId/documents/$documentId',
+  '/_authenticated/_onboarded/projects/$projectId/documents/$documentId',
 )({
   component: DocumentId,
   beforeLoad: () => ({

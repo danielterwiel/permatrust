@@ -1,20 +1,20 @@
-import { z } from "zod";
-import { useState } from "react";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { getActiveOrganisationId } from "@/utils/getActiveOrganisationId";
-import { buildPaginationInput } from "@/utils/buildPaginationInput";
-import { buildFilterField } from "@/utils/buildFilterField";
-import { Table } from "@/components/Table";
-import { Icon } from "@/components/ui/Icon";
-import { Link } from "@/components/Link";
-import { Button } from "@/components/ui/button";
-import { FilterInput } from "@/components/FilterInput";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { z } from 'zod';
+import { useState } from 'react';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { getActiveOrganisationId } from '@/utils/getActiveOrganisationId';
+import { buildPaginationInput } from '@/utils/buildPaginationInput';
+import { buildFilterField } from '@/utils/buildFilterField';
+import { Table } from '@/components/Table';
+import { Icon } from '@/components/ui/Icon';
+import { Link } from '@/components/Link';
+import { Button } from '@/components/ui/button';
+import { FilterInput } from '@/components/FilterInput';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/ui/popover";
+} from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -23,29 +23,29 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
-import { paginationInputSchema } from "@/schemas/pagination";
-import type { FilterCriteria } from "@/types/pagination";
-import type { Row } from "@tanstack/react-table";
+} from '@/components/ui/select';
+import { paginationInputSchema } from '@/schemas/pagination';
+import type { FilterCriteria } from '@/types/pagination';
+import type { Row } from '@tanstack/react-table';
 import type {
   Document,
   PaginationInput,
   Sort,
   SortCriteria,
-} from "@/declarations/pt_backend/pt_backend.did";
-import type { _SERVICE } from "@/declarations/pt_backend/pt_backend.did.d";
+} from '@/declarations/pt_backend/pt_backend.did';
+import type { _SERVICE } from '@/declarations/pt_backend/pt_backend.did.d';
 import {
   DEFAULT_PAGINATION,
   FILTER_FIELD,
   FILTER_OPERATOR,
   SORT_ORDER,
-} from "@/consts/pagination";
-import { ENTITY, ENTITY_NAME } from "@/consts/entities";
+} from '@/consts/pagination';
+import { ENTITY, ENTITY_NAME } from '@/consts/entities';
 
 const DEFAULT_FILTERS: [FilterCriteria[]] = [
   [
     {
-      value: "",
+      value: '',
       entity: ENTITY.Document,
       field: buildFilterField(
         ENTITY_NAME.Document,
@@ -74,13 +74,13 @@ const DEFAULT_DOCUMENT_PAGINATION: PaginationInput = {
   sort: DEFAULT_SORT,
 };
 
-export const Route = createFileRoute("/_authenticated/documents")({
+export const Route = createFileRoute('/_authenticated/_onboarded/documents')({
   component: Documents,
   validateSearch: (search) => {
     return documentsSearchSchema.parse(search);
   },
   beforeLoad: () => ({
-    getTitle: () => "Documents",
+    getTitle: () => 'Documents',
   }),
   loaderDeps: ({ search: { pagination } }) => ({
     pagination,
@@ -143,7 +143,7 @@ function Documents() {
               placeholder="Filter title..."
               onChange={(filterCriteria: FilterCriteria) => {
                 navigate({
-                  to: "/documents",
+                  to: '/documents',
                   search: {
                     pagination: {
                       ...pagination,
@@ -233,7 +233,7 @@ function Documents() {
             sort={pagination.sort}
             onSortingChange={(newSort: Sort) => {
               navigate({
-                to: "/documents",
+                to: '/documents',
                 search: {
                   pagination: {
                     ...pagination,
@@ -244,13 +244,13 @@ function Documents() {
             }}
             columnConfig={[
               {
-                id: "title",
-                headerName: "Document title",
+                id: 'title',
+                headerName: 'Document title',
                 cellPreprocess: (title) => title,
               },
               {
-                id: "version",
-                headerName: "Version",
+                id: 'version',
+                headerName: 'Version',
                 cellPreprocess: (version) => version,
               },
             ]}

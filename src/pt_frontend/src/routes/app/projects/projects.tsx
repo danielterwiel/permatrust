@@ -55,7 +55,7 @@ const DEFAULT_PROJECT_PAGINATION: PaginationInput = {
   sort: DEFAULT_SORT,
 };
 
-export const Route = createFileRoute('/_authenticated/projects/')({
+export const Route = createFileRoute('/_authenticated/_onboarded')({
   component: Projects,
   validateSearch: (search) => projectsSearchSchema.parse(search),
   loaderDeps: ({ search: { pagination } }) => ({ pagination }),
@@ -167,7 +167,7 @@ function Projects() {
             columnConfig={[
               {
                 id: 'name',
-                headerName: 'Project Name',
+                headerName: 'Name',
                 cellPreprocess: (v) => v,
               },
               {

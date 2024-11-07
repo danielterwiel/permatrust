@@ -1,12 +1,11 @@
-import type { AuthClient } from "@dfinity/auth-client";
-import type { _SERVICE } from "@/declarations/pt_backend/pt_backend.did.d";
+import type { AuthClient } from '@dfinity/auth-client';
+import type { _SERVICE } from '@/declarations/pt_backend/pt_backend.did.d';
 
-import { type ActorSubclass, HttpAgent } from "@dfinity/agent";
-import { createActor } from "@/declarations/pt_backend";
-import { router } from "@/router";
+import { type ActorSubclass, HttpAgent } from '@dfinity/agent';
+import { createActor } from '@/declarations/pt_backend';
+import { router } from '@/router';
 
-import { notFound } from "@tanstack/react-router";
-import type { AppError } from "@/declarations/pt_backend/pt_backend.did";
+import type { AppError } from '@/declarations/pt_backend/pt_backend.did';
 
 type CreateActorFn = typeof createActor;
 
@@ -24,7 +23,7 @@ async function createAuthenticatedAgent(
   const identity = authClient.getIdentity();
   const agent = new HttpAgent({ identity });
 
-  if (process.env.DFX_NETWORK !== "ic") {
+  if (process.env.DFX_NETWORK !== 'ic') {
     await agent.fetchRootKey();
   }
 
@@ -49,11 +48,11 @@ async function wrapWithAuth<T extends ActorSubclass<_SERVICE>>(
   return new Proxy(actor, {
     get(target, prop, receiver) {
       const original = Reflect.get(target, prop, receiver);
-      if (typeof original === "function") {
+      if (typeof original === 'function') {
         // biome-ignore lint/suspicious/noExplicitAny: types are defined inside declarations
         return async (...args: any[]) => {
           if (!(await authClient.isAuthenticated())) {
-            throw new Error("User is not authenticated");
+            throw new Error('User is not authenticated');
           }
           return original.apply(target, args);
         };
@@ -75,21 +74,14 @@ type ResultHandler<T> = {
 export function handleResult<T>(
   result: Result<T>,
   handlers: ResultHandler<T> = {},
-): T {
-  if ("Ok" in result) {
-    if (handlers.onOk) {
-      handlers.onOk(result.Ok);
-    }
+): T | AppError {
+  if ('Ok' in result) {
+    handlers.onOk?.(result.Ok);
     return result.Ok;
+  } else {
+    handlers.onErr?.(result.Err);
+    return result.Err;
   }
-
-  if (handlers.onErr) {
-    handlers.onErr(result.Err);
-  }
-
-  throw notFound({
-    data: `An error occurred: ${JSON.stringify(result.Err)}`,
-  });
 }
 
 type WrappedActor<T> = {
@@ -105,7 +97,7 @@ function wrapActor<T extends Record<string, any>>(actor: T): WrappedActor<T> {
   for (const key in actor) {
     const method = actor[key];
 
-    if (typeof method === "function") {
+    if (typeof method === 'function') {
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       wrappedActor[key] = (async (...args: any[]) => {
         // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -113,8 +105,8 @@ function wrapActor<T extends Record<string, any>>(actor: T): WrappedActor<T> {
         const lastArg = args[args.length - 1];
         if (
           lastArg &&
-          typeof lastArg === "object" &&
-          ("onOk" in lastArg || "onErr" in lastArg)
+          typeof lastArg === 'object' &&
+          ('onOk' in lastArg || 'onErr' in lastArg)
         ) {
           handlers = args.pop();
         }

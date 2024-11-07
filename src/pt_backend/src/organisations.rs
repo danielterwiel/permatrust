@@ -40,8 +40,6 @@ fn create_organisation(name: String) -> OrganisationIdResult {
 
     let caller = ic_cdk::caller();
 
-    ic_cdk::println!("caller: {}", caller);
-
     let id = get_next_organisation_id();
 
     let organisation = Organisation {

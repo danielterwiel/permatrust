@@ -54,7 +54,7 @@ const projectsSearchSchema = z.object({
   pagination: paginationInputSchema.optional(),
 });
 
-export const Route = createFileRoute('/_authenticated/projects/')({
+export const Route = createFileRoute('/_authenticated/_onboarded/projects/')({
   component: Projects,
   validateSearch: (search) => projectsSearchSchema.parse(search),
   loaderDeps: ({ search: { pagination } }) => ({ pagination }),
@@ -119,7 +119,7 @@ function Projects() {
         <Link
           to="/projects/create"
           variant="default"
-          className="h-7 gap-1"
+          className="h-7 gap-1 ml-auto"
           size="sm"
         >
           <Icon name="briefcase-outline" size="sm" />
@@ -160,7 +160,7 @@ function Projects() {
             columnConfig={[
               {
                 id: 'name',
-                headerName: 'Project Name',
+                headerName: 'Name',
                 cellPreprocess: (v) => v,
               },
               {

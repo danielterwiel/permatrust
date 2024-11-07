@@ -1,8 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
-import { storage } from "@/utils/localStorage";
+import { useState, useEffect, useCallback } from 'react';
+import { storage } from '@/utils/localStorage';
 
-// Create a custom event for localStorage changes
-const localStorageChangeEvent = new Event("localStorageChange");
+const localStorageChangeEvent = new Event('localStorageChange');
 
 export function useLocalStorage<T>(
   key: string,
@@ -21,7 +20,7 @@ export function useLocalStorage<T>(
 
       setStoredValue(valueToStore);
 
-      if (typeof globalThis !== "undefined") {
+      if (typeof globalThis !== 'undefined') {
         globalThis.localStorage.setItem(key, JSON.stringify(valueToStore));
         // Dispatch custom event
         window.dispatchEvent(localStorageChangeEvent);
@@ -43,12 +42,12 @@ export function useLocalStorage<T>(
       }
     };
 
-    window.addEventListener("storage", handleStorageChange);
-    window.addEventListener("localStorageChange", handleStorageChange);
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('localStorageChange', handleStorageChange);
 
     return () => {
-      window.removeEventListener("storage", handleStorageChange);
-      window.removeEventListener("localStorageChange", handleStorageChange);
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('localStorageChange', handleStorageChange);
     };
   }, [key, initialValue, storedValue]);
 

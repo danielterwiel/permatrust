@@ -1,6 +1,8 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/_authenticated/projects/$projectId')({
+export const Route = createFileRoute(
+  '/_authenticated/_onboarded/projects/$projectId',
+)({
   component: ProjectId,
   beforeLoad: () => ({
     getTitle: () => 'Project',

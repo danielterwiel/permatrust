@@ -57,7 +57,7 @@ const DEFAULT_DOCUMENT_PAGINATION: PaginationInput = {
 };
 
 export const Route = createFileRoute(
-  '/_authenticated/projects/$projectId/documents/',
+  '/_authenticated/_onboarded/projects/$projectId/documents/',
 )({
   component: Documents,
   validateSearch: (search) => documentsSearchSchema.parse(search),
@@ -169,7 +169,7 @@ function Documents() {
           columnConfig={[
             {
               id: 'title',
-              headerName: 'Document Title',
+              headerName: 'Title',
               cellPreprocess: (title) => title,
             },
             {

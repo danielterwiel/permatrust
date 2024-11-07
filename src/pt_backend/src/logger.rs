@@ -103,26 +103,30 @@ thread_local! {
     static LOG_LEVEL: RefCell<LogLevel> = RefCell::new(LogLevel::Info);
 }
 
-fn log<T: Debug>(level: LogLevel, message: &str, value: T) {
-    LOG_LEVEL.with(|current_level| {
-        if level <= *current_level.borrow() {
-            println!(
-                "[{}] {} : {:?}",
-                format!("{:?}", level).to_uppercase(),
-                message,
-                value
-            );
-        }
-    });
-}
-
-pub fn log_error<T: Debug>(message: &str, value: T) {
-    log(LogLevel::Error, message, value);
-}
-
-pub fn log_warn<T: Debug>(message: &str, value: T) {
-    log(LogLevel::Warn, message, value);
-}
+// fn log<T: Debug>(level: LogLevel, message: &str, value: T) {
+//     LOG_LEVEL.with(|current_level| {
+//         if level <= *current_level.borrow() {
+//             println!(
+//                 "[{}] {} : {:?}",
+//                 format!("{:?}", level).to_uppercase(),
+//                 message,
+//                 value
+//             );
+//         }
+//     });
+// }
+//
+// pub fn log_error<T: Debug>(message: &str, value: T) {
+//     log(LogLevel::Error, message, value);
+// }
+//
+// pub fn log_warn<T: Debug>(message: &str, value: T) {
+//     log(LogLevel::Warn, message, value);
+// }
+//
+// pub fn log_debug<T: Debug>(message: &str, value: T) {
+//     log(LogLevel::Debug, message, value);
+// }
 
 pub fn log_info<T: std::fmt::Display>(message: &str, value: T) {
     LOG_LEVEL.with(|current_level| {
@@ -135,10 +139,6 @@ pub fn log_info<T: std::fmt::Display>(message: &str, value: T) {
             );
         }
     });
-}
-
-pub fn log_debug<T: Debug>(message: &str, value: T) {
-    log(LogLevel::Debug, message, value);
 }
 
 pub fn init_logger() {

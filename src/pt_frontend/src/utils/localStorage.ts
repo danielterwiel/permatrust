@@ -12,6 +12,19 @@ export const getItem = <T>(key: string, initialValue: T): T => {
   }
 };
 
+export const setItem = <T>(key: string, value: T): void => {
+  if (typeof globalThis === 'undefined') {
+    return;
+  }
+
+  try {
+    globalThis.localStorage.setItem(key, JSON.stringify(value));
+  } catch (error) {
+    console.warn(`Error setting localStorage key "${key}":`, error);
+  }
+};
+
 export const storage = {
-  getItem
-}
+  getItem,
+  setItem,
+};

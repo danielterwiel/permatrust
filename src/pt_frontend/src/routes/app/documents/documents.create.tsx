@@ -1,13 +1,12 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { pt_backend } from "@/declarations/pt_backend";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/Icon";
-import { Input } from "@/components/ui/input";
-import { Loading } from "@/components/Loading";
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/Icon';
+import { Input } from '@/components/ui/input';
+import { Loading } from '@/components/Loading';
 import {
   Form,
   FormControl,
@@ -16,7 +15,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 import {
   MDXEditor,
   UndoRedo,
@@ -27,15 +26,15 @@ import {
   diffSourcePlugin,
   headingsPlugin,
   toolbarPlugin,
-} from "@mdxeditor/editor";
-import "@mdxeditor/editor/style.css";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+} from '@mdxeditor/editor';
+import '@mdxeditor/editor/style.css';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export const Route = createFileRoute(
-  "/_authenticated/projects/$projectId/documents/create",
+  '/_authenticated/_onboarded/projects/$projectId/documents/create',
 )({
   beforeLoad: () => ({
-    getTitle: () => "Create document",
+    getTitle: () => 'Create document',
   }),
   component: CreateDocument,
   errorComponent: ({ error }) => {
@@ -45,10 +44,10 @@ export const Route = createFileRoute(
 
 const formSchema = z.object({
   title: z.string().min(2, {
-    message: "Project name must be at least 2 characters.",
+    message: 'Project name must be at least 2 characters.',
   }),
   content: z.string().min(1, {
-    message: "Content must be at least 1 character.",
+    message: 'Content must be at least 1 character.',
   }),
   projects: z.array(z.bigint()),
 });
@@ -65,8 +64,8 @@ export function CreateDocument() {
     resolver: zodResolver(formSchema),
     disabled: isSubmitting,
     defaultValues: {
-      title: "",
-      content: "",
+      title: '',
+      content: '',
       projects: [BigInt(params.projectId)],
     },
   });
@@ -82,7 +81,7 @@ export function CreateDocument() {
     );
     setIsSubmitting(false);
     navigate({
-      to: "/projects/$projectId/documents/$documentId",
+      to: '/projects/$projectId/documents/$documentId',
       params: {
         projectId: params.projectId,
         documentId: documentId.toString(),
@@ -91,79 +90,86 @@ export function CreateDocument() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          <Icon
-            name="file-outline"
-            size="lg"
-            className="text-muted-foreground pb-1 mr-2"
-          />
-          Create new document
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-              control={form.control}
-              name="title"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. Leaflet" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    This is your document title.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
+    <>
+      <div className="flex items-center justify-between pb-4">
+        <h2 className="text-lg font-semibold">Create new document</h2>
+      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <Icon
+              name="file-outline"
+              size="lg"
+              className="text-muted-foreground pb-1 mr-2"
             />
-            <FormField
-              control={form.control}
-              name="content"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Content</FormLabel>
-                  <FormControl>
-                    <MDXEditor
-                      className="mdx-editor-shadncn"
-                      markdown="# Hello world"
-                      contentEditableClassName="prose"
-                      plugins={[
-                        headingsPlugin(),
-                        diffSourcePlugin(),
-                        toolbarPlugin({
-                          toolbarContents: () => (
-                            <DiffSourceToggleWrapper>
-                              <UndoRedo />
-                              <BoldItalicUnderlineToggles />
-                              <BlockTypeSelect />
-                              <ListsToggle />
-                            </DiffSourceToggleWrapper>
-                          ),
-                        }),
-                      ]}
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>This is your document.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {isSubmitting ? (
-              <Button disabled={true}>
-                <Loading text="Creating..." className="place-items-start" />
-              </Button>
-            ) : (
-              <Button type="submit">Create document</Button>
-            )}
-          </form>
-        </Form>
-      </CardContent>
-    </Card>
+            Document details
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <FormField
+                control={form.control}
+                name="title"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Title</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. Leaflet" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      This is your document title.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="content"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Content</FormLabel>
+                    <FormControl>
+                      <MDXEditor
+                        className="block w-full rounded-md border border-input bg-background p-2 text-sm placeholder:text-muted-foreground focus:border-2 focus:border-accent-foreground focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-accent-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                        markdown="# Hello world"
+                        contentEditableClassName="prose"
+                        plugins={[
+                          headingsPlugin(),
+                          diffSourcePlugin(),
+                          toolbarPlugin({
+                            toolbarContents: () => (
+                              <DiffSourceToggleWrapper>
+                                <UndoRedo />
+                                <BoldItalicUnderlineToggles />
+                                <BlockTypeSelect />
+                                <ListsToggle />
+                              </DiffSourceToggleWrapper>
+                            ),
+                          }),
+                        ]}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>This is your document.</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <div className="flex justify-end">
+                {isSubmitting ? (
+                  <Button disabled={true}>
+                    <Loading text="Creating..." className="place-items-start" />
+                  </Button>
+                ) : (
+                  <Button type="submit">Create document</Button>
+                )}
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </>
   );
 }

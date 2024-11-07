@@ -62,7 +62,9 @@ const DEFAULT_ORGANISATION_PAGINATION: PaginationInput = {
   sort: DEFAULT_SORT,
 };
 
-export const Route = createFileRoute('/_authenticated/organisations/')({
+export const Route = createFileRoute(
+  '/_authenticated/_onboarded/organisations/',
+)({
   component: Organisations,
   validateSearch: (search) => organisationsSearchSchema.parse(search),
   loaderDeps: ({ search: { pagination } }) => ({ pagination }),
@@ -132,7 +134,7 @@ function Organisations() {
         <Link
           to="/organisations/create"
           variant="default"
-          className="h-7 gap-1"
+          className="h-7 gap-1 ml-auto"
           size="sm"
         >
           <Icon name="building-outline" size="sm" />

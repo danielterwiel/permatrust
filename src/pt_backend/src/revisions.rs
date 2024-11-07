@@ -84,7 +84,6 @@ pub fn get_revisions_by_document_id(document_id: DocumentId) -> Result<Vec<Revis
     }
 }
 
-// TODO: filter on caller();
 #[query]
 fn list_revisions_by_document_id(
     document_id: DocumentId,
@@ -92,7 +91,6 @@ fn list_revisions_by_document_id(
 ) -> PaginatedRevisionsResult {
     let revisions =
         get_revisions_by_document_id(document_id).expect("Something went wrong getting revision");
-
     match paginate(
         &revisions,
         pagination.page_size,

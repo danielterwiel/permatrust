@@ -1,13 +1,13 @@
-import { SORT_ORDER } from "@/consts/pagination";
-import { snakeToPascalCase } from "@/utils/snakeToPascalCase";
-import { assertFilterFieldName } from "./assertFilterFieldName";
-import { assertFilterFieldEnum } from "./assertFilterFieldEnum";
-import { buildFilterField } from "@/utils/buildFilterField";
+import { SORT_ORDER } from '@/consts/pagination';
+import { snakeToPascalCase } from '@/utils/snakeToPascalCase';
+import { assertFilterFieldName } from './assertFilterFieldName';
+import { assertFilterFieldEnum } from './assertFilterFieldEnum';
+import { buildFilterField } from '@/utils/buildFilterField';
 
-import type { EntityName } from "@/types/entities";
-import type { Sort } from "@/declarations/pt_backend/pt_backend.did";
-import type { SortingState } from "@tanstack/react-table";
-import { buildEnum } from "./buildEnum";
+import type { EntityName } from '@/types/entities';
+import type { Sort } from '@/declarations/pt_backend/pt_backend.did';
+import type { SortingState } from '@tanstack/react-table';
+import { buildEnum } from './buildEnum';
 
 const columnIdToFilterFieldEnum = (id: string) => {
   const filterFieldNameString = snakeToPascalCase(id);
@@ -23,7 +23,7 @@ export const sortingStateToSort = (
 ): Sort => {
   const [sortingState] = sortingStates;
   if (!sortingState) {
-    throw new Error("sortingState not found");
+    throw new Error('sortingState not found');
   }
   const filterFieldEnum = columnIdToFilterFieldEnum(sortingState.id);
   return [

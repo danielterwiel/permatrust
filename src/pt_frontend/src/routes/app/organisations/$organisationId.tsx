@@ -1,29 +1,29 @@
-import { Link } from '@/components/Link';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { Table } from '@/components/Table';
-import { Icon } from '@/components/ui/Icon';
-import { FilterInput } from '@/components/FilterInput';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { formatDateTime } from '@/utils/formatDateTime';
-import { buildPaginationInput } from '@/utils/buildPaginationInput';
-import { buildFilterField } from '@/utils/buildFilterField';
-import { paginationInputSchema } from '@/schemas/pagination';
-import { z } from 'zod';
-import type { Row } from '@tanstack/react-table';
+import { Link } from '@/components/Link'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { Table } from '@/components/Table'
+import { Icon } from '@/components/ui/Icon'
+import { FilterInput } from '@/components/FilterInput'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { formatDateTime } from '@/utils/formatDateTime'
+import { buildPaginationInput } from '@/utils/buildPaginationInput'
+import { buildFilterField } from '@/utils/buildFilterField'
+import { paginationInputSchema } from '@/schemas/pagination'
+import { z } from 'zod'
+import type { Row } from '@tanstack/react-table'
 import type {
   Project,
   PaginationInput,
   Sort,
   SortCriteria,
-} from '@/declarations/pt_backend/pt_backend.did';
-import type { FilterCriteria } from '@/types/pagination';
+} from '@/declarations/pt_backend/pt_backend.did'
+import type { FilterCriteria } from '@/types/pagination'
 import {
   DEFAULT_PAGINATION,
   FILTER_FIELD,
   FILTER_OPERATOR,
   SORT_ORDER,
-} from '@/consts/pagination';
-import { ENTITY, ENTITY_NAME } from '@/consts/entities';
+} from '@/consts/pagination'
+import { ENTITY, ENTITY_NAME } from '@/consts/entities'
 
 const DEFAULT_FILTERS: [FilterCriteria[]] = [
   [
@@ -34,28 +34,28 @@ const DEFAULT_FILTERS: [FilterCriteria[]] = [
       operator: FILTER_OPERATOR.Contains,
     },
   ],
-];
+]
 
 const DEFAULT_SORT: [SortCriteria] = [
   {
     field: buildFilterField(ENTITY_NAME.Project, FILTER_FIELD.Project.Name),
     order: SORT_ORDER.Asc,
   },
-];
+]
 
 const projectsSearchSchema = z.object({
   pagination: paginationInputSchema.optional(),
-});
+})
 
 const DEFAULT_PROJECT_PAGINATION: PaginationInput = {
   page_number: DEFAULT_PAGINATION.page_number,
   page_size: DEFAULT_PAGINATION.page_size,
   filters: DEFAULT_FILTERS,
   sort: DEFAULT_SORT,
-};
+}
 
 export const Route = createFileRoute(
-  '/_authenticated/organisations/$organisationId/',
+  '/_authenticated/_onboarded/organisations/$organisationId/',
 )({
   component: OrganisationDetails,
   validateSearch: (search) => projectsSearchSchema.parse(search),
@@ -67,15 +67,15 @@ export const Route = createFileRoute(
     const projectPagination = buildPaginationInput(
       DEFAULT_PROJECT_PAGINATION,
       pagination,
-    );
+    )
     const [projects, paginationMetaData] =
       await context.api.call.list_projects_by_organisation_id(
         BigInt(Number.parseInt(params.organisationId)),
         projectPagination,
-      );
+      )
     const organisation = await context.api.call.get_organisation(
       BigInt(Number.parseInt(params.organisationId)),
-    );
+    )
 
     return {
       context,
@@ -85,17 +85,17 @@ export const Route = createFileRoute(
       active: {
         organisation,
       },
-    };
+    }
   },
   errorComponent: ({ error }) => {
-    return <div>Error: {error.message}</div>;
+    return <div>Error: {error.message}</div>
   },
-});
+})
 
 function OrganisationDetails() {
   const { projects, pagination, paginationMetaData, active } =
-    Route.useLoaderData();
-  const navigate = useNavigate();
+    Route.useLoaderData()
+  const navigate = useNavigate()
 
   const RowActions = (row: Row<Project>) => {
     return (
@@ -108,8 +108,8 @@ function OrganisationDetails() {
       >
         Open
       </Link>
-    );
-  };
+    )
+  }
 
   return (
     <>
@@ -128,7 +128,7 @@ function OrganisationDetails() {
                     filters: [[filterCriteria]],
                   },
                 },
-              });
+              })
             }}
           />
         ))}
@@ -171,7 +171,7 @@ function OrganisationDetails() {
                     sort: newSort,
                   },
                 },
-              });
+              })
             }}
             columnConfig={[
               {
@@ -194,5 +194,5 @@ function OrganisationDetails() {
         </CardContent>
       </Card>
     </>
-  );
+  )
 }

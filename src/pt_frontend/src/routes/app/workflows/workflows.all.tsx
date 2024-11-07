@@ -53,7 +53,7 @@ const DEFAULT_WORKFLOW_PAGINATION: PaginationInput = {
   sort: DEFAULT_SORT,
 };
 
-export const Route = createFileRoute('/_authenticated/workflows/')({
+export const Route = createFileRoute('/_authenticated/_onboarded/workflows/')({
   component: Workflows,
   validateSearch: (search) => workflowsSearchSchema.parse(search),
   loaderDeps: ({ search: { pagination } }) => ({ pagination }),
@@ -159,7 +159,7 @@ function Workflows() {
             columnConfig={[
               {
                 id: 'name',
-                headerName: 'Workflow name',
+                headerName: 'Name',
                 cellPreprocess: (name) => name,
               },
             ]}

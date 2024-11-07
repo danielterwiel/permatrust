@@ -56,7 +56,9 @@ const DEFAULT_DOCUMENT_PAGINATION: PaginationInput = {
   sort: DEFAULT_SORT,
 };
 
-export const Route = createFileRoute('/_authenticated/projects/$projectId/')({
+export const Route = createFileRoute(
+  '/_authenticated/_onboarded/projects/$projectId/',
+)({
   component: ProjectDetails,
   validateSearch: (search) => projectsSearchSchema.parse(search),
   beforeLoad: () => ({
@@ -112,81 +114,83 @@ function ProjectDetails() {
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          <Icon
-            name="briefcase-outline"
-            size="lg"
-            className="text-muted-foreground pb-1 mr-2"
-          />
-          {active.project.name}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="flex items-center justify-between pb-4">
-          {pagination.filters[0]?.map((filterCriteria) => (
-            <FilterInput
-              key={filterCriteria.entity.toString()}
-              filterCriteria={filterCriteria}
-              placeholder="Filter document title..."
-              onChange={(filterCriteria: FilterCriteria) => {
-                navigate({
-                  to: `/projects/${projectId}`,
-                  search: {
-                    pagination: {
-                      ...pagination,
-                      filters: [[filterCriteria]],
-                    },
+    <>
+      <div className="flex items-center justify-between pb-4">
+        {pagination.filters[0]?.map((filterCriteria) => (
+          <FilterInput
+            key={filterCriteria.entity.toString()}
+            filterCriteria={filterCriteria}
+            placeholder="Filter document title..."
+            onChange={(filterCriteria: FilterCriteria) => {
+              navigate({
+                to: `/projects/${projectId}`,
+                search: {
+                  pagination: {
+                    ...pagination,
+                    filters: [[filterCriteria]],
                   },
-                });
-              }}
-            />
-          ))}
-          <Link
-            to="/projects/$projectId/documents/create"
-            params={{ projectId }}
-            variant="default"
-            className="h-7 gap-1"
-            size="sm"
-          >
-            <Icon name="file-outline" size="sm" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-              Create Document
-            </span>
-          </Link>
-        </div>
-        <Table<Document>
-          tableData={documents}
-          paginationMetaData={paginationMetaData}
-          entityName={ENTITY_NAME.Document}
-          sort={pagination.sort}
-          onSortingChange={(newSort: Sort) => {
-            navigate({
-              to: `/projects/${projectId}`,
-              search: {
-                pagination: {
-                  ...pagination,
-                  sort: newSort,
                 },
+              });
+            }}
+          />
+        ))}
+        <Link
+          to="/projects/$projectId/documents/create"
+          params={{ projectId }}
+          variant="default"
+          className="h-7 gap-1"
+          size="sm"
+        >
+          <Icon name="file-outline" size="sm" />
+          <span className="sr-only sm:not-sr-only sm:whitespace-nowrap text-sm">
+            Create Document
+          </span>
+        </Link>
+      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <Icon
+              name="briefcase-outline"
+              size="lg"
+              className="text-muted-foreground pb-1 mr-2"
+            />
+            {active.project.name}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table<Document>
+            tableData={documents}
+            paginationMetaData={paginationMetaData}
+            entityName={ENTITY_NAME.Document}
+            sort={pagination.sort}
+            onSortingChange={(newSort: Sort) => {
+              navigate({
+                to: `/projects/${projectId}`,
+                search: {
+                  pagination: {
+                    ...pagination,
+                    sort: newSort,
+                  },
+                },
+              });
+            }}
+            actions={RowActions}
+            columnConfig={[
+              {
+                id: 'title',
+                headerName: 'Title',
+                cellPreprocess: (title) => title,
               },
-            });
-          }}
-          actions={RowActions}
-          columnConfig={[
-            {
-              id: 'title',
-              headerName: 'Document Title',
-              cellPreprocess: (title) => title,
-            },
-            {
-              id: 'version',
-              headerName: 'Version',
-              cellPreprocess: (version) => version,
-            },
-          ]}
-        />
-      </CardContent>
-    </Card>
+              {
+                id: 'version',
+                headerName: 'Version',
+                cellPreprocess: (version) => version,
+              },
+            ]}
+          />
+        </CardContent>
+      </Card>
+    </>
   );
 }

@@ -1,10 +1,10 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/Icon";
-import { Loading } from "@/components/Loading";
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+import { Button } from '@/components/ui/button'
+import { Icon } from '@/components/ui/Icon'
+import { Loading } from '@/components/Loading'
 import {
   Form,
   FormControl,
@@ -13,61 +13,63 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { useLocalStorage } from "@/hooks/useLocalStorage";
-import { useState } from "react";
+} from '@/components/ui/form'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { useState } from 'react'
 
-export const Route = createFileRoute("/_authenticated/projects/create")({
+export const Route = createFileRoute(
+  '/_authenticated/_onboarded/projects/create',
+)({
   component: CreateProject,
   beforeLoad: () => ({
-    getTitle: () => "Create project",
+    getTitle: () => 'Create project',
   }),
   errorComponent: ({ error }) => {
-    return <div>Error: {error.message}</div>;
+    return <div>Error: {error.message}</div>
   },
-});
+})
 
 const formSchema = z.object({
   name: z.string().min(2, {
-    message: "Project name must be at least 2 characters.",
+    message: 'Project name must be at least 2 characters.',
   }),
-});
+})
 
 export function CreateProject() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [activeOrganisationId] = useLocalStorage("activeOrganisationId", "");
-  const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [activeOrganisationId] = useLocalStorage('activeOrganisationId', '')
+  const navigate = useNavigate()
   const { api } = Route.useRouteContext({
     select: ({ api }) => ({ api }),
-  });
+  })
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     disabled: isSubmitting,
     defaultValues: {
-      name: "",
+      name: '',
     },
-  });
+  })
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
+    setIsSubmitting(true)
     try {
       const projectId = await api.call.create_project(
         BigInt(activeOrganisationId),
         values.name,
-      );
+      )
       navigate({
-        to: "/projects/$projectId",
+        to: '/projects/$projectId',
         params: {
           projectId: projectId.toString(),
         },
-      });
+      })
     } catch (error) {
-      console.error(error);
+      console.error(error)
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
   }
 
@@ -113,5 +115,5 @@ export function CreateProject() {
         </Form>
       </CardContent>
     </Card>
-  );
+  )
 }
