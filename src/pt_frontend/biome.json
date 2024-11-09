@@ -1,6 +1,10 @@
 {
   "files": {
-    "ignore": ["**/node_modules/**", "routeTree.gen.ts", "../../node_modules"]
+    "ignore": [
+      "**/node_modules/**",
+      "routeTree.gen.ts",
+      "../../node_modules"
+    ]
   },
   "organizeImports": {
     "enabled": true

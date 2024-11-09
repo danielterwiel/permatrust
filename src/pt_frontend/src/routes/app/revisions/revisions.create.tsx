@@ -28,14 +28,47 @@ import {
 import '@mdxeditor/editor/style.css';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/Icon';
+import type {
+  PaginationInput,
+  SortCriteria,
+} from '@/declarations/pt_backend/pt_backend.did';
+import { buildFilterField } from '@/utils/buildFilterField';
+import { SORT_ORDER, FILTER_FIELD } from '@/consts/pagination';
+import { ENTITY_NAME } from '@/consts/entities';
+import { decodeUint8Array } from '@/utils/decodeUint8Array';
+
+const DEFAULT_SORT: [SortCriteria] = [
+  {
+    field: buildFilterField(
+      ENTITY_NAME.Revision,
+      FILTER_FIELD.Revision.CreatedAt,
+    ),
+    order: SORT_ORDER.Desc,
+  },
+];
+
+const LAST_REVISION_PAGINATION: PaginationInput = {
+  page_size: 1,
+  page_number: 1,
+  filters: [],
+  sort: DEFAULT_SORT,
+};
 
 export const Route = createFileRoute(
   '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/create',
 )({
   component: CreateRevision,
-  beforeLoad: () => ({
-    getTitle: () => 'Create revision',
-  }),
+  beforeLoad: async ({ context, params }) => {
+    const [[revision]] = await context.api.call.list_revisions_by_document_id(
+      BigInt(params.documentId),
+      LAST_REVISION_PAGINATION,
+    );
+
+    return {
+      getTitle: () => 'Create revision',
+      revision,
+    };
+  },
 });
 
 const formSchema = z.object({
@@ -49,8 +82,8 @@ export function CreateRevision() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
   const params = Route.useParams();
-  const { api } = Route.useRouteContext({
-    select: ({ api }) => ({ api }),
+  const { api, revision } = Route.useRouteContext({
+    select: ({ api, revision }) => ({ api, revision }),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -85,6 +118,9 @@ export function CreateRevision() {
     }
   }
 
+  const content = decodeUint8Array(revision?.content);
+  const markdown = content ?? '';
+
   return (
     <>
       <div className="flex items-center justify-between pb-4">
@@ -112,7 +148,7 @@ export function CreateRevision() {
                     <FormLabel>Content</FormLabel>
                     <FormControl>
                       <MDXEditor
-                        markdown="# Hello world"
+                        markdown={markdown}
                         className="block w-full rounded-md border border-input bg-background p-2 text-sm placeholder:text-muted-foreground focus:border-2 focus:border-accent-foreground focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-accent-foreground disabled:cursor-not-allowed disabled:opacity-50"
                         contentEditableClassName="prose"
                         plugins={[

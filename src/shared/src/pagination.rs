@@ -18,7 +18,7 @@ pub enum PaginatedResult<T> {
     Err(AppError),
 }
 
-const ALLOWED_PAGE_SIZES: [u8; 3] = [10, 25, 50]; // TODO: u8
+const ALLOWED_PAGE_SIZES: [u8; 4] = [1, 10, 25, 50];
 
 pub fn paginate<T: Clone + Filterable + Sortable>(
     items: &[T],

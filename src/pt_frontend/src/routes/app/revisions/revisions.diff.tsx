@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
-
 import { MDXEditor, headingsPlugin, diffSourcePlugin } from '@mdxeditor/editor';
+import { decodeUint8Array } from '@/utils/decodeUint8Array';
 
 const RevisionSchema = z.object({
   id: z.bigint(),
@@ -36,11 +36,6 @@ export const Route = createFileRoute(
   },
 });
 
-function preDecode(data: number[] | Uint8Array) {
-  const uint8Array = Array.isArray(data) ? new Uint8Array(data) : data;
-  return uint8Array;
-}
-
 function RevisionDiff() {
   const { revisions } = Route.useLoaderData();
 
@@ -58,9 +53,8 @@ function RevisionDiff() {
     return <div> TODO: hoax</div>;
   }
 
-  const decoder = new TextDecoder();
-  const contentCurrent = decoder.decode(preDecode(current.content));
-  const contentTheirs = decoder.decode(preDecode(theirs.content));
+  const contentCurrent = decodeUint8Array(current.content);
+  const contentTheirs = decodeUint8Array(theirs.content);
 
   return (
     <MDXEditor

@@ -1,0 +1,12 @@
+{
+  "formatter": {
+    "enabled": true
+  },
+  "overrides": [
+    {
+      "include": [
+        "src/pt_frontend/**/*.{ts,tsx,js,jsx}"
+      ]
+    }
+  ]
+}
