@@ -1,24 +1,33 @@
+import { z } from 'zod';
 import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
+import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/components/Loading';
-import { useNavigate } from '@tanstack/react-router';
+
+const authenticateSearchSchema = zodSearchValidator(
+  z
+    .object({
+      redirect: z.string().optional(),
+    })
+    .optional(),
+);
 
 export const Route = createFileRoute('/authenticate')({
   component: Authenticate,
+  validateSearch: authenticateSearchSchema,
 });
 
 function Authenticate() {
   const { auth } = Route.useRouteContext({
     select: ({ auth }) => ({ auth }),
   });
-  const navigate = useNavigate();
+  const navigate = Route.useNavigate();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
   const authenticate = async () => {
     setIsAuthenticating(true);
     await auth.initializeAuth();
-    debugger;
 
     if (auth.isAuthenticated) {
       navigate({

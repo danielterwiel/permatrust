@@ -2,11 +2,24 @@
 
 ## Getting started
 
+### Preparation
+
+Add a ECC encrypted GPG key:
+
 ```sh
-chmod +x scripts/build-shared.sh
+gpg --expert --full-generate-key
+(9) ECC (sign and encrypt)
+(1) Curve 25519
+
+```
+
+### Installation
+
+```sh
 dfx start --clean
 dfx nns import
-npm run build:shared
+chmod +x scripts/build-shared.sh
+npm run build:shared # Requires confirmation in Settings > Security @ Mac OS
 dfx deploy
 npm start
 ```
@@ -15,7 +28,7 @@ npm start
 
 ```sh
 dfx nns install --ledger-accounts $(dfx ledger account-id)
-# Now navigate to the NNS page and copy the account id
+# Now navigate to the NNS page and copy the account id.
 dfx ledger transfer ACCOUNT_ID_NNS_PAGE --memo 12345 --amount 1337
 ```
 

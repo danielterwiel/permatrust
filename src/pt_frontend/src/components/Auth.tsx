@@ -1,9 +1,9 @@
-import type { FC } from "react";
+import type { FC } from 'react';
 
 export const Auth: FC = () => {
-	return (
-		<div className="flex justify-end">
-			{/*
+  return (
+    <div className="flex justify-end">
+      {/*
 
         {!auth.authenticated ? (
         <button
@@ -24,6 +24,6 @@ export const Auth: FC = () => {
       )}
 
       */}
-		</div>
-	);
+    </div>
+  );
 };

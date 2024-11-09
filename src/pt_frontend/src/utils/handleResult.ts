@@ -1,5 +1,5 @@
-import { notFound } from "@tanstack/react-router";
-import type { AppError } from "@/declarations/pt_backend/pt_backend.did";
+import { notFound } from '@tanstack/react-router';
+import type { AppError } from '@/declarations/pt_backend/pt_backend.did';
 
 type Result<T> = { Ok: T } | { Err: AppError };
 
@@ -14,7 +14,7 @@ export function handleResult<T>(
   result: Result<T>,
   handlers: ResultHandler<T> = {},
 ): T {
-  if ("Ok" in result) {
+  if ('Ok' in result) {
     if (handlers.onOk) {
       return handlers.onOk(result.Ok);
     }

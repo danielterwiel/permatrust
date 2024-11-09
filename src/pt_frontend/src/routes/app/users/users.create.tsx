@@ -1,10 +1,10 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { useForm } from 'react-hook-form'
-import { z } from 'zod'
-import { Button } from '@/components/ui/button'
-import { Icon } from '@/components/ui/Icon'
-import { Loading } from '@/components/Loading'
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/Icon';
+import { Loading } from '@/components/Loading';
 import {
   Form,
   FormControl,
@@ -13,10 +13,10 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { useState } from 'react'
+} from '@/components/ui/form';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { useState } from 'react';
 
 export const Route = createFileRoute(
   '/_authenticated/_onboarding/users/create',
@@ -26,9 +26,9 @@ export const Route = createFileRoute(
     getTitle: () => 'Create user',
   }),
   errorComponent: ({ error }) => {
-    return <div>Error: {error.message}</div>
+    return <div>Error: {error.message}</div>;
   },
-})
+});
 
 const formSchema = z.object({
   first_name: z.string().min(1, {
@@ -37,14 +37,14 @@ const formSchema = z.object({
   last_name: z.string().min(1, {
     message: 'Last name must be at least 1 character.',
   }),
-})
+});
 
 export function CreateProject() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const navigate = useNavigate()
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
   const { api } = Route.useRouteContext({
     select: ({ api }) => ({ api }),
-  })
+  });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -53,18 +53,18 @@ export function CreateProject() {
       first_name: '',
       last_name: '',
     },
-  })
+  });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     try {
-      setIsSubmitting(true)
-      await api.call.create_user(values.first_name, values.last_name)
-      navigate({ to: '/organisations' })
-      setIsSubmitting(false)
+      setIsSubmitting(true);
+      await api.call.create_user(values.first_name, values.last_name);
+      navigate({ to: '/organisations' });
+      setIsSubmitting(false);
     } catch (error) {
-      console.error(error)
+      console.error(error);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 
@@ -122,5 +122,5 @@ export function CreateProject() {
         </Form>
       </CardContent>
     </Card>
-  )
+  );
 }

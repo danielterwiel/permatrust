@@ -1,9 +1,8 @@
-import { useEffect } from 'react'
-import { createFileRoute } from '@tanstack/react-router'
-import { z } from 'zod'
+import { useEffect } from 'react';
+import { createFileRoute } from '@tanstack/react-router';
+import { z } from 'zod';
 
-import { MDXEditor, headingsPlugin, diffSourcePlugin } from '@mdxeditor/editor'
-import { pt_backend } from '@/declarations/pt_backend'
+import { MDXEditor, headingsPlugin, diffSourcePlugin } from '@mdxeditor/editor';
 
 const RevisionSchema = z.object({
   id: z.bigint(),
@@ -12,12 +11,12 @@ const RevisionSchema = z.object({
   created_at: z.bigint(),
   created_by: z.any(), // TODO: validate Principals
   document_id: z.bigint(),
-})
+});
 
 const revisionSearchSchema = z.object({
   current: z.number(),
   theirs: z.number(),
-})
+});
 
 export const Route = createFileRoute(
   '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/diff',
@@ -29,39 +28,39 @@ export const Route = createFileRoute(
     const revisions = await context.api.call.diff_revisions(
       BigInt(current),
       BigInt(theirs),
-    )
-    return { revisions }
+    );
+    return { revisions };
   },
   errorComponent: ({ error }) => {
-    return <div>Error: {error.message}</div>
+    return <div>Error: {error.message}</div>;
   },
-})
+});
 
 function preDecode(data: number[] | Uint8Array) {
-  const uint8Array = Array.isArray(data) ? new Uint8Array(data) : data
-  return uint8Array
+  const uint8Array = Array.isArray(data) ? new Uint8Array(data) : data;
+  return uint8Array;
 }
 
 function RevisionDiff() {
-  const { revisions } = Route.useLoaderData()
+  const { revisions } = Route.useLoaderData();
 
   useEffect(() => {
     try {
-      z.array(RevisionSchema).parse(revisions)
+      z.array(RevisionSchema).parse(revisions);
     } catch (error) {
-      console.error('Revision validation error:', error)
+      console.error('Revision validation error:', error);
     }
-  }, [revisions])
+  }, [revisions]);
 
-  const [current, theirs] = revisions
+  const [current, theirs] = revisions;
 
   if (!current || !theirs) {
-    return <div> TODO: hoax</div>
+    return <div> TODO: hoax</div>;
   }
 
-  const decoder = new TextDecoder()
-  const contentCurrent = decoder.decode(preDecode(current.content))
-  const contentTheirs = decoder.decode(preDecode(theirs.content))
+  const decoder = new TextDecoder();
+  const contentCurrent = decoder.decode(preDecode(current.content));
+  const contentTheirs = decoder.decode(preDecode(theirs.content));
 
   return (
     <MDXEditor
@@ -75,5 +74,5 @@ function RevisionDiff() {
         }),
       ]}
     />
-  )
+  );
 }

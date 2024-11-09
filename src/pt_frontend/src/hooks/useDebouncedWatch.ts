@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useRef } from "react";
-import type { UseFormWatch } from "react-hook-form";
+import { useCallback, useEffect, useRef } from 'react';
+import type { UseFormWatch } from 'react-hook-form';
 
 export function useDebouncedWatch<T extends object>(
   watch: UseFormWatch<T>,

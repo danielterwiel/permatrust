@@ -78,10 +78,9 @@ export function handleResult<T>(
   if ('Ok' in result) {
     handlers.onOk?.(result.Ok);
     return result.Ok;
-  } else {
-    handlers.onErr?.(result.Err);
-    return result.Err;
   }
+  handlers.onErr?.(result.Err);
+  return result.Err;
 }
 
 type WrappedActor<T> = {

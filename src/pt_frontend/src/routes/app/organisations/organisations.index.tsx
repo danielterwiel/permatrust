@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Outlet } from '@tanstack/react-router';
 
 export const Route = createFileRoute(
   '/_authenticated/_onboarded/organisations',
@@ -8,10 +8,10 @@ export const Route = createFileRoute(
     getTitle: () => 'Organisations',
   }),
   errorComponent: ({ error }) => {
-    return <div>Error: {error.message}</div>
+    return <div>Error: {error.message}</div>;
   },
-})
+});
 
 function Organisations() {
-  return <Outlet />
+  return <Outlet />;
 }

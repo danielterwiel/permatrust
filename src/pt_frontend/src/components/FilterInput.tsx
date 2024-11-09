@@ -1,4 +1,4 @@
-import { Input } from "@/components/ui/input";
+import { Input } from '@/components/ui/input';
 import {
   Form,
   FormControl,
@@ -6,16 +6,16 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { filterCriteriaSchema } from "@/schemas/pagination";
-import { filterCriteriaToFilterFieldName } from "@/utils/filterCriteriaToFilterFieldName";
-import { useDebouncedWatch } from "@/hooks/useDebouncedWatch";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import type { ComponentProps } from "react";
-import type { FilterCriteria } from "@/declarations/pt_backend/pt_backend.did";
+} from '@/components/ui/form';
+import { filterCriteriaSchema } from '@/schemas/pagination';
+import { filterCriteriaToFilterFieldName } from '@/utils/filterCriteriaToFilterFieldName';
+import { useDebouncedWatch } from '@/hooks/useDebouncedWatch';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { ComponentProps } from 'react';
+import type { FilterCriteria } from '@/declarations/pt_backend/pt_backend.did';
 
-type FilterProps = Omit<ComponentProps<typeof Input>, "onChange"> & {
+type FilterProps = Omit<ComponentProps<typeof Input>, 'onChange'> & {
   filterCriteria: FilterCriteria;
   placeholder: string;
   onChange?: (value: FilterCriteria) => void;
@@ -34,7 +34,7 @@ export const FilterInput = ({
       field: filterCriteria.field,
       operator: filterCriteria.operator,
     },
-    mode: "onChange",
+    mode: 'onChange',
   });
 
   const fieldName = filterCriteriaToFilterFieldName(

@@ -18,8 +18,6 @@ export async function initializeOrganisationAndRedirect(
     page_size: 1,
   });
 
-  debugger;
-
   if (!organisations.length && activeOrganisationId) {
     storage.setItem('activeOrganisationId', '');
   }

@@ -1,6 +1,6 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Icon } from '@/components/ui/Icon'
-import { createFileRoute } from '@tanstack/react-router'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Icon } from '@/components/ui/Icon';
+import { createFileRoute } from '@tanstack/react-router';
 
 export const Route = createFileRoute(
   '/_authenticated/_onboarded/workflows/$workflowId/',
@@ -17,12 +17,12 @@ export const Route = createFileRoute(
       ...context,
 
       // workflow,
-    }
+    };
   },
   errorComponent: ({ error }) => {
-    return <div>Error: {error.message}</div>
+    return <div>Error: {error.message}</div>;
   },
-})
+});
 
 function DocumentDetails() {
   // const { workflowId } = Route.useParams();
@@ -42,5 +42,5 @@ function DocumentDetails() {
       </CardHeader>
       <CardContent>Workflow content</CardContent>
     </Card>
-  )
+  );
 }

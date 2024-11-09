@@ -1,3 +1,4 @@
+import type * as React from 'react';
 import { useState, useMemo, useRef, useEffect } from 'react';
 import {
   useReactTable,
@@ -50,7 +51,6 @@ export const Table = <T extends Entity = Entity>({
   columnConfig = [],
   paginationMetaData,
   actions,
-  sort,
   onSelectionChange,
   onSortingChange,
 }: TableProps<T>) => {

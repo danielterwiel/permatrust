@@ -60,8 +60,9 @@ export function Icon({
   return (
     <svg
       {...props}
+      aria-hidden="true"
       className={twMerge(
-        clsx(sizeClassName[size], 'inline self-center', className)
+        clsx(sizeClassName[size], 'inline self-center', className),
       )}
     >
       <use href={`${href}#${name}`} />

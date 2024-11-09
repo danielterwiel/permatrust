@@ -13,11 +13,14 @@
     "prebuild": "npm run prebuild --workspaces --if-present",
     "pretest": "npm run prebuild --workspaces --if-present",
     "start": "npm start --workspaces --if-present",
-    "test": "npm test --workspaces --if-present",
-    "format": "npm format --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "format": "npm run format --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
   },
   "type": "module",
   "workspaces": [
     "src/pt_frontend"
-  ]
+  ],
+  "dependencies": {}
 }

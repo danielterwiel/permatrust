@@ -1,4 +1,4 @@
-import type { EntityName } from "@/types/entities";
+import type { EntityName } from '@/types/entities';
 
 export const ENTITY = {
   User: { User: null },

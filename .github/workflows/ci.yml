@@ -1,0 +1,28 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+  pull_request:
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+
+jobs:
+  setup:
+    uses: ./.github/workflows/setup.yml
+
+  build:
+    needs: setup
+    uses: ./.github/workflows/build.yml
+
+  quality:
+    needs: build
+    uses: ./.github/workflows/quality.yml
+
+  # test:
+  #   needs: [setup, build]
+  #   uses: ./.github/workflows/test.yml

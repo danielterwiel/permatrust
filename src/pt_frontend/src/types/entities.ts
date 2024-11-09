@@ -1,4 +1,4 @@
-import type { ENTITY } from "@/consts/entities";
+import type { ENTITY } from '@/consts/entities';
 import type {
   Document,
   Organisation,
@@ -6,7 +6,7 @@ import type {
   Revision,
   User,
   Workflow,
-} from "@/declarations/pt_backend/pt_backend.did";
+} from '@/declarations/pt_backend/pt_backend.did';
 
 export type Entity =
   | Document

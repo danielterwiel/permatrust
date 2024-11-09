@@ -51,7 +51,7 @@ const PaginationLink = ({
         size,
       }),
       className,
-      'outline'
+      'outline',
     )}
     activeProps={{ className: 'outline' }}
     inactiveProps={{ className: 'ghost' }}

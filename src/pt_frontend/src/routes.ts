@@ -14,8 +14,6 @@ export const routes = rootRoute('root.tsx', [
     ]),
 
     layout('onboarded', '_layouts/_onboarded.tsx', [
-      route('/nns', 'app/nns/nns.tsx'),
-
       route('/users', 'app/users/users.index.tsx', [
         index('app/users/users.all.tsx'),
         route('/$userId', 'app/users/$userId.tsx'),

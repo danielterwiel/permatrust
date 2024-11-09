@@ -1,0 +1,89 @@
+name: Code Quality
+
+on:
+  workflow_call:
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+
+      - name: Restore npm cache
+        id: npm-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            **/node_modules
+            ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install Root Dependencies
+        run: npm ci
+
+      - name: Setup DFX
+        uses: dfinity/setup-dfx@main
+        with:
+          dfx-version: "auto"
+
+      - name: Restore DFX cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cache/dfinity
+            ~/.config/dfinity
+          key: ${{ runner.os }}-dfx-${{ hashFiles('dfx.json') }}
+
+      - name: Setup Rust target
+        run: rustup target add wasm32-unknown-unknown
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache Cargo git directory
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
+
+      # Optionally cache the target directory (use with caution)
+      - name: Cache Rust build artifacts
+        uses: actions/cache@v4
+        with:
+          path: target
+          key: ${{ runner.os }}-rust-target-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Start DFX in background
+        run: dfx start --background
+
+      - name: Create and build canisters
+        run: |
+          dfx canister create --all
+          dfx build
+
+      - name: Generate Declarations
+        run: dfx generate
+
+      - name: Install Frontend Dependencies
+        working-directory: ./src/pt_frontend
+        run: npm ci
+
+      - name: TypeCheck
+        working-directory: ./src/pt_frontend
+        run: npm run typecheck
+
+      - name: Lint
+        working-directory: ./src/pt_frontend
+        run: npm run lint
+
+      - name: Format
+        working-directory: ./src/pt_frontend
+        run: npm run format:write
