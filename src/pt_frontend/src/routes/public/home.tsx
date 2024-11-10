@@ -15,20 +15,10 @@ export const Route = createFileRoute('/')({
 
 function Authenticate() {
   const search = Route.useSearch();
-  const { location } = Route.useRouteContext({
-    select: ({ location }) => ({ location }),
-  });
 
   return (
     <div className="grid place-items-center min-h-dvh pb-36">
-      <Link
-        to="/authenticate"
-        search={
-          location.href === '/'
-            ? search
-            : { ...search, redirect: location.href }
-        }
-      >
+      <Link to="/authenticate" search={search}>
         Authenticate
       </Link>
     </div>

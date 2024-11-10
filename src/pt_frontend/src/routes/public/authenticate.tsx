@@ -22,6 +22,7 @@ function Authenticate() {
   const { auth } = Route.useRouteContext({
     select: ({ auth }) => ({ auth }),
   });
+  const search = Route.useSearch();
   const navigate = Route.useNavigate();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
 
@@ -36,9 +37,10 @@ function Authenticate() {
       return;
     }
     const result = await auth.login();
+
     if (result) {
       navigate({
-        to: '/organisations',
+        to: search?.redirect ?? '/organisations',
       });
     }
   };
