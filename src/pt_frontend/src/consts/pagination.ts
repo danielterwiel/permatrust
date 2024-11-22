@@ -10,6 +10,7 @@ export const DEFAULT_PAGINATION: PaginationInput = {
 export const FILTER_FIELD_DOCUMENT = {
   ProjectId: { ProjectId: null },
   Title: { Title: null },
+  Version: { Version: null },
   CreatedAt: { CreatedAt: null },
 } as const;
 export const FILTER_FIELD_ORGANISATION = {

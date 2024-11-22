@@ -1,9 +1,6 @@
-import { useMemo } from 'react';
 import { Link } from '@tanstack/react-router';
 import { Icon } from '@/components/ui/Icon';
 import { Button } from '@/components/ui/button';
-import type { AuthContext } from '@/context/auth';
-
 import {
   Sidebar as SidebarBase,
   SidebarContent,
@@ -15,28 +12,23 @@ import {
   SidebarMenuItem,
   SidebarFooter,
 } from '@/components/ui/sidebar';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import type { FC } from 'react';
+import type { authActor } from '@/machines/auth-machine';
 
-export function Sidebar({ auth }: { auth: AuthContext }) {
-  const [activeOrganisationId] = useLocalStorage('activeOrganisationId', '');
+type SidebarProps = { authActor: typeof authActor };
 
-  const items = useMemo(() => {
-    const allItems = [
-      ['/nns', 'NNS', 'infinity-outline'],
-      ['/organisations', 'Organisations', 'building-outline'],
-      ['/projects', 'Projects', 'briefcase-outline'],
-      ['/documents', 'Documents', 'files-outline'],
-      ['/users', 'Users', 'users-outline'],
-      ['/workflows', 'Workflows', 'file-orientation-outline'],
-    ] as const;
+export const Sidebar: FC<SidebarProps> = ({ authActor }) => {
+  const items = [
+    ['/organisations', 'Organisations', 'building-outline'],
+    ['/projects', 'Projects', 'briefcase-outline'],
+    ['/documents', 'Documents', 'files-outline'],
+    ['/users', 'Users', 'users-outline'],
+    ['/workflows', 'Workflows', 'file-orientation-outline'],
+  ] as const;
 
-    return allItems.filter(
-      (item) => item[1] !== 'Documents' || Boolean(activeOrganisationId),
-    );
-  }, [activeOrganisationId]);
-  const logout = () => {
-    auth.logout();
-  };
+  function logout() {
+    authActor.send({ type: 'LOGOUT' });
+  }
 
   return (
     <SidebarBase>
@@ -81,4 +73,4 @@ export function Sidebar({ auth }: { auth: AuthContext }) {
       </SidebarFooter>
     </SidebarBase>
   );
-}
+};

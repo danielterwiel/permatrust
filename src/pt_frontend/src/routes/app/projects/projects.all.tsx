@@ -1,9 +1,11 @@
 import { z } from 'zod';
+import { api } from '@/api';
 import { buildFilterField } from '@/utils/buildFilterField';
 import { buildPaginationInput } from '@/utils/buildPaginationInput';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { formatDateTime } from '@/utils/formatDateTime';
 import { paginationInputSchema } from '@/schemas/pagination';
+import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { FilterInput } from '@/components/FilterInput';
 import { Icon } from '@/components/ui/Icon';
@@ -54,17 +56,18 @@ const projectsSearchSchema = z.object({
   pagination: paginationInputSchema.optional(),
 });
 
-export const Route = createFileRoute('/_authenticated/_onboarded/projects/')({
+export const Route = createFileRoute(
+  '/_initialized/_authenticated/_onboarded/projects/',
+)({
   component: Projects,
-  validateSearch: (search) => projectsSearchSchema.parse(search),
-  loaderDeps: ({ search: { pagination } }) => ({ pagination }),
-  loader: async ({ context, deps: { pagination } }) => {
-    const projectPagination = buildPaginationInput(
-      DEFAULT_PROJECT_PAGINATION,
-      pagination,
-    );
+  validateSearch: zodSearchValidator(projectsSearchSchema),
+  loaderDeps: ({ search }) => ({
+    pagination: search?.pagination ?? DEFAULT_PROJECT_PAGINATION,
+  }),
+  loader: async ({ context, deps }) => {
+    const projectPagination = buildPaginationInput(deps.pagination);
     const [projects, paginationMetaData] =
-      await context.api.call.list_projects(projectPagination);
+      await api.list_projects(projectPagination);
     return {
       context,
       projects,

@@ -1,16 +1,18 @@
-import { Link } from '@/components/Link';
+import { z } from 'zod';
+import { api } from '@/api';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { Table } from '@/components/Table';
-import { Icon } from '@/components/ui/Icon';
-import { FilterInput } from '@/components/FilterInput';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { formatDateTime } from '@/utils/formatDateTime';
 import { buildPaginationInput } from '@/utils/buildPaginationInput';
 import { buildFilterField } from '@/utils/buildFilterField';
 import { paginationInputSchema } from '@/schemas/pagination';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
-import { z } from 'zod';
+import { zodSearchValidator } from '@tanstack/router-zod-adapter';
+import { Link } from '@/components/Link';
+import { Table } from '@/components/Table';
+import { Icon } from '@/components/ui/Icon';
+import { FilterInput } from '@/components/FilterInput';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import type { Row } from '@tanstack/react-table';
 import type {
   Organisation,
@@ -63,18 +65,18 @@ const DEFAULT_ORGANISATION_PAGINATION: PaginationInput = {
 };
 
 export const Route = createFileRoute(
-  '/_authenticated/_onboarded/organisations/',
+  '/_initialized/_authenticated/_onboarded/organisations/',
 )({
   component: Organisations,
-  validateSearch: (search) => organisationsSearchSchema.parse(search),
-  loaderDeps: ({ search: { pagination } }) => ({ pagination }),
-  loader: async ({ context, deps: { pagination } }) => {
-    const organisationPagination = buildPaginationInput(
-      DEFAULT_ORGANISATION_PAGINATION,
-      pagination,
+  validateSearch: zodSearchValidator(organisationsSearchSchema),
+  loaderDeps: ({ search }) => ({
+    pagination: search?.pagination ?? DEFAULT_ORGANISATION_PAGINATION,
+  }),
+  loader: async ({ context, deps }) => {
+    const organisationPagination = buildPaginationInput(deps.pagination);
+    const [organisations, paginationMetaData] = await api.list_organisations(
+      organisationPagination,
     );
-    const [organisations, paginationMetaData] =
-      await context.api.call.list_organisations(organisationPagination);
 
     return {
       context,

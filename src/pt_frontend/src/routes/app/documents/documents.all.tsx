@@ -1,9 +1,11 @@
 import { z } from 'zod';
+import { api } from '@/api';
 import { useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { getActiveOrganisationId } from '@/utils/getActiveOrganisationId';
 import { buildPaginationInput } from '@/utils/buildPaginationInput';
 import { buildFilterField } from '@/utils/buildFilterField';
+import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { Table } from '@/components/Table';
 import { Icon } from '@/components/ui/Icon';
 import { Link } from '@/components/Link';
@@ -74,30 +76,27 @@ const DEFAULT_DOCUMENT_PAGINATION: PaginationInput = {
   sort: DEFAULT_SORT,
 };
 
-export const Route = createFileRoute('/_authenticated/_onboarded/documents')({
+export const Route = createFileRoute(
+  '/_initialized/_authenticated/_onboarded/documents',
+)({
   component: Documents,
-  validateSearch: (search) => {
-    return documentsSearchSchema.parse(search);
-  },
+  validateSearch: zodSearchValidator(documentsSearchSchema),
   beforeLoad: () => ({
     getTitle: () => 'Documents',
   }),
-  loaderDeps: ({ search: { pagination } }) => ({
-    pagination,
+  loaderDeps: ({ search }) => ({
+    pagination: { ...DEFAULT_DOCUMENT_PAGINATION, ...search.pagination },
   }),
-  loader: async ({ context, deps: { pagination } }) => {
+  loader: async ({ context, deps }) => {
     const activeOrganisationId = getActiveOrganisationId();
-    const documentPagination = buildPaginationInput(
-      DEFAULT_DOCUMENT_PAGINATION,
-      pagination,
-    );
-    const projectPagination = buildPaginationInput(DEFAULT_PAGINATION, {});
-    const [projects] = await context.api.call.list_projects_by_organisation_id(
+    const documentPagination = buildPaginationInput(deps.pagination);
+    const projectPagination = buildPaginationInput(DEFAULT_PAGINATION);
+    const [projects] = await api.list_projects_by_organisation_id(
       activeOrganisationId,
       projectPagination,
     );
     const [documents, paginationMetaData] =
-      await context.api.call.list_documents(documentPagination);
+      await api.list_documents(documentPagination);
     return {
       context,
       projects,

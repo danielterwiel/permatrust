@@ -32,6 +32,7 @@ type ProjectFilterField = variant {
     Name : null;
     OrganisationId : null;
     CreatedAt : null;
+    CreatedBy: null;
 };
 type DocumentFilterField = variant {
     Title : null;
@@ -115,6 +116,10 @@ type UserResult = variant {
     Ok: User;
     Err: AppError;
 };
+type UsersResult = variant {
+    Ok: vec User;
+    Err: AppError;
+};
 type PaginatedUsersResult = variant {
     Ok : record {
       vec User;
@@ -175,11 +180,12 @@ type OrganisationResult = variant {
     Ok: Organisation;
     Err: AppError;
 };
+type PaginatedOrganisationsResultOk = record {
+    vec Organisation;
+    PaginationMetadata;
+};
 type PaginatedOrganisationsResult = variant {
-    Ok : record {
-      vec Organisation;
-      PaginationMetadata;
-    };
+    Ok : PaginatedOrganisationsResultOk;
     Err : AppError;
 };
 
@@ -200,11 +206,12 @@ type ProjectResult = variant {
     Ok: Project;
     Err: AppError;
 };
+type PaginatedProjectsResultOk = record {
+    vec Project;
+    PaginationMetadata;
+};
 type PaginatedProjectsResult = variant {
-    Ok : record {
-      vec Project;
-      PaginationMetadata;
-    };
+    Ok : PaginatedProjectsResultOk;
     Err : AppError;
 };
 
@@ -229,11 +236,12 @@ type DocumentsResult = variant {
     Ok: vec Document;
     Err: AppError;
 };
+type PaginatedDocumentsResultOk = record {
+    vec Document;
+    PaginationMetadata;
+};
 type PaginatedDocumentsResult = variant {
-    Ok : record {
-      vec Document;
-      PaginationMetadata;
-    };
+    Ok : PaginatedDocumentsResultOk;
     Err : AppError;
 };
 
@@ -258,11 +266,12 @@ type RevisionsResult = variant {
     Ok: vec Revision;
     Err: AppError;
 };
+type PaginatedRevisionsResultOk = record {
+    vec Revision;
+    PaginationMetadata;
+};
 type PaginatedRevisionsResult = variant {
-    Ok : record {
-      vec Revision;
-      PaginationMetadata;
-    };
+    Ok : PaginatedRevisionsResultOk;
     Err : AppError;
 };
 

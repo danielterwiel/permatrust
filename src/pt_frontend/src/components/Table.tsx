@@ -1,5 +1,5 @@
-import type * as React from 'react';
-import { useState, useMemo, useRef, useEffect } from 'react';
+import type * as React from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import {
   useReactTable,
   flexRender,
@@ -7,7 +7,7 @@ import {
   type ColumnDef,
   type Row,
   type SortingState,
-} from '@tanstack/react-table';
+} from "@tanstack/react-table";
 import {
   Table as TableBase,
   TableBody,
@@ -15,17 +15,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Pagination } from './Pagination';
-import { DataTableColumnHeader } from './TableColumnHeader';
-import type { Entity, EntityName } from '@/types/entities';
+} from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Pagination } from "./Pagination";
+import { DataTableColumnHeader } from "./TableColumnHeader";
+import type { Entity, EntityName } from "@/types/entities";
 import type {
   PaginationMetadata,
   Sort,
-} from '@/declarations/pt_backend/pt_backend.did';
-import { getSortingState } from '@/utils/getSortingState';
-import { sortingStateToSort } from '@/utils/sortingStateToSort';
+} from "@/declarations/pt_backend/pt_backend.did";
+import { getSortingState } from "@/utils/getSortingState";
+import { sortingStateToSort } from "@/utils/sortingStateToSort";
 
 interface ColumnConfigItem {
   id: string;
@@ -73,7 +73,7 @@ export const Table = <T extends Entity = Entity>({
 
   const columns: ColumnDef<T>[] = useMemo(() => {
     const selectColumn: ColumnDef<T> = {
-      id: 'select',
+      id: "select",
       header: ({ table }) => (
         <Checkbox
           checked={table.getIsAllPageRowsSelected()}
@@ -196,7 +196,7 @@ export const Table = <T extends Entity = Entity>({
                 {actions && (
                   <TableCell>
                     <div className="flex justify-end pr-4">
-                      {typeof actions === 'function' ? actions(row) : actions}
+                      {typeof actions === "function" ? actions(row) : actions}
                     </div>
                   </TableCell>
                 )}

@@ -1,15 +1,17 @@
+import { z } from 'zod';
+import { useState } from 'react';
+import { api } from '@/api';
+import { formatDateTime } from '@/utils/formatDateTime';
+import { buildPaginationInput } from '@/utils/buildPaginationInput';
+import { buildFilterField } from '@/utils/buildFilterField';
+import { paginationInputSchema } from '@/schemas/pagination';
+import { zodSearchValidator } from '@tanstack/router-zod-adapter';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Link } from '@/components/Link';
 import { Table } from '@/components/Table';
 import { Icon } from '@/components/ui/Icon';
 import { FilterInput } from '@/components/FilterInput';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useState } from 'react';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { z } from 'zod';
-import { formatDateTime } from '@/utils/formatDateTime';
-import { buildPaginationInput } from '@/utils/buildPaginationInput';
-import { buildFilterField } from '@/utils/buildFilterField';
-import { paginationInputSchema } from '@/schemas/pagination';
 import type { Row } from '@tanstack/react-table';
 import type { Entity } from '@/types/entities';
 import type {
@@ -50,38 +52,29 @@ const DEFAULT_REVISION_PAGINATION: PaginationInput = {
 };
 
 export const Route = createFileRoute(
-  '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/',
+  '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/',
 )({
   component: DocumentDetails,
-  validateSearch: (search) => revisionsSearchSchema.parse(search),
-  loaderDeps: ({ search: { pagination } }) => ({ pagination }),
-  loader: async ({
-    params: { projectId, documentId },
-    deps: { pagination },
-    context,
-  }) => {
-    const revisionPagination = buildPaginationInput(
-      DEFAULT_REVISION_PAGINATION,
-      pagination,
-    );
+  validateSearch: zodSearchValidator(revisionsSearchSchema),
+  loaderDeps: ({ search }) => ({
+    pagination: search.pagination ?? DEFAULT_REVISION_PAGINATION,
+  }),
+  loader: async ({ params, deps, context }) => {
+    const revisionPagination = buildPaginationInput(deps.pagination);
 
     const [revisions, paginationMetaData] =
-      await context.api.call.list_revisions_by_document_id(
-        BigInt(documentId),
+      await api.list_revisions_by_document_id(
+        BigInt(params.documentId),
         revisionPagination,
       );
-    const document = await context.api.call.get_document(BigInt(documentId));
+    const document = await api.get_document(BigInt(params.documentId));
 
     return {
       context,
       revisions,
       paginationMetaData,
       pagination: revisionPagination,
-      active: {
-        project: context.active.project,
-        document,
-      },
-      projectId,
+      document,
     };
   },
   errorComponent: ({ error }) => {
@@ -91,7 +84,7 @@ export const Route = createFileRoute(
 
 function DocumentDetails() {
   const { projectId, documentId } = Route.useParams();
-  const { revisions, pagination, paginationMetaData, active } =
+  const { revisions, pagination, paginationMetaData, document } =
     Route.useLoaderData();
   const [selected, setSelected] = useState<Entity[]>([]);
   const navigate = useNavigate();
@@ -185,7 +178,7 @@ function DocumentDetails() {
               size="lg"
               className="text-muted-foreground pb-1 mr-2"
             />
-            {active.document.title}
+            {document.title}
           </CardTitle>
         </CardHeader>
         <CardContent>

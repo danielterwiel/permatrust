@@ -123,7 +123,7 @@ pub enum RevisionFilterField { ProjectId, Version, DocumentId, CreatedAt }
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub enum OrganisationFilterField { Name, CreatedAt }
 #[derive(CandidType, Deserialize, Clone, Debug)]
-pub enum ProjectFilterField { OrganisationId, Name, CreatedAt }
+pub enum ProjectFilterField { OrganisationId, Name, CreatedAt, CreatedBy }
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub enum WorkflowFilterField { Name, ProjectId }
 #[derive(CandidType, Deserialize, Clone, Debug)]
@@ -173,23 +173,37 @@ pub struct PaginationMetadata {
   pub page_number: PageNumber,
 }
 #[derive(CandidType, Deserialize)]
+pub struct PaginatedDocumentsResultOk (
+  pub Vec<Document>,pub PaginationMetadata,
+);
+#[derive(CandidType, Deserialize)]
 pub enum PaginatedDocumentsResult {
-  Ok(Vec<Document>,PaginationMetadata,),
+  Ok(PaginatedDocumentsResultOk),
   Err(AppError),
 }
+#[derive(CandidType, Deserialize)]
+pub struct PaginatedOrganisationsResultOk (
+  pub Vec<Organisation>,pub PaginationMetadata,
+);
 #[derive(CandidType, Deserialize)]
 pub enum PaginatedOrganisationsResult {
-  Ok(Vec<Organisation>,PaginationMetadata,),
+  Ok(PaginatedOrganisationsResultOk),
   Err(AppError),
 }
+#[derive(CandidType, Deserialize)]
+pub struct PaginatedProjectsResultOk (pub Vec<Project>,pub PaginationMetadata,);
 #[derive(CandidType, Deserialize)]
 pub enum PaginatedProjectsResult {
-  Ok(Vec<Project>,PaginationMetadata,),
+  Ok(PaginatedProjectsResultOk),
   Err(AppError),
 }
 #[derive(CandidType, Deserialize)]
+pub struct PaginatedRevisionsResultOk (
+  pub Vec<Revision>,pub PaginationMetadata,
+);
+#[derive(CandidType, Deserialize)]
 pub enum PaginatedRevisionsResult {
-  Ok(Vec<Revision>,PaginationMetadata,),
+  Ok(PaginatedRevisionsResultOk),
   Err(AppError),
 }
 #[derive(CandidType, Deserialize)]

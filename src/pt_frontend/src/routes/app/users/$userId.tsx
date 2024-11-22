@@ -1,18 +1,18 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { Card, CardHeader, CardTitle } from '@/components/ui/card';
-import { Icon } from '@/components/ui/Icon';
+import { createFileRoute } from '@tanstack/react-router'
+import { Card, CardHeader, CardTitle } from '@/components/ui/card'
+import { Icon } from '@/components/ui/Icon'
 
 export const Route = createFileRoute(
-  '/_authenticated/_onboarded/users/$userId',
+  '/_initialized/_authenticated/_onboarded/users/$userId',
 )({
   component: UserDetails,
   beforeLoad: () => ({
     getTitle: () => 'User',
   }),
   errorComponent: ({ error }) => {
-    return <div>Error: {error.message}</div>;
+    return <div>Error: {error.message}</div>
   },
-});
+})
 
 function UserDetails() {
   return (
@@ -28,5 +28,5 @@ function UserDetails() {
         </CardTitle>
       </CardHeader>
     </Card>
-  );
+  )
 }

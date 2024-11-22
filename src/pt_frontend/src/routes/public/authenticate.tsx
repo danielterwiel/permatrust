@@ -1,52 +1,52 @@
 import { z } from 'zod';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { Button } from '@/components/ui/button';
 import { Loading } from '@/components/Loading';
 
-const authenticateSearchSchema = zodSearchValidator(
-  z
-    .object({
-      redirect: z.string().optional(),
-    })
-    .optional(),
-);
+const authenticateSearchSchema = z
+  .object({
+    redirect: z.string().optional(),
+    error: z.boolean().optional(),
+  })
+  .optional();
 
-export const Route = createFileRoute('/authenticate')({
+export const Route = createFileRoute('/_initialized/authenticate')({
   component: Authenticate,
-  validateSearch: authenticateSearchSchema,
+  validateSearch: zodSearchValidator(authenticateSearchSchema),
+  loaderDeps: ({ search }) => ({
+    redirect: search?.redirect,
+    error: search?.error,
+  }),
+  beforeLoad: async ({ context, location }) => ({
+    getTitle: () => 'Authenticate',
+    location,
+    authActor: context.actors.auth,
+  }),
 });
 
 function Authenticate() {
-  const { auth } = Route.useRouteContext({
-    select: ({ auth }) => ({ auth }),
-  });
-  const search = Route.useSearch();
-  const navigate = Route.useNavigate();
   const [isAuthenticating, setIsAuthenticating] = useState(false);
+  const { authActor } = Route.useRouteContext();
+  const search = Route.useSearch();
+  // const navigate = Route.useNavigate();
 
-  const authenticate = async () => {
+  async function authenticate() {
+    // navigate({ search: { error: undefined }, replace: true });
     setIsAuthenticating(true);
-    await auth.initializeAuth();
+    authActor.send({ type: 'LOGIN' });
+  }
 
-    if (auth.isAuthenticated) {
-      navigate({
-        to: '/organisations',
-      });
-      return;
+  useEffect(() => {
+    if (search?.error) {
+      setIsAuthenticating(false);
     }
-    const result = await auth.login();
-
-    if (result) {
-      navigate({
-        to: search?.redirect ?? '/organisations',
-      });
-    }
-  };
+  }, [search?.error]);
 
   return (
     <div className="grid place-items-center min-h-dvh pb-36">
+      {search?.error && <div>Login interupted. Try again</div>}
       {isAuthenticating ? (
         <Button disabled={true}>
           <Loading text="Authenticating..." />

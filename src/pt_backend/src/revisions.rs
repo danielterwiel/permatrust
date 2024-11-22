@@ -18,6 +18,10 @@ pub fn get_next_revision_id() -> u64 {
     REVISIONS.with(|revisions| revisions.borrow().len() as u64)
 }
 
+fn get_revisions() -> Vec<Revision> {
+    REVISIONS.with(|revisions| revisions.borrow().values().cloned().collect())
+}
+
 pub fn insert_revision(revision_id: RevisionId, revision: Revision) {
     REVISIONS.with(|revisions| {
         revisions.borrow_mut().insert(revision_id, revision);
@@ -81,6 +85,24 @@ pub fn get_revisions_by_document_id(document_id: DocumentId) -> Result<Vec<Revis
         Err(AppError::EntityNotFound(
             "Document does not belong to the specified project".to_string(),
         ))
+    }
+}
+
+#[query]
+fn list_revisions(pagination: PaginationInput) -> PaginatedRevisionsResult {
+    let revisions = get_revisions();
+
+    match paginate(
+        &revisions,
+        pagination.page_size,
+        pagination.page_number,
+        pagination.filters.clone(),
+        pagination.sort.clone(),
+    ) {
+        Ok((paginated_revisions, pagination_metadata)) => {
+            PaginatedRevisionsResult::Ok(paginated_revisions, pagination_metadata)
+        }
+        Err(e) => PaginatedRevisionsResult::Err(e),
     }
 }
 

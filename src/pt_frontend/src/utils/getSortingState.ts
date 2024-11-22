@@ -2,8 +2,8 @@ import type { SortingState } from '@tanstack/react-table';
 
 export const getSortingState = (
   updater: SortingState | ((prev: SortingState) => SortingState),
-): SortingState =>
-  typeof updater === 'function'
+): SortingState => {
+  return typeof updater === 'function'
     ? updater([
         {
           desc: true,
@@ -11,3 +11,4 @@ export const getSortingState = (
         },
       ])
     : updater;
+};

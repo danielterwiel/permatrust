@@ -1,21 +1,17 @@
 import type { AuthClient } from '@dfinity/auth-client';
 import type { _SERVICE } from '@/declarations/pt_backend/pt_backend.did.d';
 
+import { isAppError } from '@/utils/isAppError';
 import { type ActorSubclass, HttpAgent } from '@dfinity/agent';
 import { createActor } from '@/declarations/pt_backend';
-import { router } from '@/router';
+import type {
+  CreateActorFn,
+  WrappedActor,
+  Result,
+  ResultHandler,
+} from '@/types/api';
 
-import type { AppError } from '@/declarations/pt_backend/pt_backend.did';
-
-type CreateActorFn = typeof createActor;
-
-export type ApiContext = {
-  call: WrappedActor<_SERVICE>;
-};
-
-export const api: ApiContext = {
-  call: {} as WrappedActor<_SERVICE>,
-};
+export let api = {} as WrappedActor<_SERVICE>;
 
 async function createAuthenticatedAgent(
   authClient: AuthClient,
@@ -49,7 +45,7 @@ async function wrapWithAuth<T extends ActorSubclass<_SERVICE>>(
     get(target, prop, receiver) {
       const original = Reflect.get(target, prop, receiver);
       if (typeof original === 'function') {
-        // biome-ignore lint/suspicious/noExplicitAny: types are defined inside declarations
+        // biome-ignore lint/suspicious/noExplicitAny: TODO: type
         return async (...args: any[]) => {
           if (!(await authClient.isAuthenticated())) {
             throw new Error('User is not authenticated');
@@ -62,34 +58,25 @@ async function wrapWithAuth<T extends ActorSubclass<_SERVICE>>(
   }) as T;
 }
 
-type Result<T> = { Ok: T } | { Err: AppError };
-
-type ErrorHandler<E> = (error: E) => void;
-
-type ResultHandler<T> = {
-  onOk?: (value: T) => void;
-  onErr?: ErrorHandler<AppError>;
-};
-
 export function handleResult<T>(
   result: Result<T>,
   handlers: ResultHandler<T> = {},
-): T | AppError {
+): T {
   if ('Ok' in result) {
     handlers.onOk?.(result.Ok);
     return result.Ok;
   }
   handlers.onErr?.(result.Err);
-  return result.Err;
+
+  if (isAppError(result.Err)) {
+    throw new Error(JSON.stringify(result.Err));
+  }
+
+  // This should never happen if types are correct, but TypeScript needs it
+  throw new Error('Unknown error occurred');
 }
 
-type WrappedActor<T> = {
-  [K in keyof T]: T[K] extends (...args: infer A) => Promise<Result<infer R>>
-    ? (...args: [...A, ResultHandler<R>?]) => Promise<R>
-    : T[K];
-};
-
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+// biome-ignore lint/suspicious/noExplicitAny: TODO: type
 function wrapActor<T extends Record<string, any>>(actor: T): WrappedActor<T> {
   const wrappedActor: Partial<WrappedActor<T>> = {};
 
@@ -97,9 +84,9 @@ function wrapActor<T extends Record<string, any>>(actor: T): WrappedActor<T> {
     const method = actor[key];
 
     if (typeof method === 'function') {
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      // biome-ignore lint/suspicious/noExplicitAny: TODO: type
       wrappedActor[key] = (async (...args: any[]) => {
-        // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+        // biome-ignore lint/suspicious/noExplicitAny: TODO: type
         let handlers: ResultHandler<any> | undefined;
         const lastArg = args[args.length - 1];
         if (
@@ -123,8 +110,12 @@ function wrapActor<T extends Record<string, any>>(actor: T): WrappedActor<T> {
 
 export async function createAuthenticatedActorWrapper(
   canisterId: string,
-  authClient: AuthClient,
+  authClient?: AuthClient,
 ): Promise<WrappedActor<_SERVICE>> {
+  if (!authClient) {
+    throw new Error('AuthClient not set');
+  }
+
   const actor = await createAuthenticatedActor(
     canisterId,
     createActor,
@@ -132,7 +123,6 @@ export async function createAuthenticatedActorWrapper(
   );
   const callWithAuth = await wrapWithAuth(actor, authClient);
   const wrappedCall = wrapActor(callWithAuth);
-  api.call = wrappedCall;
-  router.invalidate();
+  api = wrappedCall;
   return wrappedCall;
 }

@@ -1,20 +1,14 @@
-import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
-import { initializeAuthAndRedirect } from '@/utils/initializeAuthAndRedirect';
+import { waitFor } from 'xstate';
+import { createFileRoute, redirect, Outlet } from '@tanstack/react-router';
+import { Auth } from '@/auth';
 
-export const Route = createFileRoute('/_authenticated')({
+export const Route = createFileRoute('/_initialized/_authenticated')({
   component: AuthLayout,
-  beforeLoad: async ({ context, location }) => {
-    const defaultReturn = {
-      context,
-      getTitle: () => 'Home',
-    };
-
-    await initializeAuthAndRedirect(context, location);
-
-    return defaultReturn;
-  },
-  loader: ({ context }) => {
-    if (!context.auth.isAuthenticated) {
+  beforeLoad: async ({ context }) => {
+    const auth = Auth.getInstance();
+    const authActor = context.actors.auth;
+    await waitFor(authActor, (state) => state.matches('initialized'));
+    if (!(await auth.isAuthenticated())) {
       throw redirect({ to: '/authenticate' });
     }
   },

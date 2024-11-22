@@ -1,13 +1,24 @@
 import { z } from 'zod';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { api } from '@/api';
+import { createFileRoute } from '@tanstack/react-router';
+import { zodSearchValidator } from '@tanstack/router-zod-adapter';
+import { buildPaginationInput } from '@/utils/buildPaginationInput';
+import { buildFilterField } from '@/utils/buildFilterField';
+import { paginationInputSchema } from '@/schemas/pagination';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Icon } from '@/components/ui/Icon';
 import { Link } from '@/components/Link';
 import { Table } from '@/components/Table';
 import { FilterInput } from '@/components/FilterInput';
-import { buildPaginationInput } from '@/utils/buildPaginationInput';
-import { buildFilterField } from '@/utils/buildFilterField';
-import { paginationInputSchema } from '@/schemas/pagination';
+
+import { ENTITY, ENTITY_NAME } from '@/consts/entities';
+import {
+  DEFAULT_PAGINATION,
+  FILTER_FIELD,
+  FILTER_OPERATOR,
+  SORT_ORDER,
+} from '@/consts/pagination';
+
 import type { Row } from '@tanstack/react-table';
 import type {
   User,
@@ -16,13 +27,6 @@ import type {
   SortCriteria,
 } from '@/declarations/pt_backend/pt_backend.did';
 import type { FilterCriteria } from '@/types/pagination';
-import {
-  DEFAULT_PAGINATION,
-  FILTER_FIELD,
-  FILTER_OPERATOR,
-  SORT_ORDER,
-} from '@/consts/pagination';
-import { ENTITY, ENTITY_NAME } from '@/consts/entities';
 
 const DEFAULT_FILTERS: [FilterCriteria[]] = [
   [
@@ -42,9 +46,11 @@ const DEFAULT_SORT: [SortCriteria] = [
   },
 ];
 
-const usersSearchSchema = z.object({
-  pagination: paginationInputSchema.optional(),
-});
+const usersSearchSchema = z
+  .object({
+    pagination: paginationInputSchema.optional(),
+  })
+  .optional();
 
 const DEFAULT_USER_PAGINATION: PaginationInput = {
   page_number: DEFAULT_PAGINATION.page_number,
@@ -53,17 +59,17 @@ const DEFAULT_USER_PAGINATION: PaginationInput = {
   sort: DEFAULT_SORT,
 };
 
-export const Route = createFileRoute('/_authenticated/_onboarded/users/')({
+export const Route = createFileRoute(
+  '/_initialized/_authenticated/_onboarded/users/',
+)({
   component: Users,
-  validateSearch: (search) => usersSearchSchema.parse(search),
-  loaderDeps: ({ search: { pagination } }) => ({ pagination }),
-  loader: async ({ context, deps: { pagination } }) => {
-    const userPagination = buildPaginationInput(
-      DEFAULT_USER_PAGINATION,
-      pagination,
-    );
-    const [users, paginationMetaData] =
-      await context.api.call.list_users(userPagination);
+  validateSearch: zodSearchValidator(usersSearchSchema),
+  loaderDeps: ({ search }) => ({
+    pagination: search?.pagination ?? DEFAULT_USER_PAGINATION,
+  }),
+  loader: async ({ context, deps }) => {
+    const userPagination = buildPaginationInput(deps.pagination);
+    const [users, paginationMetaData] = await api.list_users(userPagination);
     return {
       context,
       users,
@@ -92,7 +98,7 @@ const RowActions = (row: Row<User>) => {
 
 function Users() {
   const { users, pagination, paginationMetaData } = Route.useLoaderData();
-  const navigate = useNavigate();
+  const navigate = Route.useNavigate();
 
   return (
     <>

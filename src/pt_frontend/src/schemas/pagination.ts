@@ -27,6 +27,7 @@ const projectFilterFieldSchema = z.union([
   z.object({ Name: z.null() }).strict(),
   z.object({ OrganisationId: z.null() }).strict(),
   z.object({ CreatedAt: z.null() }).strict(),
+  z.object({ CreatedBy: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiProjectFilterField>;
 const documentFilterFieldSchema = z.union([
   z.object({ Title: z.null() }).strict(),

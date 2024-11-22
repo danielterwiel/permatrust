@@ -5,7 +5,6 @@ pub mod pt_backend_generated;
 pub mod pt_backend_generated_traits;
 
 // general
-pub mod consts;
 pub mod env;
 
 // utils

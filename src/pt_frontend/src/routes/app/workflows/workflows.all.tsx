@@ -1,13 +1,15 @@
 import { z } from 'zod';
+import { api } from '@/api';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { buildPaginationInput } from '@/utils/buildPaginationInput';
+import { zodSearchValidator } from '@tanstack/router-zod-adapter';
+import { buildFilterField } from '@/utils/buildFilterField';
+import { paginationInputSchema } from '@/schemas/pagination';
 import { Table } from '@/components/Table';
 import { Icon } from '@/components/ui/Icon';
 import { Link } from '@/components/Link';
 import { FilterInput } from '@/components/FilterInput';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { buildPaginationInput } from '@/utils/buildPaginationInput';
-import { buildFilterField } from '@/utils/buildFilterField';
-import { paginationInputSchema } from '@/schemas/pagination';
 import type { Row } from '@tanstack/react-table';
 import type {
   Workflow,
@@ -53,17 +55,19 @@ const DEFAULT_WORKFLOW_PAGINATION: PaginationInput = {
   sort: DEFAULT_SORT,
 };
 
-export const Route = createFileRoute('/_authenticated/_onboarded/workflows/')({
+export const Route = createFileRoute(
+  '/_initialized/_authenticated/_onboarded/workflows/',
+)({
   component: Workflows,
-  validateSearch: (search) => workflowsSearchSchema.parse(search),
-  loaderDeps: ({ search: { pagination } }) => ({ pagination }),
-  loader: async ({ context, deps: { pagination } }) => {
-    const workflowPagination = buildPaginationInput(
-      DEFAULT_WORKFLOW_PAGINATION,
-      pagination,
-    );
+  validateSearch: zodSearchValidator(workflowsSearchSchema),
+  loaderDeps: ({ search }) => ({
+    pagination: search.pagination ?? DEFAULT_WORKFLOW_PAGINATION,
+  }),
+  loader: async ({ context, deps }) => {
+    const workflowPagination = buildPaginationInput(deps.pagination);
     const [workflows, paginationMetaData] =
-      await context.api.call.list_workflows(workflowPagination);
+      await api.list_workflows(workflowPagination);
+
     return {
       context,
       workflows,

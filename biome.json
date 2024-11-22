@@ -5,7 +5,7 @@
   "overrides": [
     {
       "include": [
-        "src/pt_frontend/**/*.{ts,tsx,js,jsx}"
+        "src/pt_frontend/**/*.{ts,tsx,js,jsx,json,md}"
       ]
     }
   ]

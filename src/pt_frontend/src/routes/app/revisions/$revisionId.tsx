@@ -1,30 +1,30 @@
-import { createFileRoute } from '@tanstack/react-router';
-import { MDXEditor, headingsPlugin } from '@mdxeditor/editor';
-import { Icon } from '@/components/ui/Icon';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { createFileRoute } from '@tanstack/react-router'
+import { api } from '@/api'
+import { MDXEditor, headingsPlugin } from '@mdxeditor/editor'
+import { Icon } from '@/components/ui/Icon'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
 export const Route = createFileRoute(
-  '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId',
+  '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId',
 )({
   component: RevisionDetails,
-  beforeLoad: () => ({
-    getTitle: () => 'Revision',
-  }),
-  loader: async ({ params: { revisionId }, context }) => {
-    const revision = await context.api.call.get_revision(BigInt(revisionId));
-    const active = {
-      ...context.active,
+  beforeLoad: async ({ params: { revisionId } }) => {
+    const revision = await api.get_revision(BigInt(revisionId))
+    return {
       revision,
-    };
-    return { revision, active };
+      getTitle: () => 'Revision',
+    }
   },
+  loader: ({ context }) => ({
+    revision: context.revision,
+  }),
   errorComponent: ({ error }) => {
-    return <div>Error: {error.message}</div>;
+    return <div>Error: {error.message}</div>
   },
-});
+})
 
 function RevisionDetails() {
-  const { revision, active } = Route.useLoaderData();
+  const { revision } = Route.useLoaderData()
 
   return (
     <Card>
@@ -35,7 +35,7 @@ function RevisionDetails() {
             size="lg"
             className="text-muted-foreground pb-1 mr-2"
           />
-          Revision #{active.revision?.version}
+          Revision #{revision?.version}
         </CardTitle>
       </CardHeader>
       <CardContent>
@@ -52,5 +52,5 @@ function RevisionDetails() {
         />
       </CardContent>
     </Card>
-  );
+  )
 }

@@ -1,10 +1,12 @@
+import { z } from 'zod';
+import { api } from '@/api';
+import { zodSearchValidator } from '@tanstack/router-zod-adapter';
+import { decodeUint8Array } from '@/utils/decodeUint8Array';
 import { useEffect } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import { z } from 'zod';
 import { MDXEditor, headingsPlugin, diffSourcePlugin } from '@mdxeditor/editor';
-import { decodeUint8Array } from '@/utils/decodeUint8Array';
 
-const RevisionSchema = z.object({
+const revisionSchema = z.object({
   id: z.bigint(),
   content: z.union([z.array(z.number()), z.instanceof(Uint8Array)]),
   version: z.number(),
@@ -19,15 +21,15 @@ const revisionSearchSchema = z.object({
 });
 
 export const Route = createFileRoute(
-  '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/diff',
+  '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/diff',
 )({
   component: RevisionDiff,
-  validateSearch: revisionSearchSchema,
+  validateSearch: zodSearchValidator(revisionSearchSchema),
   loaderDeps: ({ search: { current, theirs } }) => ({ current, theirs }),
-  loader: async ({ context, deps: { current, theirs } }) => {
-    const revisions = await context.api.call.diff_revisions(
-      BigInt(current),
-      BigInt(theirs),
+  loader: async ({ deps }) => {
+    const revisions = await api.diff_revisions(
+      BigInt(deps.current),
+      BigInt(deps.theirs),
     );
     return { revisions };
   },
@@ -41,7 +43,7 @@ function RevisionDiff() {
 
   useEffect(() => {
     try {
-      z.array(RevisionSchema).parse(revisions);
+      z.array(revisionSchema).parse(revisions);
     } catch (error) {
       console.error('Revision validation error:', error);
     }

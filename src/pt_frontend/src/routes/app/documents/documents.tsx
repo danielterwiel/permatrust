@@ -1,13 +1,15 @@
-import { Link } from '@/components/Link';
+import { z } from 'zod';
+import { api } from '@/api';
+import { buildFilterField } from '@/utils/buildFilterField';
+import { zodSearchValidator } from '@tanstack/router-zod-adapter';
+import { buildPaginationInput } from '@/utils/buildPaginationInput';
+import { paginationInputSchema } from '@/schemas/pagination';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { Link } from '@/components/Link';
 import { Table } from '@/components/Table';
 import { Icon } from '@/components/ui/Icon';
 import { FilterInput } from '@/components/FilterInput';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { buildPaginationInput } from '@/utils/buildPaginationInput';
-import { buildFilterField } from '@/utils/buildFilterField';
-import { paginationInputSchema } from '@/schemas/pagination';
-import { z } from 'zod';
 import type { Row } from '@tanstack/react-table';
 import type {
   Document,
@@ -16,6 +18,7 @@ import type {
   SortCriteria,
 } from '@/declarations/pt_backend/pt_backend.did';
 import type { FilterCriteria } from '@/types/pagination';
+
 import {
   DEFAULT_PAGINATION,
   FILTER_FIELD,
@@ -57,21 +60,21 @@ const DEFAULT_DOCUMENT_PAGINATION: PaginationInput = {
 };
 
 export const Route = createFileRoute(
-  '/_authenticated/_onboarded/projects/$projectId/documents/',
+  '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/',
 )({
   component: Documents,
-  validateSearch: (search) => documentsSearchSchema.parse(search),
-  loaderDeps: ({ search: { pagination } }) => ({ pagination }),
-  loader: async ({ context, params, deps: { pagination } }) => {
-    const documentPagination = buildPaginationInput(
-      DEFAULT_DOCUMENT_PAGINATION,
-      pagination,
-    );
+  validateSearch: zodSearchValidator(documentsSearchSchema),
+  loaderDeps: ({ search }) => ({
+    pagination: search.pagination ?? DEFAULT_DOCUMENT_PAGINATION,
+  }),
+  loader: async ({ context, params, deps }) => {
+    const documentPagination = buildPaginationInput(deps.pagination);
     const [documents, paginationMetaData] =
-      await context.api.call.list_documents_by_project_id(
+      await api.list_documents_by_project_id(
         BigInt(params.projectId),
         documentPagination,
       );
+
     return {
       context,
       documents,

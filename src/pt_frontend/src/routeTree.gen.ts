@@ -8,12 +8,16 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import { createFileRoute } from '@tanstack/react-router'
+
 // Import Routes
 
 import { Route as rootRoute } from './routes/root'
+import { Route as layoutsInitializedImport } from './routes/_layouts/_initialized'
+import { Route as publicHomeImport } from './routes/public/home'
+import { Route as publicUnauthorisedImport } from './routes/public/unauthorised'
 import { Route as publicAuthenticateImport } from './routes/public/authenticate'
 import { Route as layoutsAuthenticatedImport } from './routes/_layouts/_authenticated'
-import { Route as publicHomeImport } from './routes/public/home'
 import { Route as layoutsOnboardingImport } from './routes/_layouts/_onboarding'
 import { Route as layoutsOnboardedImport } from './routes/_layouts/_onboarded'
 import { Route as appWorkflowsWorkflowsindexImport } from './routes/app/workflows/workflows.index'
@@ -24,16 +28,19 @@ import { Route as appDocumentsDocumentsallImport } from './routes/app/documents/
 import { Route as appWorkflowsWorkflowIdindexImport } from './routes/app/workflows/$workflowId.index'
 import { Route as appProjectsProjectIdindexImport } from './routes/app/projects/$projectId.index'
 import { Route as appOrganisationsOrganisationIdindexImport } from './routes/app/organisations/$organisationId.index'
-import { Route as appUsersUserscreateImport } from './routes/app/users/users.create'
-import { Route as appOrganisationsOrganisationscreateImport } from './routes/app/organisations/organisations.create'
+import { Route as appOnboardingOnboardingindexImport } from './routes/app/onboarding/onboarding.index'
 import { Route as appWorkflowsWorkflowscreateImport } from './routes/app/workflows/workflows.create'
+import { Route as appUsersUserscreateImport } from './routes/app/users/users.create'
 import { Route as appUsersUserIdImport } from './routes/app/users/$userId'
 import { Route as appProjectsProjectscreateImport } from './routes/app/projects/projects.create'
+import { Route as appOrganisationsOrganisationscreateImport } from './routes/app/organisations/organisations.create'
 import { Route as appWorkflowsWorkflowsallImport } from './routes/app/workflows/workflows.all'
 import { Route as appUsersUsersallImport } from './routes/app/users/users.all'
 import { Route as appProjectsProjectsallImport } from './routes/app/projects/projects.all'
 import { Route as appOrganisationsOrganisationsallImport } from './routes/app/organisations/organisations.all'
 import { Route as appDocumentsDocumentsindexImport } from './routes/app/documents/documents.index'
+import { Route as appOnboardingUsersCreateImport } from './routes/app/onboarding/users-create'
+import { Route as appOnboardingOrganisationsCreateImport } from './routes/app/onboarding/organisations-create'
 import { Route as appWorkflowsWorkflowIdImport } from './routes/app/workflows/$workflowId'
 import { Route as appProjectsProjectIdImport } from './routes/app/projects/$projectId'
 import { Route as appOrganisationsOrganisationIdImport } from './routes/app/organisations/$organisationId'
@@ -46,16 +53,16 @@ import { Route as appRevisionsRevisionsdiffImport } from './routes/app/revisions
 import { Route as appRevisionsRevisionscreateImport } from './routes/app/revisions/revisions.create'
 import { Route as appRevisionsRevisionIdImport } from './routes/app/revisions/$revisionId'
 
+// Create Virtual Routes
+
+const Import = createFileRoute(
+  '/_initialized/_authenticated/_onboarding/onboarding',
+)()
+
 // Create/Update Routes
 
-const publicAuthenticateRoute = publicAuthenticateImport.update({
-  id: '/authenticate',
-  path: '/authenticate',
-  getParentRoute: () => rootRoute,
-} as any)
-
-const layoutsAuthenticatedRoute = layoutsAuthenticatedImport.update({
-  id: '/_authenticated',
+const layoutsInitializedRoute = layoutsInitializedImport.update({
+  id: '/_initialized',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -63,6 +70,23 @@ const publicHomeRoute = publicHomeImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRoute,
+} as any)
+
+const publicUnauthorisedRoute = publicUnauthorisedImport.update({
+  id: '/unauthorised',
+  path: '/unauthorised',
+  getParentRoute: () => layoutsInitializedRoute,
+} as any)
+
+const publicAuthenticateRoute = publicAuthenticateImport.update({
+  id: '/authenticate',
+  path: '/authenticate',
+  getParentRoute: () => layoutsInitializedRoute,
+} as any)
+
+const layoutsAuthenticatedRoute = layoutsAuthenticatedImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => layoutsInitializedRoute,
 } as any)
 
 const layoutsOnboardingRoute = layoutsOnboardingImport.update({
@@ -102,6 +126,12 @@ const appOrganisationsOrganisationsindexRoute =
     getParentRoute: () => layoutsOnboardedRoute,
   } as any)
 
+const Route = Import.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => layoutsOnboardingRoute,
+} as any)
+
 const appDocumentsDocumentsallRoute = appDocumentsDocumentsallImport.update({
   id: '/documents',
   path: '/documents',
@@ -128,17 +158,11 @@ const appOrganisationsOrganisationIdindexRoute =
     getParentRoute: () => appOrganisationsOrganisationsindexRoute,
   } as any)
 
-const appUsersUserscreateRoute = appUsersUserscreateImport.update({
-  id: '/users/create',
-  path: '/users/create',
-  getParentRoute: () => layoutsOnboardingRoute,
-} as any)
-
-const appOrganisationsOrganisationscreateRoute =
-  appOrganisationsOrganisationscreateImport.update({
-    id: '/organisations/create',
-    path: '/organisations/create',
-    getParentRoute: () => layoutsOnboardingRoute,
+const appOnboardingOnboardingindexRoute =
+  appOnboardingOnboardingindexImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => Route,
   } as any)
 
 const appWorkflowsWorkflowscreateRoute =
@@ -147,6 +171,12 @@ const appWorkflowsWorkflowscreateRoute =
     path: '/create',
     getParentRoute: () => appWorkflowsWorkflowsindexRoute,
   } as any)
+
+const appUsersUserscreateRoute = appUsersUserscreateImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => appUsersUsersindexRoute,
+} as any)
 
 const appUsersUserIdRoute = appUsersUserIdImport.update({
   id: '/$userId',
@@ -159,6 +189,13 @@ const appProjectsProjectscreateRoute = appProjectsProjectscreateImport.update({
   path: '/create',
   getParentRoute: () => appProjectsProjectsindexRoute,
 } as any)
+
+const appOrganisationsOrganisationscreateRoute =
+  appOrganisationsOrganisationscreateImport.update({
+    id: '/create',
+    path: '/create',
+    getParentRoute: () => appOrganisationsOrganisationsindexRoute,
+  } as any)
 
 const appWorkflowsWorkflowsallRoute = appWorkflowsWorkflowsallImport.update({
   id: '/',
@@ -192,6 +229,19 @@ const appDocumentsDocumentsindexRoute = appDocumentsDocumentsindexImport.update(
     getParentRoute: () => appProjectsProjectIdindexRoute,
   } as any,
 )
+
+const appOnboardingUsersCreateRoute = appOnboardingUsersCreateImport.update({
+  id: '/users/create',
+  path: '/users/create',
+  getParentRoute: () => Route,
+} as any)
+
+const appOnboardingOrganisationsCreateRoute =
+  appOnboardingOrganisationsCreateImport.update({
+    id: '/organisations/create',
+    path: '/organisations/create',
+    getParentRoute: () => Route,
+  } as any)
 
 const appWorkflowsWorkflowIdRoute = appWorkflowsWorkflowIdImport.update({
   id: '/',
@@ -276,232 +326,274 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof publicHomeImport
       parentRoute: typeof rootRoute
     }
-    '/_authenticated': {
-      id: '/_authenticated'
+    '/_initialized': {
+      id: '/_initialized'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof layoutsInitializedImport
+      parentRoute: typeof rootRoute
+    }
+    '/_initialized/_authenticated': {
+      id: '/_initialized/_authenticated'
       path: ''
       fullPath: ''
       preLoaderRoute: typeof layoutsAuthenticatedImport
-      parentRoute: typeof rootRoute
+      parentRoute: typeof layoutsInitializedImport
     }
-    '/authenticate': {
-      id: '/authenticate'
+    '/_initialized/authenticate': {
+      id: '/_initialized/authenticate'
       path: '/authenticate'
       fullPath: '/authenticate'
       preLoaderRoute: typeof publicAuthenticateImport
-      parentRoute: typeof rootRoute
+      parentRoute: typeof layoutsInitializedImport
     }
-    '/_authenticated/_onboarded': {
-      id: '/_authenticated/_onboarded'
+    '/_initialized/unauthorised': {
+      id: '/_initialized/unauthorised'
+      path: '/unauthorised'
+      fullPath: '/unauthorised'
+      preLoaderRoute: typeof publicUnauthorisedImport
+      parentRoute: typeof layoutsInitializedImport
+    }
+    '/_initialized/_authenticated/_onboarded': {
+      id: '/_initialized/_authenticated/_onboarded'
       path: ''
       fullPath: ''
       preLoaderRoute: typeof layoutsOnboardedImport
       parentRoute: typeof layoutsAuthenticatedImport
     }
-    '/_authenticated/_onboarding': {
-      id: '/_authenticated/_onboarding'
+    '/_initialized/_authenticated/_onboarding': {
+      id: '/_initialized/_authenticated/_onboarding'
       path: ''
       fullPath: ''
       preLoaderRoute: typeof layoutsOnboardingImport
       parentRoute: typeof layoutsAuthenticatedImport
     }
-    '/_authenticated/_onboarded/documents': {
-      id: '/_authenticated/_onboarded/documents'
+    '/_initialized/_authenticated/_onboarded/documents': {
+      id: '/_initialized/_authenticated/_onboarded/documents'
       path: '/documents'
       fullPath: '/documents'
       preLoaderRoute: typeof appDocumentsDocumentsallImport
       parentRoute: typeof layoutsOnboardedImport
     }
-    '/_authenticated/_onboarded/organisations': {
-      id: '/_authenticated/_onboarded/organisations'
+    '/_initialized/_authenticated/_onboarding/onboarding': {
+      id: '/_initialized/_authenticated/_onboarding/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof Import
+      parentRoute: typeof layoutsOnboardingImport
+    }
+    '/_initialized/_authenticated/_onboarded/organisations': {
+      id: '/_initialized/_authenticated/_onboarded/organisations'
       path: '/organisations'
       fullPath: '/organisations'
       preLoaderRoute: typeof appOrganisationsOrganisationsindexImport
       parentRoute: typeof layoutsOnboardedImport
     }
-    '/_authenticated/_onboarded/projects': {
-      id: '/_authenticated/_onboarded/projects'
+    '/_initialized/_authenticated/_onboarded/projects': {
+      id: '/_initialized/_authenticated/_onboarded/projects'
       path: '/projects'
       fullPath: '/projects'
       preLoaderRoute: typeof appProjectsProjectsindexImport
       parentRoute: typeof layoutsOnboardedImport
     }
-    '/_authenticated/_onboarded/users': {
-      id: '/_authenticated/_onboarded/users'
+    '/_initialized/_authenticated/_onboarded/users': {
+      id: '/_initialized/_authenticated/_onboarded/users'
       path: '/users'
       fullPath: '/users'
       preLoaderRoute: typeof appUsersUsersindexImport
       parentRoute: typeof layoutsOnboardedImport
     }
-    '/_authenticated/_onboarded/workflows': {
-      id: '/_authenticated/_onboarded/workflows'
+    '/_initialized/_authenticated/_onboarded/workflows': {
+      id: '/_initialized/_authenticated/_onboarded/workflows'
       path: '/workflows'
       fullPath: '/workflows'
       preLoaderRoute: typeof appWorkflowsWorkflowsindexImport
       parentRoute: typeof layoutsOnboardedImport
     }
-    '/_authenticated/_onboarded/organisations/': {
-      id: '/_authenticated/_onboarded/organisations/'
+    '/_initialized/_authenticated/_onboarded/organisations/': {
+      id: '/_initialized/_authenticated/_onboarded/organisations/'
       path: '/'
       fullPath: '/organisations/'
       preLoaderRoute: typeof appOrganisationsOrganisationsallImport
       parentRoute: typeof appOrganisationsOrganisationsindexImport
     }
-    '/_authenticated/_onboarded/projects/': {
-      id: '/_authenticated/_onboarded/projects/'
+    '/_initialized/_authenticated/_onboarded/projects/': {
+      id: '/_initialized/_authenticated/_onboarded/projects/'
       path: '/'
       fullPath: '/projects/'
       preLoaderRoute: typeof appProjectsProjectsallImport
       parentRoute: typeof appProjectsProjectsindexImport
     }
-    '/_authenticated/_onboarded/users/': {
-      id: '/_authenticated/_onboarded/users/'
+    '/_initialized/_authenticated/_onboarded/users/': {
+      id: '/_initialized/_authenticated/_onboarded/users/'
       path: '/'
       fullPath: '/users/'
       preLoaderRoute: typeof appUsersUsersallImport
       parentRoute: typeof appUsersUsersindexImport
     }
-    '/_authenticated/_onboarded/workflows/': {
-      id: '/_authenticated/_onboarded/workflows/'
+    '/_initialized/_authenticated/_onboarded/workflows/': {
+      id: '/_initialized/_authenticated/_onboarded/workflows/'
       path: '/'
       fullPath: '/workflows/'
       preLoaderRoute: typeof appWorkflowsWorkflowsallImport
       parentRoute: typeof appWorkflowsWorkflowsindexImport
     }
-    '/_authenticated/_onboarded/projects/create': {
-      id: '/_authenticated/_onboarded/projects/create'
+    '/_initialized/_authenticated/_onboarded/organisations/create': {
+      id: '/_initialized/_authenticated/_onboarded/organisations/create'
+      path: '/create'
+      fullPath: '/organisations/create'
+      preLoaderRoute: typeof appOrganisationsOrganisationscreateImport
+      parentRoute: typeof appOrganisationsOrganisationsindexImport
+    }
+    '/_initialized/_authenticated/_onboarded/projects/create': {
+      id: '/_initialized/_authenticated/_onboarded/projects/create'
       path: '/create'
       fullPath: '/projects/create'
       preLoaderRoute: typeof appProjectsProjectscreateImport
       parentRoute: typeof appProjectsProjectsindexImport
     }
-    '/_authenticated/_onboarded/users/$userId': {
-      id: '/_authenticated/_onboarded/users/$userId'
+    '/_initialized/_authenticated/_onboarded/users/$userId': {
+      id: '/_initialized/_authenticated/_onboarded/users/$userId'
       path: '/$userId'
       fullPath: '/users/$userId'
       preLoaderRoute: typeof appUsersUserIdImport
       parentRoute: typeof appUsersUsersindexImport
     }
-    '/_authenticated/_onboarded/workflows/create': {
-      id: '/_authenticated/_onboarded/workflows/create'
+    '/_initialized/_authenticated/_onboarded/users/create': {
+      id: '/_initialized/_authenticated/_onboarded/users/create'
+      path: '/create'
+      fullPath: '/users/create'
+      preLoaderRoute: typeof appUsersUserscreateImport
+      parentRoute: typeof appUsersUsersindexImport
+    }
+    '/_initialized/_authenticated/_onboarded/workflows/create': {
+      id: '/_initialized/_authenticated/_onboarded/workflows/create'
       path: '/create'
       fullPath: '/workflows/create'
       preLoaderRoute: typeof appWorkflowsWorkflowscreateImport
       parentRoute: typeof appWorkflowsWorkflowsindexImport
     }
-    '/_authenticated/_onboarding/organisations/create': {
-      id: '/_authenticated/_onboarding/organisations/create'
-      path: '/organisations/create'
-      fullPath: '/organisations/create'
-      preLoaderRoute: typeof appOrganisationsOrganisationscreateImport
-      parentRoute: typeof layoutsOnboardingImport
+    '/_initialized/_authenticated/_onboarding/onboarding/': {
+      id: '/_initialized/_authenticated/_onboarding/onboarding/'
+      path: '/'
+      fullPath: '/onboarding/'
+      preLoaderRoute: typeof appOnboardingOnboardingindexImport
+      parentRoute: typeof rootRoute
     }
-    '/_authenticated/_onboarding/users/create': {
-      id: '/_authenticated/_onboarding/users/create'
-      path: '/users/create'
-      fullPath: '/users/create'
-      preLoaderRoute: typeof appUsersUserscreateImport
-      parentRoute: typeof layoutsOnboardingImport
-    }
-    '/_authenticated/_onboarded/organisations/$organisationId': {
-      id: '/_authenticated/_onboarded/organisations/$organisationId'
+    '/_initialized/_authenticated/_onboarded/organisations/$organisationId': {
+      id: '/_initialized/_authenticated/_onboarded/organisations/$organisationId'
       path: '/$organisationId'
       fullPath: '/organisations/$organisationId'
       preLoaderRoute: typeof appOrganisationsOrganisationIdindexImport
       parentRoute: typeof appOrganisationsOrganisationsindexImport
     }
-    '/_authenticated/_onboarded/projects/$projectId': {
-      id: '/_authenticated/_onboarded/projects/$projectId'
+    '/_initialized/_authenticated/_onboarded/projects/$projectId': {
+      id: '/_initialized/_authenticated/_onboarded/projects/$projectId'
       path: '/$projectId'
       fullPath: '/projects/$projectId'
       preLoaderRoute: typeof appProjectsProjectIdindexImport
       parentRoute: typeof appProjectsProjectsindexImport
     }
-    '/_authenticated/_onboarded/workflows/$workflowId': {
-      id: '/_authenticated/_onboarded/workflows/$workflowId'
+    '/_initialized/_authenticated/_onboarded/workflows/$workflowId': {
+      id: '/_initialized/_authenticated/_onboarded/workflows/$workflowId'
       path: '/$workflowId'
       fullPath: '/workflows/$workflowId'
       preLoaderRoute: typeof appWorkflowsWorkflowIdindexImport
       parentRoute: typeof appWorkflowsWorkflowsindexImport
     }
-    '/_authenticated/_onboarded/organisations/$organisationId/': {
-      id: '/_authenticated/_onboarded/organisations/$organisationId/'
+    '/_initialized/_authenticated/_onboarded/organisations/$organisationId/': {
+      id: '/_initialized/_authenticated/_onboarded/organisations/$organisationId/'
       path: '/'
       fullPath: '/organisations/$organisationId/'
       preLoaderRoute: typeof appOrganisationsOrganisationIdImport
       parentRoute: typeof appOrganisationsOrganisationIdindexImport
     }
-    '/_authenticated/_onboarded/projects/$projectId/': {
-      id: '/_authenticated/_onboarded/projects/$projectId/'
+    '/_initialized/_authenticated/_onboarded/projects/$projectId/': {
+      id: '/_initialized/_authenticated/_onboarded/projects/$projectId/'
       path: '/'
       fullPath: '/projects/$projectId/'
       preLoaderRoute: typeof appProjectsProjectIdImport
       parentRoute: typeof appProjectsProjectIdindexImport
     }
-    '/_authenticated/_onboarded/workflows/$workflowId/': {
-      id: '/_authenticated/_onboarded/workflows/$workflowId/'
+    '/_initialized/_authenticated/_onboarded/workflows/$workflowId/': {
+      id: '/_initialized/_authenticated/_onboarded/workflows/$workflowId/'
       path: '/'
       fullPath: '/workflows/$workflowId/'
       preLoaderRoute: typeof appWorkflowsWorkflowIdImport
       parentRoute: typeof appWorkflowsWorkflowIdindexImport
     }
-    '/_authenticated/_onboarded/projects/$projectId/documents': {
-      id: '/_authenticated/_onboarded/projects/$projectId/documents'
+    '/_initialized/_authenticated/_onboarding/onboarding/organisations/create': {
+      id: '/_initialized/_authenticated/_onboarding/onboarding/organisations/create'
+      path: '/organisations/create'
+      fullPath: '/onboarding/organisations/create'
+      preLoaderRoute: typeof appOnboardingOrganisationsCreateImport
+      parentRoute: typeof rootRoute
+    }
+    '/_initialized/_authenticated/_onboarding/onboarding/users/create': {
+      id: '/_initialized/_authenticated/_onboarding/onboarding/users/create'
+      path: '/users/create'
+      fullPath: '/onboarding/users/create'
+      preLoaderRoute: typeof appOnboardingUsersCreateImport
+      parentRoute: typeof rootRoute
+    }
+    '/_initialized/_authenticated/_onboarded/projects/$projectId/documents': {
+      id: '/_initialized/_authenticated/_onboarded/projects/$projectId/documents'
       path: '/documents'
       fullPath: '/projects/$projectId/documents'
       preLoaderRoute: typeof appDocumentsDocumentsindexImport
       parentRoute: typeof appProjectsProjectIdindexImport
     }
-    '/_authenticated/_onboarded/projects/$projectId/documents/': {
-      id: '/_authenticated/_onboarded/projects/$projectId/documents/'
+    '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/': {
+      id: '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/'
       path: '/'
       fullPath: '/projects/$projectId/documents/'
       preLoaderRoute: typeof appDocumentsDocumentsImport
       parentRoute: typeof appDocumentsDocumentsindexImport
     }
-    '/_authenticated/_onboarded/projects/$projectId/documents/create': {
-      id: '/_authenticated/_onboarded/projects/$projectId/documents/create'
+    '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/create': {
+      id: '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/create'
       path: '/create'
       fullPath: '/projects/$projectId/documents/create'
       preLoaderRoute: typeof appDocumentsDocumentscreateImport
       parentRoute: typeof appDocumentsDocumentsindexImport
     }
-    '/_authenticated/_onboarded/projects/$projectId/documents/$documentId': {
-      id: '/_authenticated/_onboarded/projects/$projectId/documents/$documentId'
+    '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId': {
+      id: '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId'
       path: '/$documentId'
       fullPath: '/projects/$projectId/documents/$documentId'
       preLoaderRoute: typeof appDocumentsDocumentIdindexImport
       parentRoute: typeof appDocumentsDocumentsindexImport
     }
-    '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/': {
-      id: '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/'
+    '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/': {
+      id: '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/'
       path: '/'
       fullPath: '/projects/$projectId/documents/$documentId/'
       preLoaderRoute: typeof appDocumentsDocumentIdImport
       parentRoute: typeof appDocumentsDocumentIdindexImport
     }
-    '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions': {
-      id: '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions'
+    '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions': {
+      id: '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions'
       path: '/revisions'
       fullPath: '/projects/$projectId/documents/$documentId/revisions'
       preLoaderRoute: typeof appRevisionsRevisionsindexImport
       parentRoute: typeof appDocumentsDocumentIdindexImport
     }
-    '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId': {
-      id: '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId'
+    '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId': {
+      id: '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId'
       path: '/$revisionId'
       fullPath: '/projects/$projectId/documents/$documentId/revisions/$revisionId'
       preLoaderRoute: typeof appRevisionsRevisionIdImport
       parentRoute: typeof appRevisionsRevisionsindexImport
     }
-    '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/create': {
-      id: '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/create'
+    '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/create': {
+      id: '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/create'
       path: '/create'
       fullPath: '/projects/$projectId/documents/$documentId/revisions/create'
       preLoaderRoute: typeof appRevisionsRevisionscreateImport
       parentRoute: typeof appRevisionsRevisionsindexImport
     }
-    '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/diff': {
-      id: '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/diff'
+    '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/diff': {
+      id: '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/diff'
       path: '/diff'
       fullPath: '/projects/$projectId/documents/$documentId/revisions/diff'
       preLoaderRoute: typeof appRevisionsRevisionsdiffImport
@@ -528,6 +620,7 @@ const appOrganisationsOrganisationIdindexRouteWithChildren =
 
 interface appOrganisationsOrganisationsindexRouteChildren {
   appOrganisationsOrganisationsallRoute: typeof appOrganisationsOrganisationsallRoute
+  appOrganisationsOrganisationscreateRoute: typeof appOrganisationsOrganisationscreateRoute
   appOrganisationsOrganisationIdindexRoute: typeof appOrganisationsOrganisationIdindexRouteWithChildren
 }
 
@@ -535,6 +628,8 @@ const appOrganisationsOrganisationsindexRouteChildren: appOrganisationsOrganisat
   {
     appOrganisationsOrganisationsallRoute:
       appOrganisationsOrganisationsallRoute,
+    appOrganisationsOrganisationscreateRoute:
+      appOrganisationsOrganisationscreateRoute,
     appOrganisationsOrganisationIdindexRoute:
       appOrganisationsOrganisationIdindexRouteWithChildren,
   }
@@ -636,11 +731,13 @@ const appProjectsProjectsindexRouteWithChildren =
 interface appUsersUsersindexRouteChildren {
   appUsersUsersallRoute: typeof appUsersUsersallRoute
   appUsersUserIdRoute: typeof appUsersUserIdRoute
+  appUsersUserscreateRoute: typeof appUsersUserscreateRoute
 }
 
 const appUsersUsersindexRouteChildren: appUsersUsersindexRouteChildren = {
   appUsersUsersallRoute: appUsersUsersallRoute,
   appUsersUserIdRoute: appUsersUserIdRoute,
+  appUsersUserscreateRoute: appUsersUserscreateRoute,
 }
 
 const appUsersUsersindexRouteWithChildren =
@@ -699,15 +796,26 @@ const layoutsOnboardedRouteChildren: layoutsOnboardedRouteChildren = {
 const layoutsOnboardedRouteWithChildren =
   layoutsOnboardedRoute._addFileChildren(layoutsOnboardedRouteChildren)
 
+interface RouteChildren {
+  appOnboardingOnboardingindexRoute: typeof appOnboardingOnboardingindexRoute
+  appOnboardingOrganisationsCreateRoute: typeof appOnboardingOrganisationsCreateRoute
+  appOnboardingUsersCreateRoute: typeof appOnboardingUsersCreateRoute
+}
+
+const RouteChildren: RouteChildren = {
+  appOnboardingOnboardingindexRoute: appOnboardingOnboardingindexRoute,
+  appOnboardingOrganisationsCreateRoute: appOnboardingOrganisationsCreateRoute,
+  appOnboardingUsersCreateRoute: appOnboardingUsersCreateRoute,
+}
+
+const RouteWithChildren = Route._addFileChildren(RouteChildren)
+
 interface layoutsOnboardingRouteChildren {
-  appOrganisationsOrganisationscreateRoute: typeof appOrganisationsOrganisationscreateRoute
-  appUsersUserscreateRoute: typeof appUsersUserscreateRoute
+  Route: typeof RouteWithChildren
 }
 
 const layoutsOnboardingRouteChildren: layoutsOnboardingRouteChildren = {
-  appOrganisationsOrganisationscreateRoute:
-    appOrganisationsOrganisationscreateRoute,
-  appUsersUserscreateRoute: appUsersUserscreateRoute,
+  Route: RouteWithChildren,
 }
 
 const layoutsOnboardingRouteWithChildren =
@@ -726,11 +834,28 @@ const layoutsAuthenticatedRouteChildren: layoutsAuthenticatedRouteChildren = {
 const layoutsAuthenticatedRouteWithChildren =
   layoutsAuthenticatedRoute._addFileChildren(layoutsAuthenticatedRouteChildren)
 
+interface layoutsInitializedRouteChildren {
+  layoutsAuthenticatedRoute: typeof layoutsAuthenticatedRouteWithChildren
+  publicAuthenticateRoute: typeof publicAuthenticateRoute
+  publicUnauthorisedRoute: typeof publicUnauthorisedRoute
+}
+
+const layoutsInitializedRouteChildren: layoutsInitializedRouteChildren = {
+  layoutsAuthenticatedRoute: layoutsAuthenticatedRouteWithChildren,
+  publicAuthenticateRoute: publicAuthenticateRoute,
+  publicUnauthorisedRoute: publicUnauthorisedRoute,
+}
+
+const layoutsInitializedRouteWithChildren =
+  layoutsInitializedRoute._addFileChildren(layoutsInitializedRouteChildren)
+
 export interface FileRoutesByFullPath {
   '/': typeof publicHomeRoute
   '': typeof layoutsOnboardingRouteWithChildren
   '/authenticate': typeof publicAuthenticateRoute
+  '/unauthorised': typeof publicUnauthorisedRoute
   '/documents': typeof appDocumentsDocumentsallRoute
+  '/onboarding': typeof RouteWithChildren
   '/organisations': typeof appOrganisationsOrganisationsindexRouteWithChildren
   '/projects': typeof appProjectsProjectsindexRouteWithChildren
   '/users': typeof appUsersUsersindexRouteWithChildren
@@ -739,17 +864,20 @@ export interface FileRoutesByFullPath {
   '/projects/': typeof appProjectsProjectsallRoute
   '/users/': typeof appUsersUsersallRoute
   '/workflows/': typeof appWorkflowsWorkflowsallRoute
+  '/organisations/create': typeof appOrganisationsOrganisationscreateRoute
   '/projects/create': typeof appProjectsProjectscreateRoute
   '/users/$userId': typeof appUsersUserIdRoute
-  '/workflows/create': typeof appWorkflowsWorkflowscreateRoute
-  '/organisations/create': typeof appOrganisationsOrganisationscreateRoute
   '/users/create': typeof appUsersUserscreateRoute
+  '/workflows/create': typeof appWorkflowsWorkflowscreateRoute
+  '/onboarding/': typeof appOnboardingOnboardingindexRoute
   '/organisations/$organisationId': typeof appOrganisationsOrganisationIdindexRouteWithChildren
   '/projects/$projectId': typeof appProjectsProjectIdindexRouteWithChildren
   '/workflows/$workflowId': typeof appWorkflowsWorkflowIdindexRouteWithChildren
   '/organisations/$organisationId/': typeof appOrganisationsOrganisationIdRoute
   '/projects/$projectId/': typeof appProjectsProjectIdRoute
   '/workflows/$workflowId/': typeof appWorkflowsWorkflowIdRoute
+  '/onboarding/organisations/create': typeof appOnboardingOrganisationsCreateRoute
+  '/onboarding/users/create': typeof appOnboardingUsersCreateRoute
   '/projects/$projectId/documents': typeof appDocumentsDocumentsindexRouteWithChildren
   '/projects/$projectId/documents/': typeof appDocumentsDocumentsRoute
   '/projects/$projectId/documents/create': typeof appDocumentsDocumentscreateRoute
@@ -765,19 +893,23 @@ export interface FileRoutesByTo {
   '/': typeof publicHomeRoute
   '': typeof layoutsOnboardingRouteWithChildren
   '/authenticate': typeof publicAuthenticateRoute
+  '/unauthorised': typeof publicUnauthorisedRoute
   '/documents': typeof appDocumentsDocumentsallRoute
   '/organisations': typeof appOrganisationsOrganisationsallRoute
   '/projects': typeof appProjectsProjectsallRoute
   '/users': typeof appUsersUsersallRoute
   '/workflows': typeof appWorkflowsWorkflowsallRoute
+  '/organisations/create': typeof appOrganisationsOrganisationscreateRoute
   '/projects/create': typeof appProjectsProjectscreateRoute
   '/users/$userId': typeof appUsersUserIdRoute
-  '/workflows/create': typeof appWorkflowsWorkflowscreateRoute
-  '/organisations/create': typeof appOrganisationsOrganisationscreateRoute
   '/users/create': typeof appUsersUserscreateRoute
+  '/workflows/create': typeof appWorkflowsWorkflowscreateRoute
+  '/onboarding': typeof appOnboardingOnboardingindexRoute
   '/organisations/$organisationId': typeof appOrganisationsOrganisationIdRoute
   '/projects/$projectId': typeof appProjectsProjectIdRoute
   '/workflows/$workflowId': typeof appWorkflowsWorkflowIdRoute
+  '/onboarding/organisations/create': typeof appOnboardingOrganisationsCreateRoute
+  '/onboarding/users/create': typeof appOnboardingUsersCreateRoute
   '/projects/$projectId/documents': typeof appDocumentsDocumentsRoute
   '/projects/$projectId/documents/create': typeof appDocumentsDocumentscreateRoute
   '/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentIdRoute
@@ -790,39 +922,45 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof publicHomeRoute
-  '/_authenticated': typeof layoutsAuthenticatedRouteWithChildren
-  '/authenticate': typeof publicAuthenticateRoute
-  '/_authenticated/_onboarded': typeof layoutsOnboardedRouteWithChildren
-  '/_authenticated/_onboarding': typeof layoutsOnboardingRouteWithChildren
-  '/_authenticated/_onboarded/documents': typeof appDocumentsDocumentsallRoute
-  '/_authenticated/_onboarded/organisations': typeof appOrganisationsOrganisationsindexRouteWithChildren
-  '/_authenticated/_onboarded/projects': typeof appProjectsProjectsindexRouteWithChildren
-  '/_authenticated/_onboarded/users': typeof appUsersUsersindexRouteWithChildren
-  '/_authenticated/_onboarded/workflows': typeof appWorkflowsWorkflowsindexRouteWithChildren
-  '/_authenticated/_onboarded/organisations/': typeof appOrganisationsOrganisationsallRoute
-  '/_authenticated/_onboarded/projects/': typeof appProjectsProjectsallRoute
-  '/_authenticated/_onboarded/users/': typeof appUsersUsersallRoute
-  '/_authenticated/_onboarded/workflows/': typeof appWorkflowsWorkflowsallRoute
-  '/_authenticated/_onboarded/projects/create': typeof appProjectsProjectscreateRoute
-  '/_authenticated/_onboarded/users/$userId': typeof appUsersUserIdRoute
-  '/_authenticated/_onboarded/workflows/create': typeof appWorkflowsWorkflowscreateRoute
-  '/_authenticated/_onboarding/organisations/create': typeof appOrganisationsOrganisationscreateRoute
-  '/_authenticated/_onboarding/users/create': typeof appUsersUserscreateRoute
-  '/_authenticated/_onboarded/organisations/$organisationId': typeof appOrganisationsOrganisationIdindexRouteWithChildren
-  '/_authenticated/_onboarded/projects/$projectId': typeof appProjectsProjectIdindexRouteWithChildren
-  '/_authenticated/_onboarded/workflows/$workflowId': typeof appWorkflowsWorkflowIdindexRouteWithChildren
-  '/_authenticated/_onboarded/organisations/$organisationId/': typeof appOrganisationsOrganisationIdRoute
-  '/_authenticated/_onboarded/projects/$projectId/': typeof appProjectsProjectIdRoute
-  '/_authenticated/_onboarded/workflows/$workflowId/': typeof appWorkflowsWorkflowIdRoute
-  '/_authenticated/_onboarded/projects/$projectId/documents': typeof appDocumentsDocumentsindexRouteWithChildren
-  '/_authenticated/_onboarded/projects/$projectId/documents/': typeof appDocumentsDocumentsRoute
-  '/_authenticated/_onboarded/projects/$projectId/documents/create': typeof appDocumentsDocumentscreateRoute
-  '/_authenticated/_onboarded/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentIdindexRouteWithChildren
-  '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/': typeof appDocumentsDocumentIdRoute
-  '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions': typeof appRevisionsRevisionsindexRouteWithChildren
-  '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId': typeof appRevisionsRevisionIdRoute
-  '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/create': typeof appRevisionsRevisionscreateRoute
-  '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/diff': typeof appRevisionsRevisionsdiffRoute
+  '/_initialized': typeof layoutsInitializedRouteWithChildren
+  '/_initialized/_authenticated': typeof layoutsAuthenticatedRouteWithChildren
+  '/_initialized/authenticate': typeof publicAuthenticateRoute
+  '/_initialized/unauthorised': typeof publicUnauthorisedRoute
+  '/_initialized/_authenticated/_onboarded': typeof layoutsOnboardedRouteWithChildren
+  '/_initialized/_authenticated/_onboarding': typeof layoutsOnboardingRouteWithChildren
+  '/_initialized/_authenticated/_onboarded/documents': typeof appDocumentsDocumentsallRoute
+  '/_initialized/_authenticated/_onboarding/onboarding': typeof RouteWithChildren
+  '/_initialized/_authenticated/_onboarded/organisations': typeof appOrganisationsOrganisationsindexRouteWithChildren
+  '/_initialized/_authenticated/_onboarded/projects': typeof appProjectsProjectsindexRouteWithChildren
+  '/_initialized/_authenticated/_onboarded/users': typeof appUsersUsersindexRouteWithChildren
+  '/_initialized/_authenticated/_onboarded/workflows': typeof appWorkflowsWorkflowsindexRouteWithChildren
+  '/_initialized/_authenticated/_onboarded/organisations/': typeof appOrganisationsOrganisationsallRoute
+  '/_initialized/_authenticated/_onboarded/projects/': typeof appProjectsProjectsallRoute
+  '/_initialized/_authenticated/_onboarded/users/': typeof appUsersUsersallRoute
+  '/_initialized/_authenticated/_onboarded/workflows/': typeof appWorkflowsWorkflowsallRoute
+  '/_initialized/_authenticated/_onboarded/organisations/create': typeof appOrganisationsOrganisationscreateRoute
+  '/_initialized/_authenticated/_onboarded/projects/create': typeof appProjectsProjectscreateRoute
+  '/_initialized/_authenticated/_onboarded/users/$userId': typeof appUsersUserIdRoute
+  '/_initialized/_authenticated/_onboarded/users/create': typeof appUsersUserscreateRoute
+  '/_initialized/_authenticated/_onboarded/workflows/create': typeof appWorkflowsWorkflowscreateRoute
+  '/_initialized/_authenticated/_onboarding/onboarding/': typeof appOnboardingOnboardingindexRoute
+  '/_initialized/_authenticated/_onboarded/organisations/$organisationId': typeof appOrganisationsOrganisationIdindexRouteWithChildren
+  '/_initialized/_authenticated/_onboarded/projects/$projectId': typeof appProjectsProjectIdindexRouteWithChildren
+  '/_initialized/_authenticated/_onboarded/workflows/$workflowId': typeof appWorkflowsWorkflowIdindexRouteWithChildren
+  '/_initialized/_authenticated/_onboarded/organisations/$organisationId/': typeof appOrganisationsOrganisationIdRoute
+  '/_initialized/_authenticated/_onboarded/projects/$projectId/': typeof appProjectsProjectIdRoute
+  '/_initialized/_authenticated/_onboarded/workflows/$workflowId/': typeof appWorkflowsWorkflowIdRoute
+  '/_initialized/_authenticated/_onboarding/onboarding/organisations/create': typeof appOnboardingOrganisationsCreateRoute
+  '/_initialized/_authenticated/_onboarding/onboarding/users/create': typeof appOnboardingUsersCreateRoute
+  '/_initialized/_authenticated/_onboarded/projects/$projectId/documents': typeof appDocumentsDocumentsindexRouteWithChildren
+  '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/': typeof appDocumentsDocumentsRoute
+  '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/create': typeof appDocumentsDocumentscreateRoute
+  '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentIdindexRouteWithChildren
+  '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/': typeof appDocumentsDocumentIdRoute
+  '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions': typeof appRevisionsRevisionsindexRouteWithChildren
+  '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId': typeof appRevisionsRevisionIdRoute
+  '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/create': typeof appRevisionsRevisionscreateRoute
+  '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/diff': typeof appRevisionsRevisionsdiffRoute
 }
 
 export interface FileRouteTypes {
@@ -831,7 +969,9 @@ export interface FileRouteTypes {
     | '/'
     | ''
     | '/authenticate'
+    | '/unauthorised'
     | '/documents'
+    | '/onboarding'
     | '/organisations'
     | '/projects'
     | '/users'
@@ -840,17 +980,20 @@ export interface FileRouteTypes {
     | '/projects/'
     | '/users/'
     | '/workflows/'
+    | '/organisations/create'
     | '/projects/create'
     | '/users/$userId'
-    | '/workflows/create'
-    | '/organisations/create'
     | '/users/create'
+    | '/workflows/create'
+    | '/onboarding/'
     | '/organisations/$organisationId'
     | '/projects/$projectId'
     | '/workflows/$workflowId'
     | '/organisations/$organisationId/'
     | '/projects/$projectId/'
     | '/workflows/$workflowId/'
+    | '/onboarding/organisations/create'
+    | '/onboarding/users/create'
     | '/projects/$projectId/documents'
     | '/projects/$projectId/documents/'
     | '/projects/$projectId/documents/create'
@@ -865,19 +1008,23 @@ export interface FileRouteTypes {
     | '/'
     | ''
     | '/authenticate'
+    | '/unauthorised'
     | '/documents'
     | '/organisations'
     | '/projects'
     | '/users'
     | '/workflows'
+    | '/organisations/create'
     | '/projects/create'
     | '/users/$userId'
-    | '/workflows/create'
-    | '/organisations/create'
     | '/users/create'
+    | '/workflows/create'
+    | '/onboarding'
     | '/organisations/$organisationId'
     | '/projects/$projectId'
     | '/workflows/$workflowId'
+    | '/onboarding/organisations/create'
+    | '/onboarding/users/create'
     | '/projects/$projectId/documents'
     | '/projects/$projectId/documents/create'
     | '/projects/$projectId/documents/$documentId'
@@ -888,52 +1035,56 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
-    | '/_authenticated'
-    | '/authenticate'
-    | '/_authenticated/_onboarded'
-    | '/_authenticated/_onboarding'
-    | '/_authenticated/_onboarded/documents'
-    | '/_authenticated/_onboarded/organisations'
-    | '/_authenticated/_onboarded/projects'
-    | '/_authenticated/_onboarded/users'
-    | '/_authenticated/_onboarded/workflows'
-    | '/_authenticated/_onboarded/organisations/'
-    | '/_authenticated/_onboarded/projects/'
-    | '/_authenticated/_onboarded/users/'
-    | '/_authenticated/_onboarded/workflows/'
-    | '/_authenticated/_onboarded/projects/create'
-    | '/_authenticated/_onboarded/users/$userId'
-    | '/_authenticated/_onboarded/workflows/create'
-    | '/_authenticated/_onboarding/organisations/create'
-    | '/_authenticated/_onboarding/users/create'
-    | '/_authenticated/_onboarded/organisations/$organisationId'
-    | '/_authenticated/_onboarded/projects/$projectId'
-    | '/_authenticated/_onboarded/workflows/$workflowId'
-    | '/_authenticated/_onboarded/organisations/$organisationId/'
-    | '/_authenticated/_onboarded/projects/$projectId/'
-    | '/_authenticated/_onboarded/workflows/$workflowId/'
-    | '/_authenticated/_onboarded/projects/$projectId/documents'
-    | '/_authenticated/_onboarded/projects/$projectId/documents/'
-    | '/_authenticated/_onboarded/projects/$projectId/documents/create'
-    | '/_authenticated/_onboarded/projects/$projectId/documents/$documentId'
-    | '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/'
-    | '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions'
-    | '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId'
-    | '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/create'
-    | '/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/diff'
+    | '/_initialized'
+    | '/_initialized/_authenticated'
+    | '/_initialized/authenticate'
+    | '/_initialized/unauthorised'
+    | '/_initialized/_authenticated/_onboarded'
+    | '/_initialized/_authenticated/_onboarding'
+    | '/_initialized/_authenticated/_onboarded/documents'
+    | '/_initialized/_authenticated/_onboarding/onboarding'
+    | '/_initialized/_authenticated/_onboarded/organisations'
+    | '/_initialized/_authenticated/_onboarded/projects'
+    | '/_initialized/_authenticated/_onboarded/users'
+    | '/_initialized/_authenticated/_onboarded/workflows'
+    | '/_initialized/_authenticated/_onboarded/organisations/'
+    | '/_initialized/_authenticated/_onboarded/projects/'
+    | '/_initialized/_authenticated/_onboarded/users/'
+    | '/_initialized/_authenticated/_onboarded/workflows/'
+    | '/_initialized/_authenticated/_onboarded/organisations/create'
+    | '/_initialized/_authenticated/_onboarded/projects/create'
+    | '/_initialized/_authenticated/_onboarded/users/$userId'
+    | '/_initialized/_authenticated/_onboarded/users/create'
+    | '/_initialized/_authenticated/_onboarded/workflows/create'
+    | '/_initialized/_authenticated/_onboarding/onboarding/'
+    | '/_initialized/_authenticated/_onboarded/organisations/$organisationId'
+    | '/_initialized/_authenticated/_onboarded/projects/$projectId'
+    | '/_initialized/_authenticated/_onboarded/workflows/$workflowId'
+    | '/_initialized/_authenticated/_onboarded/organisations/$organisationId/'
+    | '/_initialized/_authenticated/_onboarded/projects/$projectId/'
+    | '/_initialized/_authenticated/_onboarded/workflows/$workflowId/'
+    | '/_initialized/_authenticated/_onboarding/onboarding/organisations/create'
+    | '/_initialized/_authenticated/_onboarding/onboarding/users/create'
+    | '/_initialized/_authenticated/_onboarded/projects/$projectId/documents'
+    | '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/'
+    | '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/create'
+    | '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId'
+    | '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/'
+    | '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions'
+    | '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId'
+    | '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/create'
+    | '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/diff'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   publicHomeRoute: typeof publicHomeRoute
-  layoutsAuthenticatedRoute: typeof layoutsAuthenticatedRouteWithChildren
-  publicAuthenticateRoute: typeof publicAuthenticateRoute
+  layoutsInitializedRoute: typeof layoutsInitializedRouteWithChildren
 }
 
 const rootRouteChildren: RootRouteChildren = {
   publicHomeRoute: publicHomeRoute,
-  layoutsAuthenticatedRoute: layoutsAuthenticatedRouteWithChildren,
-  publicAuthenticateRoute: publicAuthenticateRoute,
+  layoutsInitializedRoute: layoutsInitializedRouteWithChildren,
 }
 
 export const routeTree = rootRoute
@@ -947,199 +1098,234 @@ export const routeTree = rootRoute
       "filePath": "root.tsx",
       "children": [
         "/",
-        "/_authenticated",
-        "/authenticate"
+        "/_initialized"
       ]
     },
     "/": {
       "filePath": "public/home.tsx"
     },
-    "/_authenticated": {
+    "/_initialized": {
+      "filePath": "_layouts/_initialized.tsx",
+      "children": [
+        "/_initialized/_authenticated",
+        "/_initialized/authenticate",
+        "/_initialized/unauthorised"
+      ]
+    },
+    "/_initialized/_authenticated": {
       "filePath": "_layouts/_authenticated.tsx",
+      "parent": "/_initialized",
       "children": [
-        "/_authenticated/_onboarded",
-        "/_authenticated/_onboarding"
+        "/_initialized/_authenticated/_onboarded",
+        "/_initialized/_authenticated/_onboarding"
       ]
     },
-    "/authenticate": {
-      "filePath": "public/authenticate.tsx"
+    "/_initialized/authenticate": {
+      "filePath": "public/authenticate.tsx",
+      "parent": "/_initialized"
     },
-    "/_authenticated/_onboarded": {
+    "/_initialized/unauthorised": {
+      "filePath": "public/unauthorised.tsx",
+      "parent": "/_initialized"
+    },
+    "/_initialized/_authenticated/_onboarded": {
       "filePath": "_layouts/_onboarded.tsx",
-      "parent": "/_authenticated",
+      "parent": "/_initialized/_authenticated",
       "children": [
-        "/_authenticated/_onboarded/documents",
-        "/_authenticated/_onboarded/organisations",
-        "/_authenticated/_onboarded/projects",
-        "/_authenticated/_onboarded/users",
-        "/_authenticated/_onboarded/workflows"
+        "/_initialized/_authenticated/_onboarded/documents",
+        "/_initialized/_authenticated/_onboarded/organisations",
+        "/_initialized/_authenticated/_onboarded/projects",
+        "/_initialized/_authenticated/_onboarded/users",
+        "/_initialized/_authenticated/_onboarded/workflows"
       ]
     },
-    "/_authenticated/_onboarding": {
+    "/_initialized/_authenticated/_onboarding": {
       "filePath": "_layouts/_onboarding.tsx",
-      "parent": "/_authenticated",
+      "parent": "/_initialized/_authenticated",
       "children": [
-        "/_authenticated/_onboarding/organisations/create",
-        "/_authenticated/_onboarding/users/create"
+        "/_initialized/_authenticated/_onboarding/onboarding"
       ]
     },
-    "/_authenticated/_onboarded/documents": {
+    "/_initialized/_authenticated/_onboarded/documents": {
       "filePath": "app/documents/documents.all.tsx",
-      "parent": "/_authenticated/_onboarded"
+      "parent": "/_initialized/_authenticated/_onboarded"
     },
-    "/_authenticated/_onboarded/organisations": {
+    "/_initialized/_authenticated/_onboarding/onboarding": {
+      "filePath": "",
+      "parent": "/_initialized/_authenticated/_onboarding",
+      "children": [
+        "/_initialized/_authenticated/_onboarding/onboarding/",
+        "/_initialized/_authenticated/_onboarding/onboarding/organisations/create",
+        "/_initialized/_authenticated/_onboarding/onboarding/users/create"
+      ]
+    },
+    "/_initialized/_authenticated/_onboarded/organisations": {
       "filePath": "app/organisations/organisations.index.tsx",
-      "parent": "/_authenticated/_onboarded",
+      "parent": "/_initialized/_authenticated/_onboarded",
       "children": [
-        "/_authenticated/_onboarded/organisations/",
-        "/_authenticated/_onboarded/organisations/$organisationId"
+        "/_initialized/_authenticated/_onboarded/organisations/",
+        "/_initialized/_authenticated/_onboarded/organisations/create",
+        "/_initialized/_authenticated/_onboarded/organisations/$organisationId"
       ]
     },
-    "/_authenticated/_onboarded/projects": {
+    "/_initialized/_authenticated/_onboarded/projects": {
       "filePath": "app/projects/projects.index.tsx",
-      "parent": "/_authenticated/_onboarded",
+      "parent": "/_initialized/_authenticated/_onboarded",
       "children": [
-        "/_authenticated/_onboarded/projects/",
-        "/_authenticated/_onboarded/projects/create",
-        "/_authenticated/_onboarded/projects/$projectId"
+        "/_initialized/_authenticated/_onboarded/projects/",
+        "/_initialized/_authenticated/_onboarded/projects/create",
+        "/_initialized/_authenticated/_onboarded/projects/$projectId"
       ]
     },
-    "/_authenticated/_onboarded/users": {
+    "/_initialized/_authenticated/_onboarded/users": {
       "filePath": "app/users/users.index.tsx",
-      "parent": "/_authenticated/_onboarded",
+      "parent": "/_initialized/_authenticated/_onboarded",
       "children": [
-        "/_authenticated/_onboarded/users/",
-        "/_authenticated/_onboarded/users/$userId"
+        "/_initialized/_authenticated/_onboarded/users/",
+        "/_initialized/_authenticated/_onboarded/users/$userId",
+        "/_initialized/_authenticated/_onboarded/users/create"
       ]
     },
-    "/_authenticated/_onboarded/workflows": {
+    "/_initialized/_authenticated/_onboarded/workflows": {
       "filePath": "app/workflows/workflows.index.tsx",
-      "parent": "/_authenticated/_onboarded",
+      "parent": "/_initialized/_authenticated/_onboarded",
       "children": [
-        "/_authenticated/_onboarded/workflows/",
-        "/_authenticated/_onboarded/workflows/create",
-        "/_authenticated/_onboarded/workflows/$workflowId"
+        "/_initialized/_authenticated/_onboarded/workflows/",
+        "/_initialized/_authenticated/_onboarded/workflows/create",
+        "/_initialized/_authenticated/_onboarded/workflows/$workflowId"
       ]
     },
-    "/_authenticated/_onboarded/organisations/": {
+    "/_initialized/_authenticated/_onboarded/organisations/": {
       "filePath": "app/organisations/organisations.all.tsx",
-      "parent": "/_authenticated/_onboarded/organisations"
+      "parent": "/_initialized/_authenticated/_onboarded/organisations"
     },
-    "/_authenticated/_onboarded/projects/": {
+    "/_initialized/_authenticated/_onboarded/projects/": {
       "filePath": "app/projects/projects.all.tsx",
-      "parent": "/_authenticated/_onboarded/projects"
+      "parent": "/_initialized/_authenticated/_onboarded/projects"
     },
-    "/_authenticated/_onboarded/users/": {
+    "/_initialized/_authenticated/_onboarded/users/": {
       "filePath": "app/users/users.all.tsx",
-      "parent": "/_authenticated/_onboarded/users"
+      "parent": "/_initialized/_authenticated/_onboarded/users"
     },
-    "/_authenticated/_onboarded/workflows/": {
+    "/_initialized/_authenticated/_onboarded/workflows/": {
       "filePath": "app/workflows/workflows.all.tsx",
-      "parent": "/_authenticated/_onboarded/workflows"
+      "parent": "/_initialized/_authenticated/_onboarded/workflows"
     },
-    "/_authenticated/_onboarded/projects/create": {
-      "filePath": "app/projects/projects.create.tsx",
-      "parent": "/_authenticated/_onboarded/projects"
-    },
-    "/_authenticated/_onboarded/users/$userId": {
-      "filePath": "app/users/$userId.tsx",
-      "parent": "/_authenticated/_onboarded/users"
-    },
-    "/_authenticated/_onboarded/workflows/create": {
-      "filePath": "app/workflows/workflows.create.tsx",
-      "parent": "/_authenticated/_onboarded/workflows"
-    },
-    "/_authenticated/_onboarding/organisations/create": {
+    "/_initialized/_authenticated/_onboarded/organisations/create": {
       "filePath": "app/organisations/organisations.create.tsx",
-      "parent": "/_authenticated/_onboarding"
+      "parent": "/_initialized/_authenticated/_onboarded/organisations"
     },
-    "/_authenticated/_onboarding/users/create": {
+    "/_initialized/_authenticated/_onboarded/projects/create": {
+      "filePath": "app/projects/projects.create.tsx",
+      "parent": "/_initialized/_authenticated/_onboarded/projects"
+    },
+    "/_initialized/_authenticated/_onboarded/users/$userId": {
+      "filePath": "app/users/$userId.tsx",
+      "parent": "/_initialized/_authenticated/_onboarded/users"
+    },
+    "/_initialized/_authenticated/_onboarded/users/create": {
       "filePath": "app/users/users.create.tsx",
-      "parent": "/_authenticated/_onboarding"
+      "parent": "/_initialized/_authenticated/_onboarded/users"
     },
-    "/_authenticated/_onboarded/organisations/$organisationId": {
+    "/_initialized/_authenticated/_onboarded/workflows/create": {
+      "filePath": "app/workflows/workflows.create.tsx",
+      "parent": "/_initialized/_authenticated/_onboarded/workflows"
+    },
+    "/_initialized/_authenticated/_onboarding/onboarding/": {
+      "filePath": "app/onboarding/onboarding.index.tsx",
+      "parent": "/_initialized/_authenticated/_onboarding/onboarding"
+    },
+    "/_initialized/_authenticated/_onboarded/organisations/$organisationId": {
       "filePath": "app/organisations/$organisationId.index.tsx",
-      "parent": "/_authenticated/_onboarded/organisations",
+      "parent": "/_initialized/_authenticated/_onboarded/organisations",
       "children": [
-        "/_authenticated/_onboarded/organisations/$organisationId/"
+        "/_initialized/_authenticated/_onboarded/organisations/$organisationId/"
       ]
     },
-    "/_authenticated/_onboarded/projects/$projectId": {
+    "/_initialized/_authenticated/_onboarded/projects/$projectId": {
       "filePath": "app/projects/$projectId.index.tsx",
-      "parent": "/_authenticated/_onboarded/projects",
+      "parent": "/_initialized/_authenticated/_onboarded/projects",
       "children": [
-        "/_authenticated/_onboarded/projects/$projectId/",
-        "/_authenticated/_onboarded/projects/$projectId/documents"
+        "/_initialized/_authenticated/_onboarded/projects/$projectId/",
+        "/_initialized/_authenticated/_onboarded/projects/$projectId/documents"
       ]
     },
-    "/_authenticated/_onboarded/workflows/$workflowId": {
+    "/_initialized/_authenticated/_onboarded/workflows/$workflowId": {
       "filePath": "app/workflows/$workflowId.index.tsx",
-      "parent": "/_authenticated/_onboarded/workflows",
+      "parent": "/_initialized/_authenticated/_onboarded/workflows",
       "children": [
-        "/_authenticated/_onboarded/workflows/$workflowId/"
+        "/_initialized/_authenticated/_onboarded/workflows/$workflowId/"
       ]
     },
-    "/_authenticated/_onboarded/organisations/$organisationId/": {
+    "/_initialized/_authenticated/_onboarded/organisations/$organisationId/": {
       "filePath": "app/organisations/$organisationId.tsx",
-      "parent": "/_authenticated/_onboarded/organisations/$organisationId"
+      "parent": "/_initialized/_authenticated/_onboarded/organisations/$organisationId"
     },
-    "/_authenticated/_onboarded/projects/$projectId/": {
+    "/_initialized/_authenticated/_onboarded/projects/$projectId/": {
       "filePath": "app/projects/$projectId.tsx",
-      "parent": "/_authenticated/_onboarded/projects/$projectId"
+      "parent": "/_initialized/_authenticated/_onboarded/projects/$projectId"
     },
-    "/_authenticated/_onboarded/workflows/$workflowId/": {
+    "/_initialized/_authenticated/_onboarded/workflows/$workflowId/": {
       "filePath": "app/workflows/$workflowId.tsx",
-      "parent": "/_authenticated/_onboarded/workflows/$workflowId"
+      "parent": "/_initialized/_authenticated/_onboarded/workflows/$workflowId"
     },
-    "/_authenticated/_onboarded/projects/$projectId/documents": {
+    "/_initialized/_authenticated/_onboarding/onboarding/organisations/create": {
+      "filePath": "app/onboarding/organisations-create.tsx",
+      "parent": "/_initialized/_authenticated/_onboarding/onboarding"
+    },
+    "/_initialized/_authenticated/_onboarding/onboarding/users/create": {
+      "filePath": "app/onboarding/users-create.tsx",
+      "parent": "/_initialized/_authenticated/_onboarding/onboarding"
+    },
+    "/_initialized/_authenticated/_onboarded/projects/$projectId/documents": {
       "filePath": "app/documents/documents.index.tsx",
-      "parent": "/_authenticated/_onboarded/projects/$projectId",
+      "parent": "/_initialized/_authenticated/_onboarded/projects/$projectId",
       "children": [
-        "/_authenticated/_onboarded/projects/$projectId/documents/",
-        "/_authenticated/_onboarded/projects/$projectId/documents/create",
-        "/_authenticated/_onboarded/projects/$projectId/documents/$documentId"
+        "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/",
+        "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/create",
+        "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId"
       ]
     },
-    "/_authenticated/_onboarded/projects/$projectId/documents/": {
+    "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/": {
       "filePath": "app/documents/documents.tsx",
-      "parent": "/_authenticated/_onboarded/projects/$projectId/documents"
+      "parent": "/_initialized/_authenticated/_onboarded/projects/$projectId/documents"
     },
-    "/_authenticated/_onboarded/projects/$projectId/documents/create": {
+    "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/create": {
       "filePath": "app/documents/documents.create.tsx",
-      "parent": "/_authenticated/_onboarded/projects/$projectId/documents"
+      "parent": "/_initialized/_authenticated/_onboarded/projects/$projectId/documents"
     },
-    "/_authenticated/_onboarded/projects/$projectId/documents/$documentId": {
+    "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId": {
       "filePath": "app/documents/$documentId.index.tsx",
-      "parent": "/_authenticated/_onboarded/projects/$projectId/documents",
+      "parent": "/_initialized/_authenticated/_onboarded/projects/$projectId/documents",
       "children": [
-        "/_authenticated/_onboarded/projects/$projectId/documents/$documentId/",
-        "/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions"
+        "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/",
+        "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions"
       ]
     },
-    "/_authenticated/_onboarded/projects/$projectId/documents/$documentId/": {
+    "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/": {
       "filePath": "app/documents/$documentId.tsx",
-      "parent": "/_authenticated/_onboarded/projects/$projectId/documents/$documentId"
+      "parent": "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId"
     },
-    "/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions": {
+    "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions": {
       "filePath": "app/revisions/revisions.index.tsx",
-      "parent": "/_authenticated/_onboarded/projects/$projectId/documents/$documentId",
+      "parent": "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId",
       "children": [
-        "/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId",
-        "/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/create",
-        "/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/diff"
+        "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId",
+        "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/create",
+        "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/diff"
       ]
     },
-    "/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId": {
+    "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId": {
       "filePath": "app/revisions/$revisionId.tsx",
-      "parent": "/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions"
+      "parent": "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions"
     },
-    "/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/create": {
+    "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/create": {
       "filePath": "app/revisions/revisions.create.tsx",
-      "parent": "/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions"
+      "parent": "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions"
     },
-    "/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/diff": {
+    "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/diff": {
       "filePath": "app/revisions/revisions.diff.tsx",
-      "parent": "/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions"
+      "parent": "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions"
     }
   }
 }

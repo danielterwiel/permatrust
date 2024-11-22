@@ -1,14 +1,16 @@
-import { Link } from '@/components/Link';
+import { z } from 'zod';
+import { api } from '@/api';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { Table } from '@/components/Table';
-import { Icon } from '@/components/ui/Icon';
-import { FilterInput } from '@/components/FilterInput';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDateTime } from '@/utils/formatDateTime';
 import { buildPaginationInput } from '@/utils/buildPaginationInput';
 import { buildFilterField } from '@/utils/buildFilterField';
 import { paginationInputSchema } from '@/schemas/pagination';
-import { z } from 'zod';
+import { zodSearchValidator } from '@tanstack/router-zod-adapter';
+import { Link } from '@/components/Link';
+import { Table } from '@/components/Table';
+import { Icon } from '@/components/ui/Icon';
+import { FilterInput } from '@/components/FilterInput';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { Row } from '@tanstack/react-table';
 import type {
   Project,
@@ -55,25 +57,26 @@ const DEFAULT_PROJECT_PAGINATION: PaginationInput = {
 };
 
 export const Route = createFileRoute(
-  '/_authenticated/_onboarded/organisations/$organisationId/',
+  '/_initialized/_authenticated/_onboarded/organisations/$organisationId/',
 )({
   component: OrganisationDetails,
-  validateSearch: (search) => projectsSearchSchema.parse(search),
+  validateSearch: zodSearchValidator(projectsSearchSchema),
   beforeLoad: () => ({
     getTitle: () => 'Organisation',
   }),
-  loaderDeps: ({ search: { pagination } }) => ({ pagination }),
-  loader: async ({ context, deps: { pagination }, params }) => {
-    const projectPagination = buildPaginationInput(
-      DEFAULT_PROJECT_PAGINATION,
-      pagination,
-    );
+  loaderDeps: ({ search }) => ({
+    pagination: search.pagination ?? DEFAULT_PROJECT_PAGINATION,
+  }),
+  loader: async ({ context, deps, params }) => {
+    const projectPagination = buildPaginationInput(deps.pagination);
+
     const [projects, paginationMetaData] =
-      await context.api.call.list_projects_by_organisation_id(
+      await api.list_projects_by_organisation_id(
         BigInt(Number.parseInt(params.organisationId)),
         projectPagination,
       );
-    const organisation = await context.api.call.get_organisation(
+
+    const organisation = await api.get_organisation(
       BigInt(Number.parseInt(params.organisationId)),
     );
 
@@ -82,9 +85,7 @@ export const Route = createFileRoute(
       projects,
       paginationMetaData,
       pagination: projectPagination,
-      active: {
-        organisation,
-      },
+      organisation,
     };
   },
   errorComponent: ({ error }) => {
@@ -93,8 +94,9 @@ export const Route = createFileRoute(
 });
 
 function OrganisationDetails() {
-  const { projects, pagination, paginationMetaData, active } =
+  const { projects, pagination, paginationMetaData, organisation } =
     Route.useLoaderData();
+  const params = Route.useParams();
   const navigate = useNavigate();
 
   const RowActions = (row: Row<Project>) => {
@@ -121,7 +123,7 @@ function OrganisationDetails() {
             placeholder="Filter project name..."
             onChange={(filterCriteria: FilterCriteria) => {
               navigate({
-                to: `/organisations/${active.organisation.id}`,
+                to: `/organisations/${params.organisationId}`,
                 search: {
                   pagination: {
                     ...pagination,
@@ -152,7 +154,7 @@ function OrganisationDetails() {
               size="lg"
               className="text-muted-foreground pb-1 mr-2"
             />
-            {active.organisation.name}
+            {organisation.name}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -164,7 +166,7 @@ function OrganisationDetails() {
             sort={pagination.sort}
             onSortingChange={(newSort: Sort) => {
               navigate({
-                to: `/organisations/${active.organisation.id}`,
+                to: `/organisations/${organisation.id}`,
                 search: {
                   pagination: {
                     ...pagination,

@@ -1,15 +1,16 @@
 import { z } from 'zod';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { getActiveOrganisationId } from '@/utils/getActiveOrganisationId';
-import { buildPaginationInput } from '@/utils/buildPaginationInput';
-import { buildFilterField } from '@/utils/buildFilterField';
+import { api } from '@/api';
 import { formatDateTime } from '@/utils/formatDateTime';
+import { buildFilterField } from '@/utils/buildFilterField';
+import { buildPaginationInput } from '@/utils/buildPaginationInput';
+import { paginationInputSchema } from '@/schemas/pagination';
+import { getActiveOrganisationId } from '@/utils/getActiveOrganisationId';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { Table } from '@/components/Table';
 import { Icon } from '@/components/ui/Icon';
 import { Link } from '@/components/Link';
 import { FilterInput } from '@/components/FilterInput';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { paginationInputSchema } from '@/schemas/pagination';
 import type { FilterCriteria } from '@/types/pagination';
 import type { Row } from '@tanstack/react-table';
 import type {
@@ -55,7 +56,9 @@ const DEFAULT_PROJECT_PAGINATION: PaginationInput = {
   sort: DEFAULT_SORT,
 };
 
-export const Route = createFileRoute('/_authenticated/_onboarded')({
+export const Route = createFileRoute(
+  '/_initialized/_authenticated/_onboarded/projects',
+)({
   component: Projects,
   validateSearch: (search) => projectsSearchSchema.parse(search),
   loaderDeps: ({ search: { pagination } }) => ({ pagination }),
@@ -66,7 +69,7 @@ export const Route = createFileRoute('/_authenticated/_onboarded')({
       pagination,
     );
     const [projects, paginationMetaData] =
-      await context.api.call.list_projects_by_organisation_id(
+      await api.list_projects_by_organisation_id(
         activeOrganisationId,
         projectPagination,
       );

@@ -1,13 +1,15 @@
-import { Link } from '@/components/Link';
+import { z } from 'zod';
+import { api } from '@/api';
+import { buildFilterField } from '@/utils/buildFilterField';
+import { buildPaginationInput } from '@/utils/buildPaginationInput';
+import { paginationInputSchema } from '@/schemas/pagination';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { zodSearchValidator } from '@tanstack/router-zod-adapter';
+import { Link } from '@/components/Link';
 import { Table } from '@/components/Table';
 import { Icon } from '@/components/ui/Icon';
 import { FilterInput } from '@/components/FilterInput';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { buildPaginationInput } from '@/utils/buildPaginationInput';
-import { buildFilterField } from '@/utils/buildFilterField';
-import { paginationInputSchema } from '@/schemas/pagination';
-import { z } from 'zod';
 import type {
   Document,
   PaginationInput,
@@ -57,34 +59,30 @@ const DEFAULT_DOCUMENT_PAGINATION: PaginationInput = {
 };
 
 export const Route = createFileRoute(
-  '/_authenticated/_onboarded/projects/$projectId/',
+  '/_initialized/_authenticated/_onboarded/projects/$projectId/',
 )({
   component: ProjectDetails,
-  validateSearch: (search) => projectsSearchSchema.parse(search),
+  validateSearch: zodSearchValidator(projectsSearchSchema),
   beforeLoad: () => ({
     getTitle: () => 'Project',
   }),
-  loaderDeps: ({ search: { pagination } }) => ({ pagination }),
-  loader: async ({ params: { projectId }, context, deps: { pagination } }) => {
-    const documentPagination = buildPaginationInput(
-      DEFAULT_DOCUMENT_PAGINATION,
-      pagination,
-    );
+  loaderDeps: ({ search }) => ({
+    pagination: search?.pagination ?? DEFAULT_DOCUMENT_PAGINATION,
+  }),
+  loader: async ({ params, context, deps }) => {
+    const documentPagination = buildPaginationInput(deps.pagination);
     const [documents, paginationMetaData] =
-      await context.api.call.list_documents_by_project_id(
-        BigInt(projectId),
+      await api.list_documents_by_project_id(
+        BigInt(params.projectId),
         documentPagination,
       );
-    const project = await context.api.call.get_project(BigInt(projectId));
+    const project = await api.get_project(BigInt(params.projectId));
     return {
       context,
       documents,
       paginationMetaData,
       pagination: documentPagination,
-      active: {
-        project,
-      },
-      projectId,
+      project,
     };
   },
   errorComponent: ({ error }) => {
@@ -94,7 +92,7 @@ export const Route = createFileRoute(
 
 function ProjectDetails() {
   const { projectId } = Route.useParams();
-  const { documents, pagination, paginationMetaData, active } =
+  const { documents, pagination, paginationMetaData, project } =
     Route.useLoaderData();
   const navigate = useNavigate();
 
@@ -155,7 +153,7 @@ function ProjectDetails() {
               size="lg"
               className="text-muted-foreground pb-1 mr-2"
             />
-            {active.project.name}
+            {project.name}
           </CardTitle>
         </CardHeader>
         <CardContent>
