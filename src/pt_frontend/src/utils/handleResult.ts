@@ -1,13 +1,14 @@
 import { notFound } from '@tanstack/react-router';
-import type { AppError } from '@/declarations/pt_backend/pt_backend.did';
 
-type Result<T> = { Ok: T } | { Err: AppError };
+import type { AppError } from '@/declarations/pt_backend/pt_backend.did';
 
 type ErrorHandler<E> = (error: E) => void;
 
+type Result<T> = { Err: AppError } | { Ok: T };
+
 type ResultHandler<T> = {
-  onOk?: (value: T) => T;
   onErr?: ErrorHandler<AppError>;
+  onOk?: (value: T) => T;
 };
 
 export function handleResult<T>(

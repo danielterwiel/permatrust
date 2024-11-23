@@ -1,14 +1,14 @@
 import { createRouter } from '@tanstack/react-router';
-import { rootContext } from './context/root';
 
+import { rootContext } from './context/root';
 import { routeTree } from './routeTree.gen';
 
 export const router = createRouter({
-  routeTree,
+  context: rootContext,
 
   defaultPreload: 'intent',
   defaultStaleTime: 5000,
-  context: rootContext,
+  routeTree,
 });
 
 declare module '@tanstack/react-router' {

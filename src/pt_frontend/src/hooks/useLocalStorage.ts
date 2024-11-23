@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+
 import { storage } from '@/utils/localStorage';
 
 const localStorageChangeEvent = new Event('localStorageChange');
@@ -6,14 +7,14 @@ const localStorageChangeEvent = new Event('localStorageChange');
 export function useLocalStorage<T>(
   key: string,
   initialValue: T,
-): [T, (value: T | ((val: T) => T)) => void] {
+): [T, (value: ((val: T) => T) | T) => void] {
   const readValue = useCallback((): T => {
     return storage.getItem(key, initialValue);
   }, [initialValue, key]);
 
   const [storedValue, setStoredValue] = useState<T>(readValue);
 
-  const setValue = (value: T | ((val: T) => T)) => {
+  const setValue = (value: ((val: T) => T) | T) => {
     try {
       const valueToStore =
         value instanceof Function ? value(storedValue) : value;
@@ -25,8 +26,8 @@ export function useLocalStorage<T>(
         // Dispatch custom event
         window.dispatchEvent(localStorageChangeEvent);
       }
-    } catch (error) {
-      console.warn(`Error setting localStorage key "${key}":`, error);
+    } catch (_error) {
+      // TODO: handle error
     }
   };
 

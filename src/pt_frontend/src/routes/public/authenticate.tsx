@@ -1,29 +1,30 @@
-import { z } from 'zod';
-import { useEffect, useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
-import { Button } from '@/components/ui/button';
+import { useEffect, useState } from 'react';
+import { z } from 'zod';
+
 import { Loading } from '@/components/Loading';
+import { Button } from '@/components/ui/button';
 
 const authenticateSearchSchema = z
   .object({
-    redirect: z.string().optional(),
     error: z.boolean().optional(),
+    redirect: z.string().optional(),
   })
   .optional();
 
 export const Route = createFileRoute('/_initialized/authenticate')({
-  component: Authenticate,
   validateSearch: zodSearchValidator(authenticateSearchSchema),
   loaderDeps: ({ search }) => ({
-    redirect: search?.redirect,
     error: search?.error,
+    redirect: search?.redirect,
   }),
   beforeLoad: async ({ context, location }) => ({
+    authActor: context.actors.auth,
     getTitle: () => 'Authenticate',
     location,
-    authActor: context.actors.auth,
   }),
+  component: Authenticate,
 });
 
 function Authenticate() {
@@ -54,8 +55,8 @@ function Authenticate() {
       ) : (
         <Button
           disabled={isAuthenticating}
-          type="submit"
           onClick={authenticate}
+          type="submit"
         >
           Authenticate
         </Button>

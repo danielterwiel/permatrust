@@ -1,32 +1,38 @@
-import { z } from 'zod';
-import { useState } from 'react';
-import { api } from '@/api';
-import { formatDateTime } from '@/utils/formatDateTime';
-import { buildPaginationInput } from '@/utils/buildPaginationInput';
-import { buildFilterField } from '@/utils/buildFilterField';
-import { paginationInputSchema } from '@/schemas/pagination';
-import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { zodSearchValidator } from '@tanstack/router-zod-adapter';
+import { useState } from 'react';
+import { z } from 'zod';
+
+import { api } from '@/api';
+
+import { FilterInput } from '@/components/FilterInput';
 import { Link } from '@/components/Link';
 import { Table } from '@/components/Table';
-import { Icon } from '@/components/ui/Icon';
-import { FilterInput } from '@/components/FilterInput';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { Row } from '@tanstack/react-table';
-import type { Entity } from '@/types/entities';
-import type {
-  Revision,
-  PaginationInput,
-  Sort,
-  SortCriteria,
-} from '@/declarations/pt_backend/pt_backend.did';
-import type { FilterCriteria } from '@/types/pagination';
+import { Icon } from '@/components/ui/Icon';
+
+import { buildFilterField } from '@/utils/buildFilterField';
+import { buildPaginationInput } from '@/utils/buildPaginationInput';
+import { formatDateTime } from '@/utils/formatDateTime';
+
+import { ENTITY_NAME } from '@/consts/entities';
 import {
   DEFAULT_PAGINATION,
   FILTER_FIELD,
   SORT_ORDER,
 } from '@/consts/pagination';
-import { ENTITY_NAME } from '@/consts/entities';
+
+import { paginationInputSchema } from '@/schemas/pagination';
+
+import type {
+  PaginationInput,
+  Revision,
+  Sort,
+  SortCriteria,
+} from '@/declarations/pt_backend/pt_backend.did';
+import type { Entity } from '@/types/entities';
+import type { FilterCriteria } from '@/types/pagination';
+import type { Row } from '@tanstack/react-table';
 
 const DEFAULT_FILTERS: [] = [];
 
@@ -45,21 +51,20 @@ const revisionsSearchSchema = z.object({
 });
 
 const DEFAULT_REVISION_PAGINATION: PaginationInput = {
+  filters: DEFAULT_FILTERS,
   page_number: DEFAULT_PAGINATION.page_number,
   page_size: DEFAULT_PAGINATION.page_size,
-  filters: DEFAULT_FILTERS,
   sort: DEFAULT_SORT,
 };
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/',
 )({
-  component: DocumentDetails,
   validateSearch: zodSearchValidator(revisionsSearchSchema),
   loaderDeps: ({ search }) => ({
     pagination: search.pagination ?? DEFAULT_REVISION_PAGINATION,
   }),
-  loader: async ({ params, deps, context }) => {
+  loader: async ({ context, deps, params }) => {
     const revisionPagination = buildPaginationInput(deps.pagination);
 
     const [revisions, paginationMetaData] =
@@ -71,20 +76,21 @@ export const Route = createFileRoute(
 
     return {
       context,
-      revisions,
-      paginationMetaData,
-      pagination: revisionPagination,
       document,
+      pagination: revisionPagination,
+      paginationMetaData,
+      revisions,
     };
   },
+  component: DocumentDetails,
   errorComponent: ({ error }) => {
     return <div>Error: {error.message}</div>;
   },
 });
 
 function DocumentDetails() {
-  const { projectId, documentId } = Route.useParams();
-  const { revisions, pagination, paginationMetaData, document } =
+  const { documentId, projectId } = Route.useParams();
+  const { document, pagination, paginationMetaData, revisions } =
     Route.useLoaderData();
   const [selected, setSelected] = useState<Entity[]>([]);
   const navigate = useNavigate();
@@ -96,13 +102,13 @@ function DocumentDetails() {
   const RowActions = (row: Row<Revision>) => {
     return (
       <Link
-        to="/projects/$projectId/documents/$documentId/revisions/$revisionId"
-        variant="outline"
         params={{
           documentId,
           projectId,
           revisionId: row.id,
         }}
+        to="/projects/$projectId/documents/$documentId/revisions/$revisionId"
+        variant="outline"
       >
         Open
       </Link>
@@ -114,42 +120,42 @@ function DocumentDetails() {
       <div className="flex items-center justify-between pb-4">
         {pagination.filters[0]?.map((filterCriteria) => (
           <FilterInput
-            key={filterCriteria.entity.toString()}
             filterCriteria={filterCriteria}
-            placeholder="Filter content..."
+            key={filterCriteria.entity.toString()}
             onChange={(filterCriteria: FilterCriteria) => {
               navigate({
-                to: `/projects/${projectId}/documents/${documentId}`,
                 search: {
                   pagination: {
                     ...pagination,
                     filters: [[filterCriteria]],
                   },
                 },
+                to: `/projects/${projectId}/documents/${documentId}`,
               });
             }}
+            placeholder="Filter content..."
           />
         ))}
         <div className="flex gap-2 ml-auto">
           <Link
-            to="/projects/$projectId/documents/$documentId/revisions/diff"
+            className="h-7 gap-1"
+            disabled={selected.length !== 2}
             params={{
-              projectId,
               documentId,
+              projectId,
             }}
             search={{
-              theirs:
-                selected[0]?.id !== undefined
-                  ? Number(selected[0].id)
-                  : undefined,
               current:
                 selected[1]?.id !== undefined
                   ? Number(selected[1].id)
                   : undefined,
+              theirs:
+                selected[0]?.id !== undefined
+                  ? Number(selected[0].id)
+                  : undefined,
             }}
-            disabled={selected.length !== 2}
+            to="/projects/$projectId/documents/$documentId/revisions/diff"
             variant={selected.length !== 2 ? 'secondary' : 'outline'}
-            className="h-7 gap-1"
           >
             <Icon name="git-compare-outline" size="sm" />
             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -157,11 +163,11 @@ function DocumentDetails() {
             </span>
           </Link>
           <Link
-            to="/projects/$projectId/documents/$documentId/revisions/create"
-            params={{ projectId, documentId }}
-            variant="default"
             className="h-7 gap-1"
+            params={{ documentId, projectId }}
             size="sm"
+            to="/projects/$projectId/documents/$documentId/revisions/create"
+            variant="default"
           >
             <Icon name="file-stack-outline" size="sm" />
             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -174,41 +180,23 @@ function DocumentDetails() {
         <CardHeader>
           <CardTitle>
             <Icon
+              className="text-muted-foreground pb-1 mr-2"
               name="file-outline"
               size="lg"
-              className="text-muted-foreground pb-1 mr-2"
             />
             {document.title}
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Table<Revision>
-            tableData={revisions}
-            onSelectionChange={handleCheckedChange}
-            paginationMetaData={paginationMetaData}
-            entityName={ENTITY_NAME.Revision}
-            sort={pagination.sort}
-            onSortingChange={(newSort: Sort) => {
-              navigate({
-                to: `/projects/${projectId}/documents/${documentId}`,
-                search: {
-                  pagination: {
-                    ...pagination,
-                    sort: newSort,
-                  },
-                },
-              });
-            }}
             actions={RowActions}
             columnConfig={[
               {
-                id: 'version',
-                headerName: 'Version',
                 cellPreprocess: (v) => v,
+                headerName: 'Version',
+                id: 'version',
               },
               {
-                id: 'content',
-                headerName: 'Content',
                 cellPreprocess: (content) => {
                   return (
                     <div className="truncate max-w-md">
@@ -218,18 +206,36 @@ function DocumentDetails() {
                     </div>
                   );
                 },
+                headerName: 'Content',
+                id: 'content',
               },
               {
-                id: 'created_by',
-                headerName: 'Created by',
                 cellPreprocess: (createdBy) => createdBy.toString(),
+                headerName: 'Created by',
+                id: 'created_by',
               },
               {
-                id: 'created_at',
-                headerName: 'Created at',
                 cellPreprocess: (createdAt) => formatDateTime(createdAt),
+                headerName: 'Created at',
+                id: 'created_at',
               },
             ]}
+            entityName={ENTITY_NAME.Revision}
+            onSelectionChange={handleCheckedChange}
+            onSortingChange={(newSort: Sort) => {
+              navigate({
+                search: {
+                  pagination: {
+                    ...pagination,
+                    sort: newSort,
+                  },
+                },
+                to: `/projects/${projectId}/documents/${documentId}`,
+              });
+            }}
+            paginationMetaData={paginationMetaData}
+            sort={pagination.sort}
+            tableData={revisions}
           />
         </CardContent>
       </Card>

@@ -1,17 +1,17 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router'
+import { createFileRoute, Outlet } from '@tanstack/react-router';
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/users',
 )({
-  component: Users,
   beforeLoad: () => ({
     getTitle: () => 'Users',
   }),
+  component: Users,
   errorComponent: ({ error }) => {
-    return <div>Error: {error.message}</div>
+    return <div>Error: {error.message}</div>;
   },
-})
+});
 
 function Users() {
-  return <Outlet />
+  return <Outlet />;
 }

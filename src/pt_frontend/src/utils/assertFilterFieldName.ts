@@ -1,4 +1,5 @@
 import { FILTER_FIELD_NAMES } from '@/consts/pagination';
+
 import type { FilterFieldName } from '@/types/pagination';
 
 const isFilterFieldName = (value: string): value is FilterFieldName =>

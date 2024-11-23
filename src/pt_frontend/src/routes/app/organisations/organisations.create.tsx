@@ -1,20 +1,23 @@
-import { api } from '@/api';
-import { useState } from 'react';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
+
+import { api } from '@/api';
+
 import {
-  type createOrganisationFormSchema,
   CreateOrganisationForm,
+  type createOrganisationFormSchema,
 } from '@/components/create-organisation-form';
+
 import type { z } from 'zod';
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/organisations/create',
 )({
-  component: CreateOrganisation,
   beforeLoad: () => ({
     getTitle: () => 'Create organisation',
   }),
+  component: CreateOrganisation,
   errorComponent: ({ error }) => {
     return <div>Error: {error.message}</div>;
   },
@@ -38,14 +41,14 @@ function CreateOrganisation() {
       navigate({
         to: `/organisations/${organisationId.toString()}`,
       });
-    } catch (error) {
-      console.error(error);
+    } catch (_error) {
+      // TODO: handle error
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <CreateOrganisationForm onSubmit={onSubmit} isSubmitting={isSubmitting} />
+    <CreateOrganisationForm isSubmitting={isSubmitting} onSubmit={onSubmit} />
   );
 }

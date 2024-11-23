@@ -1,19 +1,21 @@
 import { Link } from '@tanstack/react-router';
-import { Icon } from '@/components/ui/Icon';
+
 import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/Icon';
 import {
   Sidebar as SidebarBase,
   SidebarContent,
+  SidebarFooter,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarFooter,
 } from '@/components/ui/sidebar';
-import type { FC } from 'react';
+
 import type { authActor } from '@/machines/auth-machine';
+import type { FC } from 'react';
 
 type SidebarProps = { authActor: typeof authActor };
 
@@ -41,7 +43,6 @@ export const Sidebar: FC<SidebarProps> = ({ authActor }) => {
                 <SidebarMenuItem key={title}>
                   <SidebarMenuButton asChild>
                     <Link
-                      to={to}
                       activeOptions={
                         {
                           // If the route points to the root of it's parent,
@@ -49,13 +50,14 @@ export const Sidebar: FC<SidebarProps> = ({ authActor }) => {
                           // exact: to === '.',
                         }
                       }
-                      preload="intent"
-                      className="block py-2 px-3 text-nowrap"
                       activeProps={{ className: 'font-bold' }}
+                      className="block py-2 px-3 text-nowrap"
+                      preload="intent"
+                      to={to}
                     >
                       <Icon
-                        name={icon}
                         className="hidden md:inline text-muted-foreground"
+                        name={icon}
                       />
                       {title}
                     </Link>

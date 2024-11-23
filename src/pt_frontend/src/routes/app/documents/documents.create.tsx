@@ -1,10 +1,13 @@
-import { api } from '@/api';
-import { useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
+
+import { api } from '@/api';
+
 import {
   CreateDocumentForm,
   type createDocumentFormSchema,
 } from '@/components/create-document-form';
+
 import type { z } from 'zod';
 
 export const Route = createFileRoute(
@@ -36,19 +39,19 @@ export function CreateDocument() {
 
     setIsSubmitting(false);
     navigate({
-      to: '/projects/$projectId/documents/$documentId',
       params: {
-        projectId: params.projectId,
         documentId: documentId.toString(),
+        projectId: params.projectId,
       },
+      to: '/projects/$projectId/documents/$documentId',
     });
   }
 
   return (
     <CreateDocumentForm
-      projectId={params.projectId}
-      onSubmit={onSubmit}
       isSubmitting={isSubmitting}
+      onSubmit={onSubmit}
+      projectId={params.projectId}
     />
   );
 }

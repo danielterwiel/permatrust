@@ -1,13 +1,14 @@
-import type * as React from "react";
-import { useState, useMemo, useRef, useEffect } from "react";
 import {
-  useReactTable,
+  type ColumnDef,
   flexRender,
   getCoreRowModel,
-  type ColumnDef,
   type Row,
   type SortingState,
-} from "@tanstack/react-table";
+  useReactTable,
+} from '@tanstack/react-table';
+import { useEffect, useMemo, useRef, useState } from 'react';
+
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table as TableBase,
   TableBody,
@@ -15,44 +16,47 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Pagination } from "./Pagination";
-import { DataTableColumnHeader } from "./TableColumnHeader";
-import type { Entity, EntityName } from "@/types/entities";
+} from '@/components/ui/table';
+
+import { getSortingState } from '@/utils/getSortingState';
+import { sortingStateToSort } from '@/utils/sortingStateToSort';
+
+import { Pagination } from './Pagination';
+import { DataTableColumnHeader } from './TableColumnHeader';
+
 import type {
   PaginationMetadata,
   Sort,
-} from "@/declarations/pt_backend/pt_backend.did";
-import { getSortingState } from "@/utils/getSortingState";
-import { sortingStateToSort } from "@/utils/sortingStateToSort";
+} from '@/declarations/pt_backend/pt_backend.did';
+import type { Entity, EntityName } from '@/types/entities';
+import type * as React from 'react';
 
 interface ColumnConfigItem {
-  id: string;
-  headerName?: string;
   // biome-ignore lint/suspicious/noExplicitAny: columnConfig can pass any value
   cellPreprocess?: (value: any) => any;
+  headerName?: string;
+  id: string;
 }
 
 interface TableProps<T extends Entity = Entity> {
-  tableData?: T[];
-  entityName: EntityName;
+  actions?: ((row: Row<T>) => React.ReactNode) | React.ReactNode;
   columnConfig?: ColumnConfigItem[];
-  paginationMetaData?: PaginationMetadata;
-  actions?: React.ReactNode | ((row: Row<T>) => React.ReactNode);
-  sort: Sort;
+  entityName: EntityName;
   onSelectionChange?: (selectedRows: T[]) => void;
   onSortingChange?: (sort: Sort) => void;
+  paginationMetaData?: PaginationMetadata;
+  sort: Sort;
+  tableData?: T[];
 }
 
 export const Table = <T extends Entity = Entity>({
-  tableData = [],
-  entityName,
-  columnConfig = [],
-  paginationMetaData,
   actions,
+  columnConfig = [],
+  entityName,
   onSelectionChange,
   onSortingChange,
+  paginationMetaData,
+  tableData = [],
 }: TableProps<T>) => {
   const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
 
@@ -64,7 +68,7 @@ export const Table = <T extends Entity = Entity>({
   }, [tableData]);
 
   const handleSortingChange = (
-    updater: SortingState | ((prev: SortingState) => SortingState),
+    updater: ((prev: SortingState) => SortingState) | SortingState,
   ) => {
     const sortingState = getSortingState(updater);
     const newSort = sortingStateToSort(entityName, sortingState);
@@ -73,35 +77,35 @@ export const Table = <T extends Entity = Entity>({
 
   const columns: ColumnDef<T>[] = useMemo(() => {
     const selectColumn: ColumnDef<T> = {
-      id: "select",
+      cell: ({ row }) => (
+        <Checkbox
+          aria-label="Select row"
+          checked={row.getIsSelected()}
+          onCheckedChange={(checked) => row.toggleSelected(!!checked)}
+        />
+      ),
+      enableHiding: false,
+      enableSorting: false,
       header: ({ table }) => (
         <Checkbox
+          aria-label="Select all"
           checked={table.getIsAllPageRowsSelected()}
           onCheckedChange={(checked) =>
             table.toggleAllPageRowsSelected(!!checked)
           }
-          aria-label="Select all"
         />
       ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={row.getIsSelected()}
-          onCheckedChange={(checked) => row.toggleSelected(!!checked)}
-          aria-label="Select row"
-        />
-      ),
-      enableSorting: false,
-      enableHiding: false,
+      id: 'select',
     };
 
     const allColumns = headers.map((header: string) => {
       const config = columnConfig.find((col) => col.id === header);
       const columnDef: ColumnDef<T> = {
         accessorKey: header,
-        header: config?.headerName,
         cell: config?.cellPreprocess
           ? ({ getValue }) => config.cellPreprocess?.(getValue())
           : undefined,
+        header: config?.headerName,
       };
       return columnDef;
     });
@@ -124,16 +128,16 @@ export const Table = <T extends Entity = Entity>({
   });
 
   const table = useReactTable<T>({
-    data: tableData,
     columns,
+    data: tableData,
     getCoreRowModel: getCoreRowModel(),
-    onSortingChange: handleSortingChange,
-    onRowSelectionChange: setRowSelection,
-    state: {
-      rowSelection,
-      columnVisibility,
-    },
     onColumnVisibilityChange: setColumnVisibility,
+    onRowSelectionChange: setRowSelection,
+    onSortingChange: handleSortingChange,
+    state: {
+      columnVisibility,
+      rowSelection,
+    },
   });
 
   const previousSelection = useRef(rowSelection);
@@ -189,14 +193,14 @@ export const Table = <T extends Entity = Entity>({
             {table.getRowModel().rows.map((row) => (
               <TableRow key={row.id}>
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id} className="whitespace-nowrap">
+                  <TableCell className="whitespace-nowrap" key={cell.id}>
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
                 {actions && (
                   <TableCell>
                     <div className="flex justify-end pr-4">
-                      {typeof actions === "function" ? actions(row) : actions}
+                      {typeof actions === 'function' ? actions(row) : actions}
                     </div>
                   </TableCell>
                 )}

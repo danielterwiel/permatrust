@@ -1,4 +1,5 @@
 import { FILTER_FIELD_ENUM } from '@/consts/pagination';
+
 import type { FilterFieldEnum, FilterFieldName } from '@/types/pagination';
 
 const isFilterFieldEnum = (value: {

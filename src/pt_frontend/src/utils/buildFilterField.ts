@@ -1,5 +1,6 @@
-import type { EntityName } from '@/types/entities';
 import { FILTER_FIELD } from '@/consts/pagination';
+
+import type { EntityName } from '@/types/entities';
 import type { FilterField } from '@/types/pagination';
 
 export function buildFilterField(

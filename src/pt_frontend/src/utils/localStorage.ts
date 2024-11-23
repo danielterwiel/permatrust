@@ -6,8 +6,8 @@ export const getItem = <T>(key: string, initialValue: T): T => {
   try {
     const item = globalThis.localStorage.getItem(key);
     return item ? (JSON.parse(item) as T) : initialValue;
-  } catch (error) {
-    console.warn(`Error reading localStorage key "${key}":`, error);
+  } catch (_error) {
+    // TODO: handle error
     return initialValue;
   }
 };
@@ -19,8 +19,8 @@ export const setItem = <T>(key: string, value: T): void => {
 
   try {
     globalThis.localStorage.setItem(key, JSON.stringify(value));
-  } catch (error) {
-    console.warn(`Error setting localStorage key "${key}":`, error);
+  } catch (_error) {
+    // TODO: handle error
   }
 };
 

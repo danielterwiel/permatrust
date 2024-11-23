@@ -1,11 +1,9 @@
-import type * as React from 'react';
 import {
   ArrowDownIcon,
   ArrowUpIcon,
   CaretSortIcon,
 } from '@radix-ui/react-icons';
-import type { Column } from '@tanstack/react-table';
-import { cn } from '@/utils/cn';
+
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -14,6 +12,11 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 
+import { cn } from '@/utils/cn';
+
+import type { Column } from '@tanstack/react-table';
+import type * as React from 'react';
+
 type DataTableColumnHeaderProps<TData, TValue> =
   React.HTMLAttributes<HTMLDivElement> & {
     column: Column<TData, TValue>;
@@ -21,9 +24,9 @@ type DataTableColumnHeaderProps<TData, TValue> =
   };
 
 export function DataTableColumnHeader<TData, TValue>({
+  className,
   column,
   title,
-  className,
 }: DataTableColumnHeaderProps<TData, TValue>) {
   if (!column.getCanSort()) {
     return <div className={cn(className)}>{title}</div>;
@@ -33,9 +36,9 @@ export function DataTableColumnHeader<TData, TValue>({
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            variant="ghost"
-            size="sm"
             className="-ml-3 h-8 data-[state=open]:bg-accent"
+            size="sm"
+            variant="ghost"
           >
             {title}
             {column.getIsSorted() === 'desc' ? (

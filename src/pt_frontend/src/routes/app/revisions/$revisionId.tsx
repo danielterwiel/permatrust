@@ -1,56 +1,61 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { api } from '@/api'
-import { MDXEditor, headingsPlugin } from '@mdxeditor/editor'
-import { Icon } from '@/components/ui/Icon'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { headingsPlugin, MDXEditor } from '@mdxeditor/editor';
+import { createFileRoute } from '@tanstack/react-router';
+
+import { api } from '@/api';
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Icon } from '@/components/ui/Icon';
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId',
 )({
-  component: RevisionDetails,
-  beforeLoad: async ({ params: { revisionId } }) => {
-    const revision = await api.get_revision(BigInt(revisionId))
+  beforeLoad: async () => {
+    return {
+      getTitle: () => 'Revision',
+    };
+  },
+  loader: async ({ params: { revisionId } }) => {
+    const revision = await api.get_revision(BigInt(revisionId));
     return {
       revision,
-      getTitle: () => 'Revision',
-    }
+    };
   },
-  loader: ({ context }) => ({
-    revision: context.revision,
-  }),
+  component: RevisionDetails,
   errorComponent: ({ error }) => {
-    return <div>Error: {error.message}</div>
+    return <div>Error: {error.message}</div>;
   },
-})
+});
 
 function RevisionDetails() {
-  const { revision } = Route.useLoaderData()
+  const { revision } = Route.useLoaderData();
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>
           <Icon
+            className="text-muted-foreground pb-1 mr-2"
             name="file-stack-outline"
             size="lg"
-            className="text-muted-foreground pb-1 mr-2"
           />
           Revision #{revision?.version}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <MDXEditor
-          readOnly={true}
-          plugins={[headingsPlugin()]}
           contentEditableClassName="prose"
           markdown={new TextDecoder().decode(
             new Uint8Array(
               revision?.content ? Object.values(revision?.content) : [],
             ),
           )}
-          onError={(error) => console.error('MDXEditor error:', error)}
+          onError={(_error) => {
+            // TODO: handle error
+          }}
+          plugins={[headingsPlugin()]}
+          readOnly={true}
         />
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -1,10 +1,9 @@
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Icon } from '@/components/ui/Icon';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+
 import { Loading } from '@/components/Loading';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
@@ -15,6 +14,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
+import { Icon } from '@/components/ui/Icon';
+import { Input } from '@/components/ui/input';
+
 import type { FC } from 'react';
 
 export const createOrganisationFormSchema = z.object({
@@ -24,19 +26,19 @@ export const createOrganisationFormSchema = z.object({
 });
 
 type CreateOrganisationFormProps = {
-  onSubmit: (values: z.infer<typeof createOrganisationFormSchema>) => void;
   isSubmitting: boolean;
+  onSubmit: (values: z.infer<typeof createOrganisationFormSchema>) => void;
 };
 
 export const CreateOrganisationForm: FC<CreateOrganisationFormProps> = ({
-  onSubmit,
   isSubmitting,
+  onSubmit,
 }) => {
   const form = useForm<z.infer<typeof createOrganisationFormSchema>>({
-    resolver: zodResolver(createOrganisationFormSchema),
     defaultValues: {
       name: '',
     },
+    resolver: zodResolver(createOrganisationFormSchema),
   });
 
   return (
@@ -44,16 +46,16 @@ export const CreateOrganisationForm: FC<CreateOrganisationFormProps> = ({
       <CardHeader>
         <CardTitle>
           <Icon
+            className="text-muted-foreground pb-1 mr-2"
             name="building-outline"
             size="lg"
-            className="text-muted-foreground pb-1 mr-2"
           />
           Create new organisation
         </CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
               name="name"

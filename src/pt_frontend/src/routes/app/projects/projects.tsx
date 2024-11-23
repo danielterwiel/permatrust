@@ -1,39 +1,45 @@
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { z } from 'zod';
+
 import { api } from '@/api';
-import { formatDateTime } from '@/utils/formatDateTime';
+
+import { FilterInput } from '@/components/FilterInput';
+import { Link } from '@/components/Link';
+import { Table } from '@/components/Table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Icon } from '@/components/ui/Icon';
+
 import { buildFilterField } from '@/utils/buildFilterField';
 import { buildPaginationInput } from '@/utils/buildPaginationInput';
-import { paginationInputSchema } from '@/schemas/pagination';
+import { formatDateTime } from '@/utils/formatDateTime';
 import { getActiveOrganisationId } from '@/utils/getActiveOrganisationId';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { Table } from '@/components/Table';
-import { Icon } from '@/components/ui/Icon';
-import { Link } from '@/components/Link';
-import { FilterInput } from '@/components/FilterInput';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import type { FilterCriteria } from '@/types/pagination';
-import type { Row } from '@tanstack/react-table';
-import type {
-  Project,
-  PaginationInput,
-  Sort,
-  SortCriteria,
-} from '@/declarations/pt_backend/pt_backend.did';
+
+import { ENTITY, ENTITY_NAME } from '@/consts/entities';
 import {
   DEFAULT_PAGINATION,
   FILTER_FIELD,
   FILTER_OPERATOR,
   SORT_ORDER,
 } from '@/consts/pagination';
-import { ENTITY, ENTITY_NAME } from '@/consts/entities';
+
+import { paginationInputSchema } from '@/schemas/pagination';
+
+import type {
+  PaginationInput,
+  Project,
+  Sort,
+  SortCriteria,
+} from '@/declarations/pt_backend/pt_backend.did';
+import type { FilterCriteria } from '@/types/pagination';
+import type { Row } from '@tanstack/react-table';
 
 const DEFAULT_FILTERS: [FilterCriteria[]] = [
   [
     {
-      value: '',
       entity: ENTITY.Project,
       field: buildFilterField(ENTITY_NAME.Project, FILTER_FIELD.Project.Name),
       operator: FILTER_OPERATOR.Contains,
+      value: '',
     },
   ],
 ];
@@ -50,16 +56,15 @@ const projectsSearchSchema = z.object({
 });
 
 const DEFAULT_PROJECT_PAGINATION: PaginationInput = {
+  filters: DEFAULT_FILTERS,
   page_number: DEFAULT_PAGINATION.page_number,
   page_size: DEFAULT_PAGINATION.page_size,
-  filters: DEFAULT_FILTERS,
   sort: DEFAULT_SORT,
 };
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects',
 )({
-  component: Projects,
   validateSearch: (search) => projectsSearchSchema.parse(search),
   loaderDeps: ({ search: { pagination } }) => ({ pagination }),
   loader: async ({ context, deps: { pagination } }) => {
@@ -75,11 +80,12 @@ export const Route = createFileRoute(
       );
     return {
       context,
-      projects,
-      paginationMetaData,
       pagination: projectPagination,
+      paginationMetaData,
+      projects,
     };
   },
+  component: Projects,
   errorComponent: ({ error }) => {
     return <div>Error: {error.message}</div>;
   },
@@ -88,11 +94,11 @@ export const Route = createFileRoute(
 const RowActions = (row: Row<Project>) => {
   return (
     <Link
-      to="/projects/$projectId"
-      variant="outline"
       params={{
         projectId: row.id,
       }}
+      to="/projects/$projectId"
+      variant="outline"
     >
       Open
     </Link>
@@ -100,7 +106,7 @@ const RowActions = (row: Row<Project>) => {
 };
 
 function Projects() {
-  const { projects, pagination, paginationMetaData } = Route.useLoaderData();
+  const { pagination, paginationMetaData, projects } = Route.useLoaderData();
   const navigate = useNavigate();
 
   return (
@@ -109,28 +115,28 @@ function Projects() {
         {pagination.filters[0]?.map((filterCriteria) => {
           return (
             <FilterInput
-              key={filterCriteria.entity.toString()}
               filterCriteria={filterCriteria}
-              placeholder="Filter project name..."
+              key={filterCriteria.entity.toString()}
               onChange={(filterCriteria: FilterCriteria) => {
                 navigate({
-                  to: '/projects',
                   search: {
                     pagination: {
                       ...pagination,
                       filters: [[filterCriteria]],
                     },
                   },
+                  to: '/projects',
                 });
               }}
+              placeholder="Filter project name..."
             />
           );
         })}
         <Link
-          to="/projects/create"
-          variant="default"
           className="h-7 gap-1"
           size="sm"
+          to="/projects/create"
+          variant="default"
         >
           <Icon name="briefcase-outline" size="sm" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap text-sm">
@@ -142,48 +148,48 @@ function Projects() {
         <CardHeader>
           <CardTitle>
             <Icon
+              className="text-muted-foreground pb-1 mr-2"
               name="briefcase-outline"
               size="lg"
-              className="text-muted-foreground pb-1 mr-2"
             />
             Projects
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Table<Project>
-            tableData={projects}
             actions={RowActions}
-            paginationMetaData={paginationMetaData}
+            columnConfig={[
+              {
+                cellPreprocess: (v) => v,
+                headerName: 'Name',
+                id: 'name',
+              },
+              {
+                cellPreprocess: (createdBy) => createdBy.toString(),
+                headerName: 'Created by',
+                id: 'created_by',
+              },
+              {
+                cellPreprocess: (createdAt) => formatDateTime(createdAt),
+                headerName: 'Created at',
+                id: 'created_at',
+              },
+            ]}
             entityName={ENTITY_NAME.Project}
-            sort={pagination.sort}
             onSortingChange={(newSort: Sort) => {
               navigate({
-                to: '/projects',
                 search: {
                   pagination: {
                     ...pagination,
                     sort: newSort,
                   },
                 },
+                to: '/projects',
               });
             }}
-            columnConfig={[
-              {
-                id: 'name',
-                headerName: 'Name',
-                cellPreprocess: (v) => v,
-              },
-              {
-                id: 'created_by',
-                headerName: 'Created by',
-                cellPreprocess: (createdBy) => createdBy.toString(),
-              },
-              {
-                id: 'created_at',
-                headerName: 'Created at',
-                cellPreprocess: (createdAt) => formatDateTime(createdAt),
-              },
-            ]}
+            paginationMetaData={paginationMetaData}
+            sort={pagination.sort}
+            tableData={projects}
           />
         </CardContent>
       </Card>

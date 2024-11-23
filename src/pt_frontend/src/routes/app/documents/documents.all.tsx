@@ -1,17 +1,16 @@
-import { z } from 'zod';
-import { api } from '@/api';
-import { useState } from 'react';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { getActiveOrganisationId } from '@/utils/getActiveOrganisationId';
-import { buildPaginationInput } from '@/utils/buildPaginationInput';
-import { buildFilterField } from '@/utils/buildFilterField';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
-import { Table } from '@/components/Table';
-import { Icon } from '@/components/ui/Icon';
-import { Link } from '@/components/Link';
-import { Button } from '@/components/ui/button';
+import { useState } from 'react';
+import { z } from 'zod';
+
+import { api } from '@/api';
+
 import { FilterInput } from '@/components/FilterInput';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Link } from '@/components/Link';
+import { Table } from '@/components/Table';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Icon } from '@/components/ui/Icon';
 import {
   Popover,
   PopoverContent,
@@ -26,34 +25,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { paginationInputSchema } from '@/schemas/pagination';
-import type { FilterCriteria } from '@/types/pagination';
-import type { Row } from '@tanstack/react-table';
-import type {
-  Document,
-  PaginationInput,
-  Sort,
-  SortCriteria,
-} from '@/declarations/pt_backend/pt_backend.did';
-import type { _SERVICE } from '@/declarations/pt_backend/pt_backend.did.d';
+
+import { buildFilterField } from '@/utils/buildFilterField';
+import { buildPaginationInput } from '@/utils/buildPaginationInput';
+import { getActiveOrganisationId } from '@/utils/getActiveOrganisationId';
+
+import { ENTITY, ENTITY_NAME } from '@/consts/entities';
 import {
   DEFAULT_PAGINATION,
   FILTER_FIELD,
   FILTER_OPERATOR,
   SORT_ORDER,
 } from '@/consts/pagination';
-import { ENTITY, ENTITY_NAME } from '@/consts/entities';
+
+import { paginationInputSchema } from '@/schemas/pagination';
+
+import type {
+  Document,
+  PaginationInput,
+  Sort,
+  SortCriteria,
+} from '@/declarations/pt_backend/pt_backend.did';
+import type { FilterCriteria } from '@/types/pagination';
+import type { Row } from '@tanstack/react-table';
 
 const DEFAULT_FILTERS: [FilterCriteria[]] = [
   [
     {
-      value: '',
       entity: ENTITY.Document,
       field: buildFilterField(
         ENTITY_NAME.Document,
         FILTER_FIELD.Document.Title,
       ),
       operator: FILTER_OPERATOR.Contains,
+      value: '',
     },
   ],
 ];
@@ -70,22 +75,21 @@ const documentsSearchSchema = z.object({
 });
 
 const DEFAULT_DOCUMENT_PAGINATION: PaginationInput = {
+  filters: DEFAULT_FILTERS,
   page_number: DEFAULT_PAGINATION.page_number,
   page_size: DEFAULT_PAGINATION.page_size,
-  filters: DEFAULT_FILTERS,
   sort: DEFAULT_SORT,
 };
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/documents',
 )({
-  component: Documents,
   validateSearch: zodSearchValidator(documentsSearchSchema),
-  beforeLoad: () => ({
-    getTitle: () => 'Documents',
-  }),
   loaderDeps: ({ search }) => ({
     pagination: { ...DEFAULT_DOCUMENT_PAGINATION, ...search.pagination },
+  }),
+  beforeLoad: () => ({
+    getTitle: () => 'Documents',
   }),
   loader: async ({ context, deps }) => {
     const activeOrganisationId = getActiveOrganisationId();
@@ -99,12 +103,13 @@ export const Route = createFileRoute(
       await api.list_documents(documentPagination);
     return {
       context,
-      projects,
       documents,
-      paginationMetaData,
       pagination: documentPagination,
+      paginationMetaData,
+      projects,
     };
   },
+  component: Documents,
   errorComponent: ({ error }) => {
     return <div>Error: {error.message}</div>;
   },
@@ -113,12 +118,12 @@ export const Route = createFileRoute(
 const RowActions = (row: Row<Document>) => {
   return (
     <Link
+      params={{
+        documentId: row.id,
+        projectId: row.original.project.toString(),
+      }}
       to="/projects/$projectId/documents/$documentId"
       variant="outline"
-      params={{
-        projectId: row.original.project.toString(),
-        documentId: row.id,
-      }}
     >
       Open
     </Link>
@@ -126,7 +131,7 @@ const RowActions = (row: Row<Document>) => {
 };
 
 function Documents() {
-  const { projects, documents, pagination, paginationMetaData } =
+  const { documents, pagination, paginationMetaData, projects } =
     Route.useLoaderData();
   const [selectedProjectId, setSelectedProjectId] = useState<string>();
   const navigate = useNavigate();
@@ -137,30 +142,30 @@ function Documents() {
         {pagination.filters[0]?.map((filterCriteria) => {
           return (
             <FilterInput
-              key={filterCriteria.entity.toString()}
               filterCriteria={filterCriteria}
-              placeholder="Filter title..."
+              key={filterCriteria.entity.toString()}
               onChange={(filterCriteria: FilterCriteria) => {
                 navigate({
-                  to: '/documents',
                   search: {
                     pagination: {
                       ...pagination,
                       filters: [[filterCriteria]],
                     },
                   },
+                  to: '/documents',
                 });
               }}
+              placeholder="Filter title..."
             />
           );
         })}
         {projects.length === 1 ? (
           <Link
-            to="/projects/$projectId/documents/create"
-            params={{ projectId: projects[0]?.id.toString() }}
-            variant="default"
             className="h-7 gap-1"
+            params={{ projectId: projects[0]?.id.toString() }}
             size="sm"
+            to="/projects/$projectId/documents/create"
+            variant="default"
           >
             <Icon name="file-outline" size="sm" />
             <span className="sr-only sm:not-sr-only sm:whitespace-nowrap text-sm">
@@ -170,7 +175,7 @@ function Documents() {
         ) : (
           <Popover>
             <PopoverTrigger asChild>
-              <Button variant="default" size="sm">
+              <Button size="sm" variant="default">
                 <Icon name="file-outline" size="xs" />
                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                   Create document
@@ -199,13 +204,13 @@ function Documents() {
                 </SelectContent>
               </Select>
               <Link
-                to="/projects/$projectId/documents/create"
-                params={{ projectId: selectedProjectId }}
-                variant="default"
-                disabled={!selectedProjectId}
                 className="mt-4"
+                disabled={!selectedProjectId}
+                params={{ projectId: selectedProjectId }}
+                to="/projects/$projectId/documents/create"
+                variant="default"
               >
-                <Icon name="file-outline" size="sm" className="mr-2" />
+                <Icon className="mr-2" name="file-outline" size="sm" />
                 Create document
               </Link>
             </PopoverContent>
@@ -216,43 +221,43 @@ function Documents() {
         <CardHeader>
           <CardTitle>
             <Icon
+              className="text-muted-foreground pb-1 mr-2"
               name="files-outline"
               size="lg"
-              className="text-muted-foreground pb-1 mr-2"
             />
             Documents
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Table<Document>
-            tableData={documents}
             actions={RowActions}
-            paginationMetaData={paginationMetaData}
+            columnConfig={[
+              {
+                cellPreprocess: (title) => title,
+                headerName: 'Document title',
+                id: 'title',
+              },
+              {
+                cellPreprocess: (version) => version,
+                headerName: 'Version',
+                id: 'version',
+              },
+            ]}
             entityName={ENTITY_NAME.Document}
-            sort={pagination.sort}
             onSortingChange={(newSort: Sort) => {
               navigate({
-                to: '/documents',
                 search: {
                   pagination: {
                     ...pagination,
                     sort: newSort,
                   },
                 },
+                to: '/documents',
               });
             }}
-            columnConfig={[
-              {
-                id: 'title',
-                headerName: 'Document title',
-                cellPreprocess: (title) => title,
-              },
-              {
-                id: 'version',
-                headerName: 'Version',
-                cellPreprocess: (version) => version,
-              },
-            ]}
+            paginationMetaData={paginationMetaData}
+            sort={pagination.sort}
+            tableData={documents}
           />
         </CardContent>
       </Card>

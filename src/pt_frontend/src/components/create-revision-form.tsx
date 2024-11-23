@@ -1,8 +1,21 @@
-import { z } from 'zod';
-import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from '@/components/ui/button';
+import {
+  BlockTypeSelect,
+  BoldItalicUnderlineToggles,
+  diffSourcePlugin,
+  DiffSourceToggleWrapper,
+  headingsPlugin,
+  ListsToggle,
+  MDXEditor,
+  toolbarPlugin,
+  UndoRedo,
+} from '@mdxeditor/editor';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+
 import { Loading } from '@/components/Loading';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -12,20 +25,10 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import {
-  MDXEditor,
-  UndoRedo,
-  BoldItalicUnderlineToggles,
-  DiffSourceToggleWrapper,
-  BlockTypeSelect,
-  ListsToggle,
-  headingsPlugin,
-  diffSourcePlugin,
-  toolbarPlugin,
-} from '@mdxeditor/editor';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/Icon';
+
 import { decodeUint8Array } from '@/utils/decodeUint8Array';
+
 import type { Revision } from '@/declarations/pt_backend/pt_backend.did';
 import type { FC } from 'react';
 
@@ -37,25 +40,25 @@ export const createRevisionFormSchema = z.object({
 });
 
 type CreateRevisionFormProps = {
-  projectId: string;
-  revision: Revision | undefined;
   isSubmitting: boolean;
   onSubmit: (data: z.infer<typeof createRevisionFormSchema>) => void;
+  projectId: string;
+  revision: Revision | undefined;
 };
 
 export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
-  projectId,
-  revision,
   isSubmitting,
   onSubmit,
+  projectId,
+  revision,
 }) => {
   const form = useForm<z.infer<typeof createRevisionFormSchema>>({
-    resolver: zodResolver(createRevisionFormSchema),
-    disabled: isSubmitting,
     defaultValues: {
       content: '',
       projects: [BigInt(projectId)],
     },
+    disabled: isSubmitting,
+    resolver: zodResolver(createRevisionFormSchema),
   });
 
   const content = decodeUint8Array(revision?.content);
@@ -70,16 +73,16 @@ export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
         <CardHeader>
           <CardTitle>
             <Icon
+              className="text-muted-foreground pb-1 mr-2"
               name="file-stack-outline"
               size="lg"
-              className="text-muted-foreground pb-1 mr-2"
             />
             Details
           </CardTitle>
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
               <FormField
                 control={form.control}
                 name="content"
@@ -90,8 +93,8 @@ export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
                       <div className="border border-input">
                         <MDXEditor
                           className="rounded-md bg-background p-2 text-sm placeholder:text-muted-foreground focus:border-2 focus:border-accent-foreground focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-accent-foreground disabled:cursor-not-allowed disabled:opacity-50"
-                          markdown={markdown}
                           contentEditableClassName="prose"
+                          markdown={markdown}
                           plugins={[
                             headingsPlugin(),
                             toolbarPlugin({

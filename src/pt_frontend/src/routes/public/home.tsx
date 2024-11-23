@@ -1,4 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
+
 import { Link } from '@/components/Link';
 
 export const Route = createFileRoute('/')({
@@ -10,7 +11,7 @@ function Authenticate() {
 
   return (
     <div className="grid place-items-center min-h-dvh pb-36">
-      <Link to="/authenticate" search={search}>
+      <Link search={search} to="/authenticate">
         Authenticate
       </Link>
     </div>

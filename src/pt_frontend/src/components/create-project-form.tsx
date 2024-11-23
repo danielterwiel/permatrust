@@ -1,9 +1,10 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Icon } from '@/components/ui/Icon';
+
 import { Loading } from '@/components/Loading';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -13,8 +14,9 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Icon } from '@/components/ui/Icon';
 import { Input } from '@/components/ui/input';
+
 import type { FC } from 'react';
 
 export const createProjectFormSchema = z.object({
@@ -24,20 +26,20 @@ export const createProjectFormSchema = z.object({
 });
 
 type CreateProjectFormProps = {
-  onSubmit: (values: z.infer<typeof createProjectFormSchema>) => void;
   isSubmitting: boolean;
+  onSubmit: (values: z.infer<typeof createProjectFormSchema>) => void;
 };
 
 export const CreateProjectForm: FC<CreateProjectFormProps> = ({
-  onSubmit,
   isSubmitting,
+  onSubmit,
 }) => {
   const form = useForm<z.infer<typeof createProjectFormSchema>>({
-    resolver: zodResolver(createProjectFormSchema),
-    disabled: isSubmitting,
     defaultValues: {
       name: '',
     },
+    disabled: isSubmitting,
+    resolver: zodResolver(createProjectFormSchema),
   });
 
   return (
@@ -45,16 +47,16 @@ export const CreateProjectForm: FC<CreateProjectFormProps> = ({
       <CardHeader>
         <CardTitle>
           <Icon
+            className="text-muted-foreground pb-1 mr-2"
             name="briefcase-outline"
             size="lg"
-            className="text-muted-foreground pb-1 mr-2"
           />
           Create new project
         </CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
               name="name"
@@ -74,7 +76,7 @@ export const CreateProjectForm: FC<CreateProjectFormProps> = ({
                 <Loading text="Creating..." />
               </Button>
             ) : (
-              <Button type="submit" disabled={isSubmitting}>
+              <Button disabled={isSubmitting} type="submit">
                 Create
               </Button>
             )}

@@ -1,6 +1,7 @@
 import { FILTER_FIELD } from '@/consts/pagination';
-import type { FilterFieldEnum, FilterFieldName } from '@/types/pagination';
+
 import type { EntityName } from '@/types/entities';
+import type { FilterFieldEnum, FilterFieldName } from '@/types/pagination';
 
 export const buildEnum = (
   filterFieldName: FilterFieldName,

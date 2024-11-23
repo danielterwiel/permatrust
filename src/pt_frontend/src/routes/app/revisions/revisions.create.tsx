@@ -1,14 +1,19 @@
-import { api } from '@/api';
-import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
-import { buildFilterField } from '@/utils/buildFilterField';
-import { isAppError } from '@/utils/isAppError';
+import { useState } from 'react';
+
+import { api } from '@/api';
+
 import {
   CreateRevisionForm,
   type createRevisionFormSchema,
 } from '@/components/create-revision-form';
-import { SORT_ORDER, FILTER_FIELD } from '@/consts/pagination';
+
+import { buildFilterField } from '@/utils/buildFilterField';
+import { isAppError } from '@/utils/isAppError';
+
 import { ENTITY_NAME } from '@/consts/entities';
+import { FILTER_FIELD, SORT_ORDER } from '@/consts/pagination';
+
 import type {
   PaginationInput,
   SortCriteria,
@@ -26,16 +31,15 @@ const DEFAULT_SORT: [SortCriteria] = [
 ];
 
 const LAST_REVISION_PAGINATION: PaginationInput = {
-  page_size: 1,
-  page_number: 1,
   filters: [],
+  page_number: 1,
+  page_size: 1,
   sort: DEFAULT_SORT,
 };
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/create',
 )({
-  component: RevisionsCreate,
   beforeLoad: async ({ params }) => {
     const response = await api.list_revisions_by_document_id(
       BigInt(params.documentId),
@@ -51,11 +55,12 @@ export const Route = createFileRoute(
       revision,
     };
   },
+  component: RevisionsCreate,
 });
 
 function RevisionsCreate() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { projectId, documentId } = Route.useParams();
+  const { documentId, projectId } = Route.useParams();
   const { revision } = Route.useRouteContext({
     select: ({ revision }) => ({ revision }),
   });
@@ -72,8 +77,8 @@ function RevisionsCreate() {
       navigate({
         to: '/projects/$projectId/documents/$documentId',
       });
-    } catch (error) {
-      console.error(error);
+    } catch (_error) {
+      // TODO: handle error
     } finally {
       setIsSubmitting(false);
     }
@@ -81,10 +86,10 @@ function RevisionsCreate() {
 
   return (
     <CreateRevisionForm
-      projectId={projectId}
-      revision={revision}
       isSubmitting={isSubmitting}
       onSubmit={onSubmit}
+      projectId={projectId}
+      revision={revision}
     />
   );
 }

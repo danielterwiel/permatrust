@@ -1,21 +1,24 @@
-import { api } from '@/api';
-import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
+
+import { api } from '@/api';
+
 import {
   CreateUserForm,
   type createUserFormSchema,
 } from '@/components/create-user-form';
+
 import type { z } from 'zod';
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/users/create',
 )({
-  component: CreateUser,
   beforeLoad: () => {
     return {
       getTitle: () => 'Create user',
     };
   },
+  component: CreateUser,
   errorComponent: ({ error }) => {
     return <div>Error: {error.message}</div>;
   },
@@ -31,12 +34,12 @@ function CreateUser() {
       await api.create_user(values.first_name, values.last_name);
       navigate({ to: '/organisations' });
       setIsSubmitting(false);
-    } catch (error) {
-      console.error(error);
+    } catch (_error) {
+      // TODO: handle error
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  return <CreateUserForm onSubmit={onSubmit} isSubmitting={isSubmitting} />;
+  return <CreateUserForm isSubmitting={isSubmitting} onSubmit={onSubmit} />;
 }

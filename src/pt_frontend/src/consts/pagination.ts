@@ -1,34 +1,34 @@
 import type { PaginationInput } from '@/declarations/pt_backend/pt_backend.did';
-import type { FilterFieldName, FilterFieldEnum } from '@/types/pagination';
+import type { FilterFieldEnum, FilterFieldName } from '@/types/pagination';
 
 export const DEFAULT_PAGINATION: PaginationInput = {
-  page_size: 10,
-  page_number: 1,
   filters: [],
+  page_number: 1,
+  page_size: 10,
   sort: [],
 } as const;
 export const FILTER_FIELD_DOCUMENT = {
+  CreatedAt: { CreatedAt: null },
   ProjectId: { ProjectId: null },
   Title: { Title: null },
   Version: { Version: null },
-  CreatedAt: { CreatedAt: null },
 } as const;
 export const FILTER_FIELD_ORGANISATION = {
-  Name: { Name: null },
   CreatedAt: { CreatedAt: null },
   CreatedBy: { CreatedBy: null },
+  Name: { Name: null },
 } as const;
 export const FILTER_FIELD_PROJECT = {
-  Name: { Name: null },
   CreatedAt: { CreatedAt: null },
   CreatedBy: { CreatedBy: null },
+  Name: { Name: null },
   OrganisationId: { OrganisationId: null },
 } as const;
 export const FILTER_FIELD_REVISION = {
-  Version: { Version: null },
   CreatedAt: { CreatedAt: null },
   DocumentId: { DocumentId: null },
   ProjectId: { ProjectId: null },
+  Version: { Version: null },
 } as const;
 export const FILTER_FIELD_USER = {
   FirstName: { FirstName: null },
@@ -50,9 +50,9 @@ export const FILTER_FIELD = {
 
 export const FILTER_OPERATOR = {
   Contains: { Contains: null },
+  Equals: { Equals: null },
   GreaterThan: { GreaterThan: null },
   LessThan: { LessThan: null },
-  Equals: { Equals: null },
 } as const;
 
 export const SORT_ORDER = {

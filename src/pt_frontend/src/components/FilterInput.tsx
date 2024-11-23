@@ -1,4 +1,7 @@
-import { Input } from '@/components/ui/input';
+import { useDebouncedWatch } from '@/hooks/useDebouncedWatch';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+
 import {
   Form,
   FormControl,
@@ -7,34 +10,35 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { filterCriteriaSchema } from '@/schemas/pagination';
+import { Input } from '@/components/ui/input';
+
 import { filterCriteriaToFilterFieldName } from '@/utils/filterCriteriaToFilterFieldName';
-import { useDebouncedWatch } from '@/hooks/useDebouncedWatch';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import type { ComponentProps } from 'react';
+
+import { filterCriteriaSchema } from '@/schemas/pagination';
+
 import type { FilterCriteria } from '@/declarations/pt_backend/pt_backend.did';
+import type { ComponentProps } from 'react';
 
 type FilterProps = Omit<ComponentProps<typeof Input>, 'onChange'> & {
   filterCriteria: FilterCriteria;
-  placeholder: string;
   onChange?: (value: FilterCriteria) => void;
+  placeholder: string;
 };
 
 export const FilterInput = ({
   filterCriteria,
-  placeholder,
   onChange,
+  placeholder,
   ...inputProps
 }: FilterProps) => {
   const form = useForm<FilterCriteria>({
-    resolver: zodResolver(filterCriteriaSchema),
     defaultValues: {
       entity: filterCriteria.entity,
       field: filterCriteria.field,
       operator: filterCriteria.operator,
     },
     mode: 'onChange',
+    resolver: zodResolver(filterCriteriaSchema),
   });
 
   const fieldName = filterCriteriaToFilterFieldName(
@@ -63,11 +67,11 @@ export const FilterInput = ({
                 <Input
                   {...inputProps}
                   {...field}
-                  placeholder={placeholder}
                   aria-label={placeholder}
-                  value={String(field.value || filterCriteria.value)}
                   className="h-8 w-[250px] lg:w-[350px] text-sm"
+                  placeholder={placeholder}
                   type="text"
+                  value={String(field.value || filterCriteria.value)}
                 />
               </FormControl>
               <FormMessage />

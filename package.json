@@ -22,7 +22,6 @@
   "workspaces": [
     "src/pt_frontend"
   ],
-  "dependencies": {
-    "@xstate/react": "^5.0.0"
-  }
+  "dependencies": {},
+  "devDependencies": {}
 }

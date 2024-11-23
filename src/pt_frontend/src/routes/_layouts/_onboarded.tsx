@@ -1,11 +1,11 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router';
+
+import { Breadcrumbs } from '@/components/Breadcrumbs';
 import { Sidebar } from '@/components/Sidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
-import { Breadcrumbs } from '@/components/Breadcrumbs';
 
 export const Route = createFileRoute('/_initialized/_authenticated/_onboarded')(
   {
-    component: OnboardedLayout,
     loader: async ({ context }) => {
       const authActor = context.actors.auth;
 
@@ -13,6 +13,7 @@ export const Route = createFileRoute('/_initialized/_authenticated/_onboarded')(
         authActor,
       };
     },
+    component: OnboardedLayout,
     errorComponent: ({ error }) => {
       return <div>Error: {error.message}</div>;
     },

@@ -1,18 +1,20 @@
 import { z } from 'zod';
+
 import { entitySchema } from './entities';
+
 import type {
-  PaginationInput as ApiPaginationInput,
+  DocumentFilterField as ApiDocumentFilterField,
   FilterField as ApiFilterField,
   FilterOperator as ApiFilterOperator,
-  UserFilterField as ApiUserFilterField,
-  OrganisationFilterField as ApiOrganisationFilterField,
-  ProjectFilterField as ApiProjectFilterField,
-  DocumentFilterField as ApiDocumentFilterField,
-  RevisionFilterField as ApiRevisionFilterField,
-  WorkflowFilterField as ApiWorkflowFilterField,
-  SortOrder as ApiSortOrder,
   Filters as ApiFilters,
+  OrganisationFilterField as ApiOrganisationFilterField,
+  PaginationInput as ApiPaginationInput,
+  ProjectFilterField as ApiProjectFilterField,
+  RevisionFilterField as ApiRevisionFilterField,
   Sort as ApiSort,
+  SortOrder as ApiSortOrder,
+  UserFilterField as ApiUserFilterField,
+  WorkflowFilterField as ApiWorkflowFilterField,
 } from '@/declarations/pt_backend/pt_backend.did';
 
 const userFilterFieldSchema = z.union([
@@ -62,10 +64,10 @@ export const filterOperatorSchema = z.union([
 
 export const filterCriteriaSchema = z
   .object({
-    field: filterFieldSchema,
     entity: entitySchema,
-    value: z.string(),
+    field: filterFieldSchema,
     operator: filterOperatorSchema,
+    value: z.string(),
   })
   .strict();
 
@@ -90,8 +92,8 @@ export const filtersSchema = z.union([
 ]) satisfies z.ZodType<ApiFilters>;
 
 export const paginationInputSchema = z.object({
-  page_size: z.number(),
-  page_number: z.number(),
   filters: filtersSchema,
+  page_number: z.number(),
+  page_size: z.number(),
   sort: sortSchema,
 }) satisfies z.ZodType<ApiPaginationInput>;

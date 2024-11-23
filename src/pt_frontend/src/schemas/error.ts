@@ -1,5 +1,6 @@
-import type { AppError } from '@/declarations/pt_backend/pt_backend.did';
 import { z } from 'zod';
+
+import type { AppError } from '@/declarations/pt_backend/pt_backend.did';
 
 export const AppErrorSchema = z.union([
   z.object({

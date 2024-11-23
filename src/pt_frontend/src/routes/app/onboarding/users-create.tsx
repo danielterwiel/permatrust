@@ -1,22 +1,25 @@
-import { api } from '@/api';
-import { useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
+import { useState } from 'react';
+
+import { api } from '@/api';
+
 import {
   CreateUserForm,
   type createUserFormSchema,
 } from '@/components/create-user-form';
+
 import type { z } from 'zod';
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarding/onboarding/users/create',
 )({
-  component: CreateUser,
   beforeLoad: () => ({
     getTitle: () => 'Create user',
   }),
   loader: async ({ context }) => ({
     authActor: context.actors.auth,
   }),
+  component: CreateUser,
 });
 
 function CreateUser() {
@@ -31,20 +34,20 @@ function CreateUser() {
       authActor.send({
         type: 'UPDATE_USER',
         user: {
-          id,
           first_name: values.first_name,
+          id,
           last_name: values.last_name,
           organisations: [],
         },
       });
       navigate({ to: '/onboarding/organisations/create' });
       setIsSubmitting(false);
-    } catch (error) {
-      console.error(error);
+    } catch (_error) {
+      // TODO: handle error
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  return <CreateUserForm onSubmit={onSubmit} isSubmitting={isSubmitting} />;
+  return <CreateUserForm isSubmitting={isSubmitting} onSubmit={onSubmit} />;
 }

@@ -1,13 +1,14 @@
-import type { PaginationMetadata } from '@/declarations/pt_backend/pt_backend.did';
+import { PaginationLink } from '@/components/PaginationLink';
+import { PaginationNext } from '@/components/PaginationNext';
+import { PaginationPrevious } from '@/components/PaginationPrevious';
 import {
   Pagination as PaginationBase,
   PaginationContent,
   PaginationEllipsis,
   PaginationItem,
 } from '@/components/ui/pagination';
-import { PaginationPrevious } from '@/components/PaginationPrevious';
-import { PaginationLink } from '@/components/PaginationLink';
-import { PaginationNext } from '@/components/PaginationNext';
+
+import type { PaginationMetadata } from '@/declarations/pt_backend/pt_backend.did';
 
 type PaginationProps = {
   paginationMetaData: PaginationMetadata;
@@ -15,11 +16,11 @@ type PaginationProps = {
 
 export function Pagination({
   paginationMetaData: {
-    total_pages,
-    total_items,
-    has_previous_page,
     has_next_page,
+    has_previous_page,
     page_number,
+    total_items,
+    total_pages,
   },
 }: PaginationProps) {
   const totalPages = Number(total_pages);
@@ -30,7 +31,7 @@ export function Pagination({
     return null;
   }
 
-  const pageNumbers: (number | 'ellipsis')[] = [];
+  const pageNumbers: ('ellipsis' | number)[] = [];
 
   if (totalPages <= 5) {
     // Less than 5 total pages, show all pages
@@ -70,12 +71,12 @@ export function Pagination({
           {has_previous_page && (
             <PaginationItem>
               <PaginationPrevious
-                to=""
                 search={
                   currentPage - 1 === 1
                     ? undefined
                     : { page_number: currentPage - 1 }
                 }
+                to=""
               >
                 Previous
               </PaginationPrevious>
@@ -95,11 +96,11 @@ export function Pagination({
             ) : (
               <PaginationItem key={pageNumber}>
                 <PaginationLink
-                  to=""
+                  isActive={pageNumber === currentPage}
                   search={
                     pageNumber === 1 ? undefined : { page_number: pageNumber }
                   }
-                  isActive={pageNumber === currentPage}
+                  to=""
                 >
                   {pageNumber}
                 </PaginationLink>
@@ -110,7 +111,7 @@ export function Pagination({
         <div className="flex justify-end w-24">
           {has_next_page && (
             <PaginationItem>
-              <PaginationNext to="" search={{ page_number: currentPage + 1 }}>
+              <PaginationNext search={{ page_number: currentPage + 1 }} to="">
                 Next
               </PaginationNext>
             </PaginationItem>

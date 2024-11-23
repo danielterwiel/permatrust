@@ -1,11 +1,11 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Icon } from '@/components/ui/Icon'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from '@tanstack/react-router';
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Icon } from '@/components/ui/Icon';
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/workflows/$workflowId/',
 )({
-  component: DocumentDetails,
   loader: async ({ context }) => {
     // const { workflowId } = Route.useParams();
 
@@ -17,12 +17,13 @@ export const Route = createFileRoute(
       ...context,
 
       // workflow,
-    }
+    };
   },
+  component: DocumentDetails,
   errorComponent: ({ error }) => {
-    return <div>Error: {error.message}</div>
+    return <div>Error: {error.message}</div>;
   },
-})
+});
 
 function DocumentDetails() {
   // const { workflowId } = Route.useParams();
@@ -33,14 +34,14 @@ function DocumentDetails() {
       <CardHeader>
         <CardTitle>
           <Icon
+            className="text-muted-foreground pb-1 mr-2"
             name="file-orientation-outline"
             size="lg"
-            className="text-muted-foreground pb-1 mr-2"
           />
           Workflow ID TODO
         </CardTitle>
       </CardHeader>
       <CardContent>Workflow content</CardContent>
     </Card>
-  )
+  );
 }

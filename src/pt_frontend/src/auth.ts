@@ -1,6 +1,8 @@
 import { AuthClient, IdbStorage } from '@dfinity/auth-client';
-import { CANISTER_ID_PT_BACKEND } from '@/consts/canisters';
+
 import { createAuthenticatedActorWrapper } from '@/api';
+
+import { CANISTER_ID_PT_BACKEND } from '@/consts/canisters';
 
 const TIMEOUT_MINS = 30;
 
@@ -18,12 +20,12 @@ export class Auth {
   public async initializeClient(): Promise<AuthClient> {
     if (!this.authClient) {
       this.authClient = await AuthClient.create({
-        storage: new IdbStorage(),
-        keyType: 'Ed25519',
         idleOptions: {
-          idleTimeout: TIMEOUT_MINS * 60 * 1000,
           disableDefaultIdleCallback: false, // TODO: implement true
+          idleTimeout: TIMEOUT_MINS * 60 * 1000,
         },
+        keyType: 'Ed25519',
+        storage: new IdbStorage(),
       });
 
       const isAuthenticated = await this.authClient.isAuthenticated();
@@ -35,6 +37,11 @@ export class Auth {
       }
     }
     return this.authClient;
+  }
+
+  public async isAuthenticated(): Promise<boolean> {
+    const client = await this.initializeClient();
+    return client.isAuthenticated();
   }
 
   public async login(): Promise<boolean> {
@@ -51,10 +58,10 @@ export class Auth {
       authClient.login({
         identityProvider,
         maxTimeToLive: BigInt(1 * 3600 * 1e9), // 1 hour in nanoseconds
-        onSuccess: () => resolve(true),
         onError: (err) => {
           return reject(err);
         },
+        onSuccess: () => resolve(true),
       });
     });
   }
@@ -63,10 +70,5 @@ export class Auth {
     if (this.authClient) {
       await this.authClient.logout();
     }
-  }
-
-  public async isAuthenticated(): Promise<boolean> {
-    const client = await this.initializeClient();
-    return client.isAuthenticated();
   }
 }

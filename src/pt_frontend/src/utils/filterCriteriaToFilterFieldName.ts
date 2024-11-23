@@ -1,4 +1,4 @@
-import type { FilterFieldName, FilterCriteria } from '@/types/pagination';
+import type { FilterCriteria, FilterFieldName } from '@/types/pagination';
 
 export const filterCriteriaToFilterFieldName = (
   filter: FilterCriteria,

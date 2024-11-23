@@ -1,7 +1,8 @@
-import { snakeToPascalCase } from '@/utils/snakeToPascalCase';
-import { assertFilterFieldName } from '@/utils/assertFilterFieldName';
 import { assertFilterFieldEnum } from '@/utils/assertFilterFieldEnum';
+import { assertFilterFieldName } from '@/utils/assertFilterFieldName';
 import { buildEnum } from '@/utils/buildEnum';
+import { snakeToPascalCase } from '@/utils/snakeToPascalCase';
+
 import type { FilterFieldEnum } from '@/types/pagination';
 
 export const columnIdToFilterFieldEnum = (id: string): FilterFieldEnum => {

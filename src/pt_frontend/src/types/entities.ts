@@ -15,5 +15,5 @@ export type Entity =
   | Revision
   | User
   | Workflow;
-export type EntityName = keyof typeof ENTITY;
 export type EntityEnum = (typeof ENTITY)[EntityName];
+export type EntityName = keyof typeof ENTITY;

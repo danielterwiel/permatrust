@@ -1,4 +1,5 @@
-import { useMatches, Link } from '@tanstack/react-router';
+import { Link, useMatches } from '@tanstack/react-router';
+
 import {
   Breadcrumb as BreadcrumbBase,
   BreadcrumbItem,
@@ -7,18 +8,6 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
-
-function filterDuplicates<T extends object>(arr: T[], key: keyof T): T[] {
-  const seen = new Set<T[keyof T]>();
-  return arr.filter((obj) => {
-    const value = obj[key];
-    if (seen.has(value)) {
-      return false;
-    }
-    seen.add(value);
-    return true;
-  });
-}
 
 export function Breadcrumbs() {
   const matches = useMatches();
@@ -53,4 +42,16 @@ export function Breadcrumbs() {
       </BreadcrumbList>
     </BreadcrumbBase>
   );
+}
+
+function filterDuplicates<T extends object>(arr: T[], key: keyof T): T[] {
+  const seen = new Set<T[keyof T]>();
+  return arr.filter((obj) => {
+    const value = obj[key];
+    if (seen.has(value)) {
+      return false;
+    }
+    seen.add(value);
+    return true;
+  });
 }

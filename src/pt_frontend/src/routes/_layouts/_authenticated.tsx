@@ -1,9 +1,8 @@
-import { waitFor } from 'xstate';
-import { createFileRoute, redirect, Outlet } from '@tanstack/react-router';
 import { Auth } from '@/auth';
+import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
+import { waitFor } from 'xstate';
 
 export const Route = createFileRoute('/_initialized/_authenticated')({
-  component: AuthLayout,
   beforeLoad: async ({ context }) => {
     const auth = Auth.getInstance();
     const authActor = context.actors.auth;
@@ -12,6 +11,7 @@ export const Route = createFileRoute('/_initialized/_authenticated')({
       throw redirect({ to: '/authenticate' });
     }
   },
+  component: AuthLayout,
   errorComponent: ({ error }) => {
     return <div>Error: {error.message}</div>;
   },

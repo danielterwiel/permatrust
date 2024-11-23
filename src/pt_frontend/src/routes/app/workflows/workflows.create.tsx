@@ -1,13 +1,21 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useForm, useWatch } from 'react-hook-form'
-import { zodResolver } from '@hookform/resolvers/zod'
-import { z } from 'zod'
-import { useState, useEffect } from 'react'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Icon } from '@/components/ui/Icon'
-import { Loading } from '@/components/Loading'
-import { Textarea } from '@/components/ui/textarea'
+import { zodResolver } from '@hookform/resolvers/zod';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useEffect, useState } from 'react';
+import { useForm, useWatch } from 'react-hook-form';
+import ReactFlow, {
+  Background,
+  Controls,
+  type Edge,
+  type Node,
+  ReactFlowProvider,
+} from 'reactflow';
+import { z } from 'zod';
+
+import { api } from '@/api';
+
+import { Loading } from '@/components/Loading';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Form,
   FormControl,
@@ -16,17 +24,12 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import ReactFlow, {
-  ReactFlowProvider,
-  Background,
-  Controls,
-  type Edge,
-  type Node,
-} from 'reactflow'
-import 'reactflow/dist/style.css'
-import { api } from '@/api'
+} from '@/components/ui/form';
+import { Icon } from '@/components/ui/Icon';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+
+import 'reactflow/dist/style.css';
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/workflows/create',
@@ -36,14 +39,11 @@ export const Route = createFileRoute(
   }),
   component: CreateWorkflow,
   errorComponent: ({ error }) => {
-    return <div>Error: {error.message}</div>
+    return <div>Error: {error.message}</div>;
   },
-})
+});
 
 const formSchema = z.object({
-  name: z.string().min(2, {
-    message: 'Workflow must be at least 2 characters.',
-  }),
   graph_json: z
     .string()
     .min(3, {
@@ -52,62 +52,52 @@ const formSchema = z.object({
     .refine(
       (value) => {
         try {
-          JSON.parse(value)
-          return true
+          JSON.parse(value);
+          return true;
         } catch {
-          return false
+          return false;
         }
       },
       {
         message: 'Invalid JSON format.',
       },
     ),
-})
+  name: z.string().min(2, {
+    message: 'Workflow must be at least 2 characters.',
+  }),
+});
 
-interface Transition {
-  target: string
-  actions?: string | string[]
+interface MachineConfig {
+  id: string;
+  initial: string;
+  states: {
+    [stateId: string]: StateConfig;
+  };
 }
 
 interface StateConfig {
   on?: {
-    [event: string]: Transition | Transition[]
-  }
+    [event: string]: Transition | Transition[];
+  };
 }
 
-interface MachineConfig {
-  id: string
-  initial: string
-  states: {
-    [stateId: string]: StateConfig
-  }
+interface Transition {
+  actions?: string | string[];
+  target: string;
 }
 
 const defaultGraphJson: MachineConfig = {
   id: 'capa_document_process',
   initial: 'identification',
   states: {
+    closure: {
+      // Final state
+    },
     identification: {
       on: {
         PROBLEM_IDENTIFIED: {
-          target: 'investigation',
           actions: 'setProblemDescription',
-        },
-      },
-    },
-    investigation: {
-      on: {
-        ROOT_CAUSE_FOUND: {
-          target: 'planningCorrectiveAction',
-          actions: 'setRootCause',
-        },
-      },
-    },
-    planningCorrectiveAction: {
-      on: {
-        CORRECTIVE_ACTION_PLANNED: {
-          target: 'implementingCorrectiveAction',
-          actions: 'setCorrectiveAction',
+          target: 'investigation',
         },
       },
     },
@@ -118,18 +108,34 @@ const defaultGraphJson: MachineConfig = {
         },
       },
     },
-    planningPreventiveAction: {
-      on: {
-        PREVENTIVE_ACTION_PLANNED: {
-          target: 'implementingPreventiveAction',
-          actions: 'setPreventiveAction',
-        },
-      },
-    },
     implementingPreventiveAction: {
       on: {
         PREVENTIVE_ACTION_IMPLEMENTED: {
           target: 'verification',
+        },
+      },
+    },
+    investigation: {
+      on: {
+        ROOT_CAUSE_FOUND: {
+          actions: 'setRootCause',
+          target: 'planningCorrectiveAction',
+        },
+      },
+    },
+    planningCorrectiveAction: {
+      on: {
+        CORRECTIVE_ACTION_PLANNED: {
+          actions: 'setCorrectiveAction',
+          target: 'implementingCorrectiveAction',
+        },
+      },
+    },
+    planningPreventiveAction: {
+      on: {
+        PREVENTIVE_ACTION_PLANNED: {
+          actions: 'setPreventiveAction',
+          target: 'implementingPreventiveAction',
         },
       },
     },
@@ -143,132 +149,128 @@ const defaultGraphJson: MachineConfig = {
         },
       },
     },
-    closure: {
-      // Final state
-    },
   },
-}
+};
 
 export function CreateWorkflow() {
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [nodes, setNodes] = useState<Node[]>([])
-  const [edges, setEdges] = useState<Edge[]>([])
-  const navigate = useNavigate()
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [nodes, setNodes] = useState<Node[]>([]);
+  const [edges, setEdges] = useState<Edge[]>([]);
+  const navigate = useNavigate();
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    disabled: isSubmitting,
     defaultValues: {
-      name: '',
       graph_json: JSON.stringify(defaultGraphJson, null, 2),
+      name: '',
     },
-  })
+    disabled: isSubmitting,
+    resolver: zodResolver(formSchema),
+  });
 
   const graphJsonValue = useWatch({
     control: form.control,
     name: 'graph_json',
-  })
+  });
 
   useEffect(() => {
     try {
-      const machineConfig: MachineConfig = JSON.parse(graphJsonValue)
-      const { nodes: newNodes, edges: newEdges } =
-        generateGraphElements(machineConfig)
-      setNodes(newNodes)
-      setEdges(newEdges)
-    } catch (error) {
-      console.error('Error parsing JSON:', error)
-      setNodes([])
-      setEdges([])
+      const machineConfig: MachineConfig = JSON.parse(graphJsonValue);
+      const { edges: newEdges, nodes: newNodes } =
+        generateGraphElements(machineConfig);
+      setNodes(newNodes);
+      setEdges(newEdges);
+    } catch (_error) {
+      setNodes([]);
+      setEdges([]);
     }
-  }, [graphJsonValue])
+  }, [graphJsonValue]);
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
-      const machineConfig: MachineConfig = JSON.parse(values.graph_json)
-      const graphJsonObject = generateWorkflowGraph(machineConfig)
-      const graph_json = JSON.stringify(graphJsonObject)
+      const machineConfig: MachineConfig = JSON.parse(values.graph_json);
+      const graphJsonObject = generateWorkflowGraph(machineConfig);
+      const graph_json = JSON.stringify(graphJsonObject);
 
       const workflowId = await api.create_workflow({
-        project_id: BigInt(0),
-        name: values.name,
         graph_json,
         initial_state: machineConfig.initial,
-      })
+        name: values.name,
+        project_id: BigInt(0),
+      });
 
       navigate({
-        to: '/workflows/$workflowId',
         params: {
           workflowId: workflowId.toString(),
         },
-      })
-    } catch (error) {
-      console.error('Error:', error)
-      // Handle the error (e.g., show a message to the user)
+        to: '/workflows/$workflowId',
+      });
+    } catch (_error) {
+      // TODO: handle error
+      // console.error('Error:', error);
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 
   function generateGraphElements(machineConfig: MachineConfig): {
-    nodes: Node[]
-    edges: Edge[]
+    edges: Edge[];
+    nodes: Node[];
   } {
-    const stateNodes: Node[] = []
-    const stateEdges: Edge[] = []
+    const stateNodes: Node[] = [];
+    const stateEdges: Edge[] = [];
 
     for (const [index, [stateId, state]] of Object.entries(
       machineConfig.states,
     ).entries()) {
       stateNodes.push({
-        id: stateId,
         data: { label: stateId },
+        id: stateId,
         position: { x: index * 150, y: 0 },
         type: 'default',
-      })
+      });
 
       if (state.on) {
         for (const [event, transitions] of Object.entries(state.on)) {
           const transitionArray = Array.isArray(transitions)
             ? transitions
-            : [transitions]
+            : [transitions];
           for (const transition of transitionArray) {
             stateEdges.push({
+              animated: true,
               id: `${stateId}-${event}-${transition.target}`,
+              label: event,
               source: stateId,
               target: transition.target,
-              label: event,
-              animated: true,
-            })
+            });
           }
         }
       }
     }
 
-    return { nodes: stateNodes, edges: stateEdges }
+    return { edges: stateEdges, nodes: stateNodes };
   }
 
   function generateWorkflowGraph(machineConfig: MachineConfig) {
-    const nodes = Object.keys(machineConfig.states)
-    const stateIndexMap: { [state: string]: number } = {}
+    const nodes = Object.keys(machineConfig.states);
+    const stateIndexMap: { [state: string]: number } = {};
     for (const [index, state] of nodes.entries()) {
-      stateIndexMap[state] = index
+      stateIndexMap[state] = index;
     }
 
-    const edges: [number, number, string][] = []
+    const edges: [number, number, string][] = [];
 
     for (const [stateId, state] of Object.entries(machineConfig.states)) {
       if (state.on) {
         for (const [event, transitions] of Object.entries(state.on)) {
           const transitionArray = Array.isArray(transitions)
             ? transitions
-            : [transitions]
+            : [transitions];
           for (const transition of transitionArray) {
-            const sourceIndex = stateIndexMap[stateId]
-            const targetIndex = stateIndexMap[transition.target]
+            const sourceIndex = stateIndexMap[stateId];
+            const targetIndex = stateIndexMap[transition.target];
             if (sourceIndex !== undefined && targetIndex !== undefined) {
-              edges.push([sourceIndex, targetIndex, event])
+              edges.push([sourceIndex, targetIndex, event]);
             }
           }
         }
@@ -276,9 +278,9 @@ export function CreateWorkflow() {
     }
 
     return {
-      nodes,
       edges,
-    }
+      nodes,
+    };
   }
 
   return (
@@ -286,16 +288,16 @@ export function CreateWorkflow() {
       <CardHeader>
         <CardTitle>
           <Icon
+            className="text-muted-foreground pb-1 mr-2"
             name="file-orientation-outline"
             size="lg"
-            className="text-muted-foreground pb-1 mr-2"
           />
           Create new workflow
         </CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+          <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
               control={form.control}
               name="name"
@@ -316,12 +318,12 @@ export function CreateWorkflow() {
                 <div style={{ height: '400px', width: '100%' }}>
                   <ReactFlowProvider>
                     <ReactFlow
-                      nodes={nodes}
                       edges={edges}
-                      fitView
-                      nodesDraggable={false}
-                      nodesConnectable={false}
                       elementsSelectable={false}
+                      fitView
+                      nodes={nodes}
+                      nodesConnectable={false}
+                      nodesDraggable={false}
                     >
                       <Background />
                       <Controls />
@@ -349,9 +351,9 @@ export function CreateWorkflow() {
                 </FormItem>
               )}
             />
-            <Button type="submit" disabled={isSubmitting}>
+            <Button disabled={isSubmitting} type="submit">
               {isSubmitting ? (
-                <Loading text="Creating..." className="place-items-start" />
+                <Loading className="place-items-start" text="Creating..." />
               ) : (
                 'Create'
               )}
@@ -360,5 +362,5 @@ export function CreateWorkflow() {
         </Form>
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -1,18 +1,20 @@
-import { z } from 'zod';
-import { api } from '@/api';
-import { zodSearchValidator } from '@tanstack/router-zod-adapter';
-import { decodeUint8Array } from '@/utils/decodeUint8Array';
-import { useEffect } from 'react';
+import { diffSourcePlugin, headingsPlugin, MDXEditor } from '@mdxeditor/editor';
 import { createFileRoute } from '@tanstack/react-router';
-import { MDXEditor, headingsPlugin, diffSourcePlugin } from '@mdxeditor/editor';
+import { zodSearchValidator } from '@tanstack/router-zod-adapter';
+import { useEffect } from 'react';
+import { z } from 'zod';
+
+import { api } from '@/api';
+
+import { decodeUint8Array } from '@/utils/decodeUint8Array';
 
 const revisionSchema = z.object({
-  id: z.bigint(),
   content: z.union([z.array(z.number()), z.instanceof(Uint8Array)]),
-  version: z.number(),
   created_at: z.bigint(),
   created_by: z.any(), // TODO: validate Principals
   document_id: z.bigint(),
+  id: z.bigint(),
+  version: z.number(),
 });
 
 const revisionSearchSchema = z.object({
@@ -23,7 +25,6 @@ const revisionSearchSchema = z.object({
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/diff',
 )({
-  component: RevisionDiff,
   validateSearch: zodSearchValidator(revisionSearchSchema),
   loaderDeps: ({ search: { current, theirs } }) => ({ current, theirs }),
   loader: async ({ deps }) => {
@@ -33,6 +34,7 @@ export const Route = createFileRoute(
     );
     return { revisions };
   },
+  component: RevisionDiff,
   errorComponent: ({ error }) => {
     return <div>Error: {error.message}</div>;
   },
@@ -44,8 +46,8 @@ function RevisionDiff() {
   useEffect(() => {
     try {
       z.array(revisionSchema).parse(revisions);
-    } catch (error) {
-      console.error('Revision validation error:', error);
+    } catch (_error) {
+      // TODO: handle error
     }
   }, [revisions]);
 
@@ -61,7 +63,9 @@ function RevisionDiff() {
   return (
     <MDXEditor
       markdown={contentCurrent}
-      onError={(error) => console.error('MDXEditor error:', error)}
+      onError={(_error) => {
+        // TODO: handle error
+      }}
       plugins={[
         headingsPlugin(),
         diffSourcePlugin({

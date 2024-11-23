@@ -1,11 +1,11 @@
 import type { EntityName } from '@/types/entities';
 
 export const ENTITY = {
-  User: { User: null },
+  Document: { Document: null },
   Organisation: { Organisation: null },
   Project: { Project: null },
-  Document: { Document: null },
   Revision: { Revision: null },
+  User: { User: null },
   Workflow: { Workflow: null },
 };
 

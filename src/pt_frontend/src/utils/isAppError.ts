@@ -1,4 +1,5 @@
 import { AppErrorSchema } from '@/schemas/error';
+
 import type { AppError } from '@/declarations/pt_backend/pt_backend.did';
 
 export function isAppError(

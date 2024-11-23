@@ -1,24 +1,26 @@
-import { api } from '@/api';
-import { createAuthenticatedActorWrapper } from '@/api';
-import { setup, fromPromise, createActor, assign, log } from 'xstate';
-import { router } from '@/router';
 import { Auth } from '@/auth';
-import { DEFAULT_PAGINATION } from '@/consts/pagination';
+import { router } from '@/router';
+import { assign, createActor, fromPromise, log, setup } from 'xstate';
+
+import { api, createAuthenticatedActorWrapper } from '@/api';
+
 import { CANISTER_ID_PT_BACKEND } from '@/consts/canisters';
-import type { DeepPartial } from '@/types/deep-partial';
+import { DEFAULT_PAGINATION } from '@/consts/pagination';
+
 import type {
-  User,
   PaginatedOrganisationsResultOk,
+  User,
 } from '@/declarations/pt_backend/pt_backend.did';
+import type { DeepPartial } from '@/types/deep-partial';
 
 type AuthMachineTypes = {
   context: {
     isAuthenticated: boolean;
 
-    user?: User;
+    navigateTo?: string;
     organisations?: DeepPartial<PaginatedOrganisationsResultOk>;
 
-    navigateTo?: string;
+    user?: User;
   };
   events:
     | {
@@ -34,15 +36,7 @@ type AuthMachineTypes = {
 };
 
 const authMachine = setup({
-  types: {} as AuthMachineTypes,
   actors: {
-    initialize_auth: fromPromise(async () => {
-      const auth = Auth.getInstance();
-      const client = await auth.initializeClient();
-      const isAuthenticated = await client?.isAuthenticated();
-      return { isAuthenticated };
-    }),
-
     authenticate: fromPromise(async () => {
       try {
         const auth = Auth.getInstance();
@@ -78,6 +72,13 @@ const authMachine = setup({
       }
     }),
 
+    initialize_auth: fromPromise(async () => {
+      const auth = Auth.getInstance();
+      const client = await auth.initializeClient();
+      const isAuthenticated = await client?.isAuthenticated();
+      return { isAuthenticated };
+    }),
+
     list_organisations: fromPromise(async () => {
       const organisationsResult =
         await api.list_organisations(DEFAULT_PAGINATION);
@@ -89,158 +90,117 @@ const authMachine = setup({
         };
       }
       return {
-        organisations: organisationsResult,
         onboardedOrganisations: true,
+        organisations: organisationsResult,
       };
     }),
   },
+  types: {} as AuthMachineTypes,
 }).createMachine({
-  id: 'authMachine',
   context: {
     isAuthenticated: false,
 
-    user: undefined,
     organisations: undefined,
+    user: undefined,
   },
+  id: 'authMachine',
   initial: 'initializing',
   states: {
-    initializing: {
-      invoke: {
-        id: 'initializing',
-        src: 'initialize_auth',
-        onError: {
-          target: 'error',
-        },
-        onDone: [
-          {
-            guard: ({ event }) => event.output.isAuthenticated,
-            actions: assign({
-              isAuthenticated: ({ event }) => event.output.isAuthenticated,
-            }),
-            target: 'initialized.authenticated',
-          },
-          {
-            target: 'initialized',
-          },
-        ],
-      },
-    },
-
     // TODO: handle error
     error: {},
 
     initialized: {
       initial: 'idle',
       states: {
-        idle: {
-          id: 'initialized_idle',
-          on: {
-            LOGIN: 'authenticating',
-          },
-        },
-
-        authenticating: {
-          invoke: {
-            id: 'authenticating',
-            src: 'authenticate',
-            onDone: {
-              target: 'authenticated',
-            },
-            onError: {
-              target: 'unauthorized',
-            },
-          },
-        },
-
-        unauthorized: {
-          entry: async () => {
-            await router.navigate({
-              to: '/authenticate',
-              search: {
-                error: true,
-              },
-            });
-          },
-          always: '#initialized_idle',
-        },
-
         authenticated: {
           id: 'authenticated',
           initial: 'onboarding',
           states: {
+            idle: {
+              id: 'authenticated_idle',
+              on: {
+                LOGIN: 'onboarding',
+                LOGOUT: {
+                  target: 'logout',
+                },
+              },
+            },
+
+            logout: {
+              always: '#initialized_idle',
+              entry: async () => {
+                const auth = Auth.getInstance();
+                await auth.logout();
+                await router.navigate({
+                  search: {
+                    redirect: window.location.pathname,
+                  },
+                  to: '/authenticate',
+                });
+              },
+            },
+
             onboarding: {
               initial: 'check_user',
               states: {
-                check_user: {
-                  invoke: {
-                    id: 'check_user',
-                    src: 'get_user',
-                    onDone: [
-                      {
-                        guard: ({ event }) => event.output?.onboardedUser,
-                        actions: assign({
-                          user: ({ event }) => event.output.user,
-                        }),
-                        target: 'check_organisations',
-                      },
-                      {
-                        target: 'onboarding_incomplete',
-                        actions: async () => {
-                          await router.navigate({
-                            to: '/onboarding/users/create',
-                          });
-                        },
-                      },
-                    ],
-                    onError: {
-                      target: 'onboarding_error',
-                    },
-                  },
-                },
-
                 check_organisations: {
                   invoke: {
                     id: 'check_organisations',
-                    src: 'list_organisations',
                     onDone: [
                       {
-                        guard: ({ event }) =>
-                          event.output?.onboardedOrganisations,
-                        target: 'onboarding_complete',
                         actions: assign({
                           organisations: ({ event }) =>
                             event.output.organisations,
                         }),
+                        guard: ({ event }) =>
+                          event.output?.onboardedOrganisations,
+                        target: 'onboarding_complete',
                       },
                       {
-                        target: 'onboarding_incomplete',
                         actions: async () => {
                           await router.navigate({
                             to: '/onboarding/organisations/create',
                           });
                         },
+                        target: 'onboarding_incomplete',
                       },
                     ],
                     onError: {
                       target: 'onboarding_error',
                     },
+                    src: 'list_organisations',
                   },
                 },
 
-                onboarding_incomplete: {
-                  entry: [
-                    async () => {
-                      await router.navigate({ to: '/onboarding/users/create' });
+                check_user: {
+                  invoke: {
+                    id: 'check_user',
+                    onDone: [
+                      {
+                        actions: assign({
+                          user: ({ event }) => event.output.user,
+                        }),
+                        guard: ({ event }) => event.output?.onboardedUser,
+                        target: 'check_organisations',
+                      },
+                      {
+                        actions: async () => {
+                          await router.navigate({
+                            to: '/onboarding/users/create',
+                          });
+                        },
+                        target: 'onboarding_incomplete',
+                      },
+                    ],
+                    onError: {
+                      target: 'onboarding_error',
                     },
-                  ],
-                  target: '#authenticated_idle',
-                },
-
-                onboarding_error: {
-                  entry: log('TODO: ONBOARDING_ERROR'),
+                    src: 'get_user',
+                  },
                 },
 
                 onboarding_complete: {
+                  always: '#authenticated_idle',
                   entry: async () => {
                     const search = new URLSearchParams(window.location.search);
                     if (search.has('redirect')) {
@@ -252,36 +212,78 @@ const authMachine = setup({
                     }
                     // we're refreshing, no need to do anything
                   },
-                  always: '#authenticated_idle',
                 },
-              },
-            },
 
-            logout: {
-              entry: async () => {
-                const auth = Auth.getInstance();
-                await auth.logout();
-                await router.navigate({
-                  to: '/authenticate',
-                  search: {
-                    redirect: window.location.pathname,
-                  },
-                });
-              },
-              always: '#initialized_idle',
-            },
-
-            idle: {
-              id: 'authenticated_idle',
-              on: {
-                LOGOUT: {
-                  target: 'logout',
+                onboarding_error: {
+                  entry: log('TODO: ONBOARDING_ERROR'),
                 },
-                LOGIN: 'onboarding',
+
+                onboarding_incomplete: {
+                  entry: [
+                    async () => {
+                      await router.navigate({ to: '/onboarding/users/create' });
+                    },
+                  ],
+                  target: '#authenticated_idle',
+                },
               },
             },
           },
         },
+
+        authenticating: {
+          invoke: {
+            id: 'authenticating',
+            onDone: {
+              target: 'authenticated',
+            },
+            onError: {
+              target: 'unauthorized',
+            },
+            src: 'authenticate',
+          },
+        },
+
+        idle: {
+          id: 'initialized_idle',
+          on: {
+            LOGIN: 'authenticating',
+          },
+        },
+
+        unauthorized: {
+          always: '#initialized_idle',
+          entry: async () => {
+            await router.navigate({
+              search: {
+                error: true,
+              },
+              to: '/authenticate',
+            });
+          },
+        },
+      },
+    },
+
+    initializing: {
+      invoke: {
+        id: 'initializing',
+        onDone: [
+          {
+            actions: assign({
+              isAuthenticated: ({ event }) => event.output.isAuthenticated,
+            }),
+            guard: ({ event }) => event.output.isAuthenticated,
+            target: 'initialized.authenticated',
+          },
+          {
+            target: 'initialized',
+          },
+        ],
+        onError: {
+          target: 'error',
+        },
+        src: 'initialize_auth',
       },
     },
   },

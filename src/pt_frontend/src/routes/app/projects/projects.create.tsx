@@ -1,20 +1,23 @@
-import { api } from '@/api';
-import { useState } from 'react';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useState } from 'react';
+
+import { api } from '@/api';
+
 import {
   CreateProjectForm,
   type createProjectFormSchema,
 } from '@/components/create-project-form';
+
 import type { z } from 'zod';
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/create',
 )({
-  component: CreateProject,
   beforeLoad: () => ({
     getTitle: () => 'Create project',
   }),
+  component: CreateProject,
   errorComponent: ({ error }) => {
     return <div>Error: {error.message}</div>;
   },
@@ -33,17 +36,17 @@ function CreateProject() {
         values.name,
       );
       navigate({
-        to: '/projects/$projectId',
         params: {
           projectId: projectId.toString(),
         },
+        to: '/projects/$projectId',
       });
-    } catch (error) {
-      console.error(error);
+    } catch (_error) {
+      // TODO: handle error
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  return <CreateProjectForm onSubmit={onSubmit} isSubmitting={isSubmitting} />;
+  return <CreateProjectForm isSubmitting={isSubmitting} onSubmit={onSubmit} />;
 }
