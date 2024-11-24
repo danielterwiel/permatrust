@@ -1,8 +1,14 @@
 use ic_cdk::println;
-use shared::pt_backend_generated::{Document, Organisation, Project, Revision, User, Workflow};
 use std::cell::RefCell;
 use std::env;
 use std::fmt::Debug;
+
+use shared::types::documents::Document;
+use shared::types::organisations::Organisation;
+use shared::types::projects::Project;
+use shared::types::revisions::Revision;
+use shared::types::users::User;
+use shared::types::workflows::Workflow;
 
 pub struct LoggableUser<'a>(&'a User);
 pub struct LoggableWorkflow<'a>(&'a Workflow);

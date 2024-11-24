@@ -1,21 +1,30 @@
 use crate::logger::{log_info, loggable_revision};
 use ic_cdk_macros::{query, update};
-use shared::pagination::{paginate, PaginatedRevisionsResult};
-use shared::pt_backend_generated::{
-    AppError, DocumentId, PaginationInput, ProjectId, Revision, RevisionId, RevisionIdResult,
-    RevisionResult, RevisionsResult,
-};
+
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicU64, Ordering};
+
+use shared::types::documents::DocumentId;
+use shared::types::errors::AppError;
+use shared::types::pagination::PaginationInput;
+use shared::types::projects::ProjectId;
+use shared::types::revisions::{
+    PaginatedRevisionsResult, PaginatedRevisionsResultOk, Revision, RevisionId, RevisionIdResult,
+    RevisionResult, RevisionsResult,
+};
+
+use shared::utils::pagination::paginate;
 
 use crate::documents::{get_document_by_id, update_document_revision};
 
 thread_local! {
-    pub static REVISIONS: RefCell<HashMap<RevisionId, Revision>> = RefCell::new(HashMap::new());
+    static REVISIONS: RefCell<HashMap<RevisionId, Revision>> = RefCell::new(HashMap::new());
+    static NEXT_ID: AtomicU64 = AtomicU64::new(0);
 }
 
 pub fn get_next_revision_id() -> u64 {
-    REVISIONS.with(|revisions| revisions.borrow().len() as u64)
+    NEXT_ID.with(|id| id.fetch_add(1, Ordering::SeqCst))
 }
 
 fn get_revisions() -> Vec<Revision> {
@@ -100,7 +109,8 @@ fn list_revisions(pagination: PaginationInput) -> PaginatedRevisionsResult {
         pagination.sort.clone(),
     ) {
         Ok((paginated_revisions, pagination_metadata)) => {
-            PaginatedRevisionsResult::Ok(paginated_revisions, pagination_metadata)
+            let result = PaginatedRevisionsResultOk(paginated_revisions, pagination_metadata);
+            PaginatedRevisionsResult::Ok(result)
         }
         Err(e) => PaginatedRevisionsResult::Err(e),
     }
@@ -120,9 +130,9 @@ fn list_revisions_by_document_id(
         pagination.filters,
         pagination.sort,
     ) {
-        Ok((paginated_revisions, pagination_metadata)) => {
-            PaginatedRevisionsResult::Ok(paginated_revisions, pagination_metadata)
-        }
+        Ok((paginated_revisions, pagination_metadata)) => PaginatedRevisionsResult::Ok(
+            PaginatedRevisionsResultOk(paginated_revisions, pagination_metadata),
+        ),
         Err(e) => PaginatedRevisionsResult::Err(e),
     }
 }

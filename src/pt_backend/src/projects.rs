@@ -1,20 +1,28 @@
 use ic_cdk_macros::{query, update};
-use shared::pagination::{paginate, PaginatedProjectsResult};
-use shared::pt_backend_generated::{
-    AppError, OrganisationId, PaginationInput, Project, ProjectId, ProjectIdResult, ProjectResult,
-};
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::vec;
+
+use shared::utils::pagination::paginate;
+
+use shared::types::errors::AppError;
+use shared::types::organisations::OrganisationId;
+use shared::types::pagination::PaginationInput;
+use shared::types::projects::{
+    PaginatedProjectsResult, PaginatedProjectsResultOk, Project, ProjectId, ProjectIdResult,
+    ProjectResult,
+};
 
 use crate::logger::{log_info, loggable_project};
 
 thread_local! {
     static PROJECTS: RefCell<HashMap<ProjectId, Project>> = RefCell::new(HashMap::new());
+    static NEXT_ID: AtomicU64 = AtomicU64::new(0);
 }
 
 pub fn get_next_project_id() -> u64 {
-    PROJECTS.with(|projects| projects.borrow().len() as u64)
+    NEXT_ID.with(|id| id.fetch_add(1, Ordering::SeqCst))
 }
 
 fn get_projects() -> Vec<Project> {
@@ -71,9 +79,9 @@ fn list_projects(pagination: PaginationInput) -> PaginatedProjectsResult {
         pagination.filters,
         pagination.sort,
     ) {
-        Ok((paginated_projects, pagination_metadata)) => {
-            PaginatedProjectsResult::Ok(paginated_projects, pagination_metadata)
-        }
+        Ok((paginated_projects, pagination_metadata)) => PaginatedProjectsResult::Ok(
+            PaginatedProjectsResultOk(paginated_projects, pagination_metadata),
+        ),
         Err(e) => PaginatedProjectsResult::Err(e),
     }
 }
@@ -91,9 +99,9 @@ fn list_projects_by_organisation_id(
         pagination.filters,
         pagination.sort,
     ) {
-        Ok((paginated_projects, pagination_metadata)) => {
-            PaginatedProjectsResult::Ok(paginated_projects, pagination_metadata)
-        }
+        Ok((paginated_projects, pagination_metadata)) => PaginatedProjectsResult::Ok(
+            PaginatedProjectsResultOk(paginated_projects, pagination_metadata),
+        ),
         Err(e) => PaginatedProjectsResult::Err(e),
     }
 }

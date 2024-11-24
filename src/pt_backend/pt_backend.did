@@ -4,6 +4,31 @@ type OrganisationId = nat64;
 type ProjectId = nat64;
 type DocumentId = nat64;
 type RevisionId = nat64;
+type RoleId = nat64;
+
+type RoleInput = record {
+  name : text;
+  description : text;
+};
+
+type Role = record {
+  id : RoleId;
+  name : text;
+  description : text;
+  permissions : vec EntityPermission;
+};
+
+type Permission = variant {
+    Create : null;
+    Read : null;
+    ReadAlls : null;
+    Update : null;
+    Delete : null;
+};
+
+type EntityPermission = variant {
+    User: vec Permission;
+};
 
 type Entity = variant {
     Document : null;
@@ -107,6 +132,11 @@ type User = record {
   first_name : text;
   last_name : text;
   organisations : vec OrganisationId;
+  roles : vec Role;
+};
+type RoleIdResult = variant {
+    Ok : RoleId;
+    Err : AppError;
 };
 type UserIdResult = variant {
     Ok : UserId;
@@ -276,9 +306,13 @@ type PaginatedRevisionsResult = variant {
 };
 
 service : {
+    create_role : (RoleInput, vec EntityPermission ) -> (RoleIdResult);
+    assign_role : (principal, text) -> (RoleIdResult);
+
     create_user : (text, text) -> (UserIdResult);
     list_users : (PaginationInput) -> (PaginatedUsersResult) query;
     get_user : () -> (UserResult) query;
+    get_user_by_id : (UserId) -> (UserResult) query;
 
     create_workflow: (CreateWorkflowInput) -> (WorkflowIdResult);
     list_workflows: (PaginationInput) -> (PaginatedWorkflowsResult) query;

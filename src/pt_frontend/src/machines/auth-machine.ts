@@ -17,7 +17,6 @@ type AuthMachineTypes = {
   context: {
     isAuthenticated: boolean;
 
-    navigateTo?: string;
     organisations?: DeepPartial<PaginatedOrganisationsResultOk>;
 
     user?: User;
@@ -220,8 +219,16 @@ const authMachine = setup({
 
                 onboarding_incomplete: {
                   entry: [
-                    async () => {
-                      await router.navigate({ to: '/onboarding/users/create' });
+                    async ({ context }) => {
+                      if (context.user) {
+                        await router.navigate({
+                          to: '/onboarding/organisations/create',
+                        });
+                      } else {
+                        await router.navigate({
+                          to: '/onboarding/users/create',
+                        });
+                      }
                     },
                   ],
                   target: '#authenticated_idle',

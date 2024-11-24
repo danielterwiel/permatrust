@@ -1,13 +1,20 @@
 use ic_cdk_macros::{query, update};
 use serde::{Deserialize, Serialize};
-use shared::pagination::paginate;
-use shared::pt_backend_generated::{
-    AppError, CreateWorkflowInput, Edge, EventId, PaginatedWorkflowsResult, PaginationInput,
-    StateId, Workflow, WorkflowGraph, WorkflowId, WorkflowIdResult, WorkflowResult,
-};
-use shared::pt_backend_generated_traits::WorkflowGraphExt;
+
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicU64, Ordering};
+
+use shared::types::errors::AppError;
+use shared::types::pagination::PaginationInput;
+use shared::types::workflows::{
+    CreateWorkflowInput, Edge, EventId, PaginatedWorkflowsResult, StateId, Workflow, WorkflowGraph,
+    WorkflowId, WorkflowIdResult, WorkflowResult,
+};
+
+use shared::traits::workflows::WorkflowGraphExt;
+
+use shared::utils::pagination::paginate;
 
 use crate::logger::{log_info, loggable_workflow};
 
@@ -21,6 +28,15 @@ pub struct GenericEvent(pub EventId);
 pub struct GenericStateMachine {
     transitions: HashMap<(StateId, EventId), StateId>,
     current_state: StateId,
+}
+
+thread_local! {
+  static WORKFLOWS: RefCell<HashMap<WorkflowId, Workflow>> = RefCell::new(HashMap::new());
+  static NEXT_ID: AtomicU64 = AtomicU64::new(0);
+}
+
+pub fn get_next_workflow_id() -> u64 {
+    NEXT_ID.with(|id| id.fetch_add(1, Ordering::SeqCst))
 }
 
 impl GenericStateMachine {
@@ -65,20 +81,6 @@ impl GenericStateMachine {
 
         state_machine
     }
-}
-
-thread_local! {
-    static WORKFLOWS: RefCell<HashMap<WorkflowId, Workflow>> = RefCell::new(HashMap::new());
-    static WORKFLOW_COUNTER: RefCell<u64> = RefCell::new(0);
-}
-
-pub fn get_next_workflow_id() -> u64 {
-    WORKFLOW_COUNTER.with(|counter| {
-        let mut id = counter.borrow_mut();
-        let next_id = *id;
-        *id += 1;
-        next_id
-    })
 }
 
 #[update]

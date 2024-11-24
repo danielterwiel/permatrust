@@ -38,6 +38,7 @@ function CreateUser() {
           id,
           last_name: values.last_name,
           organisations: [],
+          roles: [],
         },
       });
       navigate({ to: '/onboarding/organisations/create' });

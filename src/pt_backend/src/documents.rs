@@ -1,21 +1,29 @@
 use crate::logger::{log_info, loggable_document};
 use ic_cdk_macros::{query, update};
-use shared::pagination::{paginate, PaginatedDocumentsResult};
-use shared::pt_backend_generated::{
-    AppError, Document, DocumentId, DocumentIdResult, DocumentResult, PaginationInput, ProjectId,
-    RevisionId, RevisionIdResult,
-};
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicU64, Ordering};
+
+use shared::types::documents::{
+    Document, DocumentId, DocumentIdResult, DocumentResult, PaginatedDocumentsResult,
+    PaginatedDocumentsResultOk,
+};
+use shared::types::errors::AppError;
+use shared::types::pagination::PaginationInput;
+use shared::types::projects::ProjectId;
+use shared::types::revisions::{RevisionId, RevisionIdResult};
+
+use shared::utils::pagination::paginate;
 
 use crate::revisions::create_revision;
 
 thread_local! {
-    pub static DOCUMENTS: RefCell<HashMap<DocumentId, Document>> = RefCell::new(HashMap::new());
+    static DOCUMENTS: RefCell<HashMap<DocumentId, Document>> = RefCell::new(HashMap::new());
+    static NEXT_ID: AtomicU64 = AtomicU64::new(0);
 }
 
 pub fn get_next_document_id() -> u64 {
-    DOCUMENTS.with(|documents| documents.borrow().len() as u64)
+    NEXT_ID.with(|id| id.fetch_add(1, Ordering::SeqCst))
 }
 
 fn get_documents() -> Vec<Document> {
@@ -100,9 +108,9 @@ fn list_documents(pagination: PaginationInput) -> PaginatedDocumentsResult {
         pagination.filters.clone(),
         pagination.sort.clone(),
     ) {
-        Ok((paginated_documents, pagination_metadata)) => {
-            PaginatedDocumentsResult::Ok(paginated_documents, pagination_metadata)
-        }
+        Ok((paginated_documents, pagination_metadata)) => PaginatedDocumentsResult::Ok(
+            PaginatedDocumentsResultOk(paginated_documents, pagination_metadata),
+        ),
         Err(e) => PaginatedDocumentsResult::Err(e),
     }
 }
@@ -121,9 +129,9 @@ fn list_documents_by_project_id(
         pagination.filters.clone(),
         pagination.sort.clone(),
     ) {
-        Ok((paginated_documents, pagination_metadata)) => {
-            PaginatedDocumentsResult::Ok(paginated_documents, pagination_metadata)
-        }
+        Ok((paginated_documents, pagination_metadata)) => PaginatedDocumentsResult::Ok(
+            PaginatedDocumentsResultOk(paginated_documents, pagination_metadata),
+        ),
         Err(e) => PaginatedDocumentsResult::Err(e),
     }
 }

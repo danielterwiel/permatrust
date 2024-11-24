@@ -1,22 +1,28 @@
 use candid::Principal;
 use ic_cdk_macros::{query, update};
-use shared::pagination::{paginate, PaginatedOrganisationsResult};
-use shared::pt_backend_generated::{
-    AppError, Organisation, OrganisationId, OrganisationIdResult, OrganisationResult,
-    PaginationInput,
+use shared::utils::pagination::paginate;
+
+use shared::types::errors::AppError;
+use shared::types::organisations::{
+    Organisation, OrganisationId, OrganisationIdResult, OrganisationResult,
+    PaginatedOrganisationsResult, PaginatedOrganisationsResultOk,
 };
+use shared::types::pagination::PaginationInput;
+
 use std::cell::RefCell;
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::vec;
 
 use crate::logger::{log_info, loggable_organisation};
 
 thread_local! {
     static ORGANISATIONS: RefCell<HashMap<OrganisationId, Organisation>> = RefCell::new(HashMap::new());
+    static NEXT_ID: AtomicU64 = AtomicU64::new(0);
 }
 
 pub fn get_next_organisation_id() -> u64 {
-    ORGANISATIONS.with(|organisations| organisations.borrow().len() as u64)
+    NEXT_ID.with(|id| id.fetch_add(1, Ordering::SeqCst))
 }
 
 fn get_organisations_by_user_id(user_id: Principal) -> Vec<Organisation> {
@@ -72,9 +78,9 @@ fn list_organisations(pagination: PaginationInput) -> PaginatedOrganisationsResu
         pagination.filters,
         pagination.sort,
     ) {
-        Ok((paginated_organisations, pagination_metadata)) => {
-            PaginatedOrganisationsResult::Ok(paginated_organisations, pagination_metadata)
-        }
+        Ok((paginated_organisations, pagination_metadata)) => PaginatedOrganisationsResult::Ok(
+            PaginatedOrganisationsResultOk(paginated_organisations, pagination_metadata),
+        ),
         Err(e) => PaginatedOrganisationsResult::Err(e),
     }
 }

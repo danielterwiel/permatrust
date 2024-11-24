@@ -53,9 +53,6 @@ jobs:
       - name: Generate Declarations
         run: dfx generate
 
-      - name: Build shared
-        run: npm run build:shared
-
       - name: Build frontend
         run: npm run build
 

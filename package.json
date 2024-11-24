@@ -5,7 +5,6 @@
   },
   "name": "pt",
   "scripts": {
-    "build:shared": "./scripts/build-shared.sh",
     "build": "npm run build --workspaces --if-present",
     "build:icons": "npm run build:icons --workspaces --if-present",
     "add:icons": "npm run add:icons --workspaces --if-present",
@@ -22,6 +21,5 @@
   "workspaces": [
     "src/pt_frontend"
   ],
-  "dependencies": {},
   "devDependencies": {}
 }

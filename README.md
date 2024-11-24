@@ -17,9 +17,6 @@ gpg --expert --full-generate-key
 
 ```sh
 dfx start --clean
-dfx nns import
-chmod +x scripts/build-shared.sh
-npm run build:shared # Requires confirmation in Settings > Security @ Mac OS
 dfx deploy
 npm start
 ```
@@ -42,12 +39,6 @@ dfx ledger transfer ACCOUNT_ID_NNS_PAGE --memo 12345 --amount 1337
 ```sh
 dfx extension install nns
 ```
-
-## Rust development tip
-
-- Edit .did file to replicate an existing canister method
-- run `npm run build:shared`
-- See newly generated rust files in src/shared
 
 ## Convert .did value to json
 

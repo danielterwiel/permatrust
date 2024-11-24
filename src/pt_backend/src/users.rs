@@ -1,17 +1,25 @@
 use ic_cdk_macros::{query, update};
-use shared::pagination::{paginate, PaginatedUsersResult};
-use shared::pt_backend_generated::{
-    AppError, PaginationInput, User, UserId, UserIdResult, UserResult,
-};
+use shared::types::users::{PaginatedUsersResult, User, UserId, UserIdResult, UserResult};
+use shared::utils::pagination::paginate;
+
+use shared::types::errors::AppError;
+use shared::types::pagination::PaginationInput;
+
 use std::cell::RefCell;
 use std::collections::HashMap;
+// use std::sync::atomic::{AtomicU64, Ordering};
 use std::vec;
 
 use crate::logger::{log_info, loggable_user};
 
 thread_local! {
     static USERS: RefCell<HashMap<UserId, User>> = RefCell::new(HashMap::new());
+    // static NEXT_ID: AtomicU64 = AtomicU64::new(0);
 }
+
+// pub fn get_next_user_id() -> u64 {
+//     NEXT_ID.with(|id| id.fetch_add(1, Ordering::SeqCst))
+// }
 
 #[update]
 fn create_user(first_name: String, last_name: String) -> UserIdResult {
@@ -28,9 +36,10 @@ fn create_user(first_name: String, last_name: String) -> UserIdResult {
 
     let id = ic_cdk::caller();
     let user = User {
-        id,
+        id, // TODO:
         first_name,
         last_name,
+        roles: vec![],
         organisations: vec![],
     };
 
@@ -64,6 +73,14 @@ fn list_users(pagination: PaginationInput) -> PaginatedUsersResult {
 #[query]
 fn get_user() -> UserResult {
     let user_id = ic_cdk::caller();
+    USERS.with(|users| match users.borrow().get(&user_id) {
+        Some(user) => UserResult::Ok(user.clone()),
+        None => UserResult::Err(AppError::EntityNotFound("User not found".to_string())),
+    })
+}
+
+#[query]
+pub fn get_user_by_id(user_id: UserId) -> UserResult {
     USERS.with(|users| match users.borrow().get(&user_id) {
         Some(user) => UserResult::Ok(user.clone()),
         None => UserResult::Err(AppError::EntityNotFound("User not found".to_string())),
