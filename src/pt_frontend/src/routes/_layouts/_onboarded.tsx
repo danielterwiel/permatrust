@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router';
 
-import { Breadcrumbs } from '@/components/Breadcrumbs';
-import { Sidebar } from '@/components/Sidebar';
+import { Breadcrumbs } from '@/components/breadcrumbs';
+import { Sidebar } from '@/components/sidebar';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 
 export const Route = createFileRoute('/_initialized/_authenticated/_onboarded')(

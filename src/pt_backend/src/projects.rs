@@ -1,27 +1,25 @@
 use ic_cdk_macros::{query, update};
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicU32, Ordering};
 use std::vec;
 
 use shared::utils::pagination::paginate;
 
 use shared::types::errors::AppError;
-use shared::types::organisations::OrganisationId;
-use shared::types::pagination::PaginationInput;
-use shared::types::projects::{
-    PaginatedProjectsResult, PaginatedProjectsResultOk, Project, ProjectId, ProjectIdResult,
-    ProjectResult,
-};
+use shared::types::organizations::OrganizationId;
+use shared::types::pagination::{PaginationInput, PaginationMetadata};
+use shared::types::projects::{Project, ProjectId, ProjectResult};
 
 use crate::logger::{log_info, loggable_project};
+use crate::users::get_user_by_principal;
 
 thread_local! {
     static PROJECTS: RefCell<HashMap<ProjectId, Project>> = RefCell::new(HashMap::new());
-    static NEXT_ID: AtomicU64 = AtomicU64::new(0);
+    static NEXT_ID: AtomicU32 = AtomicU32::new(0);
 }
 
-pub fn get_next_project_id() -> u64 {
+pub fn get_next_project_id() -> ProjectId {
     NEXT_ID.with(|id| id.fetch_add(1, Ordering::SeqCst))
 }
 
@@ -29,34 +27,35 @@ fn get_projects() -> Vec<Project> {
     PROJECTS.with(|projects| projects.borrow().values().cloned().collect())
 }
 
-fn get_projects_by_organisation_id(organisation_id: OrganisationId) -> Vec<Project> {
+fn get_projects_by_organization_id(organization_id: OrganizationId) -> Vec<Project> {
     PROJECTS.with(|projects| {
         projects
             .borrow()
             .values()
-            .filter(|proj| proj.organisations.contains(&organisation_id))
+            .filter(|proj| proj.organizations.contains(&organization_id))
             .cloned()
             .collect()
     })
 }
 
 #[update]
-fn create_project(organisation_id: OrganisationId, name: String) -> ProjectIdResult {
+fn create_project(organization_id: OrganizationId, name: String) -> Result<ProjectId, AppError> {
     let id = get_next_project_id();
     if name.trim().is_empty() {
-        return ProjectIdResult::Err(AppError::InternalError(
+        return Err(AppError::InternalError(
             "Project name cannot be empty".to_string(),
         ));
     }
     let caller = ic_cdk::caller();
+    let user = get_user_by_principal(caller)?;
 
     let project = Project {
         id,
         name,
-        members: vec![caller],
-        organisations: vec![organisation_id],
+        members: vec![user.id],
+        organizations: vec![organization_id],
         created_at: ic_cdk::api::time(),
-        created_by: caller,
+        created_by: user.id,
         documents: vec![],
     };
 
@@ -66,11 +65,13 @@ fn create_project(organisation_id: OrganisationId, name: String) -> ProjectIdRes
 
     log_info("create_project", loggable_project(&project));
 
-    ProjectIdResult::Ok(id)
+    Ok(id)
 }
 
 #[query]
-fn list_projects(pagination: PaginationInput) -> PaginatedProjectsResult {
+fn list_projects(
+    pagination: PaginationInput,
+) -> Result<(Vec<Project>, PaginationMetadata), AppError> {
     let projects = get_projects();
     match paginate(
         &projects,
@@ -79,19 +80,19 @@ fn list_projects(pagination: PaginationInput) -> PaginatedProjectsResult {
         pagination.filters,
         pagination.sort,
     ) {
-        Ok((paginated_projects, pagination_metadata)) => PaginatedProjectsResult::Ok(
-            PaginatedProjectsResultOk(paginated_projects, pagination_metadata),
-        ),
-        Err(e) => PaginatedProjectsResult::Err(e),
+        Ok((paginated_projects, pagination_metadata)) => {
+            Ok((paginated_projects, pagination_metadata))
+        }
+        Err(e) => Err(e),
     }
 }
 
 #[query]
-fn list_projects_by_organisation_id(
-    organisation_id: OrganisationId,
+fn list_projects_by_organization_id(
+    organization_id: OrganizationId,
     pagination: PaginationInput,
-) -> PaginatedProjectsResult {
-    let projects = get_projects_by_organisation_id(organisation_id);
+) -> Result<(Vec<Project>, PaginationMetadata), AppError> {
+    let projects = get_projects_by_organization_id(organization_id);
     match paginate(
         &projects,
         pagination.page_size,
@@ -99,10 +100,10 @@ fn list_projects_by_organisation_id(
         pagination.filters,
         pagination.sort,
     ) {
-        Ok((paginated_projects, pagination_metadata)) => PaginatedProjectsResult::Ok(
-            PaginatedProjectsResultOk(paginated_projects, pagination_metadata),
-        ),
-        Err(e) => PaginatedProjectsResult::Err(e),
+        Ok((paginated_projects, pagination_metadata)) => {
+            Ok((paginated_projects, pagination_metadata))
+        }
+        Err(e) => Err(e),
     }
 }
 

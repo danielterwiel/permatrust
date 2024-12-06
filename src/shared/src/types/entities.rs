@@ -6,7 +6,7 @@ pub enum Entity {
     User,
     Document,
     Revision,
-    Organisation,
+    Organization,
     Project,
     Workflow,
 }

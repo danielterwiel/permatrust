@@ -1,15 +1,15 @@
 use std::cmp::Ordering;
 
-use crate::types::documents::Document;
-use crate::types::organisations::Organisation;
+use crate::types::documents::{Document, DocumentId};
+use crate::types::organizations::{Organization, OrganizationId};
 use crate::types::pagination::{
-    DocumentFilterField, OrganisationFilterField, ProjectFilterField, RevisionFilterField,
+    DocumentFilterField, OrganizationFilterField, ProjectFilterField, RevisionFilterField,
     UserFilterField, WorkflowFilterField,
 };
 use crate::types::pagination::{
     FilterCriteria, FilterField, FilterOperator, SortCriteria, SortOrder,
 };
-use crate::types::projects::Project;
+use crate::types::projects::{Project, ProjectId};
 use crate::types::revisions::Revision;
 use crate::types::users::User;
 use crate::types::workflows::Workflow;
@@ -40,7 +40,7 @@ impl Filterable for Document {
                 }
             }
             FilterField::Document(DocumentFilterField::ProjectId) => {
-                let criteria_value = criteria.value.parse::<u64>().unwrap_or(0);
+                let criteria_value = criteria.value.parse::<ProjectId>().unwrap_or(0);
                 match criteria.operator {
                     FilterOperator::Equals => self.project == criteria_value,
                     _ => false,
@@ -81,14 +81,14 @@ impl Filterable for Revision {
                 }
             }
             FilterField::Revision(RevisionFilterField::DocumentId) => {
-                let criteria_value = criteria.value.parse::<u64>().unwrap_or(0);
+                let criteria_value = criteria.value.parse::<DocumentId>().unwrap_or(0);
                 match criteria.operator {
                     FilterOperator::Equals => self.document_id == criteria_value,
                     _ => false,
                 }
             }
             FilterField::Revision(RevisionFilterField::ProjectId) => {
-                let criteria_value = criteria.value.parse::<u64>().unwrap_or(0);
+                let criteria_value = criteria.value.parse::<ProjectId>().unwrap_or(0);
                 match criteria.operator {
                     FilterOperator::Equals => self.project_id == criteria_value,
                     _ => false,
@@ -106,10 +106,10 @@ impl Filterable for Revision {
     }
 }
 
-impl Filterable for Organisation {
+impl Filterable for Organization {
     fn matches(&self, criteria: &FilterCriteria) -> bool {
         match &criteria.field {
-            FilterField::Organisation(OrganisationFilterField::CreatedAt) => {
+            FilterField::Organization(OrganizationFilterField::CreatedAt) => {
                 let criteria_value = criteria.value.parse::<u64>().unwrap_or(0);
                 match criteria.operator {
                     FilterOperator::GreaterThan => self.created_at > criteria_value,
@@ -118,7 +118,7 @@ impl Filterable for Organisation {
                     _ => false,
                 }
             }
-            FilterField::Organisation(OrganisationFilterField::Name) => match criteria.operator {
+            FilterField::Organization(OrganizationFilterField::Name) => match criteria.operator {
                 FilterOperator::Equals => self.name == criteria.value,
                 FilterOperator::Contains => self.name.contains(&criteria.value),
                 _ => false,
@@ -144,10 +144,10 @@ impl Filterable for Project {
                 FilterOperator::Contains => self.name.contains(&criteria.value),
                 _ => false,
             },
-            FilterField::Project(ProjectFilterField::OrganisationId) => {
-                let criteria_value = criteria.value.parse::<u64>().unwrap_or(0);
+            FilterField::Project(ProjectFilterField::OrganizationId) => {
+                let criteria_value = criteria.value.parse::<OrganizationId>().unwrap_or(0);
                 match criteria.operator {
-                    FilterOperator::Equals => self.organisations.contains(&criteria_value),
+                    FilterOperator::Equals => self.organizations.contains(&criteria_value),
                     _ => false,
                 }
             }
@@ -166,7 +166,7 @@ impl Filterable for Workflow {
                 _ => false,
             },
             FilterField::Workflow(WorkflowFilterField::ProjectId) => {
-                let criteria_value = criteria.value.parse::<u64>().unwrap_or(0);
+                let criteria_value = criteria.value.parse::<ProjectId>().unwrap_or(0);
                 match criteria.operator {
                     FilterOperator::Equals => self.project_id == criteria_value,
                     _ => false,
@@ -232,13 +232,13 @@ impl Sortable for Revision {
     }
 }
 
-impl Sortable for Organisation {
+impl Sortable for Organization {
     fn compare(&self, other: &Self, criteria: &SortCriteria) -> Ordering {
         let ordering = match &criteria.field {
-            FilterField::Organisation(OrganisationFilterField::CreatedAt) => {
+            FilterField::Organization(OrganizationFilterField::CreatedAt) => {
                 self.created_at.cmp(&other.created_at)
             }
-            FilterField::Organisation(OrganisationFilterField::Name) => self.name.cmp(&other.name),
+            FilterField::Organization(OrganizationFilterField::Name) => self.name.cmp(&other.name),
             _ => Ordering::Equal,
         };
         match criteria.order {
@@ -255,8 +255,8 @@ impl Sortable for Project {
                 self.created_at.cmp(&other.created_at)
             }
             FilterField::Project(ProjectFilterField::Name) => self.name.cmp(&other.name),
-            FilterField::Project(ProjectFilterField::OrganisationId) => {
-                self.organisations.cmp(&other.organisations)
+            FilterField::Project(ProjectFilterField::OrganizationId) => {
+                self.organizations.cmp(&other.organizations)
             }
             _ => Ordering::Equal,
         };

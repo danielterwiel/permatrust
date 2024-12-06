@@ -13,7 +13,7 @@ import {
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
-import { Loading } from '@/components/Loading';
+import { Loading } from '@/components/loading';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
@@ -25,8 +25,10 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Icon } from '@/components/ui/Icon';
+import { Icon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
+
+import { toNumberSchema } from '@/schemas/primitives';
 
 import type { FC } from 'react';
 
@@ -36,7 +38,7 @@ export const createDocumentFormSchema = z.object({
   content: z.string().min(1, {
     message: 'Content must be at least 1 character.',
   }),
-  projects: z.array(z.bigint()),
+  projects: z.array(z.number()),
   title: z.string().min(2, {
     message: 'Project name must be at least 2 characters.',
   }),
@@ -53,10 +55,11 @@ export const CreateDocumentForm: FC<CreateDocumentFormProps> = ({
   onSubmit,
   projectId,
 }) => {
+  const projectIdNumber = toNumberSchema.parse(projectId);
   const form = useForm<z.infer<typeof createDocumentFormSchema>>({
     defaultValues: {
       content: '',
-      projects: [BigInt(projectId)],
+      projects: [projectIdNumber],
       title: '',
     },
     disabled: isSubmitting,

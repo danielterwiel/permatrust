@@ -13,7 +13,7 @@ export const FILTER_FIELD_DOCUMENT = {
   Title: { Title: null },
   Version: { Version: null },
 } as const;
-export const FILTER_FIELD_ORGANISATION = {
+export const FILTER_FIELD_ORGANIZATION = {
   CreatedAt: { CreatedAt: null },
   CreatedBy: { CreatedBy: null },
   Name: { Name: null },
@@ -22,7 +22,7 @@ export const FILTER_FIELD_PROJECT = {
   CreatedAt: { CreatedAt: null },
   CreatedBy: { CreatedBy: null },
   Name: { Name: null },
-  OrganisationId: { OrganisationId: null },
+  OrganizationId: { OrganizationId: null },
 } as const;
 export const FILTER_FIELD_REVISION = {
   CreatedAt: { CreatedAt: null },
@@ -41,7 +41,7 @@ export const FILTER_FIELD_WORKFLOW = {
 
 export const FILTER_FIELD = {
   Document: FILTER_FIELD_DOCUMENT,
-  Organisation: FILTER_FIELD_ORGANISATION,
+  Organization: FILTER_FIELD_ORGANIZATION,
   Project: FILTER_FIELD_PROJECT,
   Revision: FILTER_FIELD_REVISION,
   User: FILTER_FIELD_USER,

@@ -7,6 +7,7 @@ pub struct RoleInput {
     pub name: String,
     pub description: String,
 }
+
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 pub enum Permission {
     Read,
@@ -14,10 +15,6 @@ pub enum Permission {
     Delete,
     Create,
     Update,
-}
-#[derive(CandidType, Deserialize, Clone, Debug)]
-pub enum EntityPermission {
-    User(Vec<Permission>),
 }
 
 pub type RoleId = u64;
@@ -27,10 +24,26 @@ pub enum RoleIdResult {
     Err(AppError),
 }
 
-#[derive(CandidType, Deserialize, Clone, Debug)]
+#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
 pub struct Role {
     pub id: RoleId,
     pub permissions: Vec<EntityPermission>,
     pub name: String,
     pub description: String,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
+pub enum UserAction {
+    Create,
+    Read,
+    Update,
+    Delete,
+    Invite,
+    Deactivate,
+    ChangeRole,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
+pub enum EntityPermission {
+    User(Vec<Permission>),
 }

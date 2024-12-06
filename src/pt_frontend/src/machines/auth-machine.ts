@@ -8,16 +8,15 @@ import { CANISTER_ID_PT_BACKEND } from '@/consts/canisters';
 import { DEFAULT_PAGINATION } from '@/consts/pagination';
 
 import type {
-  PaginatedOrganisationsResultOk,
+  Organization,
   User,
 } from '@/declarations/pt_backend/pt_backend.did';
-import type { DeepPartial } from '@/types/deep-partial';
 
 type AuthMachineTypes = {
   context: {
     isAuthenticated: boolean;
 
-    organisations?: DeepPartial<PaginatedOrganisationsResultOk>;
+    organizations?: Organization[];
 
     user?: User;
   };
@@ -78,19 +77,19 @@ const authMachine = setup({
       return { isAuthenticated };
     }),
 
-    list_organisations: fromPromise(async () => {
-      const organisationsResult =
-        await api.list_organisations(DEFAULT_PAGINATION);
-      const [organisations] = organisationsResult;
+    list_organizations: fromPromise(async () => {
+      const organizationsResult =
+        await api.list_organizations(DEFAULT_PAGINATION);
+      const [organizations] = organizationsResult;
 
-      if (!organisations.length) {
+      if (!organizations.length) {
         return {
-          onboardedOrganisations: false,
+          onboardedOrganizations: false,
         };
       }
       return {
-        onboardedOrganisations: true,
-        organisations: organisationsResult,
+        onboardedOrganizations: true,
+        organizations,
       };
     }),
   },
@@ -99,7 +98,7 @@ const authMachine = setup({
   context: {
     isAuthenticated: false,
 
-    organisations: undefined,
+    organizations: undefined,
     user: undefined,
   },
   id: 'authMachine',
@@ -134,7 +133,7 @@ const authMachine = setup({
                   search: {
                     redirect: window.location.pathname,
                   },
-                  to: '/authenticate',
+                  to: '/login',
                 });
               },
             },
@@ -142,23 +141,23 @@ const authMachine = setup({
             onboarding: {
               initial: 'check_user',
               states: {
-                check_organisations: {
+                check_organizations: {
                   invoke: {
-                    id: 'check_organisations',
+                    id: 'check_organizations',
                     onDone: [
                       {
                         actions: assign({
-                          organisations: ({ event }) =>
-                            event.output.organisations,
+                          organizations: ({ event }) =>
+                            event.output.organizations,
                         }),
                         guard: ({ event }) =>
-                          event.output?.onboardedOrganisations,
+                          event.output?.onboardedOrganizations,
                         target: 'onboarding_complete',
                       },
                       {
                         actions: async () => {
                           await router.navigate({
-                            to: '/onboarding/organisations/create',
+                            to: '/onboarding/organization/create',
                           });
                         },
                         target: 'onboarding_incomplete',
@@ -167,7 +166,7 @@ const authMachine = setup({
                     onError: {
                       target: 'onboarding_error',
                     },
-                    src: 'list_organisations',
+                    src: 'list_organizations',
                   },
                 },
 
@@ -180,12 +179,12 @@ const authMachine = setup({
                           user: ({ event }) => event.output.user,
                         }),
                         guard: ({ event }) => event.output?.onboardedUser,
-                        target: 'check_organisations',
+                        target: 'check_organizations',
                       },
                       {
                         actions: async () => {
                           await router.navigate({
-                            to: '/onboarding/users/create',
+                            to: '/onboarding/user/create',
                           });
                         },
                         target: 'onboarding_incomplete',
@@ -206,7 +205,7 @@ const authMachine = setup({
                       await router.navigate({
                         to: search.get('redirect') as string,
                       });
-                    } else if (window.location.pathname === '/authenticate') {
+                    } else if (window.location.pathname === '/login') {
                       await router.navigate({ to: '/projects' });
                     }
                     // we're refreshing, no need to do anything
@@ -222,11 +221,11 @@ const authMachine = setup({
                     async ({ context }) => {
                       if (context.user) {
                         await router.navigate({
-                          to: '/onboarding/organisations/create',
+                          to: '/onboarding/organization/create',
                         });
                       } else {
                         await router.navigate({
-                          to: '/onboarding/users/create',
+                          to: '/onboarding/user/create',
                         });
                       }
                     },
@@ -265,7 +264,7 @@ const authMachine = setup({
               search: {
                 error: true,
               },
-              to: '/authenticate',
+              to: '/login',
             });
           },
         },

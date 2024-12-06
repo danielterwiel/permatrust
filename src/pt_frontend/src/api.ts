@@ -1,4 +1,4 @@
-import { createActor } from '@/declarations/pt_backend';
+import { createActor } from '@/declarations/pt_backend/index';
 import { type ActorSubclass, HttpAgent } from '@dfinity/agent';
 
 import { isAppError } from '@/utils/isAppError';

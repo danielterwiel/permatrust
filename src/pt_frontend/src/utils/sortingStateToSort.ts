@@ -7,7 +7,7 @@ import { assertFilterFieldEnum } from './assertFilterFieldEnum';
 import { assertFilterFieldName } from './assertFilterFieldName';
 import { buildEnum } from './buildEnum';
 
-import type { Sort } from '@/declarations/pt_backend/pt_backend.did';
+import type { SortCriteria } from '@/declarations/pt_backend/pt_backend.did';
 import type { EntityName } from '@/types/entities';
 import type { SortingState } from '@tanstack/react-table';
 
@@ -22,7 +22,7 @@ const columnIdToFilterFieldEnum = (id: string) => {
 export const sortingStateToSort = (
   entityName: EntityName,
   sortingStates: SortingState,
-): Sort => {
+): [SortCriteria] => {
   const [sortingState] = sortingStates;
   if (!sortingState) {
     throw new Error('sortingState not found');

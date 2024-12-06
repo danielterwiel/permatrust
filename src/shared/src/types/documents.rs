@@ -8,6 +8,7 @@ use crate::types::revisions::RevisionId;
 use crate::types::users::UserId;
 
 pub type DocumentId = u64;
+
 #[derive(CandidType, Deserialize)]
 pub enum DocumentIdResult {
     Ok(DocumentId),

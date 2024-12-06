@@ -8,7 +8,7 @@ export const Route = createFileRoute('/_initialized/_authenticated')({
     const authActor = context.actors.auth;
     await waitFor(authActor, (state) => state.matches('initialized'));
     if (!(await auth.isAuthenticated())) {
-      throw redirect({ to: '/authenticate' });
+      throw redirect({ to: '/login' });
     }
   },
   component: AuthLayout,

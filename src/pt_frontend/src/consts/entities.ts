@@ -1,8 +1,8 @@
-import type { EntityName } from '@/types/entities';
+import type { EntityName } from "@/types/entities";
 
 export const ENTITY = {
   Document: { Document: null },
-  Organisation: { Organisation: null },
+  Organization: { Organization: null },
   Project: { Project: null },
   Revision: { Revision: null },
   User: { User: null },

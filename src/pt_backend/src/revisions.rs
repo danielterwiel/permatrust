@@ -1,4 +1,5 @@
 use crate::logger::{log_info, loggable_revision};
+use crate::users::get_user_by_principal;
 use ic_cdk_macros::{query, update};
 
 use std::cell::RefCell;
@@ -7,12 +8,9 @@ use std::sync::atomic::{AtomicU64, Ordering};
 
 use shared::types::documents::DocumentId;
 use shared::types::errors::AppError;
-use shared::types::pagination::PaginationInput;
+use shared::types::pagination::{PaginationInput, PaginationMetadata};
 use shared::types::projects::ProjectId;
-use shared::types::revisions::{
-    PaginatedRevisionsResult, PaginatedRevisionsResultOk, Revision, RevisionId, RevisionIdResult,
-    RevisionResult, RevisionsResult,
-};
+use shared::types::revisions::{Revision, RevisionId};
 
 use shared::utils::pagination::paginate;
 
@@ -23,7 +21,7 @@ thread_local! {
     static NEXT_ID: AtomicU64 = AtomicU64::new(0);
 }
 
-pub fn get_next_revision_id() -> u64 {
+pub fn get_next_revision_id() -> RevisionId {
     NEXT_ID.with(|id| id.fetch_add(1, Ordering::SeqCst))
 }
 
@@ -33,7 +31,7 @@ fn get_revisions() -> Vec<Revision> {
 
 pub fn insert_revision(revision_id: RevisionId, revision: Revision) {
     REVISIONS.with(|revisions| {
-        revisions.borrow_mut().insert(revision_id, revision);
+        revisions.borrow_mut().insert(revision_id.clone(), revision);
     });
 }
 
@@ -42,11 +40,12 @@ pub fn create_revision(
     project_id: ProjectId,
     document_id: DocumentId,
     content: serde_bytes::ByteBuf,
-) -> RevisionIdResult {
+) -> Result<RevisionId, AppError> {
     match get_document_by_id(document_id) {
         Some(document) if document.project == project_id => {
             let new_revision_id = get_next_revision_id();
             let version = document.version + 1;
+            let user = get_user_by_principal(ic_cdk::caller())?;
 
             let new_revision = Revision {
                 id: new_revision_id,
@@ -55,27 +54,27 @@ pub fn create_revision(
                 project_id,
                 content,
                 created_at: ic_cdk::api::time(),
-                created_by: ic_cdk::caller(),
+                created_by: user.id,
             };
 
             insert_revision(new_revision_id, new_revision.clone());
             update_document_revision(document_id, version, new_revision_id);
             log_info("create_revision", loggable_revision(&new_revision));
 
-            RevisionIdResult::Ok(new_revision_id)
+            Ok(new_revision_id)
         }
-        Some(_) => RevisionIdResult::Err(AppError::EntityNotFound(
+        Some(_) => Err(AppError::EntityNotFound(
             "Document does not belong to the specified project".to_string(),
         )),
-        None => RevisionIdResult::Err(AppError::EntityNotFound("Document not found".to_string())),
+        None => Err(AppError::EntityNotFound("Document not found".to_string())),
     }
 }
 
 #[query]
-pub fn get_revision(revision_id: RevisionId) -> RevisionResult {
+pub fn get_revision(revision_id: RevisionId) -> Result<Revision, AppError> {
     REVISIONS.with(|revisions| match revisions.borrow().get(&revision_id) {
-        Some(revision) => RevisionResult::Ok(revision.clone()),
-        None => RevisionResult::Err(AppError::EntityNotFound("Revision not found".to_string())),
+        Some(revision) => Ok(revision.clone()),
+        None => Err(AppError::EntityNotFound("Revision not found".to_string())),
     })
 }
 
@@ -98,7 +97,9 @@ pub fn get_revisions_by_document_id(document_id: DocumentId) -> Result<Vec<Revis
 }
 
 #[query]
-fn list_revisions(pagination: PaginationInput) -> PaginatedRevisionsResult {
+fn list_revisions(
+    pagination: PaginationInput,
+) -> Result<(Vec<Revision>, PaginationMetadata), AppError> {
     let revisions = get_revisions();
 
     match paginate(
@@ -109,10 +110,9 @@ fn list_revisions(pagination: PaginationInput) -> PaginatedRevisionsResult {
         pagination.sort.clone(),
     ) {
         Ok((paginated_revisions, pagination_metadata)) => {
-            let result = PaginatedRevisionsResultOk(paginated_revisions, pagination_metadata);
-            PaginatedRevisionsResult::Ok(result)
+            Ok((paginated_revisions, pagination_metadata))
         }
-        Err(e) => PaginatedRevisionsResult::Err(e),
+        Err(e) => Err(e),
     }
 }
 
@@ -120,7 +120,7 @@ fn list_revisions(pagination: PaginationInput) -> PaginatedRevisionsResult {
 fn list_revisions_by_document_id(
     document_id: DocumentId,
     pagination: PaginationInput,
-) -> PaginatedRevisionsResult {
+) -> Result<(Vec<Revision>, PaginationMetadata), AppError> {
     let revisions =
         get_revisions_by_document_id(document_id).expect("Something went wrong getting revision");
     match paginate(
@@ -130,10 +130,10 @@ fn list_revisions_by_document_id(
         pagination.filters,
         pagination.sort,
     ) {
-        Ok((paginated_revisions, pagination_metadata)) => PaginatedRevisionsResult::Ok(
-            PaginatedRevisionsResultOk(paginated_revisions, pagination_metadata),
-        ),
-        Err(e) => PaginatedRevisionsResult::Err(e),
+        Ok((paginated_revisions, pagination_metadata)) => {
+            Ok((paginated_revisions, pagination_metadata))
+        }
+        Err(e) => Err(e),
     }
 }
 
@@ -172,14 +172,12 @@ fn get_revision_range(
 pub fn diff_revisions(
     start_revision_id: RevisionId,
     end_revision_id: RevisionId,
-) -> RevisionsResult {
+) -> Result<Vec<Revision>, AppError> {
     let start_revision_result = get_revision(start_revision_id);
     let end_revision_result = get_revision(end_revision_id);
 
     match (start_revision_result, end_revision_result) {
-        (RevisionResult::Ok(start), RevisionResult::Ok(end))
-            if start.document_id == end.document_id =>
-        {
+        (Ok(start), Ok(end)) if start.document_id == end.document_id => {
             let document_id = start.document_id;
             if let Some(document) = get_document_by_id(document_id) {
                 let start_index_option = document
@@ -194,19 +192,19 @@ pub fn diff_revisions(
                 if let (Some(start_index), Some(end_index)) = (start_index_option, end_index_option)
                 {
                     let revisions = get_revision_range(document_id, start_index, end_index);
-                    RevisionsResult::Ok(revisions)
+                    Ok(revisions)
                 } else {
-                    RevisionsResult::Err(AppError::EntityNotFound(
+                    Err(AppError::EntityNotFound(
                         "Revisions not found in document".to_string(),
                     ))
                 }
             } else {
-                RevisionsResult::Err(AppError::EntityNotFound("Document not found".to_string()))
+                Err(AppError::EntityNotFound("Document not found".to_string()))
             }
         }
-        (RevisionResult::Ok(_), RevisionResult::Ok(_)) => RevisionsResult::Err(
-            AppError::InternalError("Revisions are from different documents".to_string()),
-        ),
-        (RevisionResult::Err(err), _) | (_, RevisionResult::Err(err)) => RevisionsResult::Err(err),
+        (Ok(_), Ok(_)) => Err(AppError::InternalError(
+            "Revisions are from different documents".to_string(),
+        )),
+        (Err(err), _) | (_, Err(err)) => Err(err),
     }
 }

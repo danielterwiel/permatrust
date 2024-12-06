@@ -84,7 +84,6 @@
     "build:icons": "npx svg-icons-cli build -i src/components/icons -o src/components/ui/icons",
     "add:icons": "npx @sly-cli/sly add --directory ./src/components/icons --overwrite --yes",
     "add:components": "npx shadcn@latest add",
-    "prebuild": "dfx generate",
     "start": "vite --port 3000",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",

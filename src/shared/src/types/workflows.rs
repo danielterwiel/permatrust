@@ -5,9 +5,12 @@ use crate::types::errors::AppError;
 use crate::types::pagination::PaginationMetadata;
 use crate::types::projects::ProjectId;
 
-pub type WorkflowId = u64;
+pub type WorkflowId = u32;
 pub type StateId = String;
 pub type EventId = String;
+pub type WorkflowIdResult = Result<WorkflowId, AppError>;
+pub type WorkflowResult = Result<Workflow, AppError>;
+pub type PaginatedWorkflowsResult = Result<(Vec<Workflow>, PaginationMetadata), AppError>;
 
 #[derive(CandidType, Deserialize)]
 pub struct CreateWorkflowInput {
@@ -15,12 +18,6 @@ pub struct CreateWorkflowInput {
     pub name: String,
     pub graph_json: String,
     pub project_id: ProjectId,
-}
-
-#[derive(CandidType, Deserialize)]
-pub enum WorkflowIdResult {
-    Ok(WorkflowId),
-    Err(AppError),
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
@@ -39,16 +36,4 @@ pub struct Workflow {
     pub name: String,
     pub graph: WorkflowGraph,
     pub project_id: ProjectId,
-}
-
-#[derive(CandidType, Deserialize)]
-pub enum WorkflowResult {
-    Ok(Workflow),
-    Err(AppError),
-}
-
-#[derive(CandidType, Deserialize)]
-pub enum PaginatedWorkflowsResult {
-    Ok(Vec<Workflow>, PaginationMetadata),
-    Err(AppError),
 }

@@ -6,13 +6,7 @@ use crate::types::errors::AppError;
 use crate::types::pagination::PaginationMetadata;
 use crate::types::projects::ProjectId;
 use crate::types::users::UserId;
-
 pub type RevisionId = u64;
-#[derive(CandidType, Deserialize)]
-pub enum RevisionIdResult {
-    Ok(RevisionId),
-    Err(AppError),
-}
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct Revision {

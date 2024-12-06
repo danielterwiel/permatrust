@@ -27,10 +27,10 @@
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "./src/*"
+        "src/*"
       ],
       "@/declarations/*": [
-        "./../declarations/*"
+        "../declarations/*"
       ],
       "~/icon-name": [
         "src/components/ui/icons/name.d.ts",

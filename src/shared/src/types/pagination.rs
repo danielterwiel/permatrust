@@ -27,14 +27,14 @@ pub enum RevisionFilterField {
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
-pub enum OrganisationFilterField {
+pub enum OrganizationFilterField {
     Name,
     CreatedAt,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub enum ProjectFilterField {
-    OrganisationId,
+    OrganizationId,
     Name,
     CreatedAt,
     CreatedBy,
@@ -51,7 +51,7 @@ pub enum FilterField {
     User(UserFilterField),
     Document(DocumentFilterField),
     Revision(RevisionFilterField),
-    Organisation(OrganisationFilterField),
+    Organization(OrganizationFilterField),
     Project(ProjectFilterField),
     Workflow(WorkflowFilterField),
 }
@@ -85,14 +85,14 @@ pub struct SortCriteria {
     pub field: FilterField,
     pub order: SortOrder,
 }
-pub type Sort = Option<SortCriteria>;
+// pub type Sort = Option<SortCriteria>;
 pub type PageNumber = u8;
 
 #[derive(CandidType, Deserialize)]
 pub struct PaginationInput {
     pub filters: Filters,
     pub page_size: PageSize,
-    pub sort: Sort,
+    pub sort: Option<SortCriteria>,
     pub page_number: PageNumber,
 }
 pub type TotalPages = u8;

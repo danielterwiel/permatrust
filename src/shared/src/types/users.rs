@@ -3,10 +3,9 @@ use serde::Deserialize;
 
 use crate::types::access_control::Role;
 use crate::types::errors::AppError;
-use crate::types::organisations::OrganisationId;
-use crate::types::pagination::PaginationMetadata;
+use crate::types::organizations::OrganizationId;
 
-pub type UserId = Principal;
+pub type UserId = u64;
 
 #[derive(CandidType, Deserialize)]
 pub enum UserIdResult {
@@ -19,18 +18,13 @@ pub struct User {
     pub id: UserId,
     pub first_name: String,
     pub last_name: String,
-    pub organisations: Vec<OrganisationId>,
+    pub organizations: Vec<OrganizationId>,
+    pub principal_id: Principal,
     pub roles: Vec<Role>,
 }
 
-#[derive(CandidType, Deserialize)]
-pub enum UserResult {
-    Ok(User),
-    Err(AppError),
-}
-
-#[derive(CandidType, Deserialize)]
-pub enum PaginatedUsersResult {
-    Ok(Vec<User>, PaginationMetadata),
-    Err(AppError),
+#[derive(CandidType, Deserialize, Clone, Debug)]
+pub struct CreateUserInput {
+    pub first_name: String,
+    pub last_name: String,
 }

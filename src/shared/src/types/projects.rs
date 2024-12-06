@@ -3,11 +3,11 @@ use serde::Deserialize;
 
 use crate::types::documents::DocumentId;
 use crate::types::errors::AppError;
-use crate::types::organisations::OrganisationId;
+use crate::types::organizations::OrganizationId;
 use crate::types::pagination::PaginationMetadata;
 use crate::types::users::UserId;
 
-pub type ProjectId = u64;
+pub type ProjectId = u32;
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct Project {
@@ -17,7 +17,7 @@ pub struct Project {
     pub name: String,
     pub created_at: u64,
     pub created_by: UserId,
-    pub organisations: Vec<OrganisationId>,
+    pub organizations: Vec<OrganizationId>,
 }
 
 #[derive(CandidType, Deserialize)]

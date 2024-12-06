@@ -12,7 +12,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22.x'
+          node-version: "22.x"
 
       - name: Restore npm cache
         id: npm-cache
@@ -45,16 +45,13 @@ jobs:
       - name: Start DFX background
         run: dfx start --background
 
-      - name: Create and build canisters
-        run: |
-          dfx canister create --all
-          dfx build
+      - name: Set build script permissions
+        working-directory: ./scripts
+        run: chmod +x ./build.sh
 
-      - name: Generate Declarations
-        run: dfx generate
-
-      - name: Build frontend
-        run: npm run build
+      - name: Run build script
+        working-directory: ./scripts
+        run: ./build.sh
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

@@ -3,13 +3,13 @@ use serde::{Deserialize, Serialize};
 
 use std::cell::RefCell;
 use std::collections::HashMap;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicU32, Ordering};
 
 use shared::types::errors::AppError;
 use shared::types::pagination::PaginationInput;
 use shared::types::workflows::{
     CreateWorkflowInput, Edge, EventId, PaginatedWorkflowsResult, StateId, Workflow, WorkflowGraph,
-    WorkflowId, WorkflowIdResult, WorkflowResult,
+    WorkflowId, WorkflowResult,
 };
 
 use shared::traits::workflows::WorkflowGraphExt;
@@ -32,10 +32,10 @@ pub struct GenericStateMachine {
 
 thread_local! {
   static WORKFLOWS: RefCell<HashMap<WorkflowId, Workflow>> = RefCell::new(HashMap::new());
-  static NEXT_ID: AtomicU64 = AtomicU64::new(0);
+  static NEXT_ID: AtomicU32 = AtomicU32::new(0);
 }
 
-pub fn get_next_workflow_id() -> u64 {
+pub fn get_next_workflow_id() -> WorkflowId {
     NEXT_ID.with(|id| id.fetch_add(1, Ordering::SeqCst))
 }
 
@@ -84,10 +84,10 @@ impl GenericStateMachine {
 }
 
 #[update]
-fn create_workflow(workflow: CreateWorkflowInput) -> WorkflowIdResult {
+fn create_workflow(workflow: CreateWorkflowInput) -> Result<WorkflowId, AppError> {
     let graph = match WorkflowGraph::from_json(&workflow.graph_json) {
         Ok(g) => g,
-        Err(e) => return WorkflowIdResult::Err(AppError::InvalidInput(e)),
+        Err(e) => return Err(AppError::InvalidInput(e)),
     };
     let state_machine =
         GenericStateMachine::from_workflow_graph(&graph, workflow.initial_state.clone());
@@ -106,7 +106,7 @@ fn create_workflow(workflow: CreateWorkflowInput) -> WorkflowIdResult {
         workflows.borrow_mut().insert(id, workflow.clone());
     });
 
-    WorkflowIdResult::Ok(id)
+    Ok(id)
 }
 
 #[query]
@@ -122,14 +122,14 @@ fn list_workflows(pagination: PaginationInput) -> PaginatedWorkflowsResult {
         pagination.sort,
     ) {
         Ok((paginated_workflows, pagination_metadata)) => {
-            PaginatedWorkflowsResult::Ok(paginated_workflows, pagination_metadata)
+            Ok((paginated_workflows, pagination_metadata))
         }
-        Err(e) => PaginatedWorkflowsResult::Err(e),
+        Err(e) => Err(e),
     }
 }
 
 #[query]
-fn get_workflow(workflow_id: u64) -> WorkflowResult {
+fn get_workflow(workflow_id: WorkflowId) -> Result<Workflow, AppError> {
     WORKFLOWS.with(|workflows| match workflows.borrow().get(&workflow_id) {
         Some(workflow) => WorkflowResult::Ok(workflow.clone()),
         None => WorkflowResult::Err(AppError::EntityNotFound("Workflow not found".to_string())),

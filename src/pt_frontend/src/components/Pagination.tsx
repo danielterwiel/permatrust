@@ -1,6 +1,6 @@
-import { PaginationLink } from '@/components/PaginationLink';
-import { PaginationNext } from '@/components/PaginationNext';
-import { PaginationPrevious } from '@/components/PaginationPrevious';
+import { PaginationLink } from '@/components/pagination-link';
+import { PaginationNext } from '@/components/pagination-next';
+import { PaginationPrevious } from '@/components/pagination-previous';
 import {
   Pagination as PaginationBase,
   PaginationContent,

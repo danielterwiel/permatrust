@@ -1,32 +1,32 @@
 {
-  "canisters": {
-    "internet_identity": {
-      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
-      "frontend": {},
-      "remote": {
-        "id": {
-          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
-        }
-      },
-      "type": "custom",
-      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz"
-    },
-    "pt_backend": {
-      "candid": "src/pt_backend/pt_backend.did",
-      "package": "pt_backend",
-      "type": "rust"
-    },
-    "pt_frontend": {
-      "dependencies": [
-        "pt_backend"
-      ],
-      "source": [
-        "src/pt_frontend/dist"
-      ],
-      "type": "assets",
-      "workspace": "pt_frontend"
-    }
-  },
-  "output_env_file": ".env",
-  "version": 1
+	"canisters": {
+		"pt_backend": {
+			"type": "rust",
+			"package": "pt_backend",
+			"candid": "src/pt_backend/pt_backend.did",
+			"declarations": {
+				"output": "src/declarations/pt_backend",
+				"bindings": ["ts", "js", "did"]
+			}
+		},
+		"pt_frontend": {
+			"type": "assets",
+			"source": ["src/pt_frontend/dist"],
+			"dependencies": ["pt_backend"],
+			"build": "npm run build --prefix src/pt_frontend"
+		},
+		"internet_identity": {
+			"type": "custom",
+			"candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
+			"wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz",
+			"remote": {
+				"id": {
+					"ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+				}
+			},
+			"frontend": {}
+		}
+	},
+	"output_env_file": ".env",
+	"version": 1
 }

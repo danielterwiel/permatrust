@@ -4,7 +4,7 @@ use std::env;
 use std::fmt::Debug;
 
 use shared::types::documents::Document;
-use shared::types::organisations::Organisation;
+use shared::types::organizations::Organization;
 use shared::types::projects::Project;
 use shared::types::revisions::Revision;
 use shared::types::users::User;
@@ -12,7 +12,7 @@ use shared::types::workflows::Workflow;
 
 pub struct LoggableUser<'a>(&'a User);
 pub struct LoggableWorkflow<'a>(&'a Workflow);
-pub struct LoggableOrganisation<'a>(&'a Organisation);
+pub struct LoggableOrganization<'a>(&'a Organization);
 pub struct LoggableProject<'a>(&'a Project);
 pub struct LoggableDocument<'a>(&'a Document);
 pub struct LoggableRevision<'a>(&'a Revision);
@@ -33,11 +33,11 @@ impl<'a> std::fmt::Display for LoggableWorkflow<'a> {
     }
 }
 
-impl<'a> std::fmt::Display for LoggableOrganisation<'a> {
+impl<'a> std::fmt::Display for LoggableOrganization<'a> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Organisation {{ id: {}, name: {}, created_by: {} }}",
+            "Organization {{ id: {}, name: {}, created_by: {} }}",
             self.0.id, self.0.name, self.0.created_by
         )
     }
@@ -81,8 +81,8 @@ pub fn loggable_workflow(workflow: &Workflow) -> LoggableWorkflow {
     LoggableWorkflow(workflow)
 }
 
-pub fn loggable_organisation(organistation: &Organisation) -> LoggableOrganisation {
-    LoggableOrganisation(organistation)
+pub fn loggable_organization(organistation: &Organization) -> LoggableOrganization {
+    LoggableOrganization(organistation)
 }
 
 pub fn loggable_project(project: &Project) -> LoggableProject {

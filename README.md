@@ -13,10 +13,12 @@ gpg --expert --full-generate-key
 
 ```
 
-### Installation
+### Getting started
 
 ```sh
-dfx start --clean
+dfx start --clean --background
+chmod +x scripts/build.sh
+./scripts/build.sh
 dfx deploy
 npm start
 ```
@@ -35,6 +37,7 @@ dfx ledger transfer ACCOUNT_ID_NNS_PAGE --memo 12345 --amount 1337
 - Rust
 - npm
 - dfx
+- candid-extractor
 
 ```sh
 dfx extension install nns

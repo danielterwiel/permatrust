@@ -1,8 +1,8 @@
+/// <reference types="vitest" />
+import url from 'node:url';
 import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react';
 import dotenv from 'dotenv';
-/// <reference types="vitest" />
-import url from 'node:url';
 import { defineConfig } from 'vite';
 import environment from 'vite-plugin-environment';
 
@@ -46,8 +46,8 @@ export default defineConfig({
         ),
       },
       {
-        find: '@/',
-        replacement: url.fileURLToPath(new url.URL('./src/', import.meta.url)),
+        find: '@',
+        replacement: url.fileURLToPath(new url.URL('./src', import.meta.url)),
       },
     ],
   },

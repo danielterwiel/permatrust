@@ -4,18 +4,16 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
 
-use shared::types::documents::{
-    Document, DocumentId, DocumentIdResult, DocumentResult, PaginatedDocumentsResult,
-    PaginatedDocumentsResultOk,
-};
+use shared::types::documents::{Document, DocumentId};
 use shared::types::errors::AppError;
-use shared::types::pagination::PaginationInput;
+use shared::types::pagination::{PaginationInput, PaginationMetadata};
 use shared::types::projects::ProjectId;
-use shared::types::revisions::{RevisionId, RevisionIdResult};
+use shared::types::revisions::RevisionId;
 
 use shared::utils::pagination::paginate;
 
 use crate::revisions::create_revision;
+use crate::users::get_user_by_principal;
 
 thread_local! {
     static DOCUMENTS: RefCell<HashMap<DocumentId, Document>> = RefCell::new(HashMap::new());
@@ -43,7 +41,9 @@ fn get_documents_by_project(project_id: ProjectId) -> Vec<Document> {
 
 pub fn insert_document(document: Document) {
     DOCUMENTS.with(|documents| {
-        documents.borrow_mut().insert(document.id, document);
+        documents
+            .borrow_mut()
+            .insert(get_next_document_id(), document.clone());
     });
 }
 
@@ -65,15 +65,17 @@ fn create_document(
     project_id: ProjectId,
     title: String,
     content: serde_bytes::ByteBuf,
-) -> DocumentIdResult {
+) -> Result<DocumentId, AppError> {
     let document_id = get_next_document_id();
+    let principal = ic_cdk::caller();
+    let user = get_user_by_principal(principal)?;
 
     let document = Document {
         id: document_id,
         title,
         version: 0,
         revisions: Vec::new(),
-        created_by: ic_cdk::caller(),
+        created_by: user.id,
         created_at: ic_cdk::api::time(),
         project: project_id,
     };
@@ -83,22 +85,24 @@ fn create_document(
     let revision_result = create_revision(project_id, document_id, content);
 
     match revision_result {
-        RevisionIdResult::Ok(_revision_id) => {
+        Ok(_revision_id) => {
             log_info("create_document", loggable_document(&document));
-            DocumentIdResult::Ok(document_id.into())
+            Ok(document_id.into())
         }
-        RevisionIdResult::Err(err) => {
+        Err(err) => {
             // Remove the inserted document if revision creation failed
             DOCUMENTS.with(|documents| {
                 documents.borrow_mut().remove(&document_id);
             });
-            DocumentIdResult::Err(err)
+            Err(err)
         }
     }
 }
 
 #[query]
-fn list_documents(pagination: PaginationInput) -> PaginatedDocumentsResult {
+fn list_documents(
+    pagination: PaginationInput,
+) -> Result<(Vec<Document>, PaginationMetadata), AppError> {
     let documents = get_documents();
 
     match paginate(
@@ -108,10 +112,10 @@ fn list_documents(pagination: PaginationInput) -> PaginatedDocumentsResult {
         pagination.filters.clone(),
         pagination.sort.clone(),
     ) {
-        Ok((paginated_documents, pagination_metadata)) => PaginatedDocumentsResult::Ok(
-            PaginatedDocumentsResultOk(paginated_documents, pagination_metadata),
-        ),
-        Err(e) => PaginatedDocumentsResult::Err(e),
+        Ok((paginated_documents, pagination_metadata)) => {
+            Ok((paginated_documents, pagination_metadata))
+        }
+        Err(e) => Err(e),
     }
 }
 
@@ -119,7 +123,7 @@ fn list_documents(pagination: PaginationInput) -> PaginatedDocumentsResult {
 fn list_documents_by_project_id(
     project_id: ProjectId,
     pagination: PaginationInput,
-) -> PaginatedDocumentsResult {
+) -> Result<(Vec<Document>, PaginationMetadata), AppError> {
     let documents = get_documents_by_project(project_id);
 
     match paginate(
@@ -129,17 +133,17 @@ fn list_documents_by_project_id(
         pagination.filters.clone(),
         pagination.sort.clone(),
     ) {
-        Ok((paginated_documents, pagination_metadata)) => PaginatedDocumentsResult::Ok(
-            PaginatedDocumentsResultOk(paginated_documents, pagination_metadata),
-        ),
-        Err(e) => PaginatedDocumentsResult::Err(e),
+        Ok((paginated_documents, pagination_metadata)) => {
+            Ok((paginated_documents, pagination_metadata))
+        }
+        Err(e) => Err(e),
     }
 }
 
 #[query]
-fn get_document(document_id: DocumentId) -> DocumentResult {
+fn get_document(document_id: DocumentId) -> Result<Document, AppError> {
     match get_document_by_id(document_id) {
-        Some(document) => DocumentResult::Ok(document),
-        None => DocumentResult::Err(AppError::EntityNotFound("Document not found".to_string())),
+        Some(document) => Ok(document),
+        None => Err(AppError::EntityNotFound("Document not found".to_string())),
     }
 }
