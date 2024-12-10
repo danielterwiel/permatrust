@@ -40,7 +40,8 @@ function CreateOrganization() {
       setIsSubmitting(true);
 
       const { id: userId } = authActor.getSnapshot().context.user ?? {};
-      if (!userId) {
+
+      if (userId === undefined) {
         throw new Error('User not found');
       }
 

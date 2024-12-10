@@ -1,15 +1,12 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
 
 import { Loading } from '@/components/loading';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Form,
   FormControl,
   FormDescription,
-  FormField,
   FormItem,
   FormLabel,
   FormMessage,
@@ -34,12 +31,13 @@ export const CreateProjectForm: FC<CreateProjectFormProps> = ({
   isSubmitting,
   onSubmit,
 }) => {
-  const form = useForm<z.infer<typeof createProjectFormSchema>>({
+  const form = useForm({
     defaultValues: {
       name: '',
     },
-    disabled: isSubmitting,
-    resolver: zodResolver(createProjectFormSchema),
+    onSubmit: async ({ value }) => {
+      onSubmit(value);
+    },
   });
 
   return (
@@ -55,33 +53,54 @@ export const CreateProjectForm: FC<CreateProjectFormProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Form {...form}>
-          <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. Clinical trial" {...field} />
-                  </FormControl>
-                  <FormDescription>This is your project name.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {isSubmitting ? (
-              <Button disabled={true}>
-                <Loading text="Creating..." />
-              </Button>
-            ) : (
-              <Button disabled={isSubmitting} type="submit">
-                Create
-              </Button>
+        <form
+          className="space-y-8"
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+        >
+          <form.Field
+            name="name"
+            validators={{
+              onChange: ({ value }) => {
+                try {
+                  createProjectFormSchema.parse({ name: value });
+                  return undefined;
+                } catch (error) {
+                  if (error instanceof z.ZodError) {
+                    return error.errors[0]?.message;
+                  }
+                  return 'Invalid input';
+                }
+              },
+            }}
+          >
+            {(field) => (
+              <FormItem>
+                <FormLabel field={field}>Name</FormLabel>
+                <FormControl field={field}>
+                  <Input
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="e.g. Clinical trial"
+                    value={field.state.value}
+                  />
+                </FormControl>
+                <FormDescription>This is your project name.</FormDescription>
+                <FormMessage field={field} />
+              </FormItem>
             )}
-          </form>
-        </Form>
+          </form.Field>
+
+          {isSubmitting ? (
+            <Button disabled={true}>
+              <Loading text="Creating..." />
+            </Button>
+          ) : (
+            <Button type="submit">Create</Button>
+          )}
+        </form>
       </CardContent>
     </Card>
   );

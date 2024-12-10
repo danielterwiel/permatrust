@@ -1,15 +1,12 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
 
 import { Loading } from '@/components/loading';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Form,
   FormControl,
   FormDescription,
-  FormField,
   FormItem,
   FormLabel,
   FormMessage,
@@ -25,7 +22,7 @@ export const createOrganizationFormSchema = z.object({
   }),
 });
 
-type CreateOrganizationFormProps = {
+export type CreateOrganizationFormProps = {
   isSubmitting: boolean;
   onSubmit: (values: z.infer<typeof createOrganizationFormSchema>) => void;
 };
@@ -34,11 +31,13 @@ export const CreateOrganizationForm: FC<CreateOrganizationFormProps> = ({
   isSubmitting,
   onSubmit,
 }) => {
-  const form = useForm<z.infer<typeof createOrganizationFormSchema>>({
+  const form = useForm({
     defaultValues: {
       name: '',
     },
-    resolver: zodResolver(createOrganizationFormSchema),
+    onSubmit: async ({ value }) => {
+      onSubmit(value);
+    },
   });
 
   return (
@@ -54,35 +53,61 @@ export const CreateOrganizationForm: FC<CreateOrganizationFormProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Form {...form}>
-          <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. Acme" {...field} />
-                  </FormControl>
-                  <FormDescription>
-                    This is your organization name.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {isSubmitting ? (
-              <Button disabled={true}>
-                <Loading text="Creating..." />
-              </Button>
-            ) : (
-              <Button disabled={isSubmitting} type="submit">
-                Create organization
-              </Button>
+        <form
+          className="space-y-8"
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            form.handleSubmit();
+          }}
+        >
+          <form.Field
+            name="name"
+            validators={{
+              onChange: ({ value }) => {
+                try {
+                  createOrganizationFormSchema.parse({ name: value });
+                  return undefined;
+                } catch (error) {
+                  if (error instanceof z.ZodError) {
+                    return error.errors?.[0]?.message;
+                  }
+                  return 'Invalid input';
+                }
+              },
+            }}
+          >
+            {(field) => (
+              <FormItem>
+                <FormLabel field={field}>Name</FormLabel>
+                <FormControl field={field}>
+                  <Input
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="e.g. Acme"
+                    value={field.state.value}
+                  />
+                </FormControl>
+                <FormDescription>
+                  This is your organization name.
+                </FormDescription>
+                <FormMessage field={field} />
+              </FormItem>
             )}
-          </form>
-        </Form>
+          </form.Field>
+
+          <form.Subscribe selector={(state) => [state.isSubmitting]}>
+            {([submitting]) =>
+              isSubmitting || submitting ? (
+                <Button disabled={true}>
+                  <Loading text="Creating..." />
+                </Button>
+              ) : (
+                <Button type="submit">Create organization</Button>
+              )
+            }
+          </form.Subscribe>
+        </form>
       </CardContent>
     </Card>
   );

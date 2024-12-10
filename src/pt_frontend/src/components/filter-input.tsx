@@ -1,11 +1,9 @@
-import { useDebouncedWatch } from '@/hooks/useDebouncedWatch';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm } from '@tanstack/react-form';
+import { useEffect } from 'react';
+import { z } from 'zod';
 
 import {
-  Form,
   FormControl,
-  FormField,
   FormItem,
   FormLabel,
   FormMessage,
@@ -31,54 +29,83 @@ export const FilterInput = ({
   placeholder,
   ...inputProps
 }: FilterProps) => {
-  const form = useForm<FilterCriteria>({
-    defaultValues: {
-      entity: filterCriteria.entity,
-      field: filterCriteria.field,
-      operator: filterCriteria.operator,
-    },
-    mode: 'onChange',
-    resolver: zodResolver(filterCriteriaSchema),
-  });
-
   const fieldName = filterCriteriaToFilterFieldName(
     filterCriteria,
   ) as keyof FilterCriteria;
 
-  useDebouncedWatch(form.watch, (value: Partial<FilterCriteria>) => {
-    onChange?.({
-      entity: filterCriteria.entity,
-      field: filterCriteria.field,
-      operator: filterCriteria.operator,
-      value: value[fieldName] as string,
-    });
+  const form = useForm({
+    defaultValues: {
+      [fieldName]: filterCriteria.value || '',
+    },
+    onSubmit: async () => {
+      // Form submission is prevented
+    },
   });
 
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      const value = form.state.values[fieldName];
+      if (value !== undefined) {
+        onChange?.({
+          entity: filterCriteria.entity,
+          field: filterCriteria.field,
+          operator: filterCriteria.operator,
+          value: String(value),
+        });
+      }
+    }, 300); // 300ms debounce
+
+    return () => clearTimeout(timeoutId);
+  }, [form.state.values, fieldName, filterCriteria, onChange]);
+
   return (
-    <Form {...form}>
-      <form className="flex items-center" onSubmit={(e) => e.preventDefault()}>
-        <FormField
-          control={form.control}
-          name={fieldName}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="sr-only">{placeholder}</FormLabel>
-              <FormControl>
-                <Input
-                  {...inputProps}
-                  {...field}
-                  aria-label={placeholder}
-                  className="h-8 w-[250px] lg:w-[350px] text-sm"
-                  placeholder={placeholder}
-                  type="text"
-                  value={String(field.value || filterCriteria.value)}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </form>
-    </Form>
+    <form
+      className="flex items-center"
+      onSubmit={(e) => {
+        e.preventDefault();
+        form.handleSubmit();
+      }}
+    >
+      <form.Field
+        name={fieldName}
+        validators={{
+          onChange: ({ value }) => {
+            try {
+              filterCriteriaSchema.parse({
+                ...filterCriteria,
+                value: value,
+              });
+              return undefined;
+            } catch (error) {
+              if (error instanceof z.ZodError) {
+                return error.errors[0]?.message;
+              }
+              return 'Invalid input';
+            }
+          },
+        }}
+      >
+        {(field) => (
+          <FormItem>
+            <FormLabel className="sr-only" field={field}>
+              {placeholder}
+            </FormLabel>
+            <FormControl field={field}>
+              <Input
+                {...inputProps}
+                aria-label={placeholder}
+                className="h-8 w-[250px] lg:w-[350px] text-sm"
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                placeholder={placeholder}
+                type="text"
+                value={field.state.value}
+              />
+            </FormControl>
+            <FormMessage field={field} />
+          </FormItem>
+        )}
+      </form.Field>
+    </form>
   );
 };

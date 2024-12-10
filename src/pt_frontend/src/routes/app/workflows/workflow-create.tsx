@@ -1,70 +1,44 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useEffect, useState } from 'react';
-import { useForm, useWatch } from 'react-hook-form';
+import { useForm } from "@tanstack/react-form";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import ReactFlow, {
   Background,
   Controls,
   type Edge,
   type Node,
   ReactFlowProvider,
-} from 'reactflow';
-import { z } from 'zod';
+} from "reactflow";
+import { z } from "zod";
 
-import { api } from '@/api';
+import { api } from "@/api";
 
-import { Loading } from '@/components/loading';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loading } from "@/components/loading";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
-  Form,
   FormControl,
   FormDescription,
-  FormField,
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form';
-import { Icon } from '@/components/ui/icon';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+} from "@/components/ui/form";
+import { Icon } from "@/components/ui/icon";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
-import 'reactflow/dist/style.css';
+import "reactflow/dist/style.css";
 
 export const Route = createFileRoute(
-  '/_initialized/_authenticated/_onboarded/workflows/create',
+  "/_initialized/_authenticated/_onboarded/workflows/create",
 )({
   beforeLoad: () => ({
-    getTitle: () => 'Create workflow',
+    getTitle: () => "Create workflow",
   }),
   component: CreateWorkflow,
   errorComponent: ({ error }) => {
     return <div>Error: {error.message}</div>;
   },
-});
-
-const formSchema = z.object({
-  graph_json: z
-    .string()
-    .min(3, {
-      message: 'Graph JSON must be at least 3 characters.',
-    })
-    .refine(
-      (value) => {
-        try {
-          JSON.parse(value);
-          return true;
-        } catch {
-          return false;
-        }
-      },
-      {
-        message: 'Invalid JSON format.',
-      },
-    ),
-  name: z.string().min(2, {
-    message: 'Workflow must be at least 2 characters.',
-  }),
 });
 
 interface MachineConfig {
@@ -87,8 +61,8 @@ interface Transition {
 }
 
 const defaultGraphJson: MachineConfig = {
-  id: 'capa_document_process',
-  initial: 'identification',
+  id: "capa_document_process",
+  initial: "identification",
   states: {
     closure: {
       // Final state
@@ -96,56 +70,56 @@ const defaultGraphJson: MachineConfig = {
     identification: {
       on: {
         PROBLEM_IDENTIFIED: {
-          actions: 'setProblemDescription',
-          target: 'investigation',
+          actions: "setProblemDescription",
+          target: "investigation",
         },
       },
     },
     implementingCorrectiveAction: {
       on: {
         CORRECTIVE_ACTION_IMPLEMENTED: {
-          target: 'planningPreventiveAction',
+          target: "planningPreventiveAction",
         },
       },
     },
     implementingPreventiveAction: {
       on: {
         PREVENTIVE_ACTION_IMPLEMENTED: {
-          target: 'verification',
+          target: "verification",
         },
       },
     },
     investigation: {
       on: {
         ROOT_CAUSE_FOUND: {
-          actions: 'setRootCause',
-          target: 'planningCorrectiveAction',
+          actions: "setRootCause",
+          target: "planningCorrectiveAction",
         },
       },
     },
     planningCorrectiveAction: {
       on: {
         CORRECTIVE_ACTION_PLANNED: {
-          actions: 'setCorrectiveAction',
-          target: 'implementingCorrectiveAction',
+          actions: "setCorrectiveAction",
+          target: "implementingCorrectiveAction",
         },
       },
     },
     planningPreventiveAction: {
       on: {
         PREVENTIVE_ACTION_PLANNED: {
-          actions: 'setPreventiveAction',
-          target: 'implementingPreventiveAction',
+          actions: "setPreventiveAction",
+          target: "implementingPreventiveAction",
         },
       },
     },
     verification: {
       on: {
         ACTIONS_EFFECTIVE: {
-          target: 'closure',
+          target: "closure",
         },
         ACTIONS_INEFFECTIVE: {
-          target: 'identification',
+          target: "identification",
         },
       },
     },
@@ -157,60 +131,6 @@ export function CreateWorkflow() {
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const navigate = useNavigate();
-
-  const form = useForm<z.infer<typeof formSchema>>({
-    defaultValues: {
-      graph_json: JSON.stringify(defaultGraphJson, null, 2),
-      name: '',
-    },
-    disabled: isSubmitting,
-    resolver: zodResolver(formSchema),
-  });
-
-  const graphJsonValue = useWatch({
-    control: form.control,
-    name: 'graph_json',
-  });
-
-  useEffect(() => {
-    try {
-      const machineConfig: MachineConfig = JSON.parse(graphJsonValue);
-      const { edges: newEdges, nodes: newNodes } =
-        generateGraphElements(machineConfig);
-      setNodes(newNodes);
-      setEdges(newEdges);
-    } catch (_error) {
-      setNodes([]);
-      setEdges([]);
-    }
-  }, [graphJsonValue]);
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsSubmitting(true);
-    try {
-      const machineConfig: MachineConfig = JSON.parse(values.graph_json);
-      const graphJsonObject = generateWorkflowGraph(machineConfig);
-      const graph_json = JSON.stringify(graphJsonObject);
-
-      const workflowId = await api.create_workflow({
-        graph_json,
-        initial_state: machineConfig.initial,
-        name: values.name,
-        project_id: 0, // TODO: project_id
-      });
-
-      navigate({
-        params: {
-          workflowId: workflowId.toString(),
-        },
-        to: '/workflows/$workflowId',
-      });
-    } catch (_error) {
-      // TODO: handle error
-    } finally {
-      setIsSubmitting(false);
-    }
-  }
 
   function generateGraphElements(machineConfig: MachineConfig): {
     edges: Edge[];
@@ -226,7 +146,7 @@ export function CreateWorkflow() {
         data: { label: stateId },
         id: stateId,
         position: { x: index * 150, y: 0 },
-        type: 'default',
+        type: "default",
       });
 
       if (state.on) {
@@ -282,6 +202,50 @@ export function CreateWorkflow() {
     };
   }
 
+  const form = useForm({
+    defaultValues: {
+      graph_json: JSON.stringify(defaultGraphJson, null, 2),
+      name: "",
+    },
+    onSubmit: async ({ value }) => {
+      setIsSubmitting(true);
+      try {
+        const machineConfig: MachineConfig = JSON.parse(value.graph_json);
+        const graphJsonObject = generateWorkflowGraph(machineConfig);
+        const graph_json = JSON.stringify(graphJsonObject);
+        const workflowId = await api.create_workflow({
+          graph_json,
+          initial_state: machineConfig.initial,
+          name: value.name,
+          project_id: 0, // TODO: project_id
+        });
+        navigate({
+          params: { workflowId: workflowId.toString() },
+          to: "/workflows/$workflowId",
+        });
+      } catch (_error) {
+        // TODO: handle error
+      } finally {
+        setIsSubmitting(false);
+      }
+    },
+  });
+
+  useEffect(() => {
+    try {
+      const machineConfig: MachineConfig = JSON.parse(
+        form.state.values.graph_json,
+      );
+      const { edges: newEdges, nodes: newNodes } =
+        generateGraphElements(machineConfig);
+      setNodes(newNodes);
+      setEdges(newEdges);
+    } catch (_error) {
+      setNodes([]);
+      setEdges([]);
+    }
+  }, [form.state.values.graph_json, generateGraphElements]);
+
   return (
     <Card>
       <CardHeader>
@@ -295,70 +259,114 @@ export function CreateWorkflow() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Form {...form}>
-          <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Title</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. CAPA" {...field} />
-                  </FormControl>
-                  <FormDescription>This is your workflow name.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {nodes.length > 0 && (
+        <form
+          className="space-y-8"
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+        >
+          <form.Field
+            name="name"
+            validators={{
+              onChange: ({ value }) => {
+                try {
+                  z.string()
+                    .min(2, {
+                      message: "Workflow must be at least 2 characters.",
+                    })
+                    .parse(value);
+                  return undefined;
+                } catch (error) {
+                  if (error instanceof z.ZodError) {
+                    return error.errors[0]?.message;
+                  }
+                  return "Invalid input";
+                }
+              },
+            }}
+          >
+            {(field) => (
               <FormItem>
-                <FormLabel>Workflow Visualization</FormLabel>
-                <div style={{ height: '400px', width: '100%' }}>
-                  <ReactFlowProvider>
-                    <ReactFlow
-                      edges={edges}
-                      elementsSelectable={false}
-                      fitView
-                      nodes={nodes}
-                      nodesConnectable={false}
-                      nodesDraggable={false}
-                    >
-                      <Background />
-                      <Controls />
-                    </ReactFlow>
-                  </ReactFlowProvider>
-                </div>
+                <FormLabel field={field}>Title</FormLabel>
+                <FormControl field={field}>
+                  <Input
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="e.g. CAPA"
+                    value={field.state.value}
+                  />
+                </FormControl>
+                <FormDescription>This is your workflow name.</FormDescription>
+                <FormMessage field={field} />
               </FormItem>
             )}
-            <FormField
-              control={form.control}
-              name="graph_json"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Graph JSON</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder='{ "id": "light", "initial": "green", "states": { ... } }'
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Your JSON Graph in the specified format.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button disabled={isSubmitting} type="submit">
-              {isSubmitting ? (
-                <Loading className="place-items-start" text="Creating..." />
-              ) : (
-                'Create'
-              )}
-            </Button>
-          </form>
-        </Form>
+          </form.Field>
+
+          {nodes.length > 0 && (
+            <>
+              <Label>Workflow Visualization</Label>
+              <div style={{ height: "400px", width: "100%" }}>
+                <ReactFlowProvider>
+                  <ReactFlow
+                    edges={edges}
+                    elementsSelectable={false}
+                    fitView
+                    nodes={nodes}
+                    nodesConnectable={false}
+                    nodesDraggable={false}
+                  >
+                    <Background />
+                    <Controls />
+                  </ReactFlow>
+                </ReactFlowProvider>
+              </div>
+            </>
+          )}
+
+          <form.Field
+            name="graph_json"
+            validators={{
+              onChange: ({ value }) => {
+                try {
+                  if (value.length < 3) {
+                    return "Graph JSON must be at least 3 characters.";
+                  }
+                  JSON.parse(value);
+                  return undefined;
+                } catch {
+                  return "Invalid JSON format.";
+                }
+              },
+            }}
+          >
+            {(field) => (
+              <FormItem>
+                <FormLabel field={field}>Graph JSON</FormLabel>
+                <FormControl field={field}>
+                  <Textarea
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder='{ "id": "light", "initial": "green", "states": { ... } }'
+                    value={field.state.value}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Your JSON Graph in the specified format.
+                </FormDescription>
+                <FormMessage field={field} />
+              </FormItem>
+            )}
+          </form.Field>
+
+          <Button disabled={isSubmitting} type="submit">
+            {isSubmitting ? (
+              <Loading className="place-items-start" text="Creating..." />
+            ) : (
+              "Create"
+            )}
+          </Button>
+        </form>
       </CardContent>
     </Card>
   );

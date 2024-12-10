@@ -23,6 +23,7 @@ import {
 } from '@/consts/pagination';
 
 import { paginationInputSchema } from '@/schemas/pagination';
+import { toNumberSchema } from '@/schemas/primitives';
 
 import type {
   PaginationInput,
@@ -31,7 +32,6 @@ import type {
 } from '@/declarations/pt_backend/pt_backend.did';
 import type { FilterCriteria } from '@/types/pagination';
 import type { Row } from '@tanstack/react-table';
-import { toNumberSchema } from '@/schemas/primitives';
 
 const DEFAULT_FILTERS: [FilterCriteria[]] = [
   [

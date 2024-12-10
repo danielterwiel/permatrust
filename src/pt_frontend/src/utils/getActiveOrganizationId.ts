@@ -1,6 +1,6 @@
-import { storage } from './localStorage';
-
 import { toNumberSchema } from '@/schemas/primitives';
+
+import { storage } from './localStorage';
 
 export function getActiveOrganizationId(): number {
   const activeOrganizationId = storage.getItem('activeOrganizationId', '');

@@ -3,12 +3,12 @@ import { useState } from 'react';
 
 import { api } from '@/api';
 
-import type { CreateUserInput } from '@/declarations/pt_backend/pt_backend.did';
 import {
   CreateUserForm,
   type createUserFormSchema,
 } from '@/components/create-user-form';
 
+import type { CreateUserInput } from '@/declarations/pt_backend/pt_backend.did';
 import type { z } from 'zod';
 
 export const Route = createFileRoute(

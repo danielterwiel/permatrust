@@ -1,15 +1,12 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
 
 import { Loading } from '@/components/loading';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Form,
   FormControl,
   FormDescription,
-  FormField,
   FormItem,
   FormLabel,
   FormMessage,
@@ -37,13 +34,14 @@ export const CreateUserForm: FC<CreateUserFormProps> = ({
   isSubmitting,
   onSubmit,
 }) => {
-  const form = useForm<z.infer<typeof createUserFormSchema>>({
+  const form = useForm({
     defaultValues: {
       first_name: '',
       last_name: '',
     },
-    disabled: isSubmitting,
-    resolver: zodResolver(createUserFormSchema),
+    onSubmit: async ({ value }) => {
+      onSubmit(value);
+    },
   });
 
   return (
@@ -59,45 +57,87 @@ export const CreateUserForm: FC<CreateUserFormProps> = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Form {...form}>
-          <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
-            <FormField
-              control={form.control}
-              name="first_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>First name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. Peter" {...field} />
-                  </FormControl>
-                  <FormDescription>Your first name.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="last_name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Last name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. Raksis" {...field} />
-                  </FormControl>
-                  <FormDescription>Your last name.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            {isSubmitting ? (
-              <Button disabled={true}>
-                <Loading text="Creating..." />
-              </Button>
-            ) : (
-              <Button type="submit">Create user</Button>
+        <form
+          className="space-y-8"
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+        >
+          <form.Field
+            name="first_name"
+            validators={{
+              onChange: ({ value }) => {
+                try {
+                  createUserFormSchema.shape.first_name.parse(value);
+                  return undefined;
+                } catch (error) {
+                  if (error instanceof z.ZodError) {
+                    return error.errors[0]?.message;
+                  }
+                  return 'Invalid input';
+                }
+              },
+            }}
+          >
+            {(field) => (
+              <FormItem>
+                <FormLabel field={field}>First name</FormLabel>
+                <FormControl field={field}>
+                  <Input
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="e.g. Peter"
+                    value={field.state.value}
+                  />
+                </FormControl>
+                <FormDescription>Your first name.</FormDescription>
+                <FormMessage field={field} />
+              </FormItem>
             )}
-          </form>
-        </Form>
+          </form.Field>
+
+          <form.Field
+            name="last_name"
+            validators={{
+              onChange: ({ value }) => {
+                try {
+                  createUserFormSchema.shape.last_name.parse(value);
+                  return undefined;
+                } catch (error) {
+                  if (error instanceof z.ZodError) {
+                    return error.errors[0]?.message;
+                  }
+                  return 'Invalid input';
+                }
+              },
+            }}
+          >
+            {(field) => (
+              <FormItem>
+                <FormLabel field={field}>Last name</FormLabel>
+                <FormControl field={field}>
+                  <Input
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="e.g. Raksis"
+                    value={field.state.value}
+                  />
+                </FormControl>
+                <FormDescription>Your last name.</FormDescription>
+                <FormMessage field={field} />
+              </FormItem>
+            )}
+          </form.Field>
+
+          {isSubmitting ? (
+            <Button disabled={true}>
+              <Loading text="Creating..." />
+            </Button>
+          ) : (
+            <Button type="submit">Create user</Button>
+          )}
+        </form>
       </CardContent>
     </Card>
   );

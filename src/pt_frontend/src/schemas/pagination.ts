@@ -4,9 +4,9 @@ import { entitySchema } from './entities';
 
 import type {
   DocumentFilterField as ApiDocumentFilterField,
+  FilterCriteria as ApiFilterCriteria,
   FilterField as ApiFilterField,
   FilterOperator as ApiFilterOperator,
-  FilterCriteria as ApiFilterCriteria,
   OrganizationFilterField as ApiOrganizationFilterField,
   PaginationInput as ApiPaginationInput,
   ProjectFilterField as ApiProjectFilterField,

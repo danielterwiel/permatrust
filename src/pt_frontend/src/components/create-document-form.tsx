@@ -1,4 +1,3 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import {
   BlockTypeSelect,
   BoldItalicUnderlineToggles,
@@ -10,17 +9,15 @@ import {
   toolbarPlugin,
   UndoRedo,
 } from '@mdxeditor/editor';
-import { useForm } from 'react-hook-form';
+import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
 
 import { Loading } from '@/components/loading';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-  Form,
   FormControl,
   FormDescription,
-  FormField,
   FormItem,
   FormLabel,
   FormMessage,
@@ -56,14 +53,16 @@ export const CreateDocumentForm: FC<CreateDocumentFormProps> = ({
   projectId,
 }) => {
   const projectIdNumber = toNumberSchema.parse(projectId);
-  const form = useForm<z.infer<typeof createDocumentFormSchema>>({
+
+  const form = useForm({
     defaultValues: {
-      content: '',
+      content: '# Hello world',
       projects: [projectIdNumber],
       title: '',
     },
-    disabled: isSubmitting,
-    resolver: zodResolver(createDocumentFormSchema),
+    onSubmit: async ({ value }) => {
+      onSubmit(value);
+    },
   });
 
   return (
@@ -83,70 +82,107 @@ export const CreateDocumentForm: FC<CreateDocumentFormProps> = ({
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Form {...form}>
-            <form className="space-y-8" onSubmit={form.handleSubmit(onSubmit)}>
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="e.g. Leaflet" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      This is your document title.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="content"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Content</FormLabel>
-                    <FormControl>
-                      <div className="border border-input">
-                        <MDXEditor
-                          className="rounded-md bg-background p-2 text-sm placeholder:text-muted-foreground focus:border-2 focus:border-accent-foreground focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-accent-foreground disabled:cursor-not-allowed disabled:opacity-50"
-                          contentEditableClassName="prose"
-                          markdown="# Hello world"
-                          plugins={[
-                            headingsPlugin(),
-                            diffSourcePlugin(),
-                            toolbarPlugin({
-                              toolbarContents: () => (
-                                <DiffSourceToggleWrapper>
-                                  <UndoRedo />
-                                  <BoldItalicUnderlineToggles />
-                                  <BlockTypeSelect />
-                                  <ListsToggle />
-                                </DiffSourceToggleWrapper>
-                              ),
-                            }),
-                          ]}
-                          {...field}
-                        />
-                      </div>
-                    </FormControl>
-                    <FormDescription>This is your document.</FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <div className="flex justify-end">
-                {isSubmitting ? (
-                  <Button disabled={true}>
-                    <Loading className="place-items-start" text="Creating..." />
-                  </Button>
-                ) : (
-                  <Button type="submit">Create document</Button>
-                )}
-              </div>
-            </form>
-          </Form>
+          <form
+            className="space-y-8"
+            onSubmit={(e) => {
+              e.preventDefault();
+              form.handleSubmit();
+            }}
+          >
+            <form.Field
+              name="title"
+              validators={{
+                onChange: ({ value }) => {
+                  try {
+                    createDocumentFormSchema.shape.title.parse(value);
+                    return undefined;
+                  } catch (error) {
+                    if (error instanceof z.ZodError) {
+                      return error.errors[0]?.message;
+                    }
+                    return 'Invalid input';
+                  }
+                },
+              }}
+            >
+              {(field) => (
+                <FormItem>
+                  <FormLabel field={field}>Title</FormLabel>
+                  <FormControl field={field}>
+                    <Input
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      placeholder="e.g. Leaflet"
+                      value={field.state.value}
+                    />
+                  </FormControl>
+                  <FormDescription>
+                    This is your document title.
+                  </FormDescription>
+                  <FormMessage field={field} />
+                </FormItem>
+              )}
+            </form.Field>
+
+            <form.Field
+              name="content"
+              validators={{
+                onChange: ({ value }) => {
+                  try {
+                    createDocumentFormSchema.shape.content.parse(value);
+                    return undefined;
+                  } catch (error) {
+                    if (error instanceof z.ZodError) {
+                      return error.errors[0]?.message;
+                    }
+                    return 'Invalid input';
+                  }
+                },
+              }}
+            >
+              {(field) => (
+                <FormItem>
+                  <FormLabel field={field}>Content</FormLabel>
+                  <FormControl field={field}>
+                    <div className="border border-input">
+                      <MDXEditor
+                        className="rounded-md bg-background p-2 text-sm placeholder:text-muted-foreground focus:border-2 focus:border-accent-foreground focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-accent-foreground disabled:cursor-not-allowed disabled:opacity-50"
+                        contentEditableClassName="prose"
+                        markdown={field.state.value}
+                        onChange={(value) => field.handleChange(value)}
+                        plugins={[
+                          headingsPlugin(),
+                          diffSourcePlugin(),
+                          toolbarPlugin({
+                            toolbarContents: () => (
+                              <DiffSourceToggleWrapper>
+                                <UndoRedo />
+                                <BoldItalicUnderlineToggles />
+                                <BlockTypeSelect />
+                                <ListsToggle />
+                              </DiffSourceToggleWrapper>
+                            ),
+                          }),
+                        ]}
+                      />
+                    </div>
+                  </FormControl>
+                  <FormDescription>This is your document.</FormDescription>
+                  <FormMessage field={field} />
+                </FormItem>
+              )}
+            </form.Field>
+
+            <div className="flex justify-end">
+              {isSubmitting ? (
+                <Button disabled={true}>
+                  <Loading className="place-items-start" text="Creating..." />
+                </Button>
+              ) : (
+                <Button type="submit">Create document</Button>
+              )}
+            </div>
+          </form>
         </CardContent>
       </Card>
     </>

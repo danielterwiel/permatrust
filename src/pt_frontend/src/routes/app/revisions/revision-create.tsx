@@ -14,12 +14,13 @@ import { isAppError } from '@/utils/isAppError';
 import { ENTITY_NAME } from '@/consts/entities';
 import { FILTER_FIELD, SORT_ORDER } from '@/consts/pagination';
 
+import { toBigIntSchema, toNumberSchema } from '@/schemas/primitives';
+
 import type {
   PaginationInput,
   SortCriteria,
 } from '@/declarations/pt_backend/pt_backend.did';
 import type { z } from 'zod';
-import { toBigIntSchema, toNumberSchema } from '@/schemas/primitives';
 
 const DEFAULT_SORT: [SortCriteria] = [
   {

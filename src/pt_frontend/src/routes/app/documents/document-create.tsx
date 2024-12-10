@@ -1,14 +1,14 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 
-import { toNumberSchema } from '@/schemas/primitives';
-
 import { api } from '@/api';
 
 import {
   CreateDocumentForm,
   type createDocumentFormSchema,
 } from '@/components/create-document-form';
+
+import { toNumberSchema } from '@/schemas/primitives';
 
 import type { z } from 'zod';
 

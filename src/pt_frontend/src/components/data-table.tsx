@@ -1,9 +1,9 @@
 import {
   type ColumnDef,
-  type Row,
-  type SortingState,
   flexRender,
   getCoreRowModel,
+  type Row,
+  type SortingState,
   useReactTable,
 } from '@tanstack/react-table';
 import { useEffect, useMemo, useRef, useState } from 'react';

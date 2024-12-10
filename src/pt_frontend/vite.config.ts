@@ -1,8 +1,8 @@
-/// <reference types="vitest" />
-import url from 'node:url';
 import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react';
 import dotenv from 'dotenv';
+/// <reference types="vitest" />
+import url from 'node:url';
 import { defineConfig } from 'vite';
 import environment from 'vite-plugin-environment';
 
