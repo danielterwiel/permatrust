@@ -19,7 +19,7 @@ export const Route = createFileRoute(
     getTitle: () => 'Create organization',
   }),
   loader: async ({ context }) => ({
-    authActor: context.actors.auth,
+    authActor: context.authActor,
   }),
   component: CreateOrganization,
 });
@@ -32,6 +32,7 @@ function CreateOrganization() {
   );
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<Error | undefined>();
 
   async function onSubmit(
     values: z.infer<typeof createOrganizationFormSchema>,
@@ -48,14 +49,19 @@ function CreateOrganization() {
       const organizationId = await api.create_organization(values.name);
       setActiveOrganizationId(organizationId.toString());
       navigate({ to: '/projects' });
-    } catch (_error) {
-      // TODO: handle error
+    } catch (submitError) {
+      if (submitError instanceof Error) {
+        setError(submitError);
+      }
     } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
-    <CreateOrganizationForm isSubmitting={isSubmitting} onSubmit={onSubmit} />
+    <>
+      {error && <div>{error.message}</div>}
+      <CreateOrganizationForm isSubmitting={isSubmitting} onSubmit={onSubmit} />
+    </>
   );
 }

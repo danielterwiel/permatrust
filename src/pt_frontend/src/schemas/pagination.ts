@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { entitySchema } from './entities';
+import { EntitySchema } from './entities';
 
 import type {
   DocumentFilterField as ApiDocumentFilterField,
@@ -18,6 +18,7 @@ import type {
 } from '@/declarations/pt_backend/pt_backend.did';
 
 const userFilterFieldSchema = z.union([
+  z.object({ Id: z.null() }).strict(),
   z.object({ FirstName: z.null() }).strict(),
   z.object({ LastName: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiUserFilterField>;
@@ -28,6 +29,7 @@ const organizationFilterFieldSchema = z.union([
 const projectFilterFieldSchema = z.union([
   z.object({ Name: z.null() }).strict(),
   z.object({ OrganizationId: z.null() }).strict(),
+  z.object({ Members: z.null() }).strict(),
   z.object({ CreatedAt: z.null() }).strict(),
   z.object({ CreatedBy: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiProjectFilterField>;
@@ -64,7 +66,7 @@ export const filterOperatorSchema = z.union([
 
 export const filterCriteriaSchema = z
   .object({
-    entity: entitySchema,
+    entity: EntitySchema,
     field: filterFieldSchema,
     operator: filterOperatorSchema,
     value: z.string(),

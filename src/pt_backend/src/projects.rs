@@ -1,4 +1,6 @@
 use ic_cdk_macros::{query, update};
+use shared::types::entities::Entity;
+use shared::utils::filter::filter;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU32, Ordering};
@@ -8,7 +10,10 @@ use shared::utils::pagination::paginate;
 
 use shared::types::errors::AppError;
 use shared::types::organizations::OrganizationId;
-use shared::types::pagination::{PaginationInput, PaginationMetadata};
+use shared::types::pagination::{
+    FilterCriteria, FilterField, FilterOperator, PaginationInput, PaginationMetadata,
+    ProjectFilterField,
+};
 use shared::types::projects::{Project, ProjectId, ProjectResult};
 
 use crate::logger::{log_info, loggable_project};
@@ -19,28 +24,42 @@ thread_local! {
     static NEXT_ID: AtomicU32 = AtomicU32::new(0);
 }
 
-pub fn get_next_project_id() -> ProjectId {
-    NEXT_ID.with(|id| id.fetch_add(1, Ordering::SeqCst))
-}
+mod project_utils {
+    use super::*;
 
-fn get_projects() -> Vec<Project> {
-    PROJECTS.with(|projects| projects.borrow().values().cloned().collect())
-}
+    pub fn get_next_id() -> ProjectId {
+        NEXT_ID.with(|id| id.fetch_add(1, Ordering::SeqCst))
+    }
 
-fn get_projects_by_organization_id(organization_id: OrganizationId) -> Vec<Project> {
-    PROJECTS.with(|projects| {
-        projects
-            .borrow()
-            .values()
-            .filter(|proj| proj.organizations.contains(&organization_id))
-            .cloned()
-            .collect()
-    })
+    pub fn get_all() -> Vec<Project> {
+        PROJECTS.with(|projects| projects.borrow().values().cloned().collect())
+    }
+
+    pub fn get_by_organization_id(organization_id: OrganizationId) -> Vec<Project> {
+        PROJECTS.with(|projects| {
+            projects
+                .borrow()
+                .values()
+                .filter(|proj| proj.organizations.contains(&organization_id))
+                .cloned()
+                .collect()
+        })
+    }
+
+    pub fn insert(id: ProjectId, project: Project) {
+        PROJECTS.with(|projects| {
+            projects.borrow_mut().insert(id, project);
+        });
+    }
+
+    pub fn get_by_id(project_id: ProjectId) -> Option<Project> {
+        PROJECTS.with(|projects| projects.borrow().get(&project_id).cloned())
+    }
 }
 
 #[update]
 fn create_project(organization_id: OrganizationId, name: String) -> Result<ProjectId, AppError> {
-    let id = get_next_project_id();
+    let id = project_utils::get_next_id();
     if name.trim().is_empty() {
         return Err(AppError::InternalError(
             "Project name cannot be empty".to_string(),
@@ -59,32 +78,43 @@ fn create_project(organization_id: OrganizationId, name: String) -> Result<Proje
         documents: vec![],
     };
 
-    PROJECTS.with(|projects| {
-        projects.borrow_mut().insert(id, project.clone());
-    });
-
+    project_utils::insert(id, project.clone());
     log_info("create_project", loggable_project(&project));
 
     Ok(id)
 }
 
 #[query]
+fn get_projects() -> Result<Vec<Project>, AppError> {
+    let caller = ic_cdk::caller();
+    let user = get_user_by_principal(caller)
+        .map_err(|e| AppError::EntityNotFound(format!("User not found, {:#?}", e)))?;
+
+    let filter_criteria = FilterCriteria {
+        field: FilterField::Project(ProjectFilterField::Members),
+        entity: Entity::Project,
+        value: user.id.to_string(),
+        operator: FilterOperator::Contains,
+    };
+
+    let projects = project_utils::get_all();
+    let projects = filter(&projects, vec![filter_criteria]);
+
+    Ok(projects)
+}
+
+#[query]
 fn list_projects(
     pagination: PaginationInput,
 ) -> Result<(Vec<Project>, PaginationMetadata), AppError> {
-    let projects = get_projects();
-    match paginate(
+    let projects = get_projects()?;
+    paginate(
         &projects,
         pagination.page_size,
         pagination.page_number,
         pagination.filters,
         pagination.sort,
-    ) {
-        Ok((paginated_projects, pagination_metadata)) => {
-            Ok((paginated_projects, pagination_metadata))
-        }
-        Err(e) => Err(e),
-    }
+    )
 }
 
 #[query]
@@ -92,25 +122,20 @@ fn list_projects_by_organization_id(
     organization_id: OrganizationId,
     pagination: PaginationInput,
 ) -> Result<(Vec<Project>, PaginationMetadata), AppError> {
-    let projects = get_projects_by_organization_id(organization_id);
-    match paginate(
+    let projects = project_utils::get_by_organization_id(organization_id);
+    paginate(
         &projects,
         pagination.page_size,
         pagination.page_number,
         pagination.filters,
         pagination.sort,
-    ) {
-        Ok((paginated_projects, pagination_metadata)) => {
-            Ok((paginated_projects, pagination_metadata))
-        }
-        Err(e) => Err(e),
-    }
+    )
 }
 
 #[query]
 fn get_project(project_id: ProjectId) -> ProjectResult {
-    PROJECTS.with(|projects| match projects.borrow().get(&project_id) {
-        Some(project) => ProjectResult::Ok(project.clone()),
+    match project_utils::get_by_id(project_id) {
+        Some(project) => ProjectResult::Ok(project),
         None => ProjectResult::Err(AppError::EntityNotFound("Project not found".to_string())),
-    })
+    }
 }

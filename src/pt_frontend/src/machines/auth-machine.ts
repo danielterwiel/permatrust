@@ -118,9 +118,8 @@ const authMachine = setup({
               id: 'authenticated_idle',
               on: {
                 LOGIN: 'onboarding',
-                LOGOUT: {
-                  target: 'logout',
-                },
+                LOGOUT: 'logout',
+                UPDATE_USER: 'update_user',
               },
             },
 
@@ -217,6 +216,7 @@ const authMachine = setup({
                 },
 
                 onboarding_incomplete: {
+                  always: '#authenticated_idle',
                   entry: [
                     async ({ context }) => {
                       if (context.user) {
@@ -230,9 +230,19 @@ const authMachine = setup({
                       }
                     },
                   ],
-                  target: '#authenticated_idle',
                 },
               },
+            },
+
+            update_user: {
+              always: 'onboarding.check_user',
+              entry: assign({
+                user: ({ event }) => {
+                  if (event.type === 'UPDATE_USER') {
+                    return event.user;
+                  }
+                },
+              }),
             },
           },
         },

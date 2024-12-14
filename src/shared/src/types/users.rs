@@ -1,7 +1,6 @@
 use candid::{CandidType, Principal};
 use serde::Deserialize;
 
-use crate::types::access_control::Role;
 use crate::types::errors::AppError;
 use crate::types::organizations::OrganizationId;
 
@@ -19,8 +18,7 @@ pub struct User {
     pub first_name: String,
     pub last_name: String,
     pub organizations: Vec<OrganizationId>,
-    pub principal_id: Principal,
-    pub roles: Vec<Role>,
+    pub principals: Vec<Principal>,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug)]

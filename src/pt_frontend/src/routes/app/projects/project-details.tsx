@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 import { api } from '@/api';
 
+import { CreateRoleForm } from '@/components/create-role-form';
 import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
 import { Link } from '@/components/link';
@@ -83,11 +84,15 @@ export const Route = createFileRoute(
         documentPagination,
       );
     const project = await api.get_project(projectIdNumber);
+    const permissions = await api.get_permissions();
+    const initialRoles = await api.get_project_roles(project.id);
     return {
       context,
       documents,
+      initialRoles,
       pagination: documentPagination,
       paginationMetaData,
+      permissions,
       project,
     };
   },
@@ -99,8 +104,14 @@ export const Route = createFileRoute(
 
 function ProjectDetails() {
   const { projectId } = Route.useParams();
-  const { documents, pagination, paginationMetaData, project } =
-    Route.useLoaderData();
+  const {
+    documents,
+    initialRoles,
+    pagination,
+    paginationMetaData,
+    permissions,
+    project,
+  } = Route.useLoaderData();
   const navigate = useNavigate();
 
   const RowActions = (row: Row<Document>) => {
@@ -118,84 +129,131 @@ function ProjectDetails() {
     );
   };
 
+  // useEffect(() => {
+  //
+  //   const rolesResponse = await api.get_project_roles(project.id);
+  //
+  // }, []);
+
   return (
-    <>
-      <div className="flex items-center justify-between pb-4">
-        {pagination.filters[0]?.map((filterCriteria) => (
-          <FilterInput
-            filterCriteria={filterCriteria}
-            key={filterCriteria.entity.toString()}
-            onChange={(filterCriteria: FilterCriteria) => {
-              navigate({
-                search: {
-                  pagination: {
-                    ...pagination,
-                    filters: [[filterCriteria]],
+    <div className="space-y-8">
+      <div>
+        <div className="flex items-center justify-between pb-4">
+          {pagination.filters[0]?.map((filterCriteria) => (
+            <FilterInput
+              filterCriteria={filterCriteria}
+              key={filterCriteria.entity.toString()}
+              onChange={(filterCriteria: FilterCriteria) => {
+                navigate({
+                  search: {
+                    pagination: {
+                      ...pagination,
+                      filters: [[filterCriteria]],
+                    },
                   },
+                  to: `/projects/${projectId}`,
+                });
+              }}
+              placeholder="Filter document title..."
+            />
+          ))}
+          <Link
+            className="h-7 gap-1"
+            params={{ projectId }}
+            size="sm"
+            to="/projects/$projectId/documents/create"
+            variant="default"
+          >
+            <Icon name="file-outline" size="sm" />
+            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap text-sm">
+              Create Document
+            </span>
+          </Link>
+        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              <Icon
+                className="text-muted-foreground pb-1 mr-2"
+                name="briefcase-outline"
+                size="lg"
+              />
+              {project.name}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Table<Document>
+              actions={RowActions}
+              columnConfig={[
+                {
+                  cellPreprocess: (title) => title,
+                  headerName: 'Title',
+                  id: 'title',
                 },
-                to: `/projects/${projectId}`,
-              });
-            }}
-            placeholder="Filter document title..."
-          />
-        ))}
-        <Link
-          className="h-7 gap-1"
-          params={{ projectId }}
-          size="sm"
-          to="/projects/$projectId/documents/create"
-          variant="default"
-        >
-          <Icon name="file-outline" size="sm" />
-          <span className="sr-only sm:not-sr-only sm:whitespace-nowrap text-sm">
-            Create Document
-          </span>
-        </Link>
+                {
+                  cellPreprocess: (version) => version,
+                  headerName: 'Version',
+                  id: 'version',
+                },
+              ]}
+              entityName={ENTITY_NAME.Document}
+              onSortingChange={(newSort) => {
+                navigate({
+                  search: {
+                    pagination: {
+                      ...pagination,
+                      sort: newSort,
+                    },
+                  },
+                  to: `/projects/${projectId}`,
+                });
+              }}
+              paginationMetaData={paginationMetaData}
+              sort={pagination.sort}
+              tableData={documents}
+            />
+          </CardContent>
+        </Card>
       </div>
+
       <Card>
         <CardHeader>
           <CardTitle>
             <Icon
               className="text-muted-foreground pb-1 mr-2"
-              name="briefcase-outline"
+              name="user-check-outline"
               size="lg"
             />
-            {project.name}
+            Roles
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table<Document>
-            actions={RowActions}
-            columnConfig={[
-              {
-                cellPreprocess: (title) => title,
-                headerName: 'Title',
-                id: 'title',
-              },
-              {
-                cellPreprocess: (version) => version,
-                headerName: 'Version',
-                id: 'version',
-              },
-            ]}
-            entityName={ENTITY_NAME.Document}
-            onSortingChange={(newSort) => {
-              navigate({
-                search: {
-                  pagination: {
-                    ...pagination,
-                    sort: newSort,
-                  },
-                },
-                to: `/projects/${projectId}`,
-              });
-            }}
-            paginationMetaData={paginationMetaData}
-            sort={pagination.sort}
-            tableData={documents}
-          />
+          {initialRoles.map((r) => (
+            <div key={r.id}>
+              {Object.entries(r).map(
+                ([key, value]: [string, string]) =>
+                  `${key.toString()} ${value.toString()}`,
+              )}
+            </div>
+          ))}
         </CardContent>
       </Card>
-    </>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <Icon
+              className="text-muted-foreground pb-1 mr-2"
+              name="user-check-outline"
+              size="lg"
+            />
+            Create role
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <CreateRoleForm permissions={permissions} />
+        </CardContent>
+      </Card>
+    </div>
   );
 }

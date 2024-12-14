@@ -23,6 +23,16 @@ type Document = record {
   project : nat32;
 };
 type DocumentFilterField = variant { ProjectId; Version; Title; CreatedAt };
+type DocumentPermission = variant {
+  Share;
+  Read;
+  Comment;
+  Archive;
+  Delete;
+  Create;
+  Update;
+  Export;
+};
 type Entity = variant {
   User;
   Document;
@@ -31,7 +41,22 @@ type Entity = variant {
   Project;
   Workflow;
 };
-type EntityPermission = variant { User : vec Permission };
+type EntityPermission = variant {
+  User : UserPermission;
+  Document : DocumentPermission;
+  Organization : OrganizationPermission;
+  Revision : RevisionPermission;
+  Project : ProjectPermission;
+  Workflow : WorkflowPermission;
+};
+type EntityPermissionsResult = record {
+  workflow : vec text;
+  user : vec text;
+  document : vec text;
+  organization : vec text;
+  revision : vec text;
+  project : vec text;
+};
 type FilterCriteria = record {
   field : FilterField;
   entity : Entity;
@@ -56,6 +81,16 @@ type Organization = record {
   created_by : nat64;
 };
 type OrganizationFilterField = variant { Name; CreatedAt };
+type OrganizationPermission = variant {
+  Read;
+  ConfigureSettings;
+  ManageMembers;
+  ViewAuditLogs;
+  Delete;
+  Create;
+  ManageBilling;
+  Update;
+};
 type OrganizationResult = variant { Ok : Organization; Err : AppError };
 type PaginationInput = record {
   filters : opt vec FilterCriteria;
@@ -71,7 +106,6 @@ type PaginationMetadata = record {
   has_next_page : bool;
   page_number : nat8;
 };
-type Permission = variant { Read; ReadAlls; Delete; Create; Update };
 type Project = record {
   id : nat32;
   documents : vec nat64;
@@ -84,48 +118,62 @@ type Project = record {
 type ProjectFilterField = variant {
   Name;
   OrganizationId;
+  Members;
   CreatedAt;
   CreatedBy;
 };
+type ProjectPermission = variant {
+  ManageSettings;
+  Read;
+  AssignMembers;
+  Archive;
+  ConfigureSettings;
+  ManageMembers;
+  Delete;
+  Create;
+  Update;
+  ViewMetrics;
+};
 type ProjectResult = variant { Ok : Project; Err : AppError };
 type Result = variant { Ok; Err : AppError };
-type Result_1 = variant { Ok : bool; Err : AppError };
-type Result_10 = variant { Ok : Workflow; Err : AppError };
-type Result_11 = variant { Ok : WorkflowGraph; Err : text };
-type Result_12 = variant { Ok : text; Err : text };
-type Result_13 = variant {
+type Result_1 = variant { Ok : nat64; Err : AppError };
+type Result_10 = variant { Ok : Revision; Err : AppError };
+type Result_11 = variant { Ok : Role; Err : AppError };
+type Result_12 = variant { Ok : Workflow; Err : AppError };
+type Result_13 = variant { Ok : WorkflowGraph; Err : text };
+type Result_14 = variant { Ok : text; Err : text };
+type Result_15 = variant {
   Ok : record { vec Document; PaginationMetadata };
   Err : AppError;
 };
-type Result_14 = variant {
+type Result_16 = variant {
   Ok : record { vec Organization; PaginationMetadata };
   Err : AppError;
 };
-type Result_15 = variant {
+type Result_17 = variant {
   Ok : record { vec Project; PaginationMetadata };
   Err : AppError;
 };
-type Result_16 = variant {
+type Result_18 = variant {
   Ok : record { vec Revision; PaginationMetadata };
   Err : AppError;
 };
-type Result_17 = variant { Ok : vec Role; Err : AppError };
-type Result_18 = variant {
+type Result_19 = variant {
   Ok : record { vec User; PaginationMetadata };
   Err : AppError;
 };
-type Result_19 = variant {
+type Result_2 = variant { Ok : nat32; Err : AppError };
+type Result_20 = variant {
   Ok : record { vec Workflow; PaginationMetadata };
   Err : AppError;
 };
-type Result_2 = variant { Ok : nat64; Err : AppError };
-type Result_3 = variant { Ok : nat32; Err : AppError };
-type Result_4 = variant { Ok : User; Err : AppError };
-type Result_5 = variant { Ok : vec Revision; Err : AppError };
-type Result_6 = variant { Ok; Err : text };
-type Result_7 = variant { Ok : Document; Err : AppError };
-type Result_8 = variant { Ok : Revision; Err : AppError };
-type Result_9 = variant { Ok : Role; Err : AppError };
+type Result_3 = variant { Ok : User; Err : AppError };
+type Result_4 = variant { Ok : vec Revision; Err : AppError };
+type Result_5 = variant { Ok; Err : text };
+type Result_6 = variant { Ok : Document; Err : AppError };
+type Result_7 = variant { Ok : EntityPermissionsResult; Err : AppError };
+type Result_8 = variant { Ok : vec Role; Err : AppError };
+type Result_9 = variant { Ok : vec Project; Err : AppError };
 type Revision = record {
   id : nat64;
   content : blob;
@@ -141,11 +189,28 @@ type RevisionFilterField = variant {
   DocumentId;
   CreatedAt;
 };
+type RevisionPermission = variant {
+  Approve;
+  Read;
+  Reject;
+  Compare;
+  Create;
+  Rollback;
+};
 type Role = record {
   id : nat64;
   permissions : vec EntityPermission;
+  updated_at : opt nat64;
   name : text;
-  description : text;
+  description : opt text;
+  created_at : nat64;
+  project_id : nat32;
+};
+type RoleInput = record {
+  permissions : vec EntityPermission;
+  name : text;
+  description : opt text;
+  project_id : nat32;
 };
 type SortCriteria = record { field : FilterField; order : SortOrder };
 type SortOrder = variant { Asc; Desc };
@@ -153,11 +218,18 @@ type User = record {
   id : nat64;
   first_name : text;
   last_name : text;
-  principal_id : principal;
-  roles : vec Role;
+  principals : vec principal;
   organizations : vec nat32;
 };
-type UserFilterField = variant { FirstName; LastName };
+type UserFilterField = variant { Id; FirstName; LastName };
+type UserPermission = variant {
+  ChangeRole;
+  Deactivate;
+  Read;
+  Delete;
+  Update;
+  Invite;
+};
 type Workflow = record {
   id : nat32;
   current_state : text;
@@ -170,40 +242,51 @@ type WorkflowGraph = record {
   edges : vec record { nat64; nat64; text };
   nodes : vec text;
 };
+type WorkflowPermission = variant {
+  ViewHistory;
+  Read;
+  Resume;
+  Pause;
+  Execute;
+  Delete;
+  Create;
+  Update;
+};
 service : () -> {
-  assign_permissions_to_role : (nat64, vec EntityPermission) -> (Result);
-  assign_role_to_user : (nat64, nat64) -> (Result);
-  check_permission : (EntityPermission) -> (Result_1) query;
-  create_document : (nat32, text, blob) -> (Result_2);
-  create_organization : (text) -> (Result_3);
-  create_project : (nat32, text) -> (Result_3);
-  create_revision : (nat32, nat64, blob) -> (Result_2);
-  create_role : (text, text, vec EntityPermission) -> (Result_2);
-  create_user : (CreateUserInput) -> (Result_4);
-  create_workflow : (CreateWorkflowInput) -> (Result_3);
-  diff_revisions : (nat64, nat64) -> (Result_5) query;
-  execute_workflow : (nat32, text) -> (Result_6);
-  get_document : (nat64) -> (Result_7) query;
+  assign_roles : (nat64, vec nat64) -> (Result);
+  create_document : (nat32, text, blob) -> (Result_1);
+  create_organization : (text) -> (Result_2);
+  create_project : (nat32, text) -> (Result_2);
+  create_revision : (nat32, nat64, blob) -> (Result_1);
+  create_role : (RoleInput) -> (Result_1);
+  create_user : (CreateUserInput) -> (Result_3);
+  create_workflow : (CreateWorkflowInput) -> (Result_2);
+  diff_revisions : (nat64, nat64) -> (Result_4) query;
+  execute_workflow : (nat32, text) -> (Result_5);
+  get_document : (nat64) -> (Result_6) query;
   get_organization : (nat32) -> (OrganizationResult) query;
+  get_permissions : () -> (Result_7) query;
   get_project : (nat32) -> (ProjectResult) query;
-  get_revision : (nat64) -> (Result_8) query;
-  get_role : (nat64) -> (Result_9) query;
-  get_user : () -> (Result_4) query;
-  get_workflow : (nat32) -> (Result_10) query;
-  get_workflow_definition : (nat32) -> (Result_11) query;
-  get_workflow_state : (nat32) -> (Result_12) query;
-  list_documents : (PaginationInput) -> (Result_13) query;
-  list_documents_by_project_id : (nat32, PaginationInput) -> (Result_13) query;
-  list_organizations : (PaginationInput) -> (Result_14) query;
-  list_projects : (PaginationInput) -> (Result_15) query;
+  get_project_roles : (nat32) -> (Result_8) query;
+  get_projects : () -> (Result_9) query;
+  get_revision : (nat64) -> (Result_10) query;
+  get_role : (nat64) -> (Result_11) query;
+  get_user : () -> (Result_3) query;
+  get_user_permissions : (nat64) -> (opt vec EntityPermission) query;
+  get_user_roles : (nat64) -> (Result_8) query;
+  get_workflow : (nat32) -> (Result_12) query;
+  get_workflow_definition : (nat32) -> (Result_13) query;
+  get_workflow_state : (nat32) -> (Result_14) query;
+  list_documents : (PaginationInput) -> (Result_15) query;
+  list_documents_by_project_id : (nat32, PaginationInput) -> (Result_15) query;
+  list_organizations : (PaginationInput) -> (Result_16) query;
+  list_projects : (PaginationInput) -> (Result_17) query;
   list_projects_by_organization_id : (nat32, PaginationInput) -> (
-      Result_15,
+      Result_17,
     ) query;
-  list_revisions : (PaginationInput) -> (Result_16) query;
-  list_revisions_by_document_id : (nat64, PaginationInput) -> (Result_16) query;
-  list_roles : () -> (Result_17) query;
-  list_users : (PaginationInput) -> (Result_18) query;
-  list_workflows : (PaginationInput) -> (Result_19) query;
-  remove_permissions_from_role : (nat64, vec EntityPermission) -> (Result);
-  remove_role_from_user : (nat64, nat64) -> (Result);
+  list_revisions : (PaginationInput) -> (Result_18) query;
+  list_revisions_by_document_id : (nat64, PaginationInput) -> (Result_18) query;
+  list_users : (PaginationInput) -> (Result_19) query;
+  list_workflows : (PaginationInput) -> (Result_20) query;
+  update_role_permissions : (nat64, vec EntityPermission) -> (Result);
 }

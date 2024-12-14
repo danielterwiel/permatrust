@@ -36,6 +36,7 @@ export const CreateOrganizationForm: FC<CreateOrganizationFormProps> = ({
       name: '',
     },
     onSubmit: async ({ value }) => {
+      createOrganizationFormSchema.parse(value);
       onSubmit(value);
     },
   });
@@ -61,22 +62,7 @@ export const CreateOrganizationForm: FC<CreateOrganizationFormProps> = ({
             form.handleSubmit();
           }}
         >
-          <form.Field
-            name="name"
-            validators={{
-              onChange: ({ value }) => {
-                try {
-                  createOrganizationFormSchema.parse({ name: value });
-                  return undefined;
-                } catch (error) {
-                  if (error instanceof z.ZodError) {
-                    return error.errors?.[0]?.message;
-                  }
-                  return 'Invalid input';
-                }
-              },
-            }}
-          >
+          <form.Field name="name">
             {(field) => (
               <FormItem>
                 <FormLabel field={field}>Name</FormLabel>

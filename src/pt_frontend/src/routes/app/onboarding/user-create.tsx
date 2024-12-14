@@ -26,6 +26,7 @@ export const Route = createFileRoute(
 function CreateUser() {
   const { authActor } = Route.useLoaderData();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<Error | undefined>();
   const navigate = Route.useNavigate();
 
   async function onSubmit(values: z.infer<typeof createUserFormSchema>) {
@@ -35,6 +36,7 @@ function CreateUser() {
         first_name: values.first_name,
         last_name: values.last_name,
       } satisfies CreateUserInput;
+
       const user = await api.create_user(input);
       authActor.send({
         type: 'UPDATE_USER',
@@ -42,12 +44,19 @@ function CreateUser() {
       });
       navigate({ to: '/onboarding/organization/create' });
       setIsSubmitting(false);
-    } catch (_error) {
-      // TODO: handle error
+    } catch (error) {
+      if (error instanceof Error) {
+        setError(error);
+      }
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  return <CreateUserForm isSubmitting={isSubmitting} onSubmit={onSubmit} />;
+  return (
+    <>
+      {error && <div>{error.message}</div>}
+      <CreateUserForm isSubmitting={isSubmitting} onSubmit={onSubmit} />
+    </>
+  );
 }

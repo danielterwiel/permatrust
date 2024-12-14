@@ -20,44 +20,52 @@ thread_local! {
     static NEXT_ID: AtomicU64 = AtomicU64::new(0);
 }
 
-pub fn get_next_document_id() -> u64 {
-    NEXT_ID.with(|id| id.fetch_add(1, Ordering::SeqCst))
-}
+pub mod document_utils {
+    use super::*;
 
-fn get_documents() -> Vec<Document> {
-    DOCUMENTS.with(|documents| documents.borrow().values().cloned().collect())
-}
+    pub fn get_next_id() -> DocumentId {
+        NEXT_ID.with(|id| id.fetch_add(1, Ordering::SeqCst))
+    }
 
-fn get_documents_by_project(project_id: ProjectId) -> Vec<Document> {
-    DOCUMENTS.with(|documents| {
-        documents
-            .borrow()
-            .values()
-            .filter(|doc| doc.project == project_id)
-            .cloned()
-            .collect()
-    })
-}
+    pub fn get_all() -> Vec<Document> {
+        DOCUMENTS.with(|documents| documents.borrow().values().cloned().collect())
+    }
 
-pub fn insert_document(document: Document) {
-    DOCUMENTS.with(|documents| {
-        documents
-            .borrow_mut()
-            .insert(get_next_document_id(), document.clone());
-    });
-}
+    pub fn get_by_project(project_id: ProjectId) -> Vec<Document> {
+        DOCUMENTS.with(|documents| {
+            documents
+                .borrow()
+                .values()
+                .filter(|doc| doc.project == project_id)
+                .cloned()
+                .collect()
+        })
+    }
 
-pub fn update_document_revision(document_id: DocumentId, version: u8, revision_id: RevisionId) {
-    DOCUMENTS.with(|documents| {
-        if let Some(document) = documents.borrow_mut().get_mut(&document_id) {
-            document.version = version;
-            document.revisions.push(revision_id);
-        }
-    });
-}
+    pub fn insert(document_id: DocumentId, document: Document) {
+        DOCUMENTS.with(|documents| {
+            documents.borrow_mut().insert(document_id, document);
+        });
+    }
 
-pub fn get_document_by_id(document_id: DocumentId) -> Option<Document> {
-    DOCUMENTS.with(|documents| documents.borrow().get(&document_id).cloned())
+    pub fn remove(document_id: DocumentId) {
+        DOCUMENTS.with(|documents| {
+            documents.borrow_mut().remove(&document_id);
+        });
+    }
+
+    pub fn update_revision(document_id: DocumentId, version: u8, revision_id: RevisionId) {
+        DOCUMENTS.with(|documents| {
+            if let Some(document) = documents.borrow_mut().get_mut(&document_id) {
+                document.version = version;
+                document.revisions.push(revision_id);
+            }
+        });
+    }
+
+    pub fn get_by_id(document_id: DocumentId) -> Option<Document> {
+        DOCUMENTS.with(|documents| documents.borrow().get(&document_id).cloned())
+    }
 }
 
 #[update]
@@ -66,7 +74,7 @@ fn create_document(
     title: String,
     content: serde_bytes::ByteBuf,
 ) -> Result<DocumentId, AppError> {
-    let document_id = get_next_document_id();
+    let document_id = document_utils::get_next_id();
     let principal = ic_cdk::caller();
     let user = get_user_by_principal(principal)?;
 
@@ -80,20 +88,15 @@ fn create_document(
         project: project_id,
     };
 
-    insert_document(document.clone());
+    document_utils::insert(document_id, document.clone());
 
-    let revision_result = create_revision(project_id, document_id, content);
-
-    match revision_result {
+    match create_revision(project_id, document_id, content) {
         Ok(_revision_id) => {
             log_info("create_document", loggable_document(&document));
             Ok(document_id.into())
         }
         Err(err) => {
-            // Remove the inserted document if revision creation failed
-            DOCUMENTS.with(|documents| {
-                documents.borrow_mut().remove(&document_id);
-            });
+            document_utils::remove(document_id);
             Err(err)
         }
     }
@@ -103,20 +106,14 @@ fn create_document(
 fn list_documents(
     pagination: PaginationInput,
 ) -> Result<(Vec<Document>, PaginationMetadata), AppError> {
-    let documents = get_documents();
-
-    match paginate(
+    let documents = document_utils::get_all();
+    paginate(
         &documents,
         pagination.page_size,
         pagination.page_number,
-        pagination.filters.clone(),
-        pagination.sort.clone(),
-    ) {
-        Ok((paginated_documents, pagination_metadata)) => {
-            Ok((paginated_documents, pagination_metadata))
-        }
-        Err(e) => Err(e),
-    }
+        pagination.filters,
+        pagination.sort,
+    )
 }
 
 #[query]
@@ -124,26 +121,18 @@ fn list_documents_by_project_id(
     project_id: ProjectId,
     pagination: PaginationInput,
 ) -> Result<(Vec<Document>, PaginationMetadata), AppError> {
-    let documents = get_documents_by_project(project_id);
-
-    match paginate(
+    let documents = document_utils::get_by_project(project_id);
+    paginate(
         &documents,
         pagination.page_size,
         pagination.page_number,
-        pagination.filters.clone(),
-        pagination.sort.clone(),
-    ) {
-        Ok((paginated_documents, pagination_metadata)) => {
-            Ok((paginated_documents, pagination_metadata))
-        }
-        Err(e) => Err(e),
-    }
+        pagination.filters,
+        pagination.sort,
+    )
 }
 
 #[query]
 fn get_document(document_id: DocumentId) -> Result<Document, AppError> {
-    match get_document_by_id(document_id) {
-        Some(document) => Ok(document),
-        None => Err(AppError::EntityNotFound("Document not found".to_string())),
-    }
+    document_utils::get_by_id(document_id)
+        .ok_or(AppError::EntityNotFound("Document not found".to_string()))
 }

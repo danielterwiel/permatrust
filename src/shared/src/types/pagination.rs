@@ -6,6 +6,7 @@ use crate::types::errors::AppError;
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub enum UserFilterField {
+    Id,
     FirstName,
     LastName,
 }
@@ -34,6 +35,7 @@ pub enum OrganizationFilterField {
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub enum ProjectFilterField {
+    Members,
     OrganizationId,
     Name,
     CreatedAt,

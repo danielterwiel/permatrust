@@ -40,6 +40,7 @@ export const CreateUserForm: FC<CreateUserFormProps> = ({
       last_name: '',
     },
     onSubmit: async ({ value }) => {
+      createUserFormSchema.parse(value);
       onSubmit(value);
     },
   });
@@ -64,22 +65,7 @@ export const CreateUserForm: FC<CreateUserFormProps> = ({
             form.handleSubmit();
           }}
         >
-          <form.Field
-            name="first_name"
-            validators={{
-              onChange: ({ value }) => {
-                try {
-                  createUserFormSchema.shape.first_name.parse(value);
-                  return undefined;
-                } catch (error) {
-                  if (error instanceof z.ZodError) {
-                    return error.errors[0]?.message;
-                  }
-                  return 'Invalid input';
-                }
-              },
-            }}
-          >
+          <form.Field name="first_name">
             {(field) => (
               <FormItem>
                 <FormLabel field={field}>First name</FormLabel>
@@ -97,22 +83,7 @@ export const CreateUserForm: FC<CreateUserFormProps> = ({
             )}
           </form.Field>
 
-          <form.Field
-            name="last_name"
-            validators={{
-              onChange: ({ value }) => {
-                try {
-                  createUserFormSchema.shape.last_name.parse(value);
-                  return undefined;
-                } catch (error) {
-                  if (error instanceof z.ZodError) {
-                    return error.errors[0]?.message;
-                  }
-                  return 'Invalid input';
-                }
-              },
-            }}
-          >
+          <form.Field name="last_name">
             {(field) => (
               <FormItem>
                 <FormLabel field={field}>Last name</FormLabel>

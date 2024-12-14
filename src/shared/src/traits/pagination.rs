@@ -11,7 +11,7 @@ use crate::types::pagination::{
 };
 use crate::types::projects::{Project, ProjectId};
 use crate::types::revisions::Revision;
-use crate::types::users::User;
+use crate::types::users::{User, UserId};
 use crate::types::workflows::Workflow;
 
 pub trait Filterable {
@@ -54,6 +54,14 @@ impl Filterable for Document {
 impl Filterable for User {
     fn matches(&self, criteria: &FilterCriteria) -> bool {
         match &criteria.field {
+            FilterField::User(UserFilterField::Id) => {
+                let parsed_value = criteria.value.parse::<u64>().ok();
+                match (criteria.operator.clone(), parsed_value) {
+                    (FilterOperator::Equals, Some(value)) => self.id == value,
+                    (FilterOperator::Equals, None) => false,
+                    _ => self.id.to_string() != criteria.value,
+                }
+            }
             FilterField::User(UserFilterField::FirstName) => match criteria.operator {
                 FilterOperator::Equals => self.first_name == criteria.value,
                 FilterOperator::Contains => self.first_name.contains(&criteria.value),
@@ -131,6 +139,13 @@ impl Filterable for Organization {
 impl Filterable for Project {
     fn matches(&self, criteria: &FilterCriteria) -> bool {
         match &criteria.field {
+            FilterField::Project(ProjectFilterField::Members) => {
+                let criteria_value = criteria.value.parse::<UserId>().unwrap_or(0);
+                match criteria.operator {
+                    FilterOperator::Contains => self.members.contains(&criteria_value),
+                    _ => false,
+                }
+            }
             FilterField::Project(ProjectFilterField::CreatedAt) => {
                 let criteria_value = criteria.value.parse::<u64>().unwrap_or(0);
                 match criteria.operator {

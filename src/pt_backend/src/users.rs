@@ -6,14 +6,12 @@ use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::vec;
 
-use shared::types::access_control::{EntityPermission, RoleId};
 use shared::types::errors::AppError;
 use shared::types::pagination::{PaginationInput, PaginationMetadata};
 use shared::types::users::{CreateUserInput, User, UserId};
 
 use shared::utils::pagination::paginate;
 
-use crate::access_control::{get_role_by_id, role_exists};
 use crate::logger::{log_info, loggable_user};
 
 thread_local! {
@@ -47,8 +45,7 @@ fn create_user(input: CreateUserInput) -> Result<User, AppError> {
         id,
         first_name,
         last_name,
-        principal_id: ic_cdk::caller(),
-        roles: vec![],
+        principals: vec![ic_cdk::caller()],
         organizations: vec![],
     };
 
@@ -83,19 +80,12 @@ fn get_user() -> Result<User, AppError> {
     return get_user_by_principal(principal);
 }
 
-pub fn get_user_by_id(user_id: UserId) -> Result<User, AppError> {
-    USERS.with(|users| match users.borrow().get(&user_id) {
-        Some(user) => Ok(user.clone()),
-        None => Err(AppError::EntityNotFound("User not found".to_string())),
-    })
-}
-
 pub fn get_user_by_principal(principal: Principal) -> Result<User, AppError> {
     let user = USERS.with(|users| {
         users
             .borrow()
             .iter()
-            .find(|(_, user)| user.principal_id == principal)
+            .find(|(_, user)| user.principals.contains(&principal))
             .map(|(_, user)| user.clone())
     });
 
@@ -103,78 +93,4 @@ pub fn get_user_by_principal(principal: Principal) -> Result<User, AppError> {
         Some(user) => Ok(user),
         None => Err(AppError::EntityNotFound("User not found".to_string())),
     };
-}
-
-#[update]
-pub fn assign_role_to_user(user_id: UserId, role_id: RoleId) -> Result<(), AppError> {
-    // Check if the role exists
-    if !role_exists(role_id) {
-        return Err(AppError::EntityNotFound("Role not found".to_string()));
-    }
-
-    USERS.with(|users| {
-        let mut users = users.borrow_mut();
-        match users.get_mut(&user_id) {
-            Some(user) => {
-                let role = get_role_by_id(role_id)?;
-                if !user.roles.contains(&role) {
-                    user.roles.push(role);
-                }
-                Ok(())
-            }
-            None => Err(AppError::EntityNotFound("User not found".to_string())),
-        }
-    })
-}
-
-// Update method to remove a role from a user
-#[update]
-pub fn remove_role_from_user(user_id: UserId, role_id: RoleId) -> Result<(), AppError> {
-    USERS.with(|users| {
-        let mut users = users.borrow_mut();
-        match users.get_mut(&user_id) {
-            Some(user) => {
-                let role = get_role_by_id(role_id)?;
-                user.roles.retain(|r| *r != role);
-                Ok(())
-            }
-            None => Err(AppError::EntityNotFound("User not found".to_string())),
-        }
-    })
-}
-
-// Helper function to check if a user has a specific permission
-pub fn user_has_permission(user_id: UserId, permission: EntityPermission) -> bool {
-    let user = get_user_by_id(user_id);
-
-    match user {
-        Ok(user) => {
-            for role in user.roles {
-                let role = get_role_by_id(role.id);
-                match role {
-                    Ok(role) => {
-                        if role.permissions.iter().any(|perm| perm == &permission) {
-                            return true;
-                        }
-                    }
-                    Err(_) => continue,
-                }
-            }
-            false
-        }
-        Err(_) => false,
-    }
-}
-
-// Query method to check if the current user has a specific permission
-#[query]
-pub fn check_permission(permission: EntityPermission) -> Result<bool, AppError> {
-    let principal = ic_cdk::caller();
-    match get_user_by_principal(principal) {
-        Ok(user) => {
-            let has_perm = user_has_permission(user.id, permission);
-            Ok(has_perm)
-        }
-        Err(e) => Err(e),
-    }
 }
