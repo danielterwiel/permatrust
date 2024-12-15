@@ -4,7 +4,6 @@ import { z } from 'zod';
 
 import { api } from '@/api';
 
-import { CreateRoleForm } from '@/components/create-role-form';
 import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
 import { Link } from '@/components/link';
@@ -84,15 +83,11 @@ export const Route = createFileRoute(
         documentPagination,
       );
     const project = await api.get_project(projectIdNumber);
-    const permissions = await api.get_permissions();
-    const initialRoles = await api.get_project_roles(project.id);
     return {
       context,
       documents,
-      initialRoles,
       pagination: documentPagination,
       paginationMetaData,
-      permissions,
       project,
     };
   },
@@ -104,14 +99,8 @@ export const Route = createFileRoute(
 
 function ProjectDetails() {
   const { projectId } = Route.useParams();
-  const {
-    documents,
-    initialRoles,
-    pagination,
-    paginationMetaData,
-    permissions,
-    project,
-  } = Route.useLoaderData();
+  const { documents, pagination, paginationMetaData, project } =
+    Route.useLoaderData();
   const navigate = useNavigate();
 
   const RowActions = (row: Row<Document>) => {
@@ -128,12 +117,6 @@ function ProjectDetails() {
       </Link>
     );
   };
-
-  // useEffect(() => {
-  //
-  //   const rolesResponse = await api.get_project_roles(project.id);
-  //
-  // }, []);
 
   return (
     <div className="space-y-8">
@@ -157,18 +140,33 @@ function ProjectDetails() {
               placeholder="Filter document title..."
             />
           ))}
-          <Link
-            className="h-7 gap-1"
-            params={{ projectId }}
-            size="sm"
-            to="/projects/$projectId/documents/create"
-            variant="default"
-          >
-            <Icon name="file-outline" size="sm" />
-            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap text-sm">
-              Create Document
-            </span>
-          </Link>
+
+          <div className="flex gap-4">
+            <Link
+              className="h-5 gap-1"
+              params={{ projectId }}
+              size="sm"
+              to="/projects/$projectId/roles"
+              variant="secondary"
+            >
+              <Icon name="user-check-outline" size="xs" />
+              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap text-xs">
+                Manage Roles
+              </span>
+            </Link>
+            <Link
+              className="h-7 gap-1"
+              params={{ projectId }}
+              size="sm"
+              to="/projects/$projectId/documents/create"
+              variant="default"
+            >
+              <Icon name="file-outline" size="sm" />
+              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap text-sm">
+                Create Document
+              </span>
+            </Link>
+          </div>
         </div>
         <Card>
           <CardHeader>
@@ -215,45 +213,6 @@ function ProjectDetails() {
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Icon
-              className="text-muted-foreground pb-1 mr-2"
-              name="user-check-outline"
-              size="lg"
-            />
-            Roles
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          {initialRoles.map((r) => (
-            <div key={r.id}>
-              {Object.entries(r).map(
-                ([key, value]: [string, string]) =>
-                  `${key.toString()} ${value.toString()}`,
-              )}
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            <Icon
-              className="text-muted-foreground pb-1 mr-2"
-              name="user-check-outline"
-              size="lg"
-            />
-            Create role
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CreateRoleForm permissions={permissions} />
-        </CardContent>
-      </Card>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-import { capitalizeFirstLetter, splitOnUpperCase } from '@/utils';
+import { capitalizeFirstLetter, permissionsToItems } from '@/utils';
 import { useForm } from '@tanstack/react-form';
 import { useEffect, useState } from 'react';
 import { z } from 'zod';
@@ -61,19 +61,7 @@ export function CreateRoleForm({ permissions }: CreateRoleFormProps) {
     }
   }, [projects]);
 
-  const availablePermissions = Object.entries(permissions).flatMap(
-    ([entity, perms]) =>
-      perms.flatMap((action: string) => {
-        const labelSplit = splitOnUpperCase(action);
-        const label = capitalizeFirstLetter(labelSplit.toLowerCase());
-        const group = capitalizeFirstLetter(entity);
-        return {
-          group,
-          id: `${entity}::${action}`,
-          label,
-        };
-      }),
-  );
+  const availablePermissions = permissionsToItems(permissions);
 
   const form = useForm<FormValues>({
     defaultValues: {

@@ -40,6 +40,11 @@ export const routes = rootRoute('root.tsx', [
           route('/create', 'app/projects/project-create.tsx'),
           route('/$projectId', 'app/projects/project-index.tsx', [
             index('app/projects/project-details.tsx'),
+
+            route('/roles', 'app/roles/roles-index.tsx', [
+              index('app/roles/roles-list.tsx'),
+              route('/create', 'app/roles/role-create.tsx'),
+            ]),
             route('/documents', 'app/documents/documents-index.tsx', [
               index('app/documents/project-documents-list.tsx'),
               route('/create', 'app/documents/document-create.tsx'),
