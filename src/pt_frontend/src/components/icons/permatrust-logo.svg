@@ -1,0 +1,22 @@
+<svg width="100" height="100" viewBox="0 0 100 100">
+  <!-- Document Shape: A rectangle with a folded corner -->
+  <!-- Main document rectangle -->
+  <rect x="35" y="30" width="30" height="40" stroke="black" fill="none" stroke-width="2" />
+  <!-- Folded corner: a small diagonal line at the top-right corner of the rectangle -->
+  <path d="M65 30 L65 35 L60 30 Z" fill="none" stroke="black" stroke-width="2" />
+
+  <!-- Lock Icon: small rectangle + U-shaped shackle -->
+  <!-- Lock body -->
+  <rect x="44" y="55" width="12" height="10" stroke="black" fill="none" stroke-width="2" />
+  <!-- Lock shackle (U-shape) -->
+  <path d="M46,55 V50 A6,6 0 0 1 54,50 V55" fill="none" stroke="black" stroke-width="2" />
+
+  <!-- Additional elements for enhancement -->
+  <!-- Horizontal lines to represent text on the document -->
+  <line x1="38" y1="35" x2="62" y2="35" stroke="black" stroke-width="2" />
+  <line x1="38" y1="40" x2="62" y2="40" stroke="black" stroke-width="2" />
+  <line x1="38" y1="45" x2="62" y2="45" stroke="black" stroke-width="2" />
+
+  <!-- Symmetric enhancement for lock -->
+  <circle cx="50" cy="60" r="2" stroke="black" fill="none" stroke-width="2" />
+</svg>
