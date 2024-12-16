@@ -6,6 +6,9 @@ use strum_macros::EnumIter;
 
 pub type RoleId = u64;
 
+#[derive(Clone, Debug)]
+pub struct RoleIdVec(pub Vec<RoleId>);
+
 #[derive(CandidType, Deserialize)]
 pub enum RoleIdResult {
     Ok(RoleId),

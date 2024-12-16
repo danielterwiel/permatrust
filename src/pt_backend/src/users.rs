@@ -1,8 +1,8 @@
 use candid::Principal;
 use ic_cdk_macros::{query, update};
-
+use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
+use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::vec;
 
@@ -14,8 +14,18 @@ use shared::utils::pagination::paginate;
 
 use crate::logger::{log_info, loggable_user};
 
+type Memory = VirtualMemory<DefaultMemoryImpl>;
+
 thread_local! {
-    static USERS: RefCell<HashMap<UserId, User>> = RefCell::new(HashMap::new());
+    static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> =
+        RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
+
+    static USERS: RefCell<StableBTreeMap<UserId, User, Memory>> = RefCell::new(
+        StableBTreeMap::init(
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(2))),
+        )
+    );
+
     static NEXT_ID: AtomicU64 = AtomicU64::new(0);
 }
 
@@ -60,7 +70,13 @@ fn create_user(input: CreateUserInput) -> Result<User, AppError> {
 
 #[query]
 fn list_users(pagination: PaginationInput) -> Result<(Vec<User>, PaginationMetadata), AppError> {
-    let users = USERS.with(|users| users.borrow().values().cloned().collect::<Vec<_>>());
+    let users = USERS.with(|users| {
+        users
+            .borrow()
+            .iter()
+            .map(|(_, user)| user.clone())
+            .collect::<Vec<_>>()
+    });
 
     match paginate(
         &users,

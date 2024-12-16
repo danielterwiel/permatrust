@@ -1,6 +1,7 @@
 use ic_cdk_macros::{query, update};
+use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
+use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
 use serde::{Deserialize, Serialize};
-
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::sync::atomic::{AtomicU32, Ordering};
@@ -18,6 +19,21 @@ use shared::utils::pagination::paginate;
 
 use crate::logger::{log_info, loggable_workflow};
 
+type Memory = VirtualMemory<DefaultMemoryImpl>;
+
+thread_local! {
+    static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> =
+        RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
+
+    static WORKFLOWS: RefCell<StableBTreeMap<WorkflowId, Workflow, Memory>> = RefCell::new(
+        StableBTreeMap::init(
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(4))),
+        )
+    );
+
+    static NEXT_ID: AtomicU32 = AtomicU32::new(0);
+}
+
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
 pub struct GenericState(pub StateId);
 
@@ -28,11 +44,6 @@ pub struct GenericEvent(pub EventId);
 pub struct GenericStateMachine {
     transitions: HashMap<(StateId, EventId), StateId>,
     current_state: StateId,
-}
-
-thread_local! {
-  static WORKFLOWS: RefCell<HashMap<WorkflowId, Workflow>> = RefCell::new(HashMap::new());
-  static NEXT_ID: AtomicU32 = AtomicU32::new(0);
 }
 
 pub fn get_next_workflow_id() -> WorkflowId {
@@ -111,8 +122,13 @@ fn create_workflow(workflow: CreateWorkflowInput) -> Result<WorkflowId, AppError
 
 #[query]
 fn list_workflows(pagination: PaginationInput) -> PaginatedWorkflowsResult {
-    let workflows =
-        WORKFLOWS.with(|workflows| workflows.borrow().values().cloned().collect::<Vec<_>>());
+    let workflows = WORKFLOWS.with(|workflows| {
+        workflows
+            .borrow()
+            .iter()
+            .map(|(_, workflow)| workflow.clone())
+            .collect::<Vec<_>>()
+    });
 
     match paginate(
         &workflows,
@@ -140,14 +156,16 @@ fn get_workflow(workflow_id: WorkflowId) -> Result<Workflow, AppError> {
 fn execute_workflow(id: WorkflowId, event: EventId) -> Result<(), String> {
     WORKFLOWS.with(|workflows| {
         let mut workflows = workflows.borrow_mut();
-        let workflow = workflows.get_mut(&id).ok_or("Workflow not found")?;
+        let workflow = workflows.get(&id).ok_or("Workflow not found")?;
 
         let mut state_machine = GenericStateMachine::from_workflow_graph(
             &workflow.graph,
             workflow.current_state.clone(),
         );
         state_machine.transition(&event)?;
-        workflow.current_state = state_machine.current_state().clone();
+        let mut updated_workflow = workflow.clone();
+        updated_workflow.current_state = state_machine.current_state().clone();
+        workflows.insert(id, updated_workflow);
         Ok(())
     })
 }

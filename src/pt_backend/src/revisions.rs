@@ -1,7 +1,9 @@
-use crate::documents::document_utils; //{get_document_by_id, update_document_revision};
+use crate::documents::document_utils;
 use crate::logger::{log_info, loggable_revision};
 use crate::users::get_user_by_principal;
 use ic_cdk_macros::{query, update};
+use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
+use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
 use shared::types::documents::DocumentId;
 use shared::types::errors::AppError;
 use shared::types::pagination::{PaginationInput, PaginationMetadata};
@@ -9,11 +11,20 @@ use shared::types::projects::ProjectId;
 use shared::types::revisions::{Revision, RevisionId};
 use shared::utils::pagination::paginate;
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
 
+type Memory = VirtualMemory<DefaultMemoryImpl>;
+
 thread_local! {
-    static REVISIONS: RefCell<HashMap<RevisionId, Revision>> = RefCell::new(HashMap::new());
+    static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> =
+        RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
+
+    static REVISIONS: RefCell<StableBTreeMap<RevisionId, Revision, Memory>> = RefCell::new(
+        StableBTreeMap::init(
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(5))),
+        )
+    );
+
     static NEXT_ID: AtomicU64 = AtomicU64::new(0);
 }
 
@@ -25,17 +36,23 @@ mod revision_utils {
     }
 
     pub fn get_all() -> Vec<Revision> {
-        REVISIONS.with(|revisions| revisions.borrow().values().cloned().collect())
+        REVISIONS.with(|revisions| {
+            revisions
+                .borrow()
+                .iter()
+                .map(|(_, rev)| rev.clone())
+                .collect()
+        })
     }
 
     pub fn insert(revision_id: RevisionId, revision: Revision) {
         REVISIONS.with(|revisions| {
-            revisions.borrow_mut().insert(revision_id.clone(), revision);
+            revisions.borrow_mut().insert(revision_id, revision);
         });
     }
 
     pub fn get_by_id(revision_id: RevisionId) -> Option<Revision> {
-        REVISIONS.with(|revisions| revisions.borrow().get(&revision_id).cloned())
+        REVISIONS.with(|revisions| revisions.borrow().get(&revision_id))
     }
 
     pub fn get_by_document_id(document_id: DocumentId) -> Result<Vec<Revision>, AppError> {
@@ -43,9 +60,9 @@ mod revision_utils {
             let revisions = REVISIONS.with(|revisions| {
                 revisions
                     .borrow()
-                    .values()
-                    .filter(|rev| rev.document_id == document.id)
-                    .cloned()
+                    .iter()
+                    .filter(|(_, rev)| rev.document_id == document.id)
+                    .map(|(_, rev)| rev.clone())
                     .collect()
             });
             Ok(revisions)
@@ -73,7 +90,7 @@ mod revision_utils {
 
                 let mut revs: Vec<Revision> = revision_ids[range]
                     .iter()
-                    .filter_map(|&rev_id| revisions.get(&rev_id).cloned())
+                    .filter_map(|&rev_id| revisions.get(&rev_id))
                     .collect();
 
                 if start_index > end_index {

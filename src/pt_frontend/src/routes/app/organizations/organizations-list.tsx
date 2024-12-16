@@ -146,7 +146,7 @@ function Organizations() {
         >
           <Icon name="building-outline" size="sm" />
           <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-            Create Organization
+            Create organization
           </span>
         </Link>
       </div>

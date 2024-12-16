@@ -974,6 +974,7 @@ dependencies = [
  "candid",
  "dotenv",
  "ic-cdk",
+ "ic-stable-structures",
  "petgraph",
  "serde",
  "serde_bytes",

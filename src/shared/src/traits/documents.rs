@@ -1,13 +1,11 @@
-use crate::types::revisions::Revision;
+use crate::consts::documents::MAX_DOCUMENT_SIZE;
+use crate::types::documents::Document;
 use candid::{Decode, Encode};
 use ic_stable_structures::storable::Bound;
 use ic_stable_structures::Storable;
 use std::borrow::Cow;
 
-// Size in bytes (2MB - small buffer for overhead)
-const MAX_VALUE_SIZE: u32 = 2_000_000;
-
-impl Storable for Revision {
+impl Storable for Document {
     fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
         Cow::Owned(Encode!(self).unwrap())
     }
@@ -17,7 +15,7 @@ impl Storable for Revision {
     }
 
     const BOUND: Bound = Bound::Bounded {
-        max_size: MAX_VALUE_SIZE,
+        max_size: MAX_DOCUMENT_SIZE,
         is_fixed_size: false,
     };
 }

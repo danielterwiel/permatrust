@@ -1,8 +1,9 @@
 use ic_cdk_macros::{query, update};
+use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
+use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
 use shared::types::entities::Entity;
 use shared::utils::filter::filter;
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::vec;
 
@@ -19,8 +20,18 @@ use shared::types::projects::{Project, ProjectId, ProjectResult};
 use crate::logger::{log_info, loggable_project};
 use crate::users::get_user_by_principal;
 
+type Memory = VirtualMemory<DefaultMemoryImpl>;
+
 thread_local! {
-    static PROJECTS: RefCell<HashMap<ProjectId, Project>> = RefCell::new(HashMap::new());
+    static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> =
+        RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
+
+    static PROJECTS: RefCell<StableBTreeMap<ProjectId, Project, Memory>> = RefCell::new(
+        StableBTreeMap::init(
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(1))),
+        )
+    );
+
     static NEXT_ID: AtomicU32 = AtomicU32::new(0);
 }
 
@@ -32,16 +43,22 @@ mod project_utils {
     }
 
     pub fn get_all() -> Vec<Project> {
-        PROJECTS.with(|projects| projects.borrow().values().cloned().collect())
+        PROJECTS.with(|projects| {
+            projects
+                .borrow()
+                .iter()
+                .map(|(_, project)| project.clone())
+                .collect()
+        })
     }
 
     pub fn get_by_organization_id(organization_id: OrganizationId) -> Vec<Project> {
         PROJECTS.with(|projects| {
             projects
                 .borrow()
-                .values()
-                .filter(|proj| proj.organizations.contains(&organization_id))
-                .cloned()
+                .iter()
+                .filter(|(_, proj)| proj.organizations.contains(&organization_id))
+                .map(|(_, proj)| proj.clone())
                 .collect()
         })
     }
@@ -53,7 +70,7 @@ mod project_utils {
     }
 
     pub fn get_by_id(project_id: ProjectId) -> Option<Project> {
-        PROJECTS.with(|projects| projects.borrow().get(&project_id).cloned())
+        PROJECTS.with(|projects| projects.borrow().get(&project_id))
     }
 }
 

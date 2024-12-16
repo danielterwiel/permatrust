@@ -1,18 +1,29 @@
 use crate::logger::{log_info, loggable_organization};
 use crate::users::get_user_by_principal;
 use ic_cdk_macros::{query, update};
+use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
+use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
 use shared::types::errors::AppError;
 use shared::types::organizations::{Organization, OrganizationId, OrganizationResult};
 use shared::types::pagination::{PaginationInput, PaginationMetadata};
 use shared::types::users::UserId;
 use shared::utils::pagination::paginate;
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::sync::atomic::{AtomicU32, Ordering};
 use std::vec;
 
+type Memory = VirtualMemory<DefaultMemoryImpl>;
+
 thread_local! {
-    static ORGANIZATIONS: RefCell<HashMap<OrganizationId, Organization>> = RefCell::new(HashMap::new());
+    static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> =
+        RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
+
+    static ORGANIZATIONS: RefCell<StableBTreeMap<OrganizationId, Organization, Memory>> = RefCell::new(
+        StableBTreeMap::init(
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))),
+        )
+    );
+
     static NEXT_ID: AtomicU32 = AtomicU32::new(0);
 }
 
@@ -27,15 +38,15 @@ mod organization_utils {
         ORGANIZATIONS.with(|organizations| {
             organizations
                 .borrow()
-                .values()
-                .filter(|org| org.members.contains(&user_id))
-                .cloned()
+                .iter() // Use iter() instead of values()
+                .filter(|(_, org)| org.members.contains(&user_id))
+                .map(|(_, org)| org.clone())
                 .collect()
         })
     }
 
     pub fn get_by_id(organization_id: OrganizationId) -> Option<Organization> {
-        ORGANIZATIONS.with(|organizations| organizations.borrow().get(&organization_id).cloned())
+        ORGANIZATIONS.with(|organizations| organizations.borrow().get(&organization_id))
     }
 
     pub fn insert(id: OrganizationId, organization: Organization) {
