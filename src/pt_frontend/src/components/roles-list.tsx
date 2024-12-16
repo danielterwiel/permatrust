@@ -1,7 +1,13 @@
+import { permissionsToItems } from '@/utils';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 
-import { Link } from '@/components/link';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,7 +17,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 
 import type { Role } from '@/declarations/pt_backend/pt_backend.did';
 
@@ -30,10 +35,27 @@ export const RolesList = ({ roles }: RoleListProps) => {
     );
   };
 
+  const groupPermissions = (
+    permissions: ReturnType<typeof permissionsToItems>,
+  ) => {
+    return permissions.reduce(
+      (acc, permission) => {
+        if (!acc[permission.group]) {
+          acc[permission.group] = [];
+        }
+        acc[permission.group]?.push(permission);
+        return acc;
+      },
+      {} as Record<string, typeof permissions>,
+    );
+  };
+
   return (
-    <>
-      <div className="container mx-auto p-4 space-y-6">
-        {roles.map((role) => (
+    <div className="container mx-auto p-4 space-y-6">
+      {roles.map((role) => {
+        const permissions = permissionsToItems(role.permissions);
+        const groupedPermissions = groupPermissions(permissions);
+        return (
           <Card className="w-full" key={role.id}>
             <CardHeader>
               <div className="flex justify-between items-center">
@@ -57,24 +79,31 @@ export const RolesList = ({ roles }: RoleListProps) => {
 
             {expandedRoles.includes(role.id.toString()) && (
               <CardContent>
-                <ScrollArea className="h-[100px] w-full rounded-md border p-4">
-                  <div className="flex flex-wrap gap-2">
-                    {role.permissions.map((permission) => (
-                      <Badge
-                        className="transition-all hover:scale-105"
-                        key={permission.toString()}
-                        variant="secondary"
-                      >
-                        {permission.toString()}
-                      </Badge>
-                    ))}
-                  </div>
-                </ScrollArea>
+                <Accordion className="w-full" type="multiple">
+                  {Object.entries(groupedPermissions).map(([group, perms]) => (
+                    <AccordionItem key={group} value={group}>
+                      <AccordionTrigger>{group}</AccordionTrigger>
+                      <AccordionContent>
+                        <div className="flex flex-wrap gap-2">
+                          {perms.map((permission) => (
+                            <Badge
+                              className="transition-all hover:scale-105"
+                              key={permission.id}
+                              variant="secondary"
+                            >
+                              {permission.label}
+                            </Badge>
+                          ))}
+                        </div>
+                      </AccordionContent>
+                    </AccordionItem>
+                  ))}
+                </Accordion>
               </CardContent>
             )}
           </Card>
-        ))}
-      </div>
-    </>
+        );
+      })}
+    </div>
   );
 };

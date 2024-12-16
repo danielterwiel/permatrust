@@ -1,9 +1,9 @@
-import { useMediaQuery } from "@/hooks/use-media-query";
-import { Grip } from "lucide-react";
-import * as React from "react";
+import { useMediaQuery } from '@/hooks/use-media-query';
+import { Grip } from 'lucide-react';
+import * as React from 'react';
 
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Command,
   CommandEmpty,
@@ -11,12 +11,11 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@/components/ui/command";
-import { Icon } from "@/components/ui/icon";
-import { Label } from "@/components/ui/label";
+} from '@/components/ui/command';
+import { Icon } from '@/components/ui/icon';
+import { Label } from '@/components/ui/label';
 
 export type Item = {
-  entity: string;
   group: string;
   id: string;
   label: string;
@@ -27,17 +26,17 @@ type ListContainerProps = {
   handleDragStart: (
     e: React.DragEvent<HTMLDivElement>,
     item: Item,
-    source: "available" | "selected",
+    source: 'available' | 'selected',
     selectedSet: Set<string>,
   ) => void;
   handleDrop: (
     e: React.DragEvent<HTMLDivElement>,
-    target: "available" | "selected",
+    target: 'available' | 'selected',
   ) => void;
   handleSelect: (itemId: string, isAvailable: boolean) => void;
   isAvailable: boolean;
   items: Item[];
-  onTransfer: (items: Item[], direction: "left" | "right") => void;
+  onTransfer: (items: Item[], direction: 'left' | 'right') => void;
   selected: Set<string>;
   title: string;
 };
@@ -45,7 +44,7 @@ type ListContainerProps = {
 type MultiSelectTransferProps = {
   availableItems: Item[];
   description: string;
-  onTransfer: (selectedItems: Item[], direction: "left" | "right") => void;
+  onTransfer: (selectedItems: Item[], direction: 'left' | 'right') => void;
   selectedItems: Item[];
   title: string;
 };
@@ -63,7 +62,7 @@ const ListContainer = React.memo(
     title,
   }: ListContainerProps) => {
     const handleTransferAllVisible = React.useCallback(() => {
-      onTransfer(items, isAvailable ? "right" : "left");
+      onTransfer(items, isAvailable ? 'right' : 'left');
     }, [items, isAvailable, onTransfer]);
 
     const groupedItems = React.useMemo(() => {
@@ -93,13 +92,13 @@ const ListContainer = React.memo(
             size="sm"
             variant="ghost"
           >
-            {isAvailable ? "Select All" : "Deselect All"}
+            {isAvailable ? 'Select All' : 'Deselect All'}
           </Button>
         </div>
         <div
           className="min-h-[300px]"
           onDragOver={handleDragOver}
-          onDrop={(e) => handleDrop(e, isAvailable ? "available" : "selected")}
+          onDrop={(e) => handleDrop(e, isAvailable ? 'available' : 'selected')}
         >
           <Command className="rounded-lg border shadow-md">
             <CommandInput placeholder="Search actions..." />
@@ -116,7 +115,7 @@ const ListContainer = React.memo(
                         handleDragStart(
                           e,
                           item,
-                          isAvailable ? "available" : "selected",
+                          isAvailable ? 'available' : 'selected',
                           selected,
                         )
                       }
@@ -144,14 +143,14 @@ const ListContainer = React.memo(
   },
 );
 
-ListContainer.displayName = "ListContainer";
+ListContainer.displayName = 'ListContainer';
 
 export const MultiSelectTransfer: React.FC<MultiSelectTransferProps> = ({
   availableItems,
   onTransfer,
   selectedItems,
 }) => {
-  const isMobile = useMediaQuery("(max-width: 768px)");
+  const isMobile = useMediaQuery('(max-width: 768px)');
   const [availableSelected, setAvailableSelected] = React.useState<Set<string>>(
     new Set(),
   );
@@ -182,13 +181,13 @@ export const MultiSelectTransfer: React.FC<MultiSelectTransferProps> = ({
     (
       e: React.DragEvent<HTMLDivElement>,
       item: Item,
-      source: "available" | "selected",
+      source: 'available' | 'selected',
       selectedSet: Set<string>,
     ) => {
       e.stopPropagation();
 
       const sourceItems =
-        source === "available" ? availableItems : selectedItems;
+        source === 'available' ? availableItems : selectedItems;
       let itemsToDrag: Item[] = [];
 
       if (selectedSet.size > 1 && selectedSet.has(item.id)) {
@@ -199,33 +198,33 @@ export const MultiSelectTransfer: React.FC<MultiSelectTransferProps> = ({
         itemsToDrag = [item];
       }
 
-      const dragPreview = document.createElement("div");
-      dragPreview.style.position = "absolute";
-      dragPreview.style.top = "-99999px";
-      dragPreview.style.left = "-99999px";
-      dragPreview.style.background = "white";
-      dragPreview.style.border = "1px solid #ccc";
-      dragPreview.style.padding = "8px";
-      dragPreview.style.borderRadius = "4px";
-      dragPreview.style.boxShadow = "0 2px 8px rgba(0,0,0,0.1)";
-      dragPreview.style.fontSize = "14px";
-      dragPreview.style.fontFamily = "sans-serif";
+      const dragPreview = document.createElement('div');
+      dragPreview.style.position = 'absolute';
+      dragPreview.style.top = '-99999px';
+      dragPreview.style.left = '-99999px';
+      dragPreview.style.background = 'white';
+      dragPreview.style.border = '1px solid #ccc';
+      dragPreview.style.padding = '8px';
+      dragPreview.style.borderRadius = '4px';
+      dragPreview.style.boxShadow = '0 2px 8px rgba(0,0,0,0.1)';
+      dragPreview.style.fontSize = '14px';
+      dragPreview.style.fontFamily = 'sans-serif';
 
       itemsToDrag.forEach((dragItem, index) => {
-        const itemDiv = document.createElement("div");
+        const itemDiv = document.createElement('div');
         itemDiv.textContent = dragItem.label;
         itemDiv.style.marginBottom =
-          index === itemsToDrag.length - 1 ? "0" : "4px";
+          index === itemsToDrag.length - 1 ? '0' : '4px';
         dragPreview.appendChild(itemDiv);
       });
 
       document.body.appendChild(dragPreview);
 
       e.dataTransfer.setData(
-        "text/plain",
+        'text/plain',
         JSON.stringify({ items: itemsToDrag, source }),
       );
-      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setDragImage(dragPreview, 0, 0);
 
       const eventTarget = e.currentTarget;
@@ -235,10 +234,10 @@ export const MultiSelectTransfer: React.FC<MultiSelectTransferProps> = ({
           dragPreview.parentNode.removeChild(dragPreview);
         }
 
-        eventTarget.removeEventListener("dragend", handleDragEnd);
+        eventTarget.removeEventListener('dragend', handleDragEnd);
       };
 
-      eventTarget.addEventListener("dragend", handleDragEnd);
+      eventTarget.addEventListener('dragend', handleDragEnd);
     },
     [availableItems, selectedItems],
   );
@@ -246,20 +245,20 @@ export const MultiSelectTransfer: React.FC<MultiSelectTransferProps> = ({
   const handleDragOver = React.useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
       e.preventDefault();
-      e.dataTransfer.dropEffect = "move";
+      e.dataTransfer.dropEffect = 'move';
     },
     [],
   );
 
   const handleDrop = React.useCallback(
-    (e: React.DragEvent<HTMLDivElement>, target: "available" | "selected") => {
+    (e: React.DragEvent<HTMLDivElement>, target: 'available' | 'selected') => {
       e.preventDefault();
       try {
-        const data = JSON.parse(e.dataTransfer.getData("text/plain"));
+        const data = JSON.parse(e.dataTransfer.getData('text/plain'));
         const { items, source } = data;
         if (source !== target) {
-          onTransfer(items, source === "available" ? "right" : "left");
-          if (source === "available") {
+          onTransfer(items, source === 'available' ? 'right' : 'left');
+          if (source === 'available') {
             setAvailableSelected(new Set());
           } else {
             setSelectedSelected(new Set());
@@ -273,15 +272,15 @@ export const MultiSelectTransfer: React.FC<MultiSelectTransferProps> = ({
   );
 
   const transferItems = React.useCallback(
-    (direction: "left" | "right") => {
+    (direction: 'left' | 'right') => {
       const itemsToTransfer =
-        direction === "right"
+        direction === 'right'
           ? availableItems.filter((item) => availableSelected.has(item.id))
           : selectedItems.filter((item) => selectedSelected.has(item.id));
 
       onTransfer(itemsToTransfer, direction);
 
-      if (direction === "right") {
+      if (direction === 'right') {
         setAvailableSelected(new Set());
       } else {
         setSelectedSelected(new Set());
@@ -301,28 +300,28 @@ export const MultiSelectTransfer: React.FC<MultiSelectTransferProps> = ({
       <div
         className={`flex ${
           isMobile
-            ? "flex-row justify-center space-x-2"
-            : "flex-col space-y-2 pt-16"
+            ? 'flex-row justify-center space-x-2'
+            : 'flex-col space-y-2 pt-16'
         }`}
       >
         <Button
           disabled={availableSelected.size === 0}
-          onClick={() => transferItems("right")}
+          onClick={() => transferItems('right')}
           size="sm"
           title="Move selected to right"
         >
           <Icon
-            name={isMobile ? "chevron-down-outline" : "chevron-right-outline"}
+            name={isMobile ? 'chevron-down-outline' : 'chevron-right-outline'}
           />
         </Button>
         <Button
           disabled={selectedSelected.size === 0}
-          onClick={() => transferItems("left")}
+          onClick={() => transferItems('left')}
           size="sm"
           title="Move selected to left"
         >
           <Icon
-            name={isMobile ? "chevron-up-outline" : "chevron-left-outline"}
+            name={isMobile ? 'chevron-up-outline' : 'chevron-left-outline'}
           />
         </Button>
       </div>
@@ -331,7 +330,7 @@ export const MultiSelectTransfer: React.FC<MultiSelectTransferProps> = ({
   );
 
   return (
-    <div className={`flex flex-col ${!isMobile ? "md:flex-row" : ""} gap-4`}>
+    <div className={`flex flex-col ${!isMobile ? 'md:flex-row' : ''} gap-4`}>
       <ListContainer
         handleDragOver={handleDragOver}
         handleDragStart={handleDragStart}

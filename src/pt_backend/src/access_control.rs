@@ -1,8 +1,7 @@
 use ic_cdk_macros::{query, update};
 use shared::types::access_control::{
-    DocumentPermission, EntityPermission, EntityPermissionsResult, OrganizationPermission,
-    ProjectPermission, RevisionPermission, Role, RoleId, RoleInput, UserPermission,
-    WorkflowPermission,
+    DocumentPermission, EntityPermission, OrganizationPermission, ProjectPermission,
+    RevisionPermission, Role, RoleId, RoleInput, UserPermission, WorkflowPermission,
 };
 use shared::types::errors::AppError;
 use shared::types::users::UserId;
@@ -128,27 +127,40 @@ fn get_role(role_id: RoleId) -> Result<Role, AppError> {
 }
 
 #[query]
-fn get_permissions() -> Result<EntityPermissionsResult, AppError> {
-    Ok(EntityPermissionsResult {
-        user: UserPermission::iter()
-            .map(|action| format!("{:?}", action))
-            .collect(),
-        document: DocumentPermission::iter()
-            .map(|action| format!("{:?}", action))
-            .collect(),
-        revision: RevisionPermission::iter()
-            .map(|action| format!("{:?}", action))
-            .collect(),
-        organization: OrganizationPermission::iter()
-            .map(|action| format!("{:?}", action))
-            .collect(),
-        project: ProjectPermission::iter()
-            .map(|action| format!("{:?}", action))
-            .collect(),
-        workflow: WorkflowPermission::iter()
-            .map(|action| format!("{:?}", action))
-            .collect(),
-    })
+fn get_permissions() -> Result<Vec<EntityPermission>, AppError> {
+    let user_permissions: Vec<EntityPermission> =
+        UserPermission::iter().map(EntityPermission::User).collect();
+
+    let document_permissions: Vec<EntityPermission> = DocumentPermission::iter()
+        .map(EntityPermission::Document)
+        .collect();
+
+    let revision_permissions: Vec<EntityPermission> = RevisionPermission::iter()
+        .map(EntityPermission::Revision)
+        .collect();
+
+    let organization_permissions: Vec<EntityPermission> = OrganizationPermission::iter()
+        .map(EntityPermission::Organization)
+        .collect();
+
+    let project_permissions: Vec<EntityPermission> = ProjectPermission::iter()
+        .map(EntityPermission::Project)
+        .collect();
+
+    let workflow_permissions: Vec<EntityPermission> = WorkflowPermission::iter()
+        .map(EntityPermission::Workflow)
+        .collect();
+
+    let all_permissions = user_permissions
+        .into_iter()
+        .chain(document_permissions)
+        .chain(revision_permissions)
+        .chain(organization_permissions)
+        .chain(project_permissions)
+        .chain(workflow_permissions)
+        .collect();
+
+    Ok(all_permissions)
 }
 
 #[query]

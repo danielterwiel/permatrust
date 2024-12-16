@@ -24,8 +24,10 @@ import { Textarea } from '@/components/ui/textarea';
 
 import { createEntityPermissionVariant } from '@/utils/variants/permissions';
 
-import type { Project } from '@/declarations/pt_backend/pt_backend.did';
-import type { EntityPermissionsResult } from '@/declarations/pt_backend/pt_backend.did';
+import type {
+  EntityPermission,
+  Project,
+} from '@/declarations/pt_backend/pt_backend.did';
 
 export const createRoleFormSchema = z.object({
   description: z.string().optional(),
@@ -35,7 +37,7 @@ export const createRoleFormSchema = z.object({
 });
 
 type CreateRoleFormProps = {
-  permissions: EntityPermissionsResult;
+  permissions: EntityPermission[];
 };
 
 type FormValues = {
@@ -125,7 +127,7 @@ export function CreateRoleForm({ permissions }: CreateRoleFormProps) {
   };
 
   if (!projects) {
-    return <Loading text="Loading projects" />;
+    return <Loading text="Loading project" />;
   }
 
   return projects.length === 0 ? (

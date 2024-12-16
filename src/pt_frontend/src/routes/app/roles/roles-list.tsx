@@ -29,7 +29,7 @@ function RolesCreate() {
 
   return (
     <>
-      <div className="flex items-center justify-between pb-4">
+      <div className="flex items-center justify-end pb-4">
         {/*
 
           pagination.filters[0]?.map((filterCriteria) => {

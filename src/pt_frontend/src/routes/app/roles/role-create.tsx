@@ -9,6 +9,9 @@ import { Icon } from '@/components/ui/icon';
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/create',
 )({
+  beforeLoad: () => ({
+    getTitle: () => 'Create role',
+  }),
   loader: async () => {
     const permissions = await api.get_permissions();
 

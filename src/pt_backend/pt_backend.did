@@ -49,14 +49,6 @@ type EntityPermission = variant {
   Project : ProjectPermission;
   Workflow : WorkflowPermission;
 };
-type EntityPermissionsResult = record {
-  workflow : vec text;
-  user : vec text;
-  document : vec text;
-  organization : vec text;
-  revision : vec text;
-  project : vec text;
-};
 type FilterCriteria = record {
   field : FilterField;
   entity : Entity;
@@ -171,7 +163,7 @@ type Result_3 = variant { Ok : User; Err : AppError };
 type Result_4 = variant { Ok : vec Revision; Err : AppError };
 type Result_5 = variant { Ok; Err : text };
 type Result_6 = variant { Ok : Document; Err : AppError };
-type Result_7 = variant { Ok : EntityPermissionsResult; Err : AppError };
+type Result_7 = variant { Ok : vec EntityPermission; Err : AppError };
 type Result_8 = variant { Ok : vec Role; Err : AppError };
 type Result_9 = variant { Ok : vec Project; Err : AppError };
 type Revision = record {
