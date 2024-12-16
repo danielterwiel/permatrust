@@ -73,10 +73,11 @@ pub mod document_utils {
 
     pub fn update_revision(document_id: DocumentId, version: u8, revision_id: RevisionId) {
         DOCUMENTS.with(|documents| {
-            if let Some(mut document) = documents.borrow_mut().get(&document_id) {
+            let mut documents_ref = documents.borrow_mut();
+            if let Some(mut document) = documents_ref.get(&document_id) {
                 document.version = version;
                 document.revisions.push(revision_id);
-                documents.borrow_mut().insert(document_id, document);
+                documents_ref.insert(document_id, document);
             }
         });
     }

@@ -1,18 +1,34 @@
 use ic_cdk_macros::{query, update};
+use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
+use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
 use shared::types::access_control::{
     DocumentPermission, EntityPermission, OrganizationPermission, ProjectPermission,
-    RevisionPermission, Role, RoleId, RoleInput, UserPermission, WorkflowPermission,
+    RevisionPermission, Role, RoleId, RoleIdVec, RoleInput, UserPermission, WorkflowPermission,
 };
 use shared::types::errors::AppError;
 use shared::types::users::UserId;
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::sync::atomic::{AtomicU64, Ordering};
 use strum::IntoEnumIterator;
 
+type Memory = VirtualMemory<DefaultMemoryImpl>;
+
 thread_local! {
-    static ROLES: RefCell<HashMap<RoleId, Role>> = RefCell::new(HashMap::new());
-    static USER_ROLES: RefCell<HashMap<UserId, Vec<RoleId>>> = RefCell::new(HashMap::new());
+    static MEMORY_MANAGER: RefCell<MemoryManager<DefaultMemoryImpl>> =
+        RefCell::new(MemoryManager::init(DefaultMemoryImpl::default()));
+
+    static ROLES: RefCell<StableBTreeMap<RoleId, Role, Memory>> = RefCell::new(
+        StableBTreeMap::init(
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(6))),
+        )
+    );
+
+static USER_ROLES: RefCell<StableBTreeMap<UserId, RoleIdVec, Memory>> = RefCell::new(
+    StableBTreeMap::init(
+        MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(7))),
+    )
+);
+
     static NEXT_ACCESS_CONTROL_ID: AtomicU64 = AtomicU64::new(0);
 }
 
@@ -43,8 +59,9 @@ mod access_control_utils {
         USER_ROLES.with(|user_roles| {
             user_roles.borrow().get(user_id).map(|role_ids| {
                 role_ids
+                    .0 // Access the inner Vec<RoleId>
                     .iter()
-                    .filter_map(|role_id| ROLES.with(|roles| roles.borrow().get(role_id).cloned()))
+                    .filter_map(|role_id| ROLES.with(|roles| roles.borrow().get(role_id)))
                     .collect()
             })
         })
@@ -55,9 +72,11 @@ mod access_control_utils {
         permissions: Vec<EntityPermission>,
     ) -> Result<(), AppError> {
         ROLES.with(|roles| {
-            if let Some(role) = roles.borrow_mut().get_mut(&role_id) {
+            let mut roles = roles.borrow_mut();
+            if let Some(mut role) = roles.get(&role_id) {
                 role.permissions = permissions;
                 role.updated_at = Some(ic_cdk::api::time());
+                roles.insert(role_id, role);
                 Ok(())
             } else {
                 Err(AppError::EntityNotFound("Role not found".to_string()))
@@ -69,12 +88,12 @@ mod access_control_utils {
         if !ROLES.with(|roles| {
             roles
                 .borrow()
-                .keys()
-                .all(|role_id| roles.borrow().contains_key(role_id))
+                .iter()
+                .all(|(role_id, _)| roles.borrow().contains_key(&role_id))
         }) {
             return Err(AppError::EntityNotFound("Role not found".to_string()));
         }
-        USER_ROLES.with(|user_roles| user_roles.borrow_mut().insert(user, roles));
+        USER_ROLES.with(|user_roles| user_roles.borrow_mut().insert(user, RoleIdVec(roles)));
         Ok(())
     }
 
@@ -121,7 +140,6 @@ fn get_role(role_id: RoleId) -> Result<Role, AppError> {
         roles
             .borrow()
             .get(&role_id)
-            .cloned()
             .ok_or(AppError::EntityNotFound("Role not found".to_string()))
     })
 }
@@ -176,9 +194,9 @@ fn get_project_roles(project_id: u32) -> Result<Vec<Role>, AppError> {
     let roles = ROLES.with(|roles| {
         roles
             .borrow()
-            .values()
-            .filter(|role| role.project_id == project_id)
-            .cloned()
+            .iter()
+            .filter(|(_, role)| role.project_id == project_id)
+            .map(|(_, role)| role.clone())
             .collect()
     });
     Ok(roles)
