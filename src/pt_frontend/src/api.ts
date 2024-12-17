@@ -1,25 +1,33 @@
-import { createActor } from '@/declarations/pt_backend/index';
-import { type ActorSubclass, HttpAgent } from '@dfinity/agent';
+import { createActor } from "@/declarations/pt_backend/index";
+import { type ActorSubclass, HttpAgent } from "@dfinity/agent";
 
-import { isAppError } from '@/utils/isAppError';
+import { isAppError } from "@/utils/isAppError";
 
-import type { _SERVICE } from '@/declarations/pt_backend/pt_backend.did.d';
-import type {
-  CreateActorFn,
-  Result,
-  ResultHandler,
-  WrappedActor,
-} from '@/types/api';
-import type { AuthClient } from '@dfinity/auth-client';
+import type { _SERVICE } from "@/declarations/pt_backend/pt_backend.did";
+import type { CreateActorFn, Result, ResultHandler } from "@/types/api";
+import type { AuthClient } from "@dfinity/auth-client";
 
-export let api = {} as WrappedActor<_SERVICE>;
+const HOST = import.meta.env.PROD ? "https://icp0.io" : "http://localhost:4943";
+
+type ActorWithIndex = ActorSubclass<_SERVICE> & {
+  [key: string]: unknown;
+};
+type WrappedActorWithIndex = {
+  [K in keyof ActorWithIndex]: ActorWithIndex[K] extends (
+    ...args: infer A
+  ) => Promise<Result<infer T>>
+    ? (...args: [...A, ResultHandler<T>?]) => Promise<T>
+    : ActorWithIndex[K];
+};
+
+export let api = {} as WrappedActorWithIndex;
 
 export async function createAuthenticatedActorWrapper(
   canisterId: string,
-  authClient?: AuthClient,
-): Promise<WrappedActor<_SERVICE>> {
+  authClient: AuthClient,
+): Promise<WrappedActorWithIndex> {
   if (!authClient) {
-    throw new Error('AuthClient not set');
+    throw new Error("AuthClient not set");
   }
 
   const actor = await createAuthenticatedActor(
@@ -27,17 +35,17 @@ export async function createAuthenticatedActorWrapper(
     createActor,
     authClient,
   );
-  const callWithAuth = await wrapWithAuth(actor, authClient);
-  const wrappedCall = wrapActor(callWithAuth);
-  api = wrappedCall;
-  return wrappedCall;
+
+  const wrappedActor = wrapActor(await wrapWithAuth(actor, authClient));
+  api = wrappedActor;
+  return wrappedActor;
 }
 
 export function handleResult<T>(
   result: Result<T>,
   handlers: ResultHandler<T> = {},
 ): T {
-  if ('Ok' in result) {
+  if ("Ok" in result) {
     handlers.onOk?.(result.Ok);
     return result.Ok;
   }
@@ -47,83 +55,74 @@ export function handleResult<T>(
     throw new Error(JSON.stringify(result.Err));
   }
 
-  // This should never happen if types are correct, but TypeScript needs it
-  throw new Error('Unknown error occurred');
+  throw new Error("Unknown error occurred");
 }
 
-// Function to create an authenticated actor
 async function createAuthenticatedActor(
   canisterId: string,
   createActor: CreateActorFn,
   authClient: AuthClient,
-): Promise<ActorSubclass<_SERVICE>> {
-  const agent = await createAuthenticatedAgent(authClient);
-  return createActor(canisterId, { agent }) as ActorSubclass<_SERVICE>;
-}
+): Promise<ActorWithIndex> {
+  const agent = new HttpAgent({
+    host: HOST,
+    identity: authClient.getIdentity(),
+  });
 
-async function createAuthenticatedAgent(
-  authClient: AuthClient,
-): Promise<HttpAgent> {
-  const identity = authClient.getIdentity();
-  const agent = new HttpAgent({ identity });
-
-  if (process.env.DFX_NETWORK !== 'ic') {
-    await agent.fetchRootKey();
+  if (!import.meta.env.PROD) {
+    await agent.fetchRootKey().catch(() => {
+      throw new Error("Failed to fetch root key");
+    });
   }
 
-  return agent;
+  return createActor(canisterId, { agent }) as unknown as ActorWithIndex;
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: TODO: type
-function wrapActor<T extends Record<string, any>>(actor: T): WrappedActor<T> {
-  const wrappedActor: Partial<WrappedActor<T>> = {};
+function wrapActor<T extends ActorWithIndex>(actor: T): WrappedActorWithIndex {
+  const wrappedActor: Partial<WrappedActorWithIndex> = {};
 
   for (const key in actor) {
     const method = actor[key];
 
-    if (typeof method === 'function') {
-      // biome-ignore lint/suspicious/noExplicitAny: TODO: type
-      wrappedActor[key] = (async (...args: any[]) => {
-        // biome-ignore lint/suspicious/noExplicitAny: TODO: type
-        let handlers: ResultHandler<any> | undefined;
+    if (typeof method === "function") {
+      wrappedActor[key] = (async (...args: unknown[]) => {
+        let handlers: ResultHandler<unknown> | undefined;
         const lastArg = args[args.length - 1];
+
         if (
           lastArg &&
-          typeof lastArg === 'object' &&
-          ('onOk' in lastArg || 'onErr' in lastArg)
+          typeof lastArg === "object" &&
+          ("onOk" in lastArg || "onErr" in lastArg)
         ) {
-          handlers = args.pop();
+          handlers = args.pop() as ResultHandler<unknown>;
         }
 
-        const result = await method(...args);
+        const result = await method.apply(actor, args);
         return handleResult(result, handlers);
-      }) as WrappedActor<T>[typeof key];
+      }) as WrappedActorWithIndex[typeof key];
     } else {
       wrappedActor[key] = method;
     }
   }
 
-  return wrappedActor as WrappedActor<T>;
+  return wrappedActor as WrappedActorWithIndex;
 }
 
-// Function to wrap an actor with authentication checks
-async function wrapWithAuth<T extends ActorSubclass<_SERVICE>>(
+async function wrapWithAuth<T extends ActorWithIndex>(
   actor: T,
   authClient: AuthClient,
 ): Promise<T> {
   return new Proxy(actor, {
     get(target, prop, receiver) {
       const original = Reflect.get(target, prop, receiver);
-      if (typeof original === 'function') {
-        // biome-ignore lint/suspicious/noExplicitAny: TODO: type
-        return async (...args: any[]) => {
+      if (typeof original === "function") {
+        return async (...args: unknown[]) => {
           if (!(await authClient.isAuthenticated())) {
-            throw new Error('User is not authenticated');
+            throw new Error("User is not authenticated");
           }
           return original.apply(target, args);
         };
       }
       return original;
     },
-  }) as T;
+  });
 }

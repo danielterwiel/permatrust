@@ -58,7 +58,7 @@ import { Route as appRevisionsRevisionDetailsImport } from './routes/app/revisio
 
 // Create Virtual Routes
 
-const Import = createFileRoute(
+const InitializedAuthenticatedOnboardingOnboardingImport = createFileRoute(
   '/_initialized/_authenticated/_onboarding/onboarding',
 )()
 
@@ -102,11 +102,12 @@ const layoutsOnboardedRoute = layoutsOnboardedImport.update({
   getParentRoute: () => layoutsAuthenticatedRoute,
 } as any)
 
-const Route = Import.update({
-  id: '/onboarding',
-  path: '/onboarding',
-  getParentRoute: () => layoutsOnboardingRoute,
-} as any)
+const InitializedAuthenticatedOnboardingOnboardingRoute =
+  InitializedAuthenticatedOnboardingOnboardingImport.update({
+    id: '/onboarding',
+    path: '/onboarding',
+    getParentRoute: () => layoutsOnboardingRoute,
+  } as any)
 
 const appWorkflowsWorkflowsIndexRoute = appWorkflowsWorkflowsIndexImport.update(
   {
@@ -197,7 +198,7 @@ const appOnboardingOnboardingIndexRoute =
   appOnboardingOnboardingIndexImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => Route,
+    getParentRoute: () => InitializedAuthenticatedOnboardingOnboardingRoute,
   } as any)
 
 const appWorkflowsWorkflowsListRoute = appWorkflowsWorkflowsListImport.update({
@@ -228,14 +229,14 @@ const appOrganizationsOrganizationsListRoute =
 const appOnboardingUserCreateRoute = appOnboardingUserCreateImport.update({
   id: '/user/create',
   path: '/user/create',
-  getParentRoute: () => Route,
+  getParentRoute: () => InitializedAuthenticatedOnboardingOnboardingRoute,
 } as any)
 
 const appOnboardingOrganizationCreateRoute =
   appOnboardingOrganizationCreateImport.update({
     id: '/organization/create',
     path: '/organization/create',
-    getParentRoute: () => Route,
+    getParentRoute: () => InitializedAuthenticatedOnboardingOnboardingRoute,
   } as any)
 
 const appRolesRolesIndexRoute = appRolesRolesIndexImport.update({
@@ -433,7 +434,7 @@ declare module '@tanstack/react-router' {
       id: '/_initialized/_authenticated/_onboarding/onboarding'
       path: '/onboarding'
       fullPath: '/onboarding'
-      preLoaderRoute: typeof Import
+      preLoaderRoute: typeof InitializedAuthenticatedOnboardingOnboardingImport
       parentRoute: typeof layoutsOnboardingImport
     }
     '/_initialized/_authenticated/_onboarded/organizations/': {
@@ -469,7 +470,7 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/onboarding/'
       preLoaderRoute: typeof appOnboardingOnboardingIndexImport
-      parentRoute: typeof rootRoute
+      parentRoute: typeof InitializedAuthenticatedOnboardingOnboardingImport
     }
     '/_initialized/_authenticated/_onboarded/organizations/$organizationId': {
       id: '/_initialized/_authenticated/_onboarded/organizations/$organizationId'
@@ -567,14 +568,14 @@ declare module '@tanstack/react-router' {
       path: '/organization/create'
       fullPath: '/onboarding/organization/create'
       preLoaderRoute: typeof appOnboardingOrganizationCreateImport
-      parentRoute: typeof rootRoute
+      parentRoute: typeof InitializedAuthenticatedOnboardingOnboardingImport
     }
     '/_initialized/_authenticated/_onboarding/onboarding/user/create': {
       id: '/_initialized/_authenticated/_onboarding/onboarding/user/create'
       path: '/user/create'
       fullPath: '/onboarding/user/create'
       preLoaderRoute: typeof appOnboardingUserCreateImport
-      parentRoute: typeof rootRoute
+      parentRoute: typeof InitializedAuthenticatedOnboardingOnboardingImport
     }
     '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/': {
       id: '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/'
@@ -858,26 +859,31 @@ const layoutsOnboardedRouteChildren: layoutsOnboardedRouteChildren = {
 const layoutsOnboardedRouteWithChildren =
   layoutsOnboardedRoute._addFileChildren(layoutsOnboardedRouteChildren)
 
-interface RouteChildren {
+interface InitializedAuthenticatedOnboardingOnboardingRouteChildren {
   appOnboardingOnboardingIndexRoute: typeof appOnboardingOnboardingIndexRoute
   appOnboardingOrganizationCreateRoute: typeof appOnboardingOrganizationCreateRoute
   appOnboardingUserCreateRoute: typeof appOnboardingUserCreateRoute
 }
 
-const RouteChildren: RouteChildren = {
-  appOnboardingOnboardingIndexRoute: appOnboardingOnboardingIndexRoute,
-  appOnboardingOrganizationCreateRoute: appOnboardingOrganizationCreateRoute,
-  appOnboardingUserCreateRoute: appOnboardingUserCreateRoute,
-}
+const InitializedAuthenticatedOnboardingOnboardingRouteChildren: InitializedAuthenticatedOnboardingOnboardingRouteChildren =
+  {
+    appOnboardingOnboardingIndexRoute: appOnboardingOnboardingIndexRoute,
+    appOnboardingOrganizationCreateRoute: appOnboardingOrganizationCreateRoute,
+    appOnboardingUserCreateRoute: appOnboardingUserCreateRoute,
+  }
 
-const RouteWithChildren = Route._addFileChildren(RouteChildren)
+const InitializedAuthenticatedOnboardingOnboardingRouteWithChildren =
+  InitializedAuthenticatedOnboardingOnboardingRoute._addFileChildren(
+    InitializedAuthenticatedOnboardingOnboardingRouteChildren,
+  )
 
 interface layoutsOnboardingRouteChildren {
-  Route: typeof RouteWithChildren
+  InitializedAuthenticatedOnboardingOnboardingRoute: typeof InitializedAuthenticatedOnboardingOnboardingRouteWithChildren
 }
 
 const layoutsOnboardingRouteChildren: layoutsOnboardingRouteChildren = {
-  Route: RouteWithChildren,
+  InitializedAuthenticatedOnboardingOnboardingRoute:
+    InitializedAuthenticatedOnboardingOnboardingRouteWithChildren,
 }
 
 const layoutsOnboardingRouteWithChildren =
@@ -921,7 +927,7 @@ export interface FileRoutesByFullPath {
   '/projects': typeof appProjectsProjectsIndexRouteWithChildren
   '/users': typeof appUsersUsersIndexRouteWithChildren
   '/workflows': typeof appWorkflowsWorkflowsIndexRouteWithChildren
-  '/onboarding': typeof RouteWithChildren
+  '/onboarding': typeof InitializedAuthenticatedOnboardingOnboardingRouteWithChildren
   '/organizations/': typeof appOrganizationsOrganizationsListRoute
   '/projects/': typeof appProjectsProjectsListRoute
   '/users/': typeof appUsersUsersListRoute
@@ -1000,7 +1006,7 @@ export interface FileRoutesById {
   '/_initialized/_authenticated/_onboarded/projects': typeof appProjectsProjectsIndexRouteWithChildren
   '/_initialized/_authenticated/_onboarded/users': typeof appUsersUsersIndexRouteWithChildren
   '/_initialized/_authenticated/_onboarded/workflows': typeof appWorkflowsWorkflowsIndexRouteWithChildren
-  '/_initialized/_authenticated/_onboarding/onboarding': typeof RouteWithChildren
+  '/_initialized/_authenticated/_onboarding/onboarding': typeof InitializedAuthenticatedOnboardingOnboardingRouteWithChildren
   '/_initialized/_authenticated/_onboarded/organizations/': typeof appOrganizationsOrganizationsListRoute
   '/_initialized/_authenticated/_onboarded/projects/': typeof appProjectsProjectsListRoute
   '/_initialized/_authenticated/_onboarded/users/': typeof appUsersUsersListRoute

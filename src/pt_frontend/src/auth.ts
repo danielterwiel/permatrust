@@ -1,10 +1,4 @@
-import { AuthClient, IdbStorage } from '@dfinity/auth-client';
-
-import { createAuthenticatedActorWrapper } from '@/api';
-
-import { CANISTER_ID_PT_BACKEND } from '@/consts/canisters';
-
-const TIMEOUT_MINS = 30;
+import { AuthClient } from "@dfinity/auth-client";
 
 export class Auth {
   private static instance: Auth | undefined = undefined;
@@ -19,22 +13,7 @@ export class Auth {
 
   public async initializeClient(): Promise<AuthClient> {
     if (!this.authClient) {
-      this.authClient = await AuthClient.create({
-        idleOptions: {
-          disableDefaultIdleCallback: false, // TODO: implement true
-          idleTimeout: TIMEOUT_MINS * 60 * 1000,
-        },
-        keyType: 'Ed25519',
-        storage: new IdbStorage(),
-      });
-
-      const isAuthenticated = await this.authClient.isAuthenticated();
-      if (isAuthenticated) {
-        await createAuthenticatedActorWrapper(
-          CANISTER_ID_PT_BACKEND,
-          this.authClient,
-        );
-      }
+      this.authClient = await AuthClient.create();
     }
     return this.authClient;
   }
@@ -46,21 +25,16 @@ export class Auth {
 
   public async login(): Promise<boolean> {
     const authClient = await this.initializeClient();
-    if (!CANISTER_ID_PT_BACKEND) {
-      throw new Error('Canister ID not set');
-    }
 
     const identityProvider = import.meta.env.DEV
       ? `http://${process.env.CANISTER_ID_INTERNET_IDENTITY}.localhost:4943`
-      : 'https://identity.ic0.app';
+      : "https://identity.ic0.app";
 
     return new Promise<boolean>((resolve, reject) => {
       authClient.login({
         identityProvider,
-        maxTimeToLive: BigInt(1 * 3600 * 1e9), // 1 hour in nanoseconds
-        onError: (err) => {
-          return reject(err);
-        },
+        maxTimeToLive: BigInt(7 * 24 * 60 * 60 * 1000 * 1000 * 1000), // 7 days in nanoseconds
+        onError: (err) => reject(err),
         onSuccess: () => resolve(true),
       });
     });

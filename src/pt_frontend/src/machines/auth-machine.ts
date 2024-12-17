@@ -39,23 +39,37 @@ const authMachine = setup({
       try {
         const auth = Auth.getInstance();
         const client = await auth.initializeClient();
-        const isAuthenticated = await client?.isAuthenticated();
+
+        const isAuthenticated = await client.isAuthenticated();
+
         if (!isAuthenticated) {
           await auth.login();
+
+          const verifyAuth = await client.isAuthenticated();
+          if (!verifyAuth) {
+            throw new Error('Authentication failed after login attempt');
+          }
         }
-        await createAuthenticatedActorWrapper(CANISTER_ID_PT_BACKEND, client);
-        return { success: true };
+
+        const actor = await createAuthenticatedActorWrapper(
+          CANISTER_ID_PT_BACKEND,
+          client,
+        );
+
+        return { actor, success: true };
       } catch (error) {
-        if (typeof error === 'string') {
-          throw new Error(error);
-        }
-        throw new Error('Unknown error');
+        const errorMessage =
+          error instanceof Error
+            ? error.message
+            : 'Unknown authentication error';
+        throw new Error(errorMessage);
       }
     }),
 
     get_user: fromPromise(async () => {
       try {
         const userResult = await api.get_user();
+
         if (!userResult) {
           throw new Error('User not found');
         }
@@ -71,10 +85,24 @@ const authMachine = setup({
     }),
 
     initialize_auth: fromPromise(async () => {
-      const auth = Auth.getInstance();
-      const client = await auth.initializeClient();
-      const isAuthenticated = await client?.isAuthenticated();
-      return { isAuthenticated };
+      try {
+        const auth = Auth.getInstance();
+        const client = await auth.initializeClient();
+
+        if (!client) {
+          throw new Error('Failed to initialize auth client');
+        }
+
+        const isAuthenticated = await client.isAuthenticated();
+
+        if (isAuthenticated) {
+          await createAuthenticatedActorWrapper(CANISTER_ID_PT_BACKEND, client);
+        }
+
+        return { client, isAuthenticated };
+      } catch (_error) {
+        throw new Error('Auth initialization failed');
+      }
     }),
 
     list_organizations: fromPromise(async () => {
@@ -104,7 +132,6 @@ const authMachine = setup({
   id: 'authMachine',
   initial: 'initializing',
   states: {
-    // TODO: handle error
     error: {},
 
     initialized: {
@@ -163,6 +190,7 @@ const authMachine = setup({
                       },
                     ],
                     onError: {
+                      entry: log('TODO: ONBOARDING_ERROR check_organizations'),
                       target: 'onboarding_error',
                     },
                     src: 'list_organizations',
@@ -190,6 +218,7 @@ const authMachine = setup({
                       },
                     ],
                     onError: {
+                      entry: log('TODO: ONBOARDING_ERROR check_user'),
                       target: 'onboarding_error',
                     },
                     src: 'get_user',

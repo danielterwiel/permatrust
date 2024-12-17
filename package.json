@@ -20,6 +20,5 @@
 		"lint": "npm run lint --workspaces --if-present"
 	},
 	"type": "module",
-	"workspaces": ["src/pt_frontend"],
-	"devDependencies": {}
+	"workspaces": ["src/pt_frontend"]
 }
