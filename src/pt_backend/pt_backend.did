@@ -41,14 +41,6 @@ type Entity = variant {
   Project;
   Workflow;
 };
-type EntityPermission = variant {
-  User : UserPermission;
-  Document : DocumentPermission;
-  Organization : OrganizationPermission;
-  Revision : RevisionPermission;
-  Project : ProjectPermission;
-  Workflow : WorkflowPermission;
-};
 type FilterCriteria = record {
   field : FilterField;
   entity : Entity;
@@ -97,6 +89,14 @@ type PaginationMetadata = record {
   has_previous_page : bool;
   has_next_page : bool;
   page_number : nat8;
+};
+type Permission = variant {
+  User : UserPermission;
+  Document : DocumentPermission;
+  Organization : OrganizationPermission;
+  Revision : RevisionPermission;
+  Project : ProjectPermission;
+  Workflow : WorkflowPermission;
 };
 type Project = record {
   id : nat32;
@@ -163,7 +163,7 @@ type Result_3 = variant { Ok : User; Err : AppError };
 type Result_4 = variant { Ok : vec Revision; Err : AppError };
 type Result_5 = variant { Ok; Err : text };
 type Result_6 = variant { Ok : Document; Err : AppError };
-type Result_7 = variant { Ok : vec EntityPermission; Err : AppError };
+type Result_7 = variant { Ok : vec Permission; Err : AppError };
 type Result_8 = variant { Ok : vec Role; Err : AppError };
 type Result_9 = variant { Ok : vec Project; Err : AppError };
 type Revision = record {
@@ -191,7 +191,7 @@ type RevisionPermission = variant {
 };
 type Role = record {
   id : nat64;
-  permissions : vec EntityPermission;
+  permissions : vec Permission;
   updated_at : opt nat64;
   name : text;
   description : opt text;
@@ -199,7 +199,7 @@ type Role = record {
   project_id : nat32;
 };
 type RoleInput = record {
-  permissions : vec EntityPermission;
+  permissions : vec Permission;
   name : text;
   description : opt text;
   project_id : nat32;
@@ -264,7 +264,7 @@ service : () -> {
   get_revision : (nat64) -> (Result_10) query;
   get_role : (nat64) -> (Result_11) query;
   get_user : () -> (Result_3) query;
-  get_user_permissions : (nat64) -> (opt vec EntityPermission) query;
+  get_user_permissions : (nat64) -> (opt vec Permission) query;
   get_user_roles : (nat64) -> (Result_8) query;
   get_workflow : (nat32) -> (Result_12) query;
   get_workflow_definition : (nat32) -> (Result_13) query;
@@ -280,5 +280,5 @@ service : () -> {
   list_revisions_by_document_id : (nat64, PaginationInput) -> (Result_18) query;
   list_users : (PaginationInput) -> (Result_19) query;
   list_workflows : (PaginationInput) -> (Result_20) query;
-  update_role_permissions : (nat64, vec EntityPermission) -> (Result);
+  update_role_permissions : (nat64, vec Permission) -> (Result);
 }

@@ -1,11 +1,11 @@
 import { entityPermissionSchema } from '@/schemas/permissions';
 
-import type { EntityPermission } from '@/declarations/pt_backend/pt_backend.did';
+import type { Permission } from '@/declarations/pt_backend/pt_backend.did';
 
-export function createEntityPermissionVariant(
+export function createPermissionVariant(
   entity: string,
   permission: string,
-): EntityPermission {
+): Permission {
   const variantToValidate = {
     [entity]: {
       [permission]: null,
@@ -20,5 +20,5 @@ export function createEntityPermissionVariant(
     );
   }
 
-  return variantToValidate as EntityPermission;
+  return variantToValidate as Permission;
 }

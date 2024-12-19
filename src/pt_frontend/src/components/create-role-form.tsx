@@ -22,10 +22,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
-import { createEntityPermissionVariant } from '@/utils/variants/permissions';
+import { createPermissionVariant } from '@/utils/variants/permissions';
 
 import type {
-  EntityPermission,
+  Permission,
   Project,
 } from '@/declarations/pt_backend/pt_backend.did';
 
@@ -37,7 +37,7 @@ export const createRoleFormSchema = z.object({
 });
 
 type CreateRoleFormProps = {
-  permissions: EntityPermission[];
+  permissions: Permission[];
 };
 
 type FormValues = {
@@ -82,10 +82,7 @@ export function CreateRoleForm({ permissions }: CreateRoleFormProps) {
           throw new Error('Entity not found');
         }
         const entity = capitalizeFirstLetter(entityName);
-        const entityPermission = createEntityPermissionVariant(
-          entity,
-          permission,
-        );
+        const entityPermission = createPermissionVariant(entity, permission);
         return entityPermission;
       });
       try {

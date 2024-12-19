@@ -86,7 +86,7 @@ pub enum WorkflowPermission {
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
-pub enum EntityPermission {
+pub enum Permission {
     User(UserPermission),
     Document(DocumentPermission),
     Revision(RevisionPermission),
@@ -96,7 +96,7 @@ pub enum EntityPermission {
 }
 
 #[derive(CandidType, Deserialize)]
-pub struct EntityPermissionsResult {
+pub struct PermissionsResult {
     pub user: Vec<String>,
     pub document: Vec<String>,
     pub revision: Vec<String>,
@@ -109,14 +109,14 @@ pub struct EntityPermissionsResult {
 pub struct RoleInput {
     pub name: String,
     pub description: Option<String>,
-    pub permissions: Vec<EntityPermission>,
+    pub permissions: Vec<Permission>,
     pub project_id: ProjectId,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug, PartialEq)]
 pub struct Role {
     pub id: RoleId,
-    pub permissions: Vec<EntityPermission>,
+    pub permissions: Vec<Permission>,
     pub project_id: ProjectId,
     pub name: String,
     pub description: Option<String>,

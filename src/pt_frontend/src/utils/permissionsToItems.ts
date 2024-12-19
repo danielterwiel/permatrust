@@ -1,8 +1,8 @@
 import { capitalizeFirstLetter, pascalToHumanReadable } from '@/utils';
 
-import type { EntityPermission } from '@/declarations/pt_backend/pt_backend.did';
+import type { Permission } from '@/declarations/pt_backend/pt_backend.did';
 
-export const permissionsToItems = (permissions: EntityPermission[]) => {
+export const permissionsToItems = (permissions: Permission[]) => {
   return Object.entries(permissions).flatMap(([_, entityPermission]) => {
     const [entityVariant] = Object.entries(entityPermission);
 

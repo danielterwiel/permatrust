@@ -2,8 +2,8 @@ use ic_cdk_macros::{query, update};
 use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
 use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
 use shared::types::access_control::{
-    DocumentPermission, EntityPermission, OrganizationPermission, ProjectPermission,
-    RevisionPermission, Role, RoleId, RoleIdVec, RoleInput, UserPermission, WorkflowPermission,
+    DocumentPermission, OrganizationPermission, Permission, ProjectPermission, RevisionPermission,
+    Role, RoleId, RoleIdVec, RoleInput, UserPermission, WorkflowPermission,
 };
 use shared::types::errors::AppError;
 use shared::types::users::UserId;
@@ -69,7 +69,7 @@ mod access_control_utils {
 
     pub fn update_role_permissions_internal(
         role_id: RoleId,
-        permissions: Vec<EntityPermission>,
+        permissions: Vec<Permission>,
     ) -> Result<(), AppError> {
         ROLES.with(|roles| {
             let mut roles = roles.borrow_mut();
@@ -99,17 +99,17 @@ mod access_control_utils {
 
     pub fn initialize_default_roles() -> Result<(), AppError> {
         let admin_permissions = vec![
-            EntityPermission::User(UserPermission::Read),
-            EntityPermission::User(UserPermission::Update),
-            EntityPermission::User(UserPermission::Delete),
-            EntityPermission::User(UserPermission::Invite),
-            EntityPermission::User(UserPermission::ChangeRole),
+            Permission::User(UserPermission::Read),
+            Permission::User(UserPermission::Update),
+            Permission::User(UserPermission::Delete),
+            Permission::User(UserPermission::Invite),
+            Permission::User(UserPermission::ChangeRole),
         ];
         let editor_permissions = vec![
-            EntityPermission::Document(DocumentPermission::Read),
-            EntityPermission::Document(DocumentPermission::Create),
-            EntityPermission::Document(DocumentPermission::Update),
-            EntityPermission::Document(DocumentPermission::Comment),
+            Permission::Document(DocumentPermission::Read),
+            Permission::Document(DocumentPermission::Create),
+            Permission::Document(DocumentPermission::Update),
+            Permission::Document(DocumentPermission::Comment),
         ];
 
         create_role_internal(RoleInput {
@@ -145,28 +145,26 @@ fn get_role(role_id: RoleId) -> Result<Role, AppError> {
 }
 
 #[query]
-fn get_permissions() -> Result<Vec<EntityPermission>, AppError> {
-    let user_permissions: Vec<EntityPermission> =
-        UserPermission::iter().map(EntityPermission::User).collect();
+fn get_permissions() -> Result<Vec<Permission>, AppError> {
+    let user_permissions: Vec<Permission> = UserPermission::iter().map(Permission::User).collect();
 
-    let document_permissions: Vec<EntityPermission> = DocumentPermission::iter()
-        .map(EntityPermission::Document)
+    let document_permissions: Vec<Permission> = DocumentPermission::iter()
+        .map(Permission::Document)
         .collect();
 
-    let revision_permissions: Vec<EntityPermission> = RevisionPermission::iter()
-        .map(EntityPermission::Revision)
+    let revision_permissions: Vec<Permission> = RevisionPermission::iter()
+        .map(Permission::Revision)
         .collect();
 
-    let organization_permissions: Vec<EntityPermission> = OrganizationPermission::iter()
-        .map(EntityPermission::Organization)
+    let organization_permissions: Vec<Permission> = OrganizationPermission::iter()
+        .map(Permission::Organization)
         .collect();
 
-    let project_permissions: Vec<EntityPermission> = ProjectPermission::iter()
-        .map(EntityPermission::Project)
-        .collect();
+    let project_permissions: Vec<Permission> =
+        ProjectPermission::iter().map(Permission::Project).collect();
 
-    let workflow_permissions: Vec<EntityPermission> = WorkflowPermission::iter()
-        .map(EntityPermission::Workflow)
+    let workflow_permissions: Vec<Permission> = WorkflowPermission::iter()
+        .map(Permission::Workflow)
         .collect();
 
     let all_permissions = user_permissions
@@ -213,15 +211,12 @@ fn assign_roles(user: UserId, role_ids: Vec<RoleId>) -> Result<(), AppError> {
 }
 
 #[update]
-fn update_role_permissions(
-    role_id: RoleId,
-    permissions: Vec<EntityPermission>,
-) -> Result<(), AppError> {
+fn update_role_permissions(role_id: RoleId, permissions: Vec<Permission>) -> Result<(), AppError> {
     access_control_utils::update_role_permissions_internal(role_id, permissions)
 }
 
 #[query]
-fn get_user_permissions(user: UserId) -> Option<Vec<EntityPermission>> {
+fn get_user_permissions(user: UserId) -> Option<Vec<Permission>> {
     access_control_utils::get_user_roles_internal(&user).map(|roles| {
         roles
             .iter()

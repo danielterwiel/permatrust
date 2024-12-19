@@ -1,4 +1,4 @@
-use crate::types::access_control::{EntityPermission, Role, RoleId, RoleIdVec};
+use crate::types::access_control::{Permission, Role, RoleId, RoleIdVec};
 use candid::{Decode, Encode};
 use ic_stable_structures::storable::Bound;
 use ic_stable_structures::Storable;
@@ -21,7 +21,7 @@ impl Storable for RoleIdVec {
     };
 }
 
-impl Storable for EntityPermission {
+impl Storable for Permission {
     fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
         Cow::Owned(Encode!(self).unwrap())
     }
