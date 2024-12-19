@@ -8,7 +8,6 @@ import {
   type createUserFormSchema,
 } from '@/components/create-user-form';
 
-import type { CreateUserInput } from '@/declarations/pt_backend/pt_backend.did';
 import type { z } from 'zod';
 
 export const Route = createFileRoute(
@@ -32,12 +31,11 @@ function CreateUser() {
   async function onSubmit(values: z.infer<typeof createUserFormSchema>) {
     try {
       setIsSubmitting(true);
-      const input = {
-        first_name: values.first_name,
-        last_name: values.last_name,
-      } satisfies CreateUserInput;
-
-      const user = await api.create_user(input);
+      const user = await api.create_user(
+        values.first_name,
+        values.last_name,
+        [],
+      );
       authActor.send({
         type: 'UPDATE_USER',
         user,

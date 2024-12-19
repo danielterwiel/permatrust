@@ -1,5 +1,6 @@
-use crate::types::users::User;
-use candid::{Decode, Encode};
+use crate::types::organizations::OrganizationId;
+use crate::types::users::{User, UserId};
+use candid::{Decode, Encode, Principal};
 use ic_stable_structures::storable::Bound;
 use ic_stable_structures::Storable;
 use std::borrow::Cow;
@@ -19,4 +20,24 @@ impl Storable for User {
         max_size: MAX_VALUE_SIZE,
         is_fixed_size: false,
     };
+}
+
+impl User {
+    pub fn new(
+        id: UserId,
+        principal: Principal,
+        first_name: String,
+        last_name: String,
+        organizations: Option<Vec<OrganizationId>>,
+    ) -> Self {
+        let principals = vec![principal];
+        let organizations = organizations.unwrap_or_default();
+        Self {
+            id,
+            first_name,
+            last_name,
+            organizations,
+            principals,
+        }
+    }
 }

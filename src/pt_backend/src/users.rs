@@ -2,13 +2,13 @@ use candid::Principal;
 use ic_cdk_macros::{query, update};
 use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
 use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
+use shared::types::organizations::OrganizationId;
 use std::cell::RefCell;
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::vec;
 
 use shared::types::errors::AppError;
 use shared::types::pagination::{PaginationInput, PaginationMetadata};
-use shared::types::users::{CreateUserInput, User, UserId};
+use shared::types::users::{User, UserId};
 
 use shared::utils::pagination::paginate;
 
@@ -34,11 +34,11 @@ pub fn get_next_user_id() -> u64 {
 }
 
 #[update]
-fn create_user(input: CreateUserInput) -> Result<User, AppError> {
-    let CreateUserInput {
-        first_name,
-        last_name,
-    } = input;
+fn create_user(
+    first_name: String,
+    last_name: String,
+    organizations: Option<Vec<OrganizationId>>,
+) -> Result<User, AppError> {
     if first_name.trim().is_empty() {
         return Err(AppError::InternalError(
             "First name cannot be empty".to_string(),
@@ -51,13 +51,8 @@ fn create_user(input: CreateUserInput) -> Result<User, AppError> {
     }
 
     let id = get_next_user_id();
-    let user = User {
-        id,
-        first_name,
-        last_name,
-        principals: vec![ic_cdk::caller()],
-        organizations: vec![],
-    };
+    let principal = ic_cdk::caller();
+    let user = User::new(id, principal, first_name, last_name, organizations);
 
     USERS.with(|users| {
         users.borrow_mut().insert(id, user.clone());
