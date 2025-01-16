@@ -20,6 +20,14 @@ npm ci
 echo "Building Rust project..."
 cargo build --release --target wasm32-unknown-unknown --package pt_backend
 
+if ! pgrep -x "dfx" > /dev/null
+then
+    echo "Starting dfx..."
+    dfx start --background
+else
+    echo "dfx is already running..."
+fi
+
 # Create .dfx/local/canisters directory structure
 mkdir -p .dfx/local/canisters/pt_frontend
 # Create canisters first
@@ -71,18 +79,25 @@ service : {
 EOL
 echo "Install candid-extractor"
 cargo install candid-extractor
+
 echo "Generating Candid definitions..."
 candid-extractor target/wasm32-unknown-unknown/release/pt_backend.wasm > src/pt_backend/pt_backend.did
+
 echo "Downloading Internet Identity candid file..."
 mkdir -p .dfx/local/canisters/internet_identity
 curl -o .dfx/local/canisters/internet_identity/internet_identity.did \
     https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did
+
 echo "Generate declarations..."
 dfx generate
+
 echo "Building all canisters..."
 dfx build
 
 echo "Building pt_frontend using Vite..."
 npm run build
+
+echo "Stopping dfx..."
+dfx stop
 
 echo "Build process completed successfully!"

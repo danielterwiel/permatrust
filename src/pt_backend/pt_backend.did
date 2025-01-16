@@ -6,6 +6,11 @@ type AppError = variant {
   Unauthorized;
   InternalError : text;
 };
+type CreateUserInput = record {
+  first_name : text;
+  last_name : text;
+  organizations : opt vec nat32;
+};
 type CreateWorkflowInput = record {
   initial_state : text;
   name : text;
@@ -250,7 +255,7 @@ service : () -> {
   create_project : (nat32, text) -> (Result_2);
   create_revision : (nat32, nat64, blob) -> (Result_1);
   create_role : (RoleInput) -> (Result_1);
-  create_user : (text, text, opt vec nat32) -> (Result_3);
+  create_user : (CreateUserInput) -> (Result_3);
   create_workflow : (CreateWorkflowInput) -> (Result_2);
   diff_revisions : (nat64, nat64) -> (Result_4) query;
   execute_workflow : (nat32, text) -> (Result_5);

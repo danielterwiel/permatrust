@@ -35,7 +35,7 @@ export const FilterInput = ({
 
   const form = useForm({
     defaultValues: {
-      [fieldName]: filterCriteria.value || '',
+      [fieldName]: filterCriteria.value,
     },
     onSubmit: async () => {
       // Form submission is prevented
@@ -45,7 +45,7 @@ export const FilterInput = ({
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       const value = form.state.values[fieldName];
-      if (value !== undefined) {
+      if (value !== '') {
         onChange?.({
           entity: filterCriteria.entity,
           field: filterCriteria.field,

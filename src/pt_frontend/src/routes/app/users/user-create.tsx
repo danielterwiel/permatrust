@@ -31,7 +31,11 @@ function CreateUser() {
   async function onSubmit(values: z.infer<typeof createUserFormSchema>) {
     try {
       setIsSubmitting(true);
-      await api.create_user(values.first_name, values.last_name, []);
+      await api.create_user({
+        first_name: values.first_name,
+        last_name: values.last_name,
+        organizations: [],
+      });
       navigate({ to: '/organizations' });
       setIsSubmitting(false);
     } catch (_error) {

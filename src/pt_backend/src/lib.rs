@@ -5,7 +5,7 @@ use shared::types::organizations::{Organization, OrganizationId, OrganizationRes
 use shared::types::pagination::{PaginationInput, PaginationMetadata};
 use shared::types::projects::{Project, ProjectId, ProjectResult};
 use shared::types::revisions::{Revision, RevisionId};
-use shared::types::users::{User, UserId};
+use shared::types::users::{CreateUserInput, User, UserId};
 use shared::types::workflows::{
     CreateWorkflowInput, EventId, PaginatedWorkflowsResult, StateId, Workflow, WorkflowGraph,
     WorkflowId,

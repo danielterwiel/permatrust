@@ -20,3 +20,10 @@ pub struct User {
     pub organizations: Vec<OrganizationId>,
     pub principals: Vec<Principal>,
 }
+
+#[derive(CandidType, Deserialize, Clone, Debug)]
+pub struct CreateUserInput {
+    pub first_name: String,
+    pub last_name: String,
+    pub organizations: Option<Vec<OrganizationId>>,
+}
