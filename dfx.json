@@ -3,16 +3,24 @@
     "pt_backend": {
       "type": "rust",
       "package": "pt_backend",
-      "candid": "src/candid/pt_backend.did",
+      "candid": "src/pt_backend/pt_backend.did",
       "declarations": {
         "output": "src/declarations/pt_backend",
-        "bindings": ["ts", "js", "did"]
+        "bindings": [
+          "ts",
+          "js",
+          "did"
+        ]
       }
     },
     "pt_frontend": {
       "type": "assets",
-      "source": ["src/pt_frontend/dist"],
-      "dependencies": ["pt_backend"]
+      "source": [
+        "src/pt_frontend/dist"
+      ],
+      "dependencies": [
+        "pt_backend"
+      ]
     },
     "internet_identity": {
       "type": "custom",
@@ -24,6 +32,15 @@
         }
       },
       "frontend": {}
+    }
+  },
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:8080",
+      "type": "ephemeral",
+      "replica": {
+        "subnet_type": "system"
+      }
     }
   },
   "http": {

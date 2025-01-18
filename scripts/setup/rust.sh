@@ -10,5 +10,5 @@ fi
 # Add wasm target
 rustup target add wasm32-unknown-unknown
 
-# Install candid-extractor
+# Install candid-extractor: for candid declarations/ generation
 cargo install candid-extractor

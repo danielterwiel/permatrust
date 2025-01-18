@@ -1,19 +1,26 @@
 #!/bin/bash
 set -e
 
+# Check if WASM file exists
+WASM_FILE="target/wasm32-unknown-unknown/release/pt_backend.wasm"
+if [ ! -f "$WASM_FILE" ]; then
+    echo "WASM file not found. Building project..."
+    cargo build --target wasm32-unknown-unknown --release
+fi
+
 # Ensure directories exist
-mkdir -p src/candid
-mkdir -p src/declarations
+mkdir -p src/declarations/pt_backend
 
 # Generate Candid from Rust WASM
-candid-extractor target/wasm32-unknown-unknown/release/pt_backend.wasm > src/candid/pt_backend.did
+echo "Generating Candid interface from WASM..."
+candid-extractor "$WASM_FILE" > src/pt_backend/pt_backend.did
 
 # Download Internet Identity declarations
+echo "Downloading Internet Identity declarations..."
 ./scripts/candid/download-ii.sh
 
 # Generate TypeScript declarations
+echo "Generating TypeScript bindings..."
 dfx generate
 
-# Create symbolic links for compatibility
-mkdir -p src/pt_backend
-ln -sf src/candid/pt_backend.did src/pt_backend/pt_backend.did
+echo "Generation complete!"

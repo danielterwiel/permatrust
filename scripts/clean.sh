@@ -11,7 +11,6 @@ cargo clean
 rm -rf .dfx
 rm -rf src/declarations
 rm -rf src/pt_frontend/dist
-rm -rf src/candid/*.did
 
 # Clean node modules (optional)
 # rm -rf node_modules
