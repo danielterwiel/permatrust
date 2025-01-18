@@ -1,25 +1,21 @@
 {
-  "engines": {
-    "node": ">=16.0.0",
-    "npm": ">=7.0.0"
-  },
-  "name": "pt",
-  "scripts": {
-    "build:clean": "./scripts/build.sh",
-    "build": "npm run build --workspaces --if-present",
-    "build:all": "./scripts/build.sh",
-    "build:icons": "npm run build:icons --workspaces --if-present",
-    "add:icons": "npm run add:icons --workspaces --if-present",
-    "add:components": "npm run add:components --workspaces --if-present",
-    "pretest": "npm run prebuild --workspaces --if-present",
-    "start": "npm start --workspaces --if-present",
-    "typecheck": "npm run typecheck --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present",
-    "format": "npm run format --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present"
-  },
-  "type": "module",
-  "workspaces": [
-    "src/pt_frontend"
-  ]
+	"engines": {
+		"node": ">=16.0.0",
+		"npm": ">=7.0.0"
+	},
+	"name": "pt",
+	"scripts": {
+		"build": "npm run build --workspaces --if-present",
+		"build:icons": "npm run build:icons --workspaces --if-present",
+		"add:icons": "npm run add:icons --workspaces --if-present",
+		"add:components": "npm run add:components --workspaces --if-present",
+		"pretest": "npm run prebuild --workspaces --if-present",
+		"start": "npm start --workspaces --if-present",
+		"typecheck": "npm run typecheck --workspaces --if-present",
+		"test": "npm run test --workspaces --if-present",
+		"format": "npm run format --workspaces --if-present",
+		"lint": "npm run lint --workspaces --if-present"
+	},
+	"type": "module",
+	"workspaces": ["src/pt_frontend"]
 }

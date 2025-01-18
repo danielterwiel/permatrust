@@ -1,4 +1,4 @@
-import { AuthClient } from "@dfinity/auth-client";
+import { AuthClient } from '@dfinity/auth-client';
 
 export class Auth {
   private static instance: Auth | undefined = undefined;
@@ -27,8 +27,8 @@ export class Auth {
     const authClient = await this.initializeClient();
 
     const identityProvider = import.meta.env.DEV
-      ? `http://${process.env.CANISTER_ID_INTERNET_IDENTITY}.localhost:4943`
-      : "https://identity.ic0.app";
+      ? `http://${process.env.CANISTER_ID_INTERNET_IDENTITY}.localhost:8080`
+      : 'https://identity.ic0.app';
 
     return new Promise<boolean>((resolve, reject) => {
       authClient.login({

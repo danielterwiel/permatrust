@@ -16,10 +16,9 @@ gpg --expert --full-generate-key
 ### Getting started
 
 ```sh
-dfx start --clean --background
-chmod +x scripts/build.sh
-./scripts/build.sh
-dfx deploy
+chmod +x scripts/*.sh
+chmod +x scripts/**/*.sh
+./scripts/deploy.sh
 npm start
 ```
 

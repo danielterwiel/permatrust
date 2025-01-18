@@ -11,13 +11,5 @@ on:
       - "docs/**"
 
 jobs:
-  setup:
-    uses: ./.github/workflows/setup.yml
-
   quality:
-    needs: setup
     uses: ./.github/workflows/quality.yml
-
-  # test:
-  #   needs: [setup, build]
-  #   uses: ./.github/workflows/test.yml

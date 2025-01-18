@@ -3,25 +3,16 @@
     "pt_backend": {
       "type": "rust",
       "package": "pt_backend",
-      "candid": "src/pt_backend/pt_backend.did",
+      "candid": "src/candid/pt_backend.did",
       "declarations": {
         "output": "src/declarations/pt_backend",
-        "bindings": [
-          "ts",
-          "js",
-          "did"
-        ]
+        "bindings": ["ts", "js", "did"]
       }
     },
     "pt_frontend": {
       "type": "assets",
-      "source": [
-        "src/pt_frontend/dist"
-      ],
-      "dependencies": [
-        "pt_backend"
-      ],
-      "build": "npm run build --prefix src/pt_frontend"
+      "source": ["src/pt_frontend/dist"],
+      "dependencies": ["pt_backend"]
     },
     "internet_identity": {
       "type": "custom",
@@ -34,6 +25,10 @@
       },
       "frontend": {}
     }
+  },
+  "http": {
+    "enabled": true,
+    "log_level": "error"
   },
   "output_env_file": ".env",
   "version": 1

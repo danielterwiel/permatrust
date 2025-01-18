@@ -23,16 +23,15 @@ jobs:
         run: rustup target add wasm32-unknown-unknown
 
       - name: Set build script permissions
-        run: chmod +x ./scripts/build.sh
+        run: |
+          chmod +x ./scripts/*.sh
+          chmod +x ./scripts/**/*.sh
 
       - name: Setup DFX identity and start DFX
         run: |
           dfx identity new github-ci --disable-encryption || true
           dfx identity use github-ci
-          dfx start --background
-
-      - name: Clean installation
-        run: npm run build:clean
+          ./scripts/deploy.sh
 
       - name: Format
         working-directory: ./src/pt_frontend
