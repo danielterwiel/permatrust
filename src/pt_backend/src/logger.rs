@@ -17,7 +17,7 @@ pub struct LoggableProject<'a>(&'a Project);
 pub struct LoggableDocument<'a>(&'a Document);
 pub struct LoggableRevision<'a>(&'a Revision);
 
-impl<'a> std::fmt::Display for LoggableUser<'a> {
+impl std::fmt::Display for LoggableUser<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -27,13 +27,13 @@ impl<'a> std::fmt::Display for LoggableUser<'a> {
     }
 }
 
-impl<'a> std::fmt::Display for LoggableWorkflow<'a> {
+impl std::fmt::Display for LoggableWorkflow<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Workflow {{ id: {}, name: {} }}", self.0.id, self.0.name,)
     }
 }
 
-impl<'a> std::fmt::Display for LoggableOrganization<'a> {
+impl std::fmt::Display for LoggableOrganization<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -43,7 +43,7 @@ impl<'a> std::fmt::Display for LoggableOrganization<'a> {
     }
 }
 
-impl<'a> std::fmt::Display for LoggableProject<'a> {
+impl std::fmt::Display for LoggableProject<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -53,7 +53,7 @@ impl<'a> std::fmt::Display for LoggableProject<'a> {
     }
 }
 
-impl<'a> std::fmt::Display for LoggableDocument<'a> {
+impl std::fmt::Display for LoggableDocument<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -63,7 +63,7 @@ impl<'a> std::fmt::Display for LoggableDocument<'a> {
     }
 }
 
-impl<'a> std::fmt::Display for LoggableRevision<'a> {
+impl std::fmt::Display for LoggableRevision<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
@@ -106,7 +106,7 @@ pub enum LogLevel {
 }
 
 thread_local! {
-    static LOG_LEVEL: RefCell<LogLevel> = RefCell::new(LogLevel::Info);
+    static LOG_LEVEL: RefCell<LogLevel> = const { RefCell::new(LogLevel::Info) };
 }
 
 // fn log<T: Debug>(level: LogLevel, message: &str, value: T) {

@@ -19,28 +19,40 @@ jobs:
         with:
           dfx-version: "auto"
 
-      - name: Setup Rust target
-        run: rustup target add wasm32-unknown-unknown
+      - name: Setup Rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: clippy
+          override: true
+          target: wasm32-unknown-unknown
 
       - name: Set build script permissions
         run: |
           chmod +x ./scripts/*.sh
           chmod +x ./scripts/**/*.sh
 
-      - name: Setup DFX identity and start DFX
+      - name: (BE) Setup DFX identity
         run: |
           dfx identity new github-ci --disable-encryption || true
           dfx identity use github-ci
-          ./scripts/deploy.sh
 
-      - name: Format
+      - name: (BE/FE) Deploy
+        run: ./scripts/deploy.sh
+
+      - name: (BE) Lint - Clippy
+        run: |
+          cd src/pt_backend && cargo clippy -- -D warnings
+          cd ../shared && cargo clippy -- -D warnings
+
+      - name: (FE) Format - Prettier
         working-directory: ./src/pt_frontend
         run: npm run format:write
 
-      - name: TypeCheck
+      - name: (FE) TypeCheck - tsc
         working-directory: ./src/pt_frontend
         run: npm run typecheck
 
-      - name: Lint
+      - name: (FE) Lint - Biome/ESlint
         working-directory: ./src/pt_frontend
         run: npm run lint

@@ -25,7 +25,7 @@ thread_local! {
         )
     );
 
-    static NEXT_ID: AtomicU64 = AtomicU64::new(0);
+    static NEXT_ID: AtomicU64 = const { AtomicU64::new(0) };
 }
 
 pub fn get_next_user_id() -> u64 {
@@ -89,7 +89,7 @@ fn list_users(pagination: PaginationInput) -> Result<(Vec<User>, PaginationMetad
 #[query]
 fn get_user() -> Result<User, AppError> {
     let principal = ic_cdk::caller();
-    return get_user_by_principal(principal);
+    get_user_by_principal(principal)
 }
 
 pub fn get_user_by_principal(principal: Principal) -> Result<User, AppError> {
@@ -101,8 +101,8 @@ pub fn get_user_by_principal(principal: Principal) -> Result<User, AppError> {
             .map(|(_, user)| user.clone())
     });
 
-    return match user {
+    match user {
         Some(user) => Ok(user),
         None => Err(AppError::EntityNotFound("User not found".to_string())),
-    };
+    }
 }

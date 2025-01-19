@@ -28,7 +28,7 @@ thread_local! {
         )
     );
 
-    static NEXT_ID: AtomicU64 = AtomicU64::new(0);
+    static NEXT_ID: AtomicU64 = const { AtomicU64::new(0) };
 }
 
 pub mod document_utils {
@@ -112,7 +112,7 @@ fn create_document(
     match create_revision(project_id, document_id, content) {
         Ok(_revision_id) => {
             log_info("create_document", loggable_document(&document));
-            Ok(document_id.into())
+            Ok(document_id)
         }
         Err(err) => {
             document_utils::remove(document_id);

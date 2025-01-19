@@ -29,7 +29,7 @@ static USER_ROLES: RefCell<StableBTreeMap<UserId, RoleIdVec, Memory>> = RefCell:
     )
 );
 
-    static NEXT_ACCESS_CONTROL_ID: AtomicU64 = AtomicU64::new(0);
+    static NEXT_ACCESS_CONTROL_ID: AtomicU64 = const { AtomicU64::new(0) }
 }
 
 mod access_control_utils {
@@ -39,7 +39,7 @@ mod access_control_utils {
         NEXT_ACCESS_CONTROL_ID.with(|id| id.fetch_add(1, Ordering::SeqCst))
     }
 
-    pub fn create_role_internal(input: RoleInput) -> Result<RoleId, AppError> {
+    pub fn create_role(input: RoleInput) -> Result<RoleId, AppError> {
         let role_id = get_next_id();
         let role = Role {
             id: role_id,
@@ -55,7 +55,7 @@ mod access_control_utils {
         Ok(role_id)
     }
 
-    pub fn get_user_roles_internal(user_id: &UserId) -> Option<Vec<Role>> {
+    pub fn get_user_roles(user_id: &UserId) -> Option<Vec<Role>> {
         USER_ROLES.with(|user_roles| {
             user_roles.borrow().get(user_id).map(|role_ids| {
                 role_ids
@@ -67,7 +67,7 @@ mod access_control_utils {
         })
     }
 
-    pub fn update_role_permissions_internal(
+    pub fn update_role_permissions(
         role_id: RoleId,
         permissions: Vec<Permission>,
     ) -> Result<(), AppError> {
@@ -84,7 +84,7 @@ mod access_control_utils {
         })
     }
 
-    pub fn assign_roles_internal(user: UserId, roles: Vec<RoleId>) -> Result<(), AppError> {
+    pub fn assign_roles(user: UserId, roles: Vec<RoleId>) -> Result<(), AppError> {
         if !ROLES.with(|roles| {
             roles
                 .borrow()
@@ -112,14 +112,14 @@ mod access_control_utils {
             Permission::Document(DocumentPermission::Comment),
         ];
 
-        create_role_internal(RoleInput {
+        create_role(RoleInput {
             name: "Admin".to_string(),
             description: Some("Full system access".to_string()),
             permissions: admin_permissions,
             project_id: 0,
         })?;
 
-        create_role_internal(RoleInput {
+        create_role(RoleInput {
             name: "Editor".to_string(),
             description: Some("Can manage content".to_string()),
             permissions: editor_permissions,
@@ -181,7 +181,7 @@ fn get_permissions() -> Result<Vec<Permission>, AppError> {
 
 #[query]
 fn get_user_roles(user_id: UserId) -> Result<Vec<Role>, AppError> {
-    match access_control_utils::get_user_roles_internal(&user_id) {
+    match access_control_utils::get_user_roles(&user_id) {
         Some(roles) => Ok(roles),
         None => Err(AppError::EntityNotFound("User roles not found".to_string())),
     }
@@ -202,22 +202,22 @@ fn get_project_roles(project_id: u32) -> Result<Vec<Role>, AppError> {
 
 #[update]
 fn create_role(input: RoleInput) -> Result<RoleId, AppError> {
-    access_control_utils::create_role_internal(input)
+    access_control_utils::create_role(input)
 }
 
 #[update]
 fn assign_roles(user: UserId, role_ids: Vec<RoleId>) -> Result<(), AppError> {
-    access_control_utils::assign_roles_internal(user, role_ids)
+    access_control_utils::assign_roles(user, role_ids)
 }
 
 #[update]
 fn update_role_permissions(role_id: RoleId, permissions: Vec<Permission>) -> Result<(), AppError> {
-    access_control_utils::update_role_permissions_internal(role_id, permissions)
+    access_control_utils::update_role_permissions(role_id, permissions)
 }
 
 #[query]
 fn get_user_permissions(user: UserId) -> Option<Vec<Permission>> {
-    access_control_utils::get_user_roles_internal(&user).map(|roles| {
+    access_control_utils::get_user_roles(&user).map(|roles| {
         roles
             .iter()
             .flat_map(|role| role.permissions.clone())

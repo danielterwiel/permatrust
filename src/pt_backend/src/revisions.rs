@@ -25,7 +25,7 @@ thread_local! {
         )
     );
 
-    static NEXT_ID: AtomicU64 = AtomicU64::new(0);
+    static NEXT_ID: AtomicU64 = const { AtomicU64::new(0) };
 }
 
 mod revision_utils {

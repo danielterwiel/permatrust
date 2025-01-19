@@ -39,7 +39,7 @@ pub fn paginate<T: Clone + Filterable + Sortable>(
     let total_pages = if total_items == 0 {
         1
     } else {
-        (total_items + page_size as TotalItems - 1) / page_size as TotalItems
+        total_items.div_ceil(page_size as TotalItems)
     };
 
     if page_number < 1 || page_number > total_pages as PageNumber {

@@ -24,7 +24,7 @@ thread_local! {
         )
     );
 
-    static NEXT_ID: AtomicU32 = AtomicU32::new(0);
+    static NEXT_ID: AtomicU32 = const { AtomicU32::new(0) };
 }
 
 mod organization_utils {
