@@ -1,4 +1,4 @@
-use shared::types::access_control::{Permission, Role, RoleId, RoleInput};
+use shared::types::access_control::{AssignRolesInput, Permission, Role, RoleId, RoleInput};
 use shared::types::documents::{Document, DocumentId};
 use shared::types::errors::AppError;
 use shared::types::organizations::{Organization, OrganizationId, OrganizationResult};

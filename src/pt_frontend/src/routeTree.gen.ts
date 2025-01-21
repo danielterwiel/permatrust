@@ -45,10 +45,11 @@ import { Route as appDocumentsDocumentsIndexImport } from './routes/app/document
 import { Route as appWorkflowsWorkflowDetailsImport } from './routes/app/workflows/workflow-details'
 import { Route as appProjectsProjectDetailsImport } from './routes/app/projects/project-details'
 import { Route as appOrganizationsOrganizationDetailsImport } from './routes/app/organizations/organization-details'
+import { Route as appRolesRolesListImport } from './routes/app/roles/roles-list'
 import { Route as appRolesRoleCreateImport } from './routes/app/roles/role-create'
+import { Route as appRolesRolesAssignImport } from './routes/app/roles/roles-assign'
 import { Route as appDocumentsDocumentCreateImport } from './routes/app/documents/document-create'
 import { Route as appDocumentsDocumentIndexImport } from './routes/app/documents/document-index'
-import { Route as appRolesRolesListImport } from './routes/app/roles/roles-list'
 import { Route as appDocumentsProjectDocumentsListImport } from './routes/app/documents/project-documents-list'
 import { Route as appRevisionsRevisionsIndexImport } from './routes/app/revisions/revisions-index'
 import { Route as appDocumentsDocumentDetailsImport } from './routes/app/documents/document-details'
@@ -273,9 +274,21 @@ const appOrganizationsOrganizationDetailsRoute =
     getParentRoute: () => appOrganizationsOrganizationIndexRoute,
   } as any)
 
+const appRolesRolesListRoute = appRolesRolesListImport.update({
+  id: '/list',
+  path: '/list',
+  getParentRoute: () => appRolesRolesIndexRoute,
+} as any)
+
 const appRolesRoleCreateRoute = appRolesRoleCreateImport.update({
   id: '/create',
   path: '/create',
+  getParentRoute: () => appRolesRolesIndexRoute,
+} as any)
+
+const appRolesRolesAssignRoute = appRolesRolesAssignImport.update({
+  id: '/assign',
+  path: '/assign',
   getParentRoute: () => appRolesRolesIndexRoute,
 } as any)
 
@@ -291,12 +304,6 @@ const appDocumentsDocumentIndexRoute = appDocumentsDocumentIndexImport.update({
   id: '/$documentId',
   path: '/$documentId',
   getParentRoute: () => appDocumentsDocumentsIndexRoute,
-} as any)
-
-const appRolesRolesListRoute = appRolesRolesListImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => appRolesRolesIndexRoute,
 } as any)
 
 const appDocumentsProjectDocumentsListRoute =
@@ -584,13 +591,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appDocumentsProjectDocumentsListImport
       parentRoute: typeof appDocumentsDocumentsIndexImport
     }
-    '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/': {
-      id: '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/'
-      path: '/'
-      fullPath: '/projects/$projectId/roles/'
-      preLoaderRoute: typeof appRolesRolesListImport
-      parentRoute: typeof appRolesRolesIndexImport
-    }
     '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId': {
       id: '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId'
       path: '/$documentId'
@@ -605,11 +605,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appDocumentsDocumentCreateImport
       parentRoute: typeof appDocumentsDocumentsIndexImport
     }
+    '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/assign': {
+      id: '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/assign'
+      path: '/assign'
+      fullPath: '/projects/$projectId/roles/assign'
+      preLoaderRoute: typeof appRolesRolesAssignImport
+      parentRoute: typeof appRolesRolesIndexImport
+    }
     '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/create': {
       id: '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/create'
       path: '/create'
       fullPath: '/projects/$projectId/roles/create'
       preLoaderRoute: typeof appRolesRoleCreateImport
+      parentRoute: typeof appRolesRolesIndexImport
+    }
+    '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/list': {
+      id: '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/list'
+      path: '/list'
+      fullPath: '/projects/$projectId/roles/list'
+      preLoaderRoute: typeof appRolesRolesListImport
       parentRoute: typeof appRolesRolesIndexImport
     }
     '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/': {
@@ -743,13 +757,15 @@ const appDocumentsDocumentsIndexRouteWithChildren =
   )
 
 interface appRolesRolesIndexRouteChildren {
-  appRolesRolesListRoute: typeof appRolesRolesListRoute
+  appRolesRolesAssignRoute: typeof appRolesRolesAssignRoute
   appRolesRoleCreateRoute: typeof appRolesRoleCreateRoute
+  appRolesRolesListRoute: typeof appRolesRolesListRoute
 }
 
 const appRolesRolesIndexRouteChildren: appRolesRolesIndexRouteChildren = {
-  appRolesRolesListRoute: appRolesRolesListRoute,
+  appRolesRolesAssignRoute: appRolesRolesAssignRoute,
   appRolesRoleCreateRoute: appRolesRoleCreateRoute,
+  appRolesRolesListRoute: appRolesRolesListRoute,
 }
 
 const appRolesRolesIndexRouteWithChildren =
@@ -949,10 +965,11 @@ export interface FileRoutesByFullPath {
   '/onboarding/organization/create': typeof appOnboardingOrganizationCreateRoute
   '/onboarding/user/create': typeof appOnboardingUserCreateRoute
   '/projects/$projectId/documents/': typeof appDocumentsProjectDocumentsListRoute
-  '/projects/$projectId/roles/': typeof appRolesRolesListRoute
   '/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentIndexRouteWithChildren
   '/projects/$projectId/documents/create': typeof appDocumentsDocumentCreateRoute
+  '/projects/$projectId/roles/assign': typeof appRolesRolesAssignRoute
   '/projects/$projectId/roles/create': typeof appRolesRoleCreateRoute
+  '/projects/$projectId/roles/list': typeof appRolesRolesListRoute
   '/projects/$projectId/documents/$documentId/': typeof appDocumentsDocumentDetailsRoute
   '/projects/$projectId/documents/$documentId/revisions': typeof appRevisionsRevisionsIndexRouteWithChildren
   '/projects/$projectId/documents/$documentId/revisions/$revisionId': typeof appRevisionsRevisionDetailsRoute
@@ -979,12 +996,14 @@ export interface FileRoutesByTo {
   '/organizations/$organizationId': typeof appOrganizationsOrganizationDetailsRoute
   '/projects/$projectId': typeof appProjectsProjectDetailsRoute
   '/workflows/$workflowId': typeof appWorkflowsWorkflowDetailsRoute
+  '/projects/$projectId/roles': typeof appRolesRolesIndexRouteWithChildren
   '/onboarding/organization/create': typeof appOnboardingOrganizationCreateRoute
   '/onboarding/user/create': typeof appOnboardingUserCreateRoute
   '/projects/$projectId/documents': typeof appDocumentsProjectDocumentsListRoute
-  '/projects/$projectId/roles': typeof appRolesRolesListRoute
   '/projects/$projectId/documents/create': typeof appDocumentsDocumentCreateRoute
+  '/projects/$projectId/roles/assign': typeof appRolesRolesAssignRoute
   '/projects/$projectId/roles/create': typeof appRolesRoleCreateRoute
+  '/projects/$projectId/roles/list': typeof appRolesRolesListRoute
   '/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentDetailsRoute
   '/projects/$projectId/documents/$documentId/revisions': typeof appRevisionsRevisionsIndexRouteWithChildren
   '/projects/$projectId/documents/$documentId/revisions/$revisionId': typeof appRevisionsRevisionDetailsRoute
@@ -1028,10 +1047,11 @@ export interface FileRoutesById {
   '/_initialized/_authenticated/_onboarding/onboarding/organization/create': typeof appOnboardingOrganizationCreateRoute
   '/_initialized/_authenticated/_onboarding/onboarding/user/create': typeof appOnboardingUserCreateRoute
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/': typeof appDocumentsProjectDocumentsListRoute
-  '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/': typeof appRolesRolesListRoute
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId': typeof appDocumentsDocumentIndexRouteWithChildren
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/create': typeof appDocumentsDocumentCreateRoute
+  '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/assign': typeof appRolesRolesAssignRoute
   '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/create': typeof appRolesRoleCreateRoute
+  '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/list': typeof appRolesRolesListRoute
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/': typeof appDocumentsDocumentDetailsRoute
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions': typeof appRevisionsRevisionsIndexRouteWithChildren
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId': typeof appRevisionsRevisionDetailsRoute
@@ -1073,10 +1093,11 @@ export interface FileRouteTypes {
     | '/onboarding/organization/create'
     | '/onboarding/user/create'
     | '/projects/$projectId/documents/'
-    | '/projects/$projectId/roles/'
     | '/projects/$projectId/documents/$documentId'
     | '/projects/$projectId/documents/create'
+    | '/projects/$projectId/roles/assign'
     | '/projects/$projectId/roles/create'
+    | '/projects/$projectId/roles/list'
     | '/projects/$projectId/documents/$documentId/'
     | '/projects/$projectId/documents/$documentId/revisions'
     | '/projects/$projectId/documents/$documentId/revisions/$revisionId'
@@ -1102,12 +1123,14 @@ export interface FileRouteTypes {
     | '/organizations/$organizationId'
     | '/projects/$projectId'
     | '/workflows/$workflowId'
+    | '/projects/$projectId/roles'
     | '/onboarding/organization/create'
     | '/onboarding/user/create'
     | '/projects/$projectId/documents'
-    | '/projects/$projectId/roles'
     | '/projects/$projectId/documents/create'
+    | '/projects/$projectId/roles/assign'
     | '/projects/$projectId/roles/create'
+    | '/projects/$projectId/roles/list'
     | '/projects/$projectId/documents/$documentId'
     | '/projects/$projectId/documents/$documentId/revisions'
     | '/projects/$projectId/documents/$documentId/revisions/$revisionId'
@@ -1149,10 +1172,11 @@ export interface FileRouteTypes {
     | '/_initialized/_authenticated/_onboarding/onboarding/organization/create'
     | '/_initialized/_authenticated/_onboarding/onboarding/user/create'
     | '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/'
-    | '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/'
     | '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId'
     | '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/create'
+    | '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/assign'
     | '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/create'
+    | '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/list'
     | '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/'
     | '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions'
     | '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId'
@@ -1367,8 +1391,9 @@ export const routeTree = rootRoute
       "filePath": "app/roles/roles-index.tsx",
       "parent": "/_initialized/_authenticated/_onboarded/projects/$projectId",
       "children": [
-        "/_initialized/_authenticated/_onboarded/projects/$projectId/roles/",
-        "/_initialized/_authenticated/_onboarded/projects/$projectId/roles/create"
+        "/_initialized/_authenticated/_onboarded/projects/$projectId/roles/assign",
+        "/_initialized/_authenticated/_onboarded/projects/$projectId/roles/create",
+        "/_initialized/_authenticated/_onboarded/projects/$projectId/roles/list"
       ]
     },
     "/_initialized/_authenticated/_onboarding/onboarding/organization/create": {
@@ -1383,10 +1408,6 @@ export const routeTree = rootRoute
       "filePath": "app/documents/project-documents-list.tsx",
       "parent": "/_initialized/_authenticated/_onboarded/projects/$projectId/documents"
     },
-    "/_initialized/_authenticated/_onboarded/projects/$projectId/roles/": {
-      "filePath": "app/roles/roles-list.tsx",
-      "parent": "/_initialized/_authenticated/_onboarded/projects/$projectId/roles"
-    },
     "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId": {
       "filePath": "app/documents/document-index.tsx",
       "parent": "/_initialized/_authenticated/_onboarded/projects/$projectId/documents",
@@ -1399,8 +1420,16 @@ export const routeTree = rootRoute
       "filePath": "app/documents/document-create.tsx",
       "parent": "/_initialized/_authenticated/_onboarded/projects/$projectId/documents"
     },
+    "/_initialized/_authenticated/_onboarded/projects/$projectId/roles/assign": {
+      "filePath": "app/roles/roles-assign.tsx",
+      "parent": "/_initialized/_authenticated/_onboarded/projects/$projectId/roles"
+    },
     "/_initialized/_authenticated/_onboarded/projects/$projectId/roles/create": {
       "filePath": "app/roles/role-create.tsx",
+      "parent": "/_initialized/_authenticated/_onboarded/projects/$projectId/roles"
+    },
+    "/_initialized/_authenticated/_onboarded/projects/$projectId/roles/list": {
+      "filePath": "app/roles/roles-list.tsx",
       "parent": "/_initialized/_authenticated/_onboarded/projects/$projectId/roles"
     },
     "/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/": {

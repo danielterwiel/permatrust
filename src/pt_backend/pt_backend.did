@@ -6,6 +6,7 @@ type AppError = variant {
   Unauthorized;
   InternalError : text;
 };
+type AssignRolesInput = record { role_ids : vec nat64; user_ids : vec nat64 };
 type CreateUserInput = record {
   first_name : text;
   last_name : text;
@@ -147,15 +148,15 @@ type Result_16 = variant {
   Err : AppError;
 };
 type Result_17 = variant {
-  Ok : record { vec Project; PaginationMetadata };
+  Ok : record { vec User; PaginationMetadata };
   Err : AppError;
 };
 type Result_18 = variant {
-  Ok : record { vec Revision; PaginationMetadata };
+  Ok : record { vec Project; PaginationMetadata };
   Err : AppError;
 };
 type Result_19 = variant {
-  Ok : record { vec User; PaginationMetadata };
+  Ok : record { vec Revision; PaginationMetadata };
   Err : AppError;
 };
 type Result_2 = variant { Ok : nat32; Err : AppError };
@@ -249,7 +250,7 @@ type WorkflowPermission = variant {
   Update;
 };
 service : () -> {
-  assign_roles : (nat64, vec nat64) -> (Result);
+  assign_roles : (AssignRolesInput) -> (Result);
   create_document : (nat32, text, blob) -> (Result_1);
   create_organization : (text) -> (Result_2);
   create_project : (nat32, text) -> (Result_2);
@@ -276,13 +277,14 @@ service : () -> {
   list_documents : (PaginationInput) -> (Result_15) query;
   list_documents_by_project_id : (nat32, PaginationInput) -> (Result_15) query;
   list_organizations : (PaginationInput) -> (Result_16) query;
-  list_projects : (PaginationInput) -> (Result_17) query;
+  list_project_members : (nat32, PaginationInput) -> (Result_17) query;
+  list_projects : (PaginationInput) -> (Result_18) query;
   list_projects_by_organization_id : (nat32, PaginationInput) -> (
-      Result_17,
+      Result_18,
     ) query;
-  list_revisions : (PaginationInput) -> (Result_18) query;
-  list_revisions_by_document_id : (nat64, PaginationInput) -> (Result_18) query;
-  list_users : (PaginationInput) -> (Result_19) query;
+  list_revisions : (PaginationInput) -> (Result_19) query;
+  list_revisions_by_document_id : (nat64, PaginationInput) -> (Result_19) query;
+  list_users : (PaginationInput) -> (Result_17) query;
   list_workflows : (PaginationInput) -> (Result_20) query;
   update_role_permissions : (nat64, vec Permission) -> (Result);
 }

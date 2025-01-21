@@ -12,3 +12,6 @@ rustup target add wasm32-unknown-unknown
 
 # Install candid-extractor: for candid declarations/ generation
 cargo install candid-extractor
+
+# Install cargo-audit: for Rust security audits
+cargo install cargo-audit

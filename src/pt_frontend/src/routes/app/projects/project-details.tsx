@@ -146,7 +146,7 @@ function ProjectDetails() {
               className="h-5 gap-1"
               params={{ projectId }}
               size="sm"
-              to="/projects/$projectId/roles"
+              to="/projects/$projectId/roles/list"
               variant="secondary"
             >
               <Icon name="user-check-outline" size="xs" />

@@ -10,7 +10,7 @@ import { Icon } from '@/components/ui/icon';
 import { toNumberSchema } from '@/schemas/primitives';
 
 export const Route = createFileRoute(
-  '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/',
+  '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/list',
 )({
   loader: async ({ params }) => {
     const projectId = toNumberSchema.parse(params.projectId);
@@ -25,7 +25,6 @@ export const Route = createFileRoute(
 
 function RolesCreate() {
   const { roles } = Route.useLoaderData();
-  const params = Route.useParams();
 
   return (
     <>
@@ -54,18 +53,6 @@ function RolesCreate() {
         })
 
         */}
-        <Link
-          className="h-7 gap-1"
-          params={{ projectId: params.projectId }}
-          size="sm"
-          to="/projects/$projectId/roles/create"
-          variant="default"
-        >
-          <Icon name="user-check-outline" size="sm" />
-          <span className="sr-only sm:not-sr-only sm:whitespace-nowrap text-sm">
-            Create role
-          </span>
-        </Link>
       </div>
       <Card>
         <CardHeader>

@@ -43,6 +43,7 @@ import { paginationInputSchema } from '@/schemas/pagination';
 import type {
   Document,
   PaginationInput,
+  Project,
   SortCriteria,
 } from '@/declarations/pt_backend/pt_backend.did';
 import type { FilterCriteria } from '@/types/pagination';
@@ -191,7 +192,7 @@ function Documents() {
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Projects</SelectLabel>
-                    {projects.map((project) => (
+                    {projects.map((project: Project) => (
                       <SelectItem
                         key={project.id}
                         value={project.id.toString()}

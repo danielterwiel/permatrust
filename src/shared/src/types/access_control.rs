@@ -4,6 +4,8 @@ use candid::CandidType;
 use serde::Deserialize;
 use strum_macros::EnumIter;
 
+use super::users::UserId;
+
 pub type RoleId = u64;
 
 #[derive(Clone, Debug)]
@@ -122,4 +124,10 @@ pub struct Role {
     pub description: Option<String>,
     pub created_at: u64,
     pub updated_at: Option<u64>,
+}
+
+#[derive(CandidType, Deserialize)]
+pub struct AssignRolesInput {
+    pub role_ids: Vec<RoleId>,
+    pub user_ids: Vec<UserId>,
 }
