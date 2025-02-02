@@ -91,10 +91,10 @@ function DocumentDetails() {
   const { documentId, projectId } = Route.useParams();
   const { document, pagination, paginationMetaData, revisions } =
     Route.useLoaderData();
-  const [selected, setSelected] = useState<Entity[]>([]);
+  const [selected, setSelected] = useState<Revision[]>([]);
   const navigate = useNavigate();
 
-  function handleCheckedChange(revisions: Entity[]) {
+  function handleCheckedChange(revisions: Revision[]) {
     setSelected(revisions);
   }
 
@@ -193,7 +193,7 @@ function DocumentDetails() {
               {
                 cellPreprocess: (v) => v,
                 headerName: 'Version',
-                id: 'version',
+                key: 'version',
               },
               {
                 cellPreprocess: (content) => {
@@ -206,17 +206,17 @@ function DocumentDetails() {
                   );
                 },
                 headerName: 'Content',
-                id: 'content',
+                key: 'content',
               },
               {
                 cellPreprocess: (createdBy) => createdBy.toString(),
                 headerName: 'Created by',
-                id: 'created_by',
+                key: 'created_by',
               },
               {
                 cellPreprocess: (createdAt) => formatDateTime(createdAt),
                 headerName: 'Created at',
-                id: 'created_at',
+                key: 'created_at',
               },
             ]}
             entityName={ENTITY_NAME.Revision}

@@ -32,7 +32,7 @@ import type {
 export const createRoleFormSchema = z.object({
   description: z.string().optional(),
   name: z.string().min(2, {
-    message: 'Project name must be at least 2 characters.',
+    message: 'Role name must be at least 2 characters.',
   }),
 });
 

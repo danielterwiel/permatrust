@@ -58,6 +58,6 @@ pub fn get_user_by_id(id: UserId) -> Result<User, AppError> {
 }
 
 pub fn get_user_by_principal(principal: Principal) -> Result<User, AppError> {
-    state::find_by_principal(principal)
+    state::get_by_principal(principal)
         .ok_or_else(|| AppError::EntityNotFound("User not found".to_string()))
 }

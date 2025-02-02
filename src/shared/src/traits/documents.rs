@@ -1,9 +1,10 @@
-use crate::consts::documents::MAX_DOCUMENT_SIZE;
 use crate::types::documents::Document;
 use candid::{Decode, Encode};
 use ic_stable_structures::storable::Bound;
 use ic_stable_structures::Storable;
 use std::borrow::Cow;
+
+const MAX_VALUE_SIZE: u32 = 32_768;
 
 impl Storable for Document {
     fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
@@ -15,7 +16,7 @@ impl Storable for Document {
     }
 
     const BOUND: Bound = Bound::Bounded {
-        max_size: MAX_DOCUMENT_SIZE,
+        max_size: MAX_VALUE_SIZE,
         is_fixed_size: false,
     };
 }

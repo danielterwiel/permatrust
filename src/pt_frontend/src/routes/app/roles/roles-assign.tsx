@@ -1,7 +1,9 @@
 import { useToast } from '@/hooks/use-toast';
 import { createFileRoute } from '@tanstack/react-router';
-import { Check, ChevronsUpDown, Plus } from 'lucide-react';
+import { zodSearchValidator } from '@tanstack/router-zod-adapter';
+import { Check, ChevronsUpDown } from 'lucide-react';
 import { useState } from 'react';
+import { z } from 'zod';
 
 import { api } from '@/api';
 
@@ -28,28 +30,81 @@ import {
 } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
+import { buildFilterField } from '@/utils/buildFilterField';
 import { cn } from '@/utils/cn';
 
-import { DEFAULT_PAGINATION } from '@/consts/pagination';
+import { ENTITY, ENTITY_NAME } from '@/consts/entities';
+import {
+  DEFAULT_PAGINATION,
+  FILTER_FIELD,
+  FILTER_OPERATOR,
+} from '@/consts/pagination';
 
 import { toNumberSchema } from '@/schemas/primitives';
 
-import type { Role } from '@/declarations/pt_backend/pt_backend.did';
-import type { User } from '@/declarations/pt_backend/pt_backend.did';
+import type { Role, User } from '@/declarations/pt_backend/pt_backend.did';
+
+const searchSchema = z.object({
+  userId: z.number().optional(),
+});
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/assign',
 )({
-  loader: async ({ params }) => {
+  validateSearch: zodSearchValidator(searchSchema),
+
+  loaderDeps: ({ search }) => ({
+    userId: search.userId,
+  }),
+  loader: async ({ deps, params }) => {
     const projectId = toNumberSchema.parse(params.projectId);
-    const roles = await api.get_project_roles(projectId); // TODO: unlimited limit. Then: endless scroll orso
+    const roles = await api.get_project_roles(projectId);
     const [users] = await api.list_project_members(
       projectId,
-      DEFAULT_PAGINATION, // TODO: first: unlimited limit. Then: endless scroll + search
+      DEFAULT_PAGINATION,
     );
 
+    let preselectedUser: undefined | User;
+    let userRoles: Role[] = [];
+
+    if (!Number.isNaN(deps.userId)) {
+      const userId = deps.userId;
+      // First find the user in the users list
+      preselectedUser = users.find((user: User) => user.id === BigInt(userId));
+
+      // Then get their roles
+      if (preselectedUser) {
+        const [assignedRoles] = await api.list_project_members_roles(
+          projectId,
+          {
+            ...DEFAULT_PAGINATION,
+            filters: [
+              [
+                {
+                  entity: ENTITY.UserWithRoles,
+                  field: buildFilterField(
+                    ENTITY_NAME.UserWithRoles,
+                    FILTER_FIELD.UserWithRoles.Id,
+                  ),
+                  operator: FILTER_OPERATOR.Equals,
+                  value: userId,
+                },
+              ],
+            ],
+          },
+        );
+
+        if (assignedRoles.length > 0) {
+          const userWithRoles = assignedRoles[0];
+          userRoles = userWithRoles.roles;
+        }
+      }
+    }
+
     return {
+      preselectedUser,
       roles,
+      userRoles,
       users,
     };
   },
@@ -57,9 +112,12 @@ export const Route = createFileRoute(
 });
 
 function RolesAssign() {
-  const { roles, users } = Route.useLoaderData();
-  const [selectedUsers, setSelectedUsers] = useState<User[]>([]);
-  const [selectedRoles, setSelectedRoles] = useState<Role[]>([]);
+  const { preselectedUser, roles, userRoles, users } = Route.useLoaderData();
+  const search = Route.useSearch();
+  const [selectedUsers, setSelectedUsers] = useState<User[]>(
+    preselectedUser ? [preselectedUser] : [],
+  );
+  const [selectedRoles, setSelectedRoles] = useState<Role[]>(userRoles || []);
   const [openUsers, setOpenUsers] = useState(false);
   const [openRoles, setOpenRoles] = useState(false);
   const { toast } = useToast();
@@ -75,7 +133,7 @@ function RolesAssign() {
     }
 
     const selectedUserIds = selectedUsers.map((u) => u.id);
-    const selectedRoleIds = selectedUsers.map((u) => u.id);
+    const selectedRoleIds = selectedRoles.map((r) => r.id);
     await api.assign_roles({
       role_ids: selectedRoleIds,
       user_ids: selectedUserIds,
@@ -91,117 +149,118 @@ function RolesAssign() {
   };
 
   return (
-    <Card className="w-[400px]">
-      <CardHeader>
-        <CardTitle>
-          <Icon
-            className="text-muted-foreground pb-1 mr-2"
-            name="user-check-outline"
-            size="lg"
-          />
-          Assign Roles to Users
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="flex flex-col space-y-4">
-        <Popover onOpenChange={setOpenUsers} open={openUsers}>
-          <PopoverTrigger asChild>
-            <Button
-              aria-expanded={openUsers}
-              className="justify-between w-full"
-              variant="outline"
-            >
-              {selectedUsers.length > 0
-                ? `${selectedUsers.length} user(s) selected`
-                : 'Select users...'}
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[400px] p-0">
-            <Command>
-              <CommandInput placeholder="Search users..." />
-              <CommandEmpty>No user found.</CommandEmpty>
-              <CommandGroup>
-                <ScrollArea className="h-64">
-                  {users.map((user: User) => (
-                    <CommandItem
-                      key={user.id}
-                      onSelect={() => {
-                        setSelectedUsers((prev) =>
-                          prev.some((u) => u.id === user.id)
-                            ? prev.filter((u) => u.id !== user.id)
-                            : [...prev, user],
-                        );
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          'mr-2 h-4 w-4',
-                          selectedUsers.some((u: User) => u.id === user.id)
-                            ? 'opacity-100'
-                            : 'opacity-0',
-                        )}
-                      />
-                      {user.last_name}, {user.first_name}
-                    </CommandItem>
-                  ))}
-                </ScrollArea>
-              </CommandGroup>
-            </Command>
-          </PopoverContent>
-        </Popover>
+    <div className="pt-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <Icon
+              className="text-muted-foreground pb-1 mr-2"
+              name="user-check-outline"
+              size="lg"
+            />
+            Assign Roles to Users
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col space-y-4">
+          <Popover onOpenChange={setOpenUsers} open={openUsers}>
+            <PopoverTrigger asChild>
+              <Button
+                aria-expanded={openUsers}
+                className="justify-between w-full"
+                disabled={!!search.userId}
+                variant="outline"
+              >
+                {selectedUsers.length > 0
+                  ? `${selectedUsers.length} user(s) selected`
+                  : 'Select users...'}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[400px] p-0">
+              <Command>
+                <CommandInput placeholder="Search users..." />
+                <CommandEmpty>No user found.</CommandEmpty>
+                <CommandGroup>
+                  <ScrollArea className="h-64">
+                    {users.map((user: User) => (
+                      <CommandItem
+                        key={user.id}
+                        onSelect={() => {
+                          setSelectedUsers((prev) =>
+                            prev.some((u) => u.id === user.id)
+                              ? prev.filter((u) => u.id !== user.id)
+                              : [...prev, user],
+                          );
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            'mr-2 h-4 w-4',
+                            selectedUsers.some((u: User) => u.id === user.id)
+                              ? 'opacity-100'
+                              : 'opacity-0',
+                          )}
+                        />
+                        {user.last_name}, {user.first_name}
+                      </CommandItem>
+                    ))}
+                  </ScrollArea>
+                </CommandGroup>
+              </Command>
+            </PopoverContent>
+          </Popover>
 
-        <Popover onOpenChange={setOpenRoles} open={openRoles}>
-          <PopoverTrigger asChild>
-            <Button
-              aria-expanded={openRoles}
-              className="justify-between w-full"
-              variant="outline"
-            >
-              {selectedRoles.length > 0
-                ? `${selectedRoles.length} role(s) selected`
-                : 'Select roles...'}
-              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-[400px] p-0">
-            <Command>
-              <CommandInput placeholder="Search roles..." />
-              <CommandEmpty>No role found.</CommandEmpty>
-              <CommandGroup>
-                <ScrollArea className="h-64">
-                  {roles.map((role: Role) => (
-                    <CommandItem
-                      key={role.id}
-                      onSelect={() => {
-                        setSelectedRoles((prev: Role[]) =>
-                          prev.some((r) => r.id === role.id)
-                            ? prev.filter((r) => r.id !== role.id)
-                            : [...prev, role],
-                        );
-                      }}
-                    >
-                      <Check
-                        className={cn(
-                          'mr-2 h-4 w-4',
-                          selectedRoles.some((r: Role) => r.id === role.id)
-                            ? 'opacity-100'
-                            : 'opacity-0',
-                        )}
-                      />
-                      {role.name}
-                    </CommandItem>
-                  ))}
-                </ScrollArea>
-              </CommandGroup>
-            </Command>
-          </PopoverContent>
-        </Popover>
-      </CardContent>
-      <CardFooter>
-        <Button className="w-full" onClick={onSubmit}>
-          <Plus className="mr-2 h-4 w-4" /> Assign Roles
-        </Button>
-      </CardFooter>
-    </Card>
+          <Popover onOpenChange={setOpenRoles} open={openRoles}>
+            <PopoverTrigger asChild>
+              <Button
+                aria-expanded={openRoles}
+                className="justify-between w-full"
+                variant="outline"
+              >
+                {selectedRoles.length > 0
+                  ? `${selectedRoles.length} role(s) selected`
+                  : 'Select roles...'}
+                <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-[400px] p-0">
+              <Command>
+                <CommandInput placeholder="Search roles..." />
+                <CommandEmpty>No role found.</CommandEmpty>
+                <CommandGroup>
+                  <ScrollArea className="h-64">
+                    {roles.map((role: Role) => (
+                      <CommandItem
+                        key={role.id}
+                        onSelect={() => {
+                          setSelectedRoles((prev: Role[]) =>
+                            prev.some((r) => r.id === role.id)
+                              ? prev.filter((r) => r.id !== role.id)
+                              : [...prev, role],
+                          );
+                        }}
+                      >
+                        <Check
+                          className={cn(
+                            'mr-2 h-4 w-4',
+                            selectedRoles.some((r: Role) => r.id === role.id)
+                              ? 'opacity-100'
+                              : 'opacity-0',
+                          )}
+                        />
+                        {role.name}
+                      </CommandItem>
+                    ))}
+                  </ScrollArea>
+                </CommandGroup>
+              </Command>
+            </PopoverContent>
+          </Popover>
+        </CardContent>
+        <CardFooter>
+          <Button onClick={onSubmit}>Assign Roles</Button>
+        </CardFooter>
+      </Card>
+    </div>
   );
 }

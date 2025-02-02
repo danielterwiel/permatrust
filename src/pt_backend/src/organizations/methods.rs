@@ -2,6 +2,7 @@ use super::state;
 use super::*;
 use crate::logger::{log_info, loggable_organization};
 use crate::users::get_user_by_principal;
+use shared::types::errors::AppError;
 use shared::utils::pagination::paginate;
 
 #[ic_cdk_macros::update]

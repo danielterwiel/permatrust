@@ -154,7 +154,7 @@ function Workflows() {
               {
                 cellPreprocess: (name) => name,
                 headerName: 'Name',
-                id: 'name',
+                key: 'name',
               },
             ]}
             entityName={ENTITY_NAME.Workflow}

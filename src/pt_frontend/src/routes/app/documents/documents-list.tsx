@@ -235,12 +235,12 @@ function Documents() {
               {
                 cellPreprocess: (title) => title,
                 headerName: 'Document title',
-                id: 'title',
+                key: 'title',
               },
               {
                 cellPreprocess: (version) => version,
                 headerName: 'Version',
-                id: 'version',
+                key: 'version',
               },
             ]}
             entityName={ENTITY_NAME.Document}

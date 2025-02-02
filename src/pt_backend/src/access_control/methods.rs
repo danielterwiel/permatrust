@@ -1,8 +1,11 @@
 use super::state;
 use super::*;
+use shared::types::pagination::{PaginationInput, PaginationMetadata};
+use shared::types::projects::ProjectId;
+use shared::utils::pagination::paginate;
 use strum::IntoEnumIterator;
 
-use shared::types::access_control::AssignRolesInput;
+use shared::types::access_control::{AssignRolesInput, UserWithRoles};
 
 #[ic_cdk_macros::update]
 pub fn create_role(input: RoleInput) -> Result<RoleId, AppError> {
@@ -114,32 +117,86 @@ pub fn get_user_permissions(user: UserId) -> Option<Vec<Permission>> {
     })
 }
 
+#[ic_cdk_macros::query]
+pub fn list_project_members_roles(
+    project_id: ProjectId,
+    pagination: PaginationInput,
+) -> Result<(Vec<UserWithRoles>, PaginationMetadata), AppError> {
+    let project = crate::projects::state::get_by_id(project_id)
+        .ok_or_else(|| AppError::EntityNotFound("Project not found".to_string()))?;
+
+    let mut users_with_roles: Vec<UserWithRoles> = Vec::new();
+
+    for user_id in &project.members {
+        match crate::users::get_user_by_id(*user_id) {
+            Ok(user) => match get_user_roles(*user_id) {
+                Ok(roles) => {
+                    let project_roles: Vec<Role> = roles
+                        .into_iter()
+                        .filter(|role| role.project_id == project_id)
+                        .collect();
+
+                    users_with_roles.push(UserWithRoles {
+                        user,
+                        roles: project_roles,
+                    });
+                }
+                Err(e) => {
+                    ic_cdk::api::print(format!(
+                        "Failed to get roles for user {}: {:?}",
+                        user_id, e
+                    ));
+                    continue;
+                }
+            },
+            Err(e) => {
+                ic_cdk::api::print(format!("Failed to deserialize user {}: {:?}", user_id, e));
+                continue;
+            }
+        }
+    }
+
+    if users_with_roles.is_empty() {
+        return Err(AppError::EntityNotFound(
+            "No valid users found in project".to_string(),
+        ));
+    }
+
+    paginate(
+        &users_with_roles,
+        pagination.page_size,
+        pagination.page_number,
+        pagination.filters,
+        pagination.sort,
+    )
+}
+
 pub fn init_default_roles() {
     let all_permissions = get_permissions().expect("Failed to get permissions");
     let admin_role = RoleInput {
         name: "Admin".to_string(),
         description: Some("Full system access".to_string()),
         permissions: all_permissions,
-        project_id: 0,
+        project_id: 0, // TODO: add entries on every project creation
     };
 
     let editor_role = RoleInput {
         name: "Editor".to_string(),
-        description: Some("Can manage content".to_string()),
+        description: Some("Manages the content".to_string()),
         permissions: vec![
             Permission::Document(DocumentPermission::Read),
             Permission::Document(DocumentPermission::Create),
             Permission::Document(DocumentPermission::Update),
             Permission::Document(DocumentPermission::Comment),
         ],
-        project_id: 0,
+        project_id: 0, // TODO: add entries on every project creation
     };
 
     let viewer_role = RoleInput {
         name: "Viewer".to_string(),
         description: Some("Read-only access".to_string()),
         permissions: get_all_read_permissions(),
-        project_id: 0,
+        project_id: 0, // TODO: add entries on every project creation
     };
 
     let _ = create_role(admin_role);

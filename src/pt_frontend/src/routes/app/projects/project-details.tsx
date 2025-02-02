@@ -186,12 +186,12 @@ function ProjectDetails() {
                 {
                   cellPreprocess: (title) => title,
                   headerName: 'Title',
-                  id: 'title',
+                  key: 'title',
                 },
                 {
                   cellPreprocess: (version) => version,
                   headerName: 'Version',
-                  id: 'version',
+                  key: 'version',
                 },
               ]}
               entityName={ENTITY_NAME.Document}

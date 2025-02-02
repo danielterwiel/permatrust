@@ -72,7 +72,6 @@ pub fn list_projects(
         pagination.sort,
     )
 }
-
 #[ic_cdk_macros::query]
 pub fn list_projects_by_organization_id(
     organization_id: OrganizationId,
@@ -96,11 +95,18 @@ pub fn list_project_members(
     let project = state::get_by_id(project_id)
         .ok_or_else(|| AppError::EntityNotFound("Project not found".to_string()))?;
 
-    let users = project
-        .members
-        .into_iter()
-        .map(|user_id| get_user_by_id(user_id).expect("User not found"))
-        .collect::<Vec<_>>();
+    let mut users = Vec::new();
+    for user_id in project.members {
+        match get_user_by_id(user_id) {
+            Ok(user) => users.push(user),
+            Err(e) => {
+                return Err(AppError::InternalError(format!(
+                    "Failed to get user with id: {}. Cause: {:#?}",
+                    user_id, e
+                )));
+            }
+        }
+    }
 
     paginate(
         &users,

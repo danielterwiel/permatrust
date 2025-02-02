@@ -89,7 +89,7 @@ export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
             <form.Field
               name="content"
               validators={{
-                onChange: ({ value }) => {
+                onSubmit: ({ value }) => {
                   try {
                     createRevisionFormSchema.shape.content.parse(value);
                     return undefined;

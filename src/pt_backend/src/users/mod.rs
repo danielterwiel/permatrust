@@ -1,5 +1,5 @@
 mod methods;
-mod state;
+pub(crate) mod state;
 
 use candid::Principal;
 use shared::types::errors::AppError;

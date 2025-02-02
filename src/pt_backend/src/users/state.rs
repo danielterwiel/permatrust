@@ -43,7 +43,7 @@ pub fn get_by_id(id: UserId) -> Option<User> {
     USERS.with(|users| users.borrow().get(&id))
 }
 
-pub fn find_by_principal(principal: Principal) -> Option<User> {
+pub fn get_by_principal(principal: Principal) -> Option<User> {
     USERS.with(|users| {
         users
             .borrow()

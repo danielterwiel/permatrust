@@ -143,12 +143,12 @@ function Users() {
               {
                 cellPreprocess: (firstName) => firstName,
                 headerName: 'First name',
-                id: 'first_name',
+                key: 'first_name',
               },
               {
                 cellPreprocess: (lastName) => lastName,
                 headerName: 'Last name',
-                id: 'last_name',
+                key: 'last_name',
               },
             ]}
             entityName={ENTITY_NAME.User}

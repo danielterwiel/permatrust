@@ -35,7 +35,7 @@ interface ColumnConfigItem {
   // biome-ignore lint/suspicious/noExplicitAny: columnConfig can pass any value
   cellPreprocess?: (value: any) => any;
   headerName?: string;
-  id: string;
+  key: string;
 }
 
 interface TableProps<T extends Entity = Entity> {
@@ -76,6 +76,7 @@ export const Table = <T extends Entity = Entity>({
   };
 
   const columns: ColumnDef<T>[] = useMemo(() => {
+    // Conditionally include the selectColumn based on the presence of onSelectionChange
     const selectColumn: ColumnDef<T> = {
       cell: ({ row }) => (
         <Checkbox
@@ -98,19 +99,33 @@ export const Table = <T extends Entity = Entity>({
       id: 'select',
     };
 
-    const allColumns = headers.map((header: string) => {
-      const config = columnConfig.find((col) => col.id === header);
-      const columnDef: ColumnDef<T> = {
+    /**
+     * We now allow multiple items from columnConfig that share the same `key`.
+     * For each header, we find *all* columnConfig items whose `key` matches
+     * that header. Then each config becomes its own column, possibly sharing
+     * the same accessorKey but with different cellPreprocess/headerName. [1]
+     */
+    const allColumns = headers.flatMap((header: string) => {
+      const matchingConfigs = columnConfig.filter((col) => col.key === header);
+
+      if (matchingConfigs.length === 0) {
+        return [
+          {
+            accessorKey: header,
+          } as ColumnDef<T>,
+        ];
+      }
+
+      return matchingConfigs.map((config, idx) => ({
         accessorKey: header,
-        cell: config?.cellPreprocess
+        cell: config.cellPreprocess
           ? ({ getValue }) => config.cellPreprocess?.(getValue())
           : undefined,
-        header: config?.headerName,
-      };
-      return columnDef;
+        header: config.headerName,
+        id: `${config.key}-${idx}`,
+      })) as ColumnDef<T>[];
     });
 
-    // Conditionally include the selectColumn based on the presence of onSelectionChange
     return onSelectionChange ? [selectColumn, ...allColumns] : allColumns;
   }, [headers, columnConfig, onSelectionChange]);
 
@@ -119,11 +134,9 @@ export const Table = <T extends Entity = Entity>({
     for (const header of headers) {
       initialVisibility[header] = false;
     }
-
-    for (const col of columnConfig) {
-      initialVisibility[col.id] = true;
-    }
-
+    columnConfig.forEach((col, idx) => {
+      initialVisibility[`${col.key}-${idx}`] = true;
+    });
     return initialVisibility;
   });
 
@@ -161,6 +174,7 @@ export const Table = <T extends Entity = Entity>({
   if (!Array.isArray(tableData)) {
     return <p>Invalid data</p>;
   }
+
   return (
     <div className="grid">
       <div className="overflow-auto py-2">
@@ -168,8 +182,8 @@ export const Table = <T extends Entity = Entity>({
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return header.isPlaceholder ? null : (
+                {headerGroup.headers.map((header) =>
+                  header.isPlaceholder ? null : (
                     <TableHead key={header.id}>
                       <DataTableColumnHeader
                         column={header.column}
@@ -181,8 +195,8 @@ export const Table = <T extends Entity = Entity>({
                         }
                       />
                     </TableHead>
-                  );
-                })}
+                  ),
+                )}
                 <TableHead>
                   <div className="flex justify-end pr-4">Actions</div>
                 </TableHead>

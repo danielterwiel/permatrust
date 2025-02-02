@@ -169,17 +169,17 @@ function OrganizationDetails() {
               {
                 cellPreprocess: (v) => v,
                 headerName: 'Project Name',
-                id: 'name',
+                key: 'name',
               },
               {
                 cellPreprocess: (createdBy) => createdBy.toString(),
                 headerName: 'Created by',
-                id: 'created_by',
+                key: 'created_by',
               },
               {
                 cellPreprocess: (createdAt) => formatDateTime(createdAt),
                 headerName: 'Created at',
-                id: 'created_at',
+                key: 'created_at',
               },
             ]}
             entityName={ENTITY_NAME.Project}

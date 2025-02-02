@@ -1,5 +1,6 @@
 use crate::types::errors::AppError;
 use crate::types::projects::ProjectId;
+use crate::types::users::User;
 use candid::CandidType;
 use serde::Deserialize;
 use strum_macros::EnumIter;
@@ -130,4 +131,10 @@ pub struct Role {
 pub struct AssignRolesInput {
     pub role_ids: Vec<RoleId>,
     pub user_ids: Vec<UserId>,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug)]
+pub struct UserWithRoles {
+    pub user: User,
+    pub roles: Vec<Role>,
 }

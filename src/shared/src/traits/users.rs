@@ -5,7 +5,7 @@ use ic_stable_structures::storable::Bound;
 use ic_stable_structures::Storable;
 use std::borrow::Cow;
 
-const MAX_VALUE_SIZE: u32 = 100;
+const MAX_VALUE_SIZE: u32 = 32_768;
 
 impl Storable for User {
     fn to_bytes(&self) -> std::borrow::Cow<[u8]> {

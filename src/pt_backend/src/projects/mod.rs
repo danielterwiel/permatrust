@@ -1,5 +1,5 @@
 mod methods;
-mod state;
+pub(crate) mod state;
 
 use shared::types::errors::AppError;
 use shared::types::organizations::OrganizationId;

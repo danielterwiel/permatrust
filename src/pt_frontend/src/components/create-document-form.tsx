@@ -92,7 +92,7 @@ export const CreateDocumentForm: FC<CreateDocumentFormProps> = ({
             <form.Field
               name="title"
               validators={{
-                onChange: ({ value }) => {
+                onSubmit: ({ value }) => {
                   try {
                     createDocumentFormSchema.shape.title.parse(value);
                     return undefined;
@@ -127,7 +127,7 @@ export const CreateDocumentForm: FC<CreateDocumentFormProps> = ({
             <form.Field
               name="content"
               validators={{
-                onChange: ({ value }) => {
+                onSubmit: ({ value }) => {
                   try {
                     createDocumentFormSchema.shape.content.parse(value);
                     return undefined;

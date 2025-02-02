@@ -51,7 +51,7 @@ export const RolesList = ({ roles }: RoleListProps) => {
   };
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <div className="space-y-6">
       {roles.map((role) => {
         const permissions = permissionsToItems(role.permissions);
         const groupedPermissions = groupPermissions(permissions);

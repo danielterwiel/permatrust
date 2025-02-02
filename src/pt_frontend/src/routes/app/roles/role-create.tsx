@@ -25,20 +25,22 @@ export const Route = createFileRoute(
 function RoleCreate() {
   const { permissions } = Route.useLoaderData();
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          <Icon
-            className="text-muted-foreground pb-1 mr-2"
-            name="user-check-outline"
-            size="lg"
-          />
-          Create role
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <CreateRoleForm permissions={permissions} />
-      </CardContent>
-    </Card>
+    <div className="pt-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <Icon
+              className="text-muted-foreground pb-1 mr-2"
+              name="user-check-outline"
+              size="lg"
+            />
+            Create role
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <CreateRoleForm permissions={permissions} />
+        </CardContent>
+      </Card>
+    </div>
   );
 }

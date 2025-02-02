@@ -1,12 +1,13 @@
-import type { ENTITY } from "@/consts/entities";
+import type { ENTITY } from '@/consts/entities';
 import type {
   Document,
   Organization,
   Project,
   Revision,
   User,
+  UserWithRoles,
   Workflow,
-} from "@/declarations/pt_backend/pt_backend.did";
+} from '@/declarations/pt_backend/pt_backend.did';
 
 export type Entity =
   | Document
@@ -14,6 +15,7 @@ export type Entity =
   | Project
   | Revision
   | User
+  | UserWithRoles
   | Workflow;
 export type EntityEnum = (typeof ENTITY)[EntityName];
 export type EntityName = keyof typeof ENTITY;

@@ -38,6 +38,12 @@ export const FILTER_FIELD_WORKFLOW = {
   Name: { Name: null },
   ProjectId: { ProjectId: null },
 } as const;
+export const FILTER_FIELD_USER_WITH_ROLES = {
+  FirstName: { FirstName: null },
+  Id: { Id: null },
+  LastName: { LastName: null },
+  Roles: { Roles: null },
+} as const;
 
 export const FILTER_FIELD = {
   Document: FILTER_FIELD_DOCUMENT,
@@ -45,6 +51,7 @@ export const FILTER_FIELD = {
   Project: FILTER_FIELD_PROJECT,
   Revision: FILTER_FIELD_REVISION,
   User: FILTER_FIELD_USER,
+  UserWithRoles: FILTER_FIELD_USER_WITH_ROLES,
   Workflow: FILTER_FIELD_WORKFLOW,
 } as const;
 

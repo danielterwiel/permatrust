@@ -1,7 +1,7 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router';
 import { Link } from '@tanstack/react-router';
 
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import type { ReactNode } from 'react';
 
@@ -10,7 +10,7 @@ const TabsLinkTrigger = ({
   href,
 }: {
   children: ReactNode;
-  href: 'assign' | 'create' | 'list';
+  href: 'assign' | 'assigned' | 'create' | 'list';
 }) => (
   <TabsTrigger asChild value={href}>
     <Link href={href}>{children}</Link>
@@ -33,19 +33,12 @@ function Roles() {
   return (
     <Tabs defaultValue="list">
       <TabsList className="w-full justify-start">
-        <TabsLinkTrigger href="list">Roles</TabsLinkTrigger>
+        <TabsLinkTrigger href="assigned">Assigned</TabsLinkTrigger>
         <TabsLinkTrigger href="assign">Assign</TabsLinkTrigger>
+        <TabsLinkTrigger href="list">Roles</TabsLinkTrigger>
         <TabsLinkTrigger href="create">Create</TabsLinkTrigger>
       </TabsList>
-      <TabsContent value="list">
-        <Outlet />
-      </TabsContent>
-      <TabsContent value="assign">
-        <Outlet />
-      </TabsContent>
-      <TabsContent value="create">
-        <Outlet />
-      </TabsContent>
+      <Outlet />
     </Tabs>
   );
 }

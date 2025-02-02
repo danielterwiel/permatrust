@@ -69,7 +69,7 @@ export const FilterInput = ({
       <form.Field
         name={fieldName}
         validators={{
-          onChange: ({ value }) => {
+          onSubmit: ({ value }) => {
             try {
               filterCriteriaSchema.parse({
                 ...filterCriteria,

@@ -1,39 +1,39 @@
-import { useForm } from "@tanstack/react-form";
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useCallback, useEffect, useState } from "react";
+import { useForm } from '@tanstack/react-form';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useCallback, useEffect, useState } from 'react';
 import ReactFlow, {
   Background,
   Controls,
   type Edge,
   type Node,
   ReactFlowProvider,
-} from "reactflow";
-import { z } from "zod";
+} from 'reactflow';
+import { z } from 'zod';
 
-import { api } from "@/api";
+import { api } from '@/api';
 
-import { Loading } from "@/components/loading";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loading } from '@/components/loading';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   FormControl,
   FormDescription,
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form";
-import { Icon } from "@/components/ui/icon";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+} from '@/components/ui/form';
+import { Icon } from '@/components/ui/icon';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 
-import "reactflow/dist/style.css";
+import 'reactflow/dist/style.css';
 
 export const Route = createFileRoute(
-  "/_initialized/_authenticated/_onboarded/workflows/create",
+  '/_initialized/_authenticated/_onboarded/workflows/create',
 )({
   beforeLoad: () => ({
-    getTitle: () => "Create workflow",
+    getTitle: () => 'Create workflow',
   }),
   component: CreateWorkflow,
   errorComponent: ({ error }) => {
@@ -61,8 +61,8 @@ interface Transition {
 }
 
 const defaultGraphJson: MachineConfig = {
-  id: "capa_document_process",
-  initial: "identification",
+  id: 'capa_document_process',
+  initial: 'identification',
   states: {
     closure: {
       // Final state
@@ -70,56 +70,56 @@ const defaultGraphJson: MachineConfig = {
     identification: {
       on: {
         PROBLEM_IDENTIFIED: {
-          actions: "setProblemDescription",
-          target: "investigation",
+          actions: 'setProblemDescription',
+          target: 'investigation',
         },
       },
     },
     implementingCorrectiveAction: {
       on: {
         CORRECTIVE_ACTION_IMPLEMENTED: {
-          target: "planningPreventiveAction",
+          target: 'planningPreventiveAction',
         },
       },
     },
     implementingPreventiveAction: {
       on: {
         PREVENTIVE_ACTION_IMPLEMENTED: {
-          target: "verification",
+          target: 'verification',
         },
       },
     },
     investigation: {
       on: {
         ROOT_CAUSE_FOUND: {
-          actions: "setRootCause",
-          target: "planningCorrectiveAction",
+          actions: 'setRootCause',
+          target: 'planningCorrectiveAction',
         },
       },
     },
     planningCorrectiveAction: {
       on: {
         CORRECTIVE_ACTION_PLANNED: {
-          actions: "setCorrectiveAction",
-          target: "implementingCorrectiveAction",
+          actions: 'setCorrectiveAction',
+          target: 'implementingCorrectiveAction',
         },
       },
     },
     planningPreventiveAction: {
       on: {
         PREVENTIVE_ACTION_PLANNED: {
-          actions: "setPreventiveAction",
-          target: "implementingPreventiveAction",
+          actions: 'setPreventiveAction',
+          target: 'implementingPreventiveAction',
         },
       },
     },
     verification: {
       on: {
         ACTIONS_EFFECTIVE: {
-          target: "closure",
+          target: 'closure',
         },
         ACTIONS_INEFFECTIVE: {
-          target: "identification",
+          target: 'identification',
         },
       },
     },
@@ -149,7 +149,7 @@ export function CreateWorkflow() {
           data: { label: stateId },
           id: stateId,
           position: { x: index * 150, y: 0 },
-          type: "default",
+          type: 'default',
         });
 
         if (state.on) {
@@ -210,7 +210,7 @@ export function CreateWorkflow() {
   const form = useForm({
     defaultValues: {
       graph_json: JSON.stringify(defaultGraphJson, null, 2),
-      name: "",
+      name: '',
     },
     onSubmit: async ({ value }) => {
       setIsSubmitting(true);
@@ -227,7 +227,7 @@ export function CreateWorkflow() {
         });
         navigate({
           params: { workflowId: workflowId.toString() },
-          to: "/workflows/$workflowId",
+          to: '/workflows/$workflowId',
         });
       } catch (_error) {
         // TODO: handle error
@@ -275,11 +275,11 @@ export function CreateWorkflow() {
           <form.Field
             name="name"
             validators={{
-              onChange: ({ value }) => {
+              onSubmit: ({ value }) => {
                 try {
                   z.string()
                     .min(2, {
-                      message: "Workflow must be at least 2 characters.",
+                      message: 'Workflow must be at least 2 characters.',
                     })
                     .parse(value);
                   return undefined;
@@ -287,7 +287,7 @@ export function CreateWorkflow() {
                   if (error instanceof z.ZodError) {
                     return error.errors[0]?.message;
                   }
-                  return "Invalid input";
+                  return 'Invalid input';
                 }
               },
             }}
@@ -312,7 +312,7 @@ export function CreateWorkflow() {
           {nodes.length > 0 && (
             <>
               <Label>Workflow Visualization</Label>
-              <div style={{ height: "400px", width: "100%" }}>
+              <div style={{ height: '400px', width: '100%' }}>
                 <ReactFlowProvider>
                   <ReactFlow
                     edges={edges}
@@ -333,15 +333,15 @@ export function CreateWorkflow() {
           <form.Field
             name="graph_json"
             validators={{
-              onChange: ({ value }) => {
+              onSubmit: ({ value }) => {
                 try {
                   if (value.length < 3) {
-                    return "Graph JSON must be at least 3 characters.";
+                    return 'Graph JSON must be at least 3 characters.';
                   }
                   JSON.parse(value);
                   return undefined;
                 } catch {
-                  return "Invalid JSON format.";
+                  return 'Invalid JSON format.';
                 }
               },
             }}
@@ -369,7 +369,7 @@ export function CreateWorkflow() {
             {isSubmitting ? (
               <Loading className="place-items-start" text="Creating..." />
             ) : (
-              "Create"
+              'Create'
             )}
           </Button>
         </form>

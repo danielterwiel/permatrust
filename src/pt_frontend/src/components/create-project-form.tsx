@@ -63,7 +63,7 @@ export const CreateProjectForm: FC<CreateProjectFormProps> = ({
           <form.Field
             name="name"
             validators={{
-              onChange: ({ value }) => {
+              onSubmit: ({ value }) => {
                 try {
                   createProjectFormSchema.parse({ name: value });
                   return undefined;

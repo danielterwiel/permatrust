@@ -2,7 +2,7 @@ use super::state;
 use super::*;
 use crate::logger::{log_info, loggable_document};
 use crate::revisions::create_revision;
-use crate::users::get_user_by_principal;
+use crate::users::state::get_by_principal;
 use shared::utils::pagination::paginate;
 
 #[ic_cdk_macros::update]
@@ -13,7 +13,8 @@ pub fn create_document(
 ) -> Result<DocumentId, AppError> {
     let document_id = state::get_next_id();
     let principal = ic_cdk::caller();
-    let user = get_user_by_principal(principal)?;
+    let user = get_by_principal(principal)
+        .ok_or_else(|| AppError::EntityNotFound("User not found".to_string()))?;
 
     let document = Document {
         id: document_id,

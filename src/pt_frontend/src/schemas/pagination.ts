@@ -22,6 +22,10 @@ const userFilterFieldSchema = z.union([
   z.object({ FirstName: z.null() }).strict(),
   z.object({ LastName: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiUserFilterField>;
+const userWithRolesFilterFieldSchema = z.union([
+  z.object({ FirstName: z.null() }).strict(),
+  z.object({ LastName: z.null() }).strict(),
+]) satisfies z.ZodType<ApiUserFilterField>;
 const organizationFilterFieldSchema = z.union([
   z.object({ Name: z.null() }).strict(),
   z.object({ CreatedAt: z.null() }).strict(),
@@ -55,6 +59,7 @@ export const filterFieldSchema = z.union([
   z.object({ Project: projectFilterFieldSchema }).strict(),
   z.object({ Revision: revisionFilterFieldSchema }).strict(),
   z.object({ User: userFilterFieldSchema }).strict(),
+  z.object({ UserWithRoles: userWithRolesFilterFieldSchema }).strict(),
   z.object({ Workflow: workflowFilterFieldSchema }).strict(),
 ]) satisfies z.ZodType<ApiFilterField>;
 export const filterOperatorSchema = z.union([

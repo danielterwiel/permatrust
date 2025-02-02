@@ -49,8 +49,15 @@ pub enum WorkflowFilterField {
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
+pub enum UserWithRolesFilterField {
+    FirstName,
+    LastName,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug)]
 pub enum FilterField {
     User(UserFilterField),
+    UserWithRoles(UserWithRolesFilterField),
     Document(DocumentFilterField),
     Revision(RevisionFilterField),
     Organization(OrganizationFilterField),
