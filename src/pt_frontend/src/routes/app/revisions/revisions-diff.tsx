@@ -11,7 +11,7 @@ import { decodeUint8Array } from '@/utils/decodeUint8Array';
 const revisionSchema = z.object({
   content: z.union([z.array(z.number()), z.instanceof(Uint8Array)]),
   created_at: z.bigint(),
-  created_by: z.any(), // TODO: validate Principals
+  created_by: z.string().uuid(),
   document_id: z.bigint(),
   id: z.bigint(),
   version: z.number(),

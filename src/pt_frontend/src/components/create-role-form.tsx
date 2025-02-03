@@ -38,6 +38,7 @@ export const createRoleFormSchema = z.object({
 
 type CreateRoleFormProps = {
   permissions: Permission[];
+  projectId: string;
 };
 
 type FormValues = {
@@ -49,7 +50,10 @@ type FormValues = {
   };
 };
 
-export function CreateRoleForm({ permissions }: CreateRoleFormProps) {
+export function CreateRoleForm({
+  permissions,
+  projectId,
+}: CreateRoleFormProps) {
   const [projects, setProjects] = useState<Project[] | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -90,7 +94,7 @@ export function CreateRoleForm({ permissions }: CreateRoleFormProps) {
           description: value.description ? [value.description] : [],
           name: value.name,
           permissions,
-          project_id: 0, // TODO:
+          project_id: projectId,
         });
       } catch (_error) {
         // TODO: handle error

@@ -1,5 +1,5 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -eo pipefail
 
 # Get script directory
 SCRIPT_DIR=$(dirname "$(realpath "$0")")

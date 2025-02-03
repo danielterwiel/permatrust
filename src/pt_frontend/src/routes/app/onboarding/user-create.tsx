@@ -31,11 +31,10 @@ function CreateUser() {
   async function onSubmit(values: z.infer<typeof createUserFormSchema>) {
     try {
       setIsSubmitting(true);
-      // TODO: set organizations
       const user = await api.create_user({
         first_name: values.first_name,
         last_name: values.last_name,
-        organizations: [],
+        organizations: [], // TODO: invite codes
       });
       authActor.send({
         type: 'UPDATE_USER',

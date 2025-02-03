@@ -1,5 +1,5 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -eo pipefail
 
 # Start dfx in background if not running
 if ! pgrep -x "dfx" > /dev/null; then
@@ -10,3 +10,5 @@ fi
 # Run frontend development server
 cd src/pt_frontend
 npm run dev
+
+

@@ -1,25 +1,39 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -eo pipefail
 
 # Download II candid first
 ./scripts/candid/download-ii.sh
 
-# Install dfx if not present
+# CI-specific configuration
+if [ "$CI" = "true" ]; then
+    # Source environment for current shell
+    source "$HOME/.local/share/dfx/env"
+else
+    # Local development install
+    if ! command -v dfx &> /dev/null; then
+        DFX_VERSION="0.24.3"  # Match CI version
+        sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+    fi
+fi
+
+# Verify installation
 if ! command -v dfx &> /dev/null; then
-    DFX_VERSION=$(cat dfx.json | grep -o '"dfx": "[^"]*' | cut -d'"' -f4 || echo "0.15.1")
-    sh -ci "$(curl -fsSL https://internetcomputer.org/install.sh)"
+    echo "❌ Critical Error: dfx not found in PATH after installation attempt"
+    exit 1
 fi
 
 # Start dfx if not running
 if ! pgrep -x "dfx" > /dev/null; then
     dfx start --background
-    sleep 2
+    sleep 5  # Increased wait time for CI stability
 fi
 
-# Create canisters if they don't exist
+# Create canisters with retry logic
 CANISTERS=("pt_backend" "internet_identity" "pt_frontend")
 for CANISTER in "${CANISTERS[@]}"; do
-    dfx canister create "$CANISTER" || true
+    for i in {1..3}; do
+        dfx canister create "$CANISTER" && break || sleep 5
+    done
 done
 
 # Create asset canister interface

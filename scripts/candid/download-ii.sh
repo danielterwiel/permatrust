@@ -1,5 +1,5 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -eo pipefail
 
 # Create all necessary directories
 mkdir -p src/declarations/internet_identity

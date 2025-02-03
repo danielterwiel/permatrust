@@ -24,6 +24,8 @@ export const Route = createFileRoute(
 
 function RoleCreate() {
   const { permissions } = Route.useLoaderData();
+  const { projectId } = Route.useParams();
+
   return (
     <div className="pt-4">
       <Card>
@@ -38,7 +40,7 @@ function RoleCreate() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <CreateRoleForm permissions={permissions} />
+          <CreateRoleForm permissions={permissions} projectId={projectId} />
         </CardContent>
       </Card>
     </div>

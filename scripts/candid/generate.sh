@@ -1,5 +1,5 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -eo pipefail
 
 # Check if WASM file exists
 WASM_FILE="target/wasm32-unknown-unknown/release/pt_backend.wasm"

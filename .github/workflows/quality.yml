@@ -9,74 +9,37 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Cache Node.js modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+      - name: Ensure Script Permissions
+        run: find ./scripts -type f -name "*.sh" -exec chmod +x {} \;
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '23.x'
-
-      - name: Cache DFX
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/dfx
-          key: ${{ runner.os }}-dfx-${{ hashFiles('**/dfx.json') }}
-          restore-keys: |
-            ${{ runner.os }}-dfx-
+      - name: Verify Script Permissions
+        run: ls -l ./scripts/**/*.sh
 
       - name: Setup DFX
         uses: dfinity/setup-dfx@main
         with:
-          dfx-version: "auto"
+          dfx-version: "0.24.3"
 
-      - name: Cache Rust toolchain
+      - name: Configure environment
+        run: |
+          echo "$HOME/.local/share/dfx/bin" >> $GITHUB_PATH
+          dfx cache install
+
+      - name: Cache Dependencies
         uses: actions/cache@v3
         with:
-          path: ~/.cargo
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          path: |
+            ~/.npm
+            ~/.cache/dfx
+            ~/.cargo
+            target
+            src/pt_frontend/node_modules
+          key: ${{ runner.os }}-${{ hashFiles('**/Cargo.lock', '**/package-lock.json', 'dfx.json') }}
           restore-keys: |
-            ${{ runner.os }}-cargo-
+            ${{ runner.os }}-
 
-      - name: Setup Rust toolchain
-        uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          components: clippy
-          override: true
-          target: wasm32-unknown-unknown
+      - name: Full Build Process
+        run: ./scripts/build.sh
 
-      - name: Set build script permissions
-        run: |
-          chmod +x ./scripts/*.sh
-          chmod +x ./scripts/**/*.sh
-
-      - name: (BE) Setup DFX identity
-        run: |
-          dfx identity new github-ci --disable-encryption || true
-          dfx identity use github-ci
-
-      - name: (BE/FE) Deploy
-        run: ./scripts/deploy.sh
-
-      - name: (BE) Lint - Clippy
-        run: |
-          cd src/pt_backend && cargo clippy -- -D warnings
-          cd ../shared && cargo clippy -- -D warnings
-
-      - name: (FE) Format - Prettier
-        working-directory: ./src/pt_frontend
-        run: npm run format:write
-
-      - name: (FE) TypeCheck - tsc
-        working-directory: ./src/pt_frontend
-        run: npm run typecheck
-
-      - name: (FE) Lint - Biome/ESlint
-        working-directory: ./src/pt_frontend
-        run: npm run lint
+      - name: Quality Assurance
+        run: ./scripts/check.sh

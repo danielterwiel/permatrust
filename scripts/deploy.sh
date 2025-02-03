@@ -1,5 +1,7 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -eo pipefail
+
+export DFX_CACHE_PATH=~/.cache/dfx
 
 # Ensure everything is built
 ./scripts/build.sh
