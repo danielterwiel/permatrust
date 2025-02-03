@@ -9,15 +9,39 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Cache Node.js modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '23.x'
 
+      - name: Cache DFX
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/dfx
+          key: ${{ runner.os }}-dfx-${{ hashFiles('**/dfx.json') }}
+          restore-keys: |
+            ${{ runner.os }}-dfx-
+
       - name: Setup DFX
         uses: dfinity/setup-dfx@main
         with:
           dfx-version: "auto"
+
+      - name: Cache Rust toolchain
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
 
       - name: Setup Rust toolchain
         uses: actions-rs/toolchain@v1
