@@ -2,20 +2,29 @@ use super::state;
 use super::*;
 use crate::logger::{log_info, loggable_organization};
 use crate::users::get_user_by_principal;
-use shared::types::errors::AppError;
+use shared::types::organizations::{
+    CreateOrganizationInput, CreateOrganizationResult, GetOrganizationResult,
+    ListOrganizationsResult, OrganizationIdInput,
+};
 use shared::utils::pagination::paginate;
 
 #[ic_cdk_macros::update]
-pub fn create_organization(name: String) -> Result<OrganizationId, AppError> {
-    state::validate_name(&name)?;
+pub fn create_organization(input: CreateOrganizationInput) -> CreateOrganizationResult {
+    let validate_result = state::validate_name(&input.name);
+    if let Err(e) = validate_result {
+        return CreateOrganizationResult::Err(e);
+    }
 
     let caller = ic_cdk::caller();
-    let user = get_user_by_principal(caller)?;
-    let id = state::get_next_id();
+    let user = match get_user_by_principal(caller) {
+        Ok(u) => u,
+        Err(e) => return CreateOrganizationResult::Err(e),
+    };
 
+    let id = state::get_next_id();
     let organization = Organization {
         id,
-        name,
+        name: input.name,
         members: vec![user.id],
         projects: vec![],
         created_at: ic_cdk::api::time(),
@@ -25,31 +34,35 @@ pub fn create_organization(name: String) -> Result<OrganizationId, AppError> {
     state::insert(id, organization.clone());
     log_info("create_organization", loggable_organization(&organization));
 
-    Ok(id)
+    CreateOrganizationResult::Ok(id)
 }
 
 #[ic_cdk_macros::query]
-pub fn list_organizations(
-    pagination: PaginationInput,
-) -> Result<(Vec<Organization>, PaginationMetadata), AppError> {
+pub fn list_organizations(pagination: PaginationInput) -> ListOrganizationsResult {
     let caller = ic_cdk::caller();
-    let user = get_user_by_principal(caller)?;
-    let organizations = state::get_by_user_id(user.id);
+    let user = match get_user_by_principal(caller) {
+        Ok(u) => u,
+        Err(e) => return ListOrganizationsResult::Err(e),
+    };
 
-    paginate(
+    let organizations = state::get_by_user_id(user.id);
+    match paginate(
         &organizations,
         pagination.page_size,
         pagination.page_number,
         pagination.filters,
         pagination.sort,
-    )
+    ) {
+        Ok(result) => ListOrganizationsResult::Ok(result),
+        Err(e) => ListOrganizationsResult::Err(e),
+    }
 }
 
 #[ic_cdk_macros::query]
-pub fn get_organization(organization_id: OrganizationId) -> OrganizationResult {
-    match state::get_by_id(organization_id) {
-        Some(organization) => OrganizationResult::Ok(organization),
-        None => OrganizationResult::Err(AppError::EntityNotFound(
+pub fn get_organization(input: OrganizationIdInput) -> GetOrganizationResult {
+    match state::get_by_id(input.id) {
+        Some(org) => GetOrganizationResult::Ok(org),
+        None => GetOrganizationResult::Err(AppError::EntityNotFound(
             "Organization not found".to_string(),
         )),
     }

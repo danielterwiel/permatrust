@@ -73,7 +73,10 @@ export const Route = createFileRoute(
     const projectId = toNumberSchema.parse(params.projectId);
     const rolePagination = buildPaginationInput(deps.pagination);
     const [assignedRoles, paginationMetaData] =
-      await api.list_project_members_roles(projectId, rolePagination);
+      await api.list_project_members_roles({
+        pagination: rolePagination,
+        project_id: projectId,
+      });
 
     return {
       assignedRoles,
@@ -97,7 +100,7 @@ const RowActions = (row: Row<UserWithRoles>) => {
         projectId: firstRole?.project_id.toString(),
       }}
       search={{
-        userId: Number(row.original.user.id),
+        userId: toNumberSchema.parse(row.original.user.id),
       }}
       to="/projects/$projectId/roles/assign"
       variant="outline"

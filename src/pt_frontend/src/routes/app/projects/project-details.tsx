@@ -76,13 +76,13 @@ export const Route = createFileRoute(
   }),
   loader: async ({ context, deps, params }) => {
     const documentPagination = buildPaginationInput(deps.pagination);
-    const projectIdNumber = toNumberSchema.parse(params.projectId);
+    const projectId = toNumberSchema.parse(params.projectId);
     const [documents, paginationMetaData] =
-      await api.list_documents_by_project_id(
-        projectIdNumber,
-        documentPagination,
-      );
-    const project = await api.get_project(projectIdNumber);
+      await api.list_documents_by_project_id({
+        pagination: documentPagination,
+        project_id: projectId,
+      });
+    const project = await api.get_project({ id: projectId });
     return {
       context,
       documents,

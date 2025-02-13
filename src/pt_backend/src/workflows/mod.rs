@@ -8,7 +8,6 @@ use shared::traits::workflows::WorkflowGraphExt;
 use shared::types::errors::AppError;
 use shared::types::pagination::PaginationInput;
 use shared::types::workflows::{
-    CreateWorkflowInput, Edge, EventId, PaginatedWorkflowsResult, StateId, Workflow, WorkflowGraph,
-    WorkflowId, WorkflowResult,
+    CreateWorkflowInput, Edge, EventId, StateId, Workflow, WorkflowGraph, WorkflowId,
 };
 use std::collections::HashMap;

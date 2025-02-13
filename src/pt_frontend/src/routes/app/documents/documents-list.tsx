@@ -87,6 +87,7 @@ export const Route = createFileRoute(
   validateSearch: zodSearchValidator(documentsSearchSchema),
   loaderDeps: ({ search }) => ({
     pagination: { ...DEFAULT_DOCUMENT_PAGINATION, ...search.pagination },
+    projectId: search.projectId,
   }),
   beforeLoad: () => ({
     getTitle: () => 'Documents',
@@ -95,12 +96,14 @@ export const Route = createFileRoute(
     const activeOrganizationId = getActiveOrganizationId();
     const documentPagination = buildPaginationInput(deps.pagination);
     const projectPagination = buildPaginationInput(DEFAULT_PAGINATION);
-    const [projects] = await api.list_projects_by_organization_id(
-      activeOrganizationId,
-      projectPagination,
-    );
-    const [documents, paginationMetaData] =
-      await api.list_documents(documentPagination);
+    const [projects] = await api.list_projects_by_organization_id({
+      organization_id: activeOrganizationId,
+      pagination: projectPagination,
+    });
+    const [documents, paginationMetaData] = await api.list_documents({
+      pagination: documentPagination,
+      project_id: deps.projectId,
+    });
     return {
       context,
       documents,

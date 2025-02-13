@@ -1,4 +1,4 @@
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 
@@ -36,7 +36,9 @@ function CreateOrganization() {
   ) {
     try {
       setIsSubmitting(true);
-      const organizationId = await api.create_organization(values.name);
+      const organizationId = await api.create_organization({
+        name: values.name,
+      });
       setActiveOrganizationId(organizationId.toString());
       navigate({
         to: `/organizations/${organizationId.toString()}`,

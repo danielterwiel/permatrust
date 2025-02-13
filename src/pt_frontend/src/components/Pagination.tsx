@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/pagination';
 
 import type { PaginationMetadata } from '@/declarations/pt_backend/pt_backend.did';
+import { toNumberSchema } from '@/schemas/primitives';
 
 type PaginationProps = {
   paginationMetaData: PaginationMetadata;
@@ -23,8 +24,8 @@ export function Pagination({
     total_pages,
   },
 }: PaginationProps) {
-  const totalPages = Number(total_pages);
-  const currentPage = Number(page_number);
+  const totalPages = toNumberSchema.parse(total_pages);
+  const currentPage = toNumberSchema.parse(page_number);
 
   // Hide pagination when there are no items or only one page
   if (total_items === 0 || totalPages <= 1) {

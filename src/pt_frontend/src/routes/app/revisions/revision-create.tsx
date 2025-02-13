@@ -43,10 +43,10 @@ export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/create',
 )({
   beforeLoad: async ({ params }) => {
-    const response = await api.list_revisions_by_document_id(
-      BigInt(params.documentId),
-      LAST_REVISION_PAGINATION,
-    );
+    const response = await api.list_revisions_by_document_id({
+      document_id: BigInt(params.documentId),
+      pagination: LAST_REVISION_PAGINATION,
+    });
     if (isAppError(response)) {
       throw new Error('Error fetching Revision');
     }
@@ -62,7 +62,7 @@ export const Route = createFileRoute(
 
 function RevisionsCreate() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { documentId, projectId } = Route.useParams();
+  const params = Route.useParams();
   const { revision } = Route.useRouteContext({
     select: ({ revision }) => ({ revision }),
   });
@@ -74,10 +74,14 @@ function RevisionsCreate() {
       const encoder = new TextEncoder();
       const content = encoder.encode(values.content);
 
-      const projectIdNumber = toNumberSchema.parse(projectId);
-      const documentIdBigInt = toBigIntSchema.parse(documentId);
+      const projectId = toNumberSchema.parse(params.projectId);
+      const documentId = toBigIntSchema.parse(params.documentId);
 
-      await api.create_revision(projectIdNumber, documentIdBigInt, content);
+      await api.create_revision({
+        content,
+        document_id: documentId,
+        project_id: projectId,
+      });
 
       navigate({
         to: '/projects/$projectId/documents/$documentId',
@@ -93,7 +97,7 @@ function RevisionsCreate() {
     <CreateRevisionForm
       isSubmitting={isSubmitting}
       onSubmit={onSubmit}
-      projectId={projectId}
+      projectId={params.projectId}
       revision={revision}
     />
   );

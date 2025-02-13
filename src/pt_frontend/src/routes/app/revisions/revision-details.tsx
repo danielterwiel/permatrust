@@ -15,7 +15,7 @@ export const Route = createFileRoute(
     };
   },
   loader: async ({ params: { revisionId } }) => {
-    const revision = await api.get_revision(BigInt(revisionId));
+    const revision = await api.get_revision({ id: BigInt(revisionId) });
     return {
       revision,
     };

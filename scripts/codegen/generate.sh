@@ -17,7 +17,7 @@ candid-extractor "$WASM_FILE" > src/pt_backend/pt_backend.did
 
 # Download Internet Identity declarations
 echo "Downloading Internet Identity declarations..."
-./scripts/candid/download-ii.sh
+./scripts/codegen/download-ii.sh
 
 # Generate TypeScript declarations
 echo "Generating TypeScript bindings..."

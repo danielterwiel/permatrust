@@ -94,10 +94,9 @@ pub struct SortCriteria {
     pub field: FilterField,
     pub order: SortOrder,
 }
-// pub type Sort = Option<SortCriteria>;
 pub type PageNumber = u8;
 
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Debug, Clone)]
 pub struct PaginationInput {
     pub filters: Filters,
     pub page_size: PageSize,

@@ -23,6 +23,7 @@ import {
 } from '@/consts/pagination';
 
 import { paginationInputSchema } from '@/schemas/pagination';
+import { toNumberSchema } from '@/schemas/primitives';
 
 import type {
   PaginationInput,
@@ -67,11 +68,11 @@ export const Route = createFileRoute(
     const revisionPagination = buildPaginationInput(deps.pagination);
 
     const [revisions, paginationMetaData] =
-      await api.list_revisions_by_document_id(
-        BigInt(params.documentId),
-        revisionPagination,
-      );
-    const document = await api.get_document(BigInt(params.documentId));
+      await api.list_revisions_by_document_id({
+        document_id: BigInt(params.documentId),
+        pagination: revisionPagination,
+      });
+    const document = await api.get_document({ id: BigInt(params.documentId) });
 
     return {
       context,
@@ -146,11 +147,11 @@ function DocumentDetails() {
             search={{
               current:
                 selected[1]?.id !== undefined
-                  ? Number(selected[1].id)
+                  ? toNumberSchema.parse(selected[1].id)
                   : undefined,
               theirs:
                 selected[0]?.id !== undefined
-                  ? Number(selected[0].id)
+                  ? toNumberSchema.parse(selected[0].id)
                   : undefined,
             }}
             to="/projects/$projectId/documents/$documentId/revisions/diff"

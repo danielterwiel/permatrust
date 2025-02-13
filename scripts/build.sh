@@ -19,6 +19,9 @@ cd "$PROJECT_ROOT"
 # Build backend
 ./scripts/build/backend.sh
 
+# Generate types
+./scripts/codegen/generate.sh
+
 # Build frontend
 ./scripts/build/frontend.sh
 

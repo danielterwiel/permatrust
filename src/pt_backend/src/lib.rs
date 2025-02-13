@@ -1,16 +1,36 @@
 use shared::types::access_control::{
-    AssignRolesInput, Permission, Role, RoleId, RoleInput, UserWithRoles,
+    AssignRolesInput, AssignRolesResult, CreateRoleResult, GetPermissionsResult,
+    GetProjectRolesInput, GetProjectRolesResult, GetRoleResult, GetUserPermissionsResult,
+    GetUserRolesResult, ListProjectMembersRolesResult, RoleIdInput, RoleInput,
+    UpdateRolePermissionsInput, UpdateRolePermissionsResult,
 };
-use shared::types::documents::{Document, DocumentId};
+use shared::types::documents::{
+    CreateDocumentInput, CreateDocumentResult, DocumentIdInput, GetDocumentResult,
+    ListDocumentsByProjectIdInput, ListDocumentsByProjectIdResult, ListDocumentsInput,
+    ListDocumentsResult,
+};
 use shared::types::errors::AppError;
-use shared::types::organizations::{Organization, OrganizationId, OrganizationResult};
+use shared::types::organizations::{
+    CreateOrganizationInput, CreateOrganizationResult, GetOrganizationResult,
+    ListOrganizationsResult, OrganizationIdInput,
+};
+
 use shared::types::pagination::{PaginationInput, PaginationMetadata};
-use shared::types::projects::{Project, ProjectId, ProjectResult};
-use shared::types::revisions::{Revision, RevisionId};
-use shared::types::users::{CreateUserInput, User, UserId};
+use shared::types::projects::{
+    CreateProjectInput, CreateProjectResult, GetProjectsResult, ListProjectMembersInput,
+    ListProjectMembersResult, ListProjectsByOrganizationIdInput, ListProjectsByOrganizationResult,
+    ListProjectsResult, ProjectIdInput, ProjectResult,
+};
+use shared::types::revisions::{
+    CreateRevisionInput, CreateRevisionResult, DiffRevisionsInput, DiffRevisionsResult,
+    GetRevisionResult, ListRevisionsByDocumentIdInput, ListRevisionsInput, ListRevisionsResult,
+    RevisionIdInput,
+};
+use shared::types::users::{CreateUserInput, ListProjectMembersRolesInput, User, UserIdInput};
 use shared::types::workflows::{
-    CreateWorkflowInput, EventId, PaginatedWorkflowsResult, StateId, Workflow, WorkflowGraph,
-    WorkflowId,
+    CreateWorkflowInput, CreateWorkflowResult, ExecuteWorkflowInput, ExecuteWorkflowResult,
+    GetWorkflowDefinitionResult, GetWorkflowResult, GetWorkflowStateResult, ListWorkflowsResult,
+    WorkflowIdInput,
 };
 
 // init

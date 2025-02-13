@@ -5,6 +5,7 @@ use serde::Deserialize;
 pub enum AppError {
     InvalidPageSize(String),
     InvalidInput(String),
+    InvalidStateTransition(String),
     EntityNotFound(String),
     InvalidPageNumber(String),
     Unauthorized,

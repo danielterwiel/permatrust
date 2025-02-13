@@ -35,10 +35,6 @@ pub fn get_role(role_id: &RoleId) -> Option<Role> {
     ROLES.with(|roles| roles.borrow().get(role_id))
 }
 
-// pub fn get_all_roles() -> Vec<Role> {
-//     ROLES.with(|roles| roles.borrow().iter().map(|(_, role)| role).collect())
-// }
-
 pub fn get_roles_by_project(project_id: u32) -> Vec<Role> {
     ROLES.with(|roles| {
         roles

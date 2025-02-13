@@ -1,4 +1,4 @@
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { z } from 'zod';

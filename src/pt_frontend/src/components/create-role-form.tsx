@@ -24,6 +24,8 @@ import { Textarea } from '@/components/ui/textarea';
 
 import { createPermissionVariant } from '@/utils/variants/permissions';
 
+import { toNumberSchema } from '@/schemas/primitives';
+
 import type {
   Permission,
   Project,
@@ -66,7 +68,6 @@ export function CreateRoleForm({
       getProjects();
     }
   }, [projects]);
-
   const availablePermissions = permissionsToItems(permissions);
 
   const form = useForm<FormValues>({
@@ -90,17 +91,17 @@ export function CreateRoleForm({
         return entityPermission;
       });
       try {
+        const projectIdParsed = toNumberSchema.parse(projectId);
         await api.create_role({
           description: value.description ? [value.description] : [],
           name: value.name,
           permissions,
-          project_id: projectId,
+          project_id: projectIdParsed,
         });
       } catch (_error) {
         // TODO: handle error
-      } finally {
-        setIsSubmitting(false);
       }
+      setIsSubmitting(false);
     },
   });
 
@@ -156,7 +157,7 @@ export function CreateRoleForm({
                 value={field.state.value}
               />
             </FormControl>
-            <FormDescription>This is your project name.</FormDescription>
+            <FormDescription>This is your role name.</FormDescription>
             <FormMessage field={field} />
           </FormItem>
         )}
@@ -174,7 +175,7 @@ export function CreateRoleForm({
                 value={field.state.value}
               />
             </FormControl>
-            <FormDescription>This is your project description.</FormDescription>
+            <FormDescription>This is your role description.</FormDescription>
             <FormMessage field={field} />
           </FormItem>
         )}

@@ -28,10 +28,10 @@ export const Route = createFileRoute(
   validateSearch: zodSearchValidator(revisionSearchSchema),
   loaderDeps: ({ search: { current, theirs } }) => ({ current, theirs }),
   loader: async ({ deps }) => {
-    const revisions = await api.diff_revisions(
-      BigInt(deps.current),
-      BigInt(deps.theirs),
-    );
+    const revisions = await api.diff_revisions({
+      original: BigInt(deps.current),
+      updated: BigInt(deps.theirs),
+    });
     return { revisions };
   },
   component: RevisionDiff,
@@ -51,25 +51,25 @@ function RevisionDiff() {
     }
   }, [revisions]);
 
-  const [current, theirs] = revisions;
+  const [original, updated] = revisions;
 
-  if (!current || !theirs) {
+  if (!original || !updated) {
     return <div> TODO: hoax</div>;
   }
 
-  const contentCurrent = decodeUint8Array(current.content);
-  const contentTheirs = decodeUint8Array(theirs.content);
+  const contentOriginal = decodeUint8Array(original.content);
+  const contentUpdated = decodeUint8Array(updated.content);
 
   return (
     <MDXEditor
-      markdown={contentCurrent}
+      markdown={contentOriginal}
       onError={(_error) => {
         // TODO: handle error
       }}
       plugins={[
         headingsPlugin(),
         diffSourcePlugin({
-          diffMarkdown: contentTheirs,
+          diffMarkdown: contentUpdated,
           viewMode: 'diff',
         }),
       ]}

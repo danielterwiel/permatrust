@@ -58,11 +58,11 @@ export const Route = createFileRoute(
   }),
   loader: async ({ deps, params }) => {
     const projectId = toNumberSchema.parse(params.projectId);
-    const roles = await api.get_project_roles(projectId);
-    const [users] = await api.list_project_members(
-      projectId,
-      DEFAULT_PAGINATION,
-    );
+    const roles = await api.get_project_roles({ project_id: projectId });
+    const [users] = await api.list_project_members({
+      pagination: DEFAULT_PAGINATION,
+      project_id: projectId,
+    });
 
     let preselectedUser: undefined | User;
     let userRoles: Role[] = [];
@@ -74,9 +74,8 @@ export const Route = createFileRoute(
 
       // Then get their roles
       if (preselectedUser) {
-        const [assignedRoles] = await api.list_project_members_roles(
-          projectId,
-          {
+        const [assignedRoles] = await api.list_project_members_roles({
+          pagination: {
             ...DEFAULT_PAGINATION,
             filters: [
               [
@@ -92,11 +91,12 @@ export const Route = createFileRoute(
               ],
             ],
           },
-        );
+          project_id: projectId,
+        });
 
         if (assignedRoles.length > 0) {
           const userWithRoles = assignedRoles[0];
-          userRoles = userWithRoles.roles;
+          userRoles = userWithRoles?.roles ?? [];
         }
       }
     }

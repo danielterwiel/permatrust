@@ -75,7 +75,10 @@ export const Route = createFileRoute(
     const documentPagination = buildPaginationInput(deps.pagination);
     const projectId = toNumberSchema.parse(params.projectId);
     const [documents, paginationMetaData] =
-      await api.list_documents_by_project_id(projectId, documentPagination);
+      await api.list_documents_by_project_id({
+        pagination: documentPagination,
+        project_id: projectId,
+      });
 
     return {
       context,

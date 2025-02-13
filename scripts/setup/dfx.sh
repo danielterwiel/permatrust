@@ -2,7 +2,7 @@
 set -eo pipefail
 
 # Download II candid first
-./scripts/candid/download-ii.sh
+./scripts/codegen/download-ii.sh
 
 # CI-specific configuration
 if [ "$CI" = "true" ]; then

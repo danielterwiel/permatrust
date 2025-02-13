@@ -1,4 +1,4 @@
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 
@@ -35,10 +35,10 @@ function CreateProject() {
     try {
       const activeOrganizationIdNumber =
         toNumberSchema.parse(activeOrganizationId);
-      const projectId = await api.create_project(
-        activeOrganizationIdNumber,
-        values.name,
-      );
+      const projectId = await api.create_project({
+        name: values.name,
+        organization_id: activeOrganizationIdNumber,
+      });
       navigate({
         params: {
           projectId: projectId.toString(),

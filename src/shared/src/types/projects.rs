@@ -4,8 +4,9 @@ use serde::Deserialize;
 use crate::types::documents::DocumentId;
 use crate::types::errors::AppError;
 use crate::types::organizations::OrganizationId;
+use crate::types::pagination::PaginationInput;
 use crate::types::pagination::PaginationMetadata;
-use crate::types::users::UserId;
+use crate::types::users::{User, UserId};
 
 pub type ProjectId = u32;
 
@@ -20,23 +21,67 @@ pub struct Project {
     pub organizations: Vec<OrganizationId>,
 }
 
+// Inputs
+
+#[derive(CandidType, Deserialize, Clone, Debug)]
+pub struct ProjectIdInput {
+    pub id: ProjectId,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug)]
+pub struct CreateProjectInput {
+    pub organization_id: OrganizationId,
+    pub name: String,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug)]
+pub struct ListProjectMembersInput {
+    pub project_id: ProjectId,
+    pub pagination: PaginationInput,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug)]
+pub struct ListProjectsByOrganizationIdInput {
+    pub organization_id: OrganizationId,
+    pub pagination: PaginationInput,
+}
+
+// Results
+
 #[derive(CandidType, Deserialize)]
-pub enum ProjectIdResult {
+pub enum CreateProjectResult {
     Ok(ProjectId),
     Err(AppError),
 }
 
 #[derive(CandidType, Deserialize)]
-pub enum ProjectResult {
-    Ok(Project),
+pub enum GetProjectsResult {
+    Ok(Vec<Project>),
     Err(AppError),
 }
 
 #[derive(CandidType, Deserialize)]
-pub struct PaginatedProjectsResultOk(pub Vec<Project>, pub PaginationMetadata);
+pub enum ListProjectsResult {
+    Ok((Vec<Project>, PaginationMetadata)),
+    Err(AppError),
+}
 
 #[derive(CandidType, Deserialize)]
-pub enum PaginatedProjectsResult {
-    Ok(PaginatedProjectsResultOk),
+pub enum ListProjectsByOrganizationResult {
+    Ok((Vec<Project>, PaginationMetadata)),
+    Err(AppError),
+}
+
+#[derive(CandidType, Deserialize)]
+pub enum ListProjectMembersResult {
+    Ok((Vec<User>, PaginationMetadata)),
+    Err(AppError),
+}
+
+#[derive(CandidType, Deserialize)]
+pub enum ProjectResult {
+    // #[serde(rename = "ok")]
+    Ok(Project),
+    // #[serde(rename = "err")]
     Err(AppError),
 }

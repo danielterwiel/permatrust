@@ -4,32 +4,36 @@ use crate::users::{get_user_by_id, get_user_by_principal};
 
 use shared::types::entities::Entity;
 use shared::types::pagination::{FilterCriteria, FilterField, FilterOperator, ProjectFilterField};
-use shared::types::users::User;
+use shared::types::projects::{
+    CreateProjectInput, CreateProjectResult, GetProjectsResult, ListProjectMembersInput,
+    ListProjectMembersResult, ListProjectsByOrganizationIdInput, ListProjectsByOrganizationResult,
+    ListProjectsResult, ProjectIdInput,
+};
 use shared::utils::filter::filter;
 use shared::utils::pagination::paginate;
 
 use crate::logger::{log_info, loggable_project};
 
 #[ic_cdk_macros::update]
-pub fn create_project(
-    organization_id: OrganizationId,
-    name: String,
-) -> Result<ProjectId, AppError> {
-    if name.trim().is_empty() {
-        return Err(AppError::InternalError(
+pub fn create_project(input: CreateProjectInput) -> CreateProjectResult {
+    if input.name.trim().is_empty() {
+        return CreateProjectResult::Err(AppError::InternalError(
             "Project name cannot be empty".to_string(),
         ));
     }
 
     let caller = ic_cdk::caller();
-    let user = get_user_by_principal(caller)?;
-    let id = state::get_next_id();
+    let user = match get_user_by_principal(caller) {
+        Ok(u) => u,
+        Err(e) => return CreateProjectResult::Err(e),
+    };
 
+    let id = state::get_next_id();
     let project = Project {
         id,
-        name,
+        name: input.name,
         members: vec![user.id],
-        organizations: vec![organization_id],
+        organizations: vec![input.organization_id],
         created_at: ic_cdk::api::time(),
         created_by: user.id,
         documents: vec![],
@@ -38,13 +42,16 @@ pub fn create_project(
     state::insert(id, project.clone());
     log_info("create_project", loggable_project(&project));
 
-    Ok(id)
+    CreateProjectResult::Ok(id)
 }
 
 #[ic_cdk_macros::query]
-pub fn get_projects() -> Result<Vec<Project>, AppError> {
+pub fn get_projects() -> GetProjectsResult {
     let caller = ic_cdk::caller();
-    let user = get_user_by_principal(caller)?;
+    let user = match get_user_by_principal(caller) {
+        Ok(u) => u,
+        Err(e) => return GetProjectsResult::Err(e),
+    };
 
     let filter_criteria = FilterCriteria {
         field: FilterField::Project(ProjectFilterField::Members),
@@ -56,70 +63,84 @@ pub fn get_projects() -> Result<Vec<Project>, AppError> {
     let projects = state::get_all();
     let projects = filter(&projects, vec![filter_criteria]);
 
-    Ok(projects)
+    GetProjectsResult::Ok(projects)
 }
 
 #[ic_cdk_macros::query]
-pub fn list_projects(
-    pagination: PaginationInput,
-) -> Result<(Vec<Project>, PaginationMetadata), AppError> {
-    let projects = get_projects()?;
-    paginate(
+pub fn list_projects(pagination: PaginationInput) -> ListProjectsResult {
+    let projects = match get_projects() {
+        GetProjectsResult::Ok(p) => p,
+        GetProjectsResult::Err(e) => return ListProjectsResult::Err(e),
+    };
+
+    match paginate(
         &projects,
         pagination.page_size,
         pagination.page_number,
         pagination.filters,
         pagination.sort,
-    )
+    ) {
+        Ok(result) => ListProjectsResult::Ok(result),
+        Err(e) => ListProjectsResult::Err(e),
+    }
 }
+
 #[ic_cdk_macros::query]
 pub fn list_projects_by_organization_id(
-    organization_id: OrganizationId,
-    pagination: PaginationInput,
-) -> Result<(Vec<Project>, PaginationMetadata), AppError> {
-    let projects = state::get_by_organization_id(organization_id);
-    paginate(
+    input: ListProjectsByOrganizationIdInput,
+) -> ListProjectsByOrganizationResult {
+    let projects = state::get_by_organization_id(input.organization_id);
+    match paginate(
         &projects,
-        pagination.page_size,
-        pagination.page_number,
-        pagination.filters,
-        pagination.sort,
-    )
+        input.pagination.page_size,
+        input.pagination.page_number,
+        input.pagination.filters,
+        input.pagination.sort,
+    ) {
+        Ok(result) => ListProjectsByOrganizationResult::Ok(result),
+        Err(e) => ListProjectsByOrganizationResult::Err(e),
+    }
 }
 
 #[ic_cdk_macros::query]
-pub fn list_project_members(
-    project_id: ProjectId,
-    pagination: PaginationInput,
-) -> Result<(Vec<User>, PaginationMetadata), AppError> {
-    let project = state::get_by_id(project_id)
-        .ok_or_else(|| AppError::EntityNotFound("Project not found".to_string()))?;
+pub fn list_project_members(input: ListProjectMembersInput) -> ListProjectMembersResult {
+    let project = match state::get_by_id(input.project_id) {
+        Some(p) => p,
+        None => {
+            return ListProjectMembersResult::Err(AppError::EntityNotFound(
+                "Project not found".to_string(),
+            ))
+        }
+    };
 
     let mut users = Vec::new();
     for user_id in project.members {
         match get_user_by_id(user_id) {
             Ok(user) => users.push(user),
             Err(e) => {
-                return Err(AppError::InternalError(format!(
+                return ListProjectMembersResult::Err(AppError::InternalError(format!(
                     "Failed to get user with id: {}. Cause: {:#?}",
                     user_id, e
-                )));
+                )))
             }
         }
     }
 
-    paginate(
+    match paginate(
         &users,
-        pagination.page_size,
-        pagination.page_number,
-        pagination.filters,
-        pagination.sort,
-    )
+        input.pagination.page_size,
+        input.pagination.page_number,
+        input.pagination.filters,
+        input.pagination.sort,
+    ) {
+        Ok(result) => ListProjectMembersResult::Ok(result),
+        Err(e) => ListProjectMembersResult::Err(e),
+    }
 }
 
 #[ic_cdk_macros::query]
-pub fn get_project(project_id: ProjectId) -> ProjectResult {
-    match state::get_by_id(project_id) {
+pub fn get_project(input: ProjectIdInput) -> ProjectResult {
+    match state::get_by_id(input.id) {
         Some(project) => ProjectResult::Ok(project),
         None => ProjectResult::Err(AppError::EntityNotFound("Project not found".to_string())),
     }

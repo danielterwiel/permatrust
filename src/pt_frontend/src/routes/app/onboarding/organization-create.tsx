@@ -1,14 +1,12 @@
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useState } from 'react';
 
 import { api } from '@/api';
 
-import {
-  CreateOrganizationForm,
-  type createOrganizationFormSchema,
-} from '@/components/create-organization-form';
+import { CreateOrganizationForm } from '@/components/create-organization-form';
 
+import type { createOrganizationFormSchema } from '@/components/create-organization-form';
 import type { z } from 'zod';
 
 export const Route = createFileRoute(
@@ -18,7 +16,7 @@ export const Route = createFileRoute(
     authActor: context.actors.auth,
     getTitle: () => 'Create organization',
   }),
-  loader: async ({ context }) => ({
+  loader: ({ context }) => ({
     authActor: context.authActor,
   }),
   component: CreateOrganization,
@@ -46,7 +44,9 @@ function CreateOrganization() {
         throw new Error('User not found');
       }
 
-      const organizationId = await api.create_organization(values.name);
+      const organizationId = await api.create_organization({
+        name: values.name,
+      });
       setActiveOrganizationId(organizationId.toString());
       navigate({ to: '/projects' });
     } catch (submitError) {

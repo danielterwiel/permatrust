@@ -74,15 +74,15 @@ export const Route = createFileRoute(
   }),
   loader: async ({ context, deps, params }) => {
     const projectPagination = buildPaginationInput(deps.pagination);
-    const organizationIdNumber = toNumberSchema.parse(params.organizationId);
+    const organizationId = toNumberSchema.parse(params.organizationId);
 
     const [projects, paginationMetaData] =
-      await api.list_projects_by_organization_id(
-        organizationIdNumber,
-        projectPagination,
-      );
+      await api.list_projects_by_organization_id({
+        organization_id: organizationId,
+        pagination: projectPagination,
+      });
 
-    const organization = await api.get_organization(organizationIdNumber);
+    const organization = await api.get_organization({ id: organizationId });
 
     return {
       context,

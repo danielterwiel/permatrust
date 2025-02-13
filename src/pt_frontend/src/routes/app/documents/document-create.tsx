@@ -34,13 +34,13 @@ export function CreateDocument() {
     const encoder = new TextEncoder();
     const content = encoder.encode(values.content);
 
-    const documentIdNumber = toNumberSchema.parse(params.projectId);
+    const projectId = toNumberSchema.parse(params.projectId);
 
-    const documentId = await api.create_document(
-      documentIdNumber,
-      values.title,
+    const documentId = await api.create_document({
+      project_id: projectId,
+      title: values.title,
       content,
-    );
+    });
 
     setIsSubmitting(false);
     navigate({
