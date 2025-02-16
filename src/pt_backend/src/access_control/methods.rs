@@ -9,7 +9,7 @@ use shared::types::access_control::{
     GetUserRolesResult, ListProjectMembersRolesResult, RoleIdInput, UpdateRolePermissionsInput,
     UpdateRolePermissionsResult, UserWithRoles,
 };
-use shared::types::users::{ListProjectMembersRolesInput, UserIdInput};
+use shared::types::users::{GetUserResult, ListProjectMembersRolesInput, UserIdInput};
 
 #[ic_cdk_macros::update]
 pub fn create_role(input: RoleInput) -> CreateRoleResult {
@@ -153,7 +153,7 @@ pub fn list_project_members_roles(
 
     for user_id in &project.members {
         match crate::users::get_user_by_id(*user_id) {
-            Ok(user) => match get_user_roles(UserIdInput { id: *user_id }) {
+            GetUserResult::Ok(user) => match get_user_roles(UserIdInput { id: *user_id }) {
                 GetUserRolesResult::Ok(roles) => {
                     let project_roles: Vec<Role> = roles
                         .into_iter()
@@ -173,7 +173,7 @@ pub fn list_project_members_roles(
                     continue;
                 }
             },
-            Err(e) => {
+            GetUserResult::Err(e) => {
                 ic_cdk::api::print(format!("Failed to deserialize user {}: {:?}", user_id, e));
                 continue;
             }

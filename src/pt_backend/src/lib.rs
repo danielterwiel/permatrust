@@ -9,13 +9,12 @@ use shared::types::documents::{
     ListDocumentsByProjectIdInput, ListDocumentsByProjectIdResult, ListDocumentsInput,
     ListDocumentsResult,
 };
-use shared::types::errors::AppError;
 use shared::types::organizations::{
     CreateOrganizationInput, CreateOrganizationResult, GetOrganizationResult,
     ListOrganizationsResult, OrganizationIdInput,
 };
 
-use shared::types::pagination::{PaginationInput, PaginationMetadata};
+use shared::types::pagination::PaginationInput;
 use shared::types::projects::{
     CreateProjectInput, CreateProjectResult, GetProjectsResult, ListProjectMembersInput,
     ListProjectMembersResult, ListProjectsByOrganizationIdInput, ListProjectsByOrganizationResult,
@@ -26,7 +25,10 @@ use shared::types::revisions::{
     GetRevisionResult, ListRevisionsByDocumentIdInput, ListRevisionsInput, ListRevisionsResult,
     RevisionIdInput,
 };
-use shared::types::users::{CreateUserInput, ListProjectMembersRolesInput, User, UserIdInput};
+use shared::types::users::{
+    CreateUserInput, CreateUserResult, GetUserResult, ListProjectMembersRolesInput, ListUsersInput,
+    ListUsersResult, UserIdInput,
+};
 use shared::types::workflows::{
     CreateWorkflowInput, CreateWorkflowResult, ExecuteWorkflowInput, ExecuteWorkflowResult,
     GetWorkflowDefinitionResult, GetWorkflowResult, GetWorkflowStateResult, ListWorkflowsResult,

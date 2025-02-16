@@ -6,6 +6,9 @@ import {
 } from '@dfinity/agent';
 
 import { isAppError } from '@/utils/isAppError';
+import { transformBigIntsToNumbers } from '@/utils/transformBigIntsToNumbers';
+
+import { queryClient } from './query-client';
 
 import type { _SERVICE } from '@/declarations/pt_backend/pt_backend.did';
 import type { Result, ResultHandler } from '@/types/api';
@@ -13,7 +16,6 @@ import type { AuthClient } from '@dfinity/auth-client';
 
 const HOST = import.meta.env.PROD ? 'https://icp0.io' : 'http://localhost:8080';
 
-// For each method in _SERVICE, append an optional ResultHandler parameter.
 export type ApiType = {
   [K in keyof _SERVICE]: _SERVICE[K] extends ActorMethod<infer Args, infer Ret>
     ? (...args: [...Args, ResultHandler<Ret>?]) => Promise<Ret>
@@ -76,35 +78,66 @@ function handleResult<T>(
   throw new Error('Unknown error occurred');
 }
 
-// Wrap an actor to map each method onto our ApiType
+/**
+ * Type guard that checks whether a value is a ResultHandler.
+ */
+function isResultHandler<T>(value: unknown): value is ResultHandler<T> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    ('onOk' in value || 'onErr' in value)
+  );
+}
+
+/**
+ * Wrap an actor to map each method onto our ApiType and integrate react-query.
+ */
 function wrapActor(actor: Actor): ApiType {
   const wrapped = {} as ApiType;
+
   (Object.keys(actor) as Array<keyof _SERVICE>).forEach((key) => {
     const orig = actor[key];
     if (typeof orig === 'function') {
-      wrapped[key] = wrapMethod(orig);
+      wrapped[key] = wrapMethod(orig, key);
     } else {
       wrapped[key] = orig;
     }
   });
+
   return wrapped;
 }
 
-// Wrap a method while preserving its type signature
-function wrapMethod<K extends keyof _SERVICE>(method: _SERVICE[K]): ApiType[K] {
-  return (async (...args: any[]) => {
+/**
+ * Wrap a method while preserving its type signature and integrating react-query.
+ */
+function wrapMethod<K extends keyof _SERVICE>(
+  method: _SERVICE[K],
+  key: K,
+): ApiType[K] {
+  return (async (...args: unknown[]) => {
     let handler: ResultHandler<any> | undefined;
-    // If last argument is a result handler, remove it.
-    if (
-      args.length &&
-      args[args.length - 1] &&
-      typeof args[args.length - 1] === 'object' &&
-      ('onOk' in args[args.length - 1] || 'onErr' in args[args.length - 1])
-    ) {
-      handler = args.pop();
+
+    // Check whether the last argument is a valid ResultHandler
+    if (args.length && isResultHandler(args[args.length - 1])) {
+      handler = args.pop() as ResultHandler<any>;
     }
-    // Invoke the original canister method.
-    const result = (await method(...args)) as Result<any>;
+
+    // Build a unique query key using the method name and arguments.
+    const queryKey = [key, ...args];
+
+    // Define the query function which calls the original method.
+    const queryFn = async (): Promise<Result<any>> => {
+      return (await method(...args)) as Result<any>;
+    };
+
+    const queryKeyTransformed = transformBigIntsToNumbers(queryKey);
+
+    // Use react-query's caching mechanism.
+    const result = await queryClient.fetchQuery({
+      queryFn,
+      queryKey: queryKeyTransformed,
+    });
+
     return handleResult(result, handler);
   }) as ApiType[K];
 }

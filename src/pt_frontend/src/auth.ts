@@ -12,7 +12,6 @@ export class Auth {
   }
 
   public async initializeClient(): Promise<AuthClient> {
-    console.log('initializeClient');
     if (!this.authClient) {
       this.authClient = await AuthClient.create();
     }

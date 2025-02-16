@@ -6,6 +6,8 @@ use crate::types::organizations::OrganizationId;
 use crate::types::pagination::PaginationInput;
 use crate::types::projects::ProjectId;
 
+use super::pagination::PaginationMetadata;
+
 pub type UserId = u64;
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
@@ -37,10 +39,38 @@ pub struct CreateUserInput {
     pub organizations: Option<Vec<OrganizationId>>,
 }
 
+#[derive(CandidType, Deserialize)]
+pub struct ListUsersInput {
+    pub pagination: PaginationInput,
+}
+
+#[derive(CandidType, Deserialize)]
+pub struct GetUserResultOk {
+    pub user: User,
+}
+
 // Results
 
 #[derive(CandidType, Deserialize)]
 pub enum UserIdResult {
     Ok(UserId),
+    Err(AppError),
+}
+
+#[derive(CandidType, Deserialize)]
+pub enum CreateUserResult {
+    Ok(User),
+    Err(AppError),
+}
+
+#[derive(CandidType, Deserialize)]
+pub enum ListUsersResult {
+    Ok((Vec<User>, PaginationMetadata)),
+    Err(AppError),
+}
+
+#[derive(CandidType, Deserialize)]
+pub enum GetUserResult {
+    Ok(User),
     Err(AppError),
 }

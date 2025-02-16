@@ -9,6 +9,7 @@ use shared::types::projects::{
     ListProjectMembersResult, ListProjectsByOrganizationIdInput, ListProjectsByOrganizationResult,
     ListProjectsResult, ProjectIdInput,
 };
+use shared::types::users::GetUserResult;
 use shared::utils::filter::filter;
 use shared::utils::pagination::paginate;
 
@@ -24,8 +25,8 @@ pub fn create_project(input: CreateProjectInput) -> CreateProjectResult {
 
     let caller = ic_cdk::caller();
     let user = match get_user_by_principal(caller) {
-        Ok(u) => u,
-        Err(e) => return CreateProjectResult::Err(e),
+        GetUserResult::Ok(u) => u,
+        GetUserResult::Err(e) => return CreateProjectResult::Err(e),
     };
 
     let id = state::get_next_id();
@@ -49,8 +50,8 @@ pub fn create_project(input: CreateProjectInput) -> CreateProjectResult {
 pub fn get_projects() -> GetProjectsResult {
     let caller = ic_cdk::caller();
     let user = match get_user_by_principal(caller) {
-        Ok(u) => u,
-        Err(e) => return GetProjectsResult::Err(e),
+        GetUserResult::Ok(u) => u,
+        GetUserResult::Err(e) => return GetProjectsResult::Err(e),
     };
 
     let filter_criteria = FilterCriteria {
@@ -116,8 +117,8 @@ pub fn list_project_members(input: ListProjectMembersInput) -> ListProjectMember
     let mut users = Vec::new();
     for user_id in project.members {
         match get_user_by_id(user_id) {
-            Ok(user) => users.push(user),
-            Err(e) => {
+            GetUserResult::Ok(user) => users.push(user),
+            GetUserResult::Err(e) => {
                 return ListProjectMembersResult::Err(AppError::InternalError(format!(
                     "Failed to get user with id: {}. Cause: {:#?}",
                     user_id, e

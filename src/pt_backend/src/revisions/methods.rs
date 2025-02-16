@@ -8,6 +8,7 @@ use shared::types::revisions::{
     GetRevisionResult, ListRevisionsByDocumentIdInput, ListRevisionsInput, ListRevisionsResult,
     RevisionIdInput,
 };
+use shared::types::users::GetUserResult;
 use shared::utils::pagination::paginate;
 
 #[ic_cdk_macros::update]
@@ -17,8 +18,8 @@ pub fn create_revision(input: CreateRevisionInput) -> CreateRevisionResult {
             let new_revision_id = state::get_next_id();
             let version = document.version + 1;
             let user = match get_user_by_principal(ic_cdk::caller()) {
-                Ok(u) => u,
-                Err(e) => return CreateRevisionResult::Err(e),
+                GetUserResult::Ok(u) => u,
+                GetUserResult::Err(e) => return CreateRevisionResult::Err(e),
             };
 
             let new_revision = Revision {

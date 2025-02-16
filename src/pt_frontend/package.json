@@ -33,6 +33,7 @@
     "@statelyai/inspect": "^0.4.0",
     "@tailwindcss/typography": "^0.5.15",
     "@tanstack/react-form": "^0.39.0",
+    "@tanstack/react-query": "^5.66.0",
     "@tanstack/react-router": "^1.75.0",
     "@tanstack/react-table": "^8.17.3",
     "@tanstack/router-devtools": "^1.34.5",

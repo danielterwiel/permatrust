@@ -6,6 +6,7 @@ use shared::types::organizations::{
     CreateOrganizationInput, CreateOrganizationResult, GetOrganizationResult,
     ListOrganizationsResult, OrganizationIdInput,
 };
+use shared::types::users::GetUserResult;
 use shared::utils::pagination::paginate;
 
 #[ic_cdk_macros::update]
@@ -17,8 +18,8 @@ pub fn create_organization(input: CreateOrganizationInput) -> CreateOrganization
 
     let caller = ic_cdk::caller();
     let user = match get_user_by_principal(caller) {
-        Ok(u) => u,
-        Err(e) => return CreateOrganizationResult::Err(e),
+        GetUserResult::Ok(u) => u,
+        GetUserResult::Err(e) => return CreateOrganizationResult::Err(e),
     };
 
     let id = state::get_next_id();
@@ -41,8 +42,8 @@ pub fn create_organization(input: CreateOrganizationInput) -> CreateOrganization
 pub fn list_organizations(pagination: PaginationInput) -> ListOrganizationsResult {
     let caller = ic_cdk::caller();
     let user = match get_user_by_principal(caller) {
-        Ok(u) => u,
-        Err(e) => return ListOrganizationsResult::Err(e),
+        GetUserResult::Ok(u) => u,
+        GetUserResult::Err(e) => return ListOrganizationsResult::Err(e),
     };
 
     let organizations = state::get_by_user_id(user.id);
