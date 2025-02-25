@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { z } from 'zod';
 
 import { api } from '@/api';
+import { getDiffRevisionsQueryOptions } from '@/api/query';
 
 import { decodeUint8Array } from '@/utils/decodeUint8Array';
 
@@ -27,11 +28,13 @@ export const Route = createFileRoute(
 )({
   validateSearch: zodSearchValidator(revisionSearchSchema),
   loaderDeps: ({ search: { current, theirs } }) => ({ current, theirs }),
-  loader: async ({ deps }) => {
-    const revisions = await api.diff_revisions({
-      original: BigInt(deps.current),
-      updated: BigInt(deps.theirs),
-    });
+  loader: async ({ context, deps }) => {
+    const revisions = await context.query.ensureQueryData(
+      getDiffRevisionsQueryOptions({
+        original: BigInt(deps.current),
+        updated: BigInt(deps.theirs),
+      })
+    );
     return { revisions };
   },
   component: RevisionDiff,

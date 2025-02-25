@@ -1,4 +1,4 @@
 import type { routeTree } from '@/routeTree.gen';
-import type { ParseRoute } from '@tanstack/react-router';
+import type { Route } from '@tanstack/react-router';
 
-export type ValidRoute = ParseRoute<typeof routeTree>['parentRoute'];
+export type ValidRoute = Route<typeof routeTree>['parentRoute'];

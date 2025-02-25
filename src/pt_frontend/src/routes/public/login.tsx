@@ -6,6 +6,8 @@ import { z } from 'zod';
 import { Loading } from '@/components/loading';
 import { Button } from '@/components/ui/button';
 
+import type { _SERVICE } from '@/declarations/pt_backend/pt_backend.did';
+
 const loginSearchSchema = z
   .object({
     error: z.boolean().optional(),
@@ -32,7 +34,7 @@ function Login() {
   const { authActor } = Route.useRouteContext();
   const search = Route.useSearch();
 
-  async function login() {
+  async function handleLogin() {
     setIsAuthenticating(true);
     authActor.send({ type: 'LOGIN' });
   }
@@ -51,7 +53,7 @@ function Login() {
           <Loading text="Logging in..." />
         </Button>
       ) : (
-        <Button disabled={isAuthenticating} onClick={login} type="submit">
+        <Button disabled={isAuthenticating} onClick={handleLogin} type="submit">
           Login
         </Button>
       )}

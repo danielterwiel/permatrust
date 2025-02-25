@@ -10,15 +10,13 @@ Add an ECC encrypted GPG key:
 gpg --expert --full-generate-key
 (9) ECC (sign and encrypt)
 (1) Curve 25519
-
 ```
 
 ### Local Deployment
 
 ```sh
-chmod +x scripts/*.sh
 chmod +x scripts/**/*.sh
-./scripts/deploy.sh
+npm run deploy
 npm start
 ```
 

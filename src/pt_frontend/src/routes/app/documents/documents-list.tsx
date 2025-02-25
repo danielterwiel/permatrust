@@ -102,7 +102,7 @@ export const Route = createFileRoute(
     });
     const [documents, paginationMetaData] = await api.list_documents({
       pagination: documentPagination,
-      project_id: projects[0].id, // TODO: selectable
+      project_id: projects[0]?.id || 0, // TODO: selectable
     });
     return {
       context,

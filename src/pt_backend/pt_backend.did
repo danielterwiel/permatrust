@@ -29,6 +29,7 @@ type CreateUserInput = record {
   last_name : text;
   organizations : opt vec nat32;
 };
+type CreateUserResult = variant { Ok : User; Err : AppError };
 type CreateWorkflowInput = record {
   initial_state : text;
   name : text;
@@ -93,6 +94,7 @@ type GetProjectRolesResult = variant { Ok : vec Role; Err : AppError };
 type GetProjectsResult = variant { Ok : vec Project; Err : AppError };
 type GetRevisionResult = variant { Ok : Revision; Err : AppError };
 type GetRoleResult = variant { Ok : Role; Err : AppError };
+type GetUserResult = variant { Ok : User; Err : AppError };
 type GetUserRolesResult = variant { Ok : vec Role; Err : AppError };
 type GetWorkflowDefinitionResult = variant {
   Ok : WorkflowGraph;
@@ -138,6 +140,11 @@ type ListRevisionsInput = record {
 };
 type ListRevisionsResult = variant {
   Ok : record { vec Revision; PaginationMetadata };
+  Err : AppError;
+};
+type ListUsersInput = record { pagination : PaginationInput };
+type ListUsersResult = variant {
+  Ok : record { vec User; PaginationMetadata };
   Err : AppError;
 };
 type ListWorkflowsResult = variant {
@@ -216,7 +223,6 @@ type ProjectPermission = variant {
   ViewMetrics;
 };
 type ProjectResult = variant { Ok : Project; Err : AppError };
-type Result = variant { Ok : User; Err : AppError };
 type Revision = record {
   id : nat64;
   content : blob;
@@ -309,10 +315,10 @@ service : () -> {
   create_project : (CreateProjectInput) -> (CreateProjectResult);
   create_revision : (CreateRevisionInput) -> (CreateDocumentResult);
   create_role : (RoleInput) -> (CreateDocumentResult);
-  create_user : (CreateUserInput) -> (Result);
+  create_user : (CreateUserInput) -> (CreateUserResult);
   create_workflow : (CreateWorkflowInput) -> (CreateProjectResult);
-  diff_revisions : (DiffRevisionsInput) -> (DiffRevisionsResult) query;
   execute_workflow : (ExecuteWorkflowInput) -> (ExecuteWorkflowResult);
+  get_diff_revisions : (DiffRevisionsInput) -> (DiffRevisionsResult) query;
   get_document : (DocumentIdInput) -> (GetDocumentResult) query;
   get_organization : (OrganizationIdInput) -> (GetOrganizationResult) query;
   get_permissions : () -> (GetPermissionsResult) query;
@@ -321,7 +327,7 @@ service : () -> {
   get_projects : () -> (GetProjectsResult) query;
   get_revision : (DocumentIdInput) -> (GetRevisionResult) query;
   get_role : (DocumentIdInput) -> (GetRoleResult) query;
-  get_user : () -> (Result) query;
+  get_user : () -> (GetUserResult) query;
   get_user_permissions : (UserIdInput) -> (GetPermissionsResult) query;
   get_user_roles : (UserIdInput) -> (GetUserRolesResult) query;
   get_workflow : (ProjectIdInput) -> (GetWorkflowResult) query;
@@ -348,7 +354,7 @@ service : () -> {
   list_revisions_by_document_id : (ListRevisionsByDocumentIdInput) -> (
       ListRevisionsResult,
     ) query;
-  list_users : (PaginationInput) -> (ListProjectMembersResult) query;
+  list_users : (ListUsersInput) -> (ListUsersResult) query;
   list_workflows : (PaginationInput) -> (ListWorkflowsResult) query;
   update_role_permissions : (UpdateRolePermissionsInput) -> (
       ExecuteWorkflowResult,

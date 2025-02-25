@@ -3,6 +3,7 @@ import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { z } from 'zod';
 
 import { api } from '@/api';
+import { listUsersQueryOptions } from '@/api/query';
 
 import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
@@ -71,7 +72,9 @@ export const Route = createFileRoute(
   }),
   loader: async ({ context, deps }) => {
     const userPagination = buildPaginationInput(deps.pagination);
-    const [users, paginationMetaData] = await api.list_users(userPagination);
+    const [users, paginationMetaData] = await context.query.ensureQueryData(
+      listUsersQueryOptions({ pagination: userPagination })
+    );
     return {
       context,
       pagination: userPagination,

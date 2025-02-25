@@ -90,7 +90,7 @@ pub fn list_revisions_by_document_id(input: ListRevisionsByDocumentIdInput) -> L
 }
 
 #[ic_cdk_macros::query]
-pub fn diff_revisions(input: DiffRevisionsInput) -> DiffRevisionsResult {
+pub fn get_diff_revisions(input: DiffRevisionsInput) -> DiffRevisionsResult {
     let start_revision = match state::get_by_id(input.original) {
         Some(r) => r,
         None => {

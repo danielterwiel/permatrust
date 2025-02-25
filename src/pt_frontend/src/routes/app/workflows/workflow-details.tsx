@@ -1,47 +1,62 @@
 import { createFileRoute } from '@tanstack/react-router';
 
+import {
+  getWorkflowQueryOptions,
+  getWorkflowStateQueryOptions,
+} from '@/api/query';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
+
+import { toNumberSchema } from '@/schemas/primitives';
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/workflows/$workflowId/',
 )({
-  loader: async ({ context }) => {
-    // const { workflowId } = Route.useParams();
+  beforeLoad: () => ({
+    getTitle: () => 'Workflow',
+  }),
+  loader: async ({ context, params }) => {
+    const workflowId = toNumberSchema.parse(params.workflowId);
+    const workflow = await context.query.ensureQueryData(
+      getWorkflowQueryOptions({ id: workflowId }),
+    );
 
-    // const workflow_response = await api.get_workflow(BigInt(workflowId))
-    // const workflow_result = handleResult(workflow_response)
-    // const workflow = workflow_result
+    const workflowState = await context.query.ensureQueryData(
+      getWorkflowStateQueryOptions({ id: workflowId }),
+    );
 
     return {
-      ...context,
-
-      // workflow,
+      context,
+      workflow,
+      workflowState,
     };
   },
-  component: DocumentDetails,
+  component: WorkflowDetails,
   errorComponent: ({ error }) => {
     return <div>Error: {error.message}</div>;
   },
 });
 
-function DocumentDetails() {
+function WorkflowDetails() {
   // const { workflowId } = Route.useParams();
-  // const { workflow } = Route.useLoaderData();
+  // const { workflow, workflowState } = Route.useLoaderData();
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          <Icon
-            className="text-muted-foreground pb-1 mr-2"
-            name="file-orientation-outline"
-            size="lg"
-          />
-          Workflow ID TODO
-        </CardTitle>
-      </CardHeader>
-      <CardContent>Workflow content</CardContent>
-    </Card>
+    <div className="space-y-8">
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            <Icon
+              className="text-muted-foreground pb-1 mr-2"
+              name="file-orientation-outline"
+              size="lg"
+            />
+            Workflow ID TODO
+          </CardTitle>
+        </CardHeader>
+        <CardContent>Workflow content</CardContent>
+      </Card>
+    </div>
   );
 }

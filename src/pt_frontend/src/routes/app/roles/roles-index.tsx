@@ -1,6 +1,6 @@
 import { createFileRoute, Outlet } from '@tanstack/react-router';
-import { Link } from '@tanstack/react-router';
 
+import { Link } from '@/components/link';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 import type { ReactNode } from 'react';

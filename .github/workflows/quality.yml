@@ -20,6 +20,15 @@ jobs:
         with:
           dfx-version: "0.24.3"
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: 'npm'
+          node-version-file: '.nvmrc'
+
+      - name: Enable Corepack to enforce npm as package manager
+        run: corepack enable
+
       - name: Configure environment
         run: |
           echo "$HOME/.local/share/dfx/bin" >> $GITHUB_PATH
@@ -29,6 +38,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
+            node_modules
             ~/.npm
             ~/.cache/dfx
             ~/.cargo
