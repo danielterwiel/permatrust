@@ -1,4 +1,5 @@
 import pluginJs from '@eslint/js';
+import pluginRouter from '@tanstack/eslint-plugin-router';
 import pluginBiome from 'eslint-config-biome';
 import pluginPerfectionist from 'eslint-plugin-perfectionist';
 import pluginReact from 'eslint-plugin-react';
@@ -39,6 +40,7 @@ export default [
   },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
+  ...pluginRouter.configs['flat/recommended'],
   pluginReact.configs.flat.recommended,
   pluginPerfectionist.configs['recommended-natural'],
   pluginBiome,
@@ -135,29 +137,7 @@ export default [
         },
       ],
 
-      'perfectionist/sort-objects': [
-        'error',
-        {
-          customGroups: {
-            validateSearch: 'validateSearch',
-            loaderDeps: 'loaderDeps',
-            beforeLoad: 'beforeLoad',
-            loader: 'loader',
-            component: 'component',
-            errorComponent: 'errorComponent',
-          },
-          groups: [
-            'validateSearch',
-            'loaderDeps',
-            'beforeLoad',
-            'loader',
-            'component',
-            'errorComponent',
-          ],
-          order: 'asc',
-          type: 'natural',
-        },
-      ],
+      'perfectionist/sort-objects': 'off',
 
       'react/jsx-uses-react': 'off',
       'react/no-multi-comp': ['error', { ignoreStateless: true }],

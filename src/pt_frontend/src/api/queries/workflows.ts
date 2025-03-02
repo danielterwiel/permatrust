@@ -13,12 +13,6 @@ export const getWorkflowOptions = (input: ProjectIdInput) =>
     queryKey: ['workflow', input],
   });
 
-export const getWorkflowDefinitionOptions = (input: ProjectIdInput) =>
-  createQueryOptions({
-    queryFn: () => api.get_workflow_definition(input),
-    queryKey: ['workflow_definition', input],
-  });
-
 export const getWorkflowStateOptions = (input: ProjectIdInput) =>
   createQueryOptions({
     queryFn: () => api.get_workflow_state(input),

@@ -10,12 +10,6 @@ export const getProjectOptions = (id: number) =>
     queryKey: ['project', { id }],
   });
 
-export const getProjectsOptions = () =>
-  createQueryOptions({
-    queryFn: () => api.get_projects(),
-    queryKey: ['projects'],
-  });
-
 export const listProjectsOptions = (input: PaginationInput) =>
   createQueryOptions({
     queryFn: () => api.list_projects(input),

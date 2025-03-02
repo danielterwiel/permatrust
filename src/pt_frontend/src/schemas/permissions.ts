@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const documentPermissionSchema = z.union([
+const documentPermissionSchema = z.union([
   z.object({ Share: z.null() }),
   z.object({ Read: z.null() }),
   z.object({ Comment: z.null() }),
@@ -11,7 +11,7 @@ export const documentPermissionSchema = z.union([
   z.object({ Export: z.null() })
 ]);
 
-export const userPermissionSchema = z.union([
+const userPermissionSchema = z.union([
   z.object({ ChangeRole: z.null() }),
   z.object({ Deactivate: z.null() }),
   z.object({ Read: z.null() }),
@@ -20,7 +20,7 @@ export const userPermissionSchema = z.union([
   z.object({ Invite: z.null() })
 ]);
 
-export const organizationPermissionSchema = z.union([
+const organizationPermissionSchema = z.union([
   z.object({ Read: z.null() }),
   z.object({ ConfigureSettings: z.null() }),
   z.object({ ManageMembers: z.null() }),
@@ -31,7 +31,7 @@ export const organizationPermissionSchema = z.union([
   z.object({ Update: z.null() })
 ]);
 
-export const revisionPermissionSchema = z.union([
+const revisionPermissionSchema = z.union([
   z.object({ Approve: z.null() }),
   z.object({ Read: z.null() }),
   z.object({ Reject: z.null() }),
@@ -40,7 +40,7 @@ export const revisionPermissionSchema = z.union([
   z.object({ Rollback: z.null() })
 ]);
 
-export const projectPermissionSchema = z.union([
+const projectPermissionSchema = z.union([
   z.object({ ManageSettings: z.null() }),
   z.object({ Read: z.null() }),
   z.object({ AssignMembers: z.null() }),
@@ -53,7 +53,7 @@ export const projectPermissionSchema = z.union([
   z.object({ ViewMetrics: z.null() })
 ]);
 
-export const workflowPermissionSchema = z.union([
+const workflowPermissionSchema = z.union([
   z.object({ ViewHistory: z.null() }),
   z.object({ Read: z.null() }),
   z.object({ Resume: z.null() }),

@@ -12,7 +12,7 @@ export type FilterFieldEnum = {
   [E in EntityName]: FilterFields[E][keyof FilterFields[E]];
 }[EntityName];
 export type FilterFieldName = FilterFieldNames[keyof FilterFieldNames];
-export type FilterFieldNames = {
+type FilterFieldNames = {
   [E in EntityName]: keyof FilterFields[E];
 };
-export type FilterFields = typeof FILTER_FIELD;
+type FilterFields = typeof FILTER_FIELD;

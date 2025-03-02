@@ -5,8 +5,6 @@ import type {
 } from '@/declarations/pt_backend/pt_backend.did.d';
 export type CreateActorFn = typeof createActor;
 
-export type ErrorHandler<E> = (error: E) => void;
-
 export type Result<T> = { Err: AppError } | { Ok: T };
 
 export type ResultHandler<T> = {
@@ -14,8 +12,4 @@ export type ResultHandler<T> = {
   onOk?: (value: T) => void;
 };
 
-export type WrappedActor<T> = {
-  [K in keyof T]: T[K] extends (...args: infer Args) => Promise<Result<infer R>>
-    ? (...args: [...Args, ResultHandler<R>?]) => Promise<R>
-    : T[K];
-};
+type ErrorHandler<E> = (error: E) => void;

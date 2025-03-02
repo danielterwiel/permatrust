@@ -7,38 +7,38 @@ export const DEFAULT_PAGINATION: PaginationInput = {
   page_size: 10,
   sort: [],
 } as const;
-export const FILTER_FIELD_DOCUMENT = {
+const FILTER_FIELD_DOCUMENT = {
   CreatedAt: { CreatedAt: null },
   ProjectId: { ProjectId: null },
   Title: { Title: null },
   Version: { Version: null },
 } as const;
-export const FILTER_FIELD_ORGANIZATION = {
+const FILTER_FIELD_ORGANIZATION = {
   CreatedAt: { CreatedAt: null },
   CreatedBy: { CreatedBy: null },
   Name: { Name: null },
 } as const;
-export const FILTER_FIELD_PROJECT = {
+const FILTER_FIELD_PROJECT = {
   CreatedAt: { CreatedAt: null },
   CreatedBy: { CreatedBy: null },
   Name: { Name: null },
   OrganizationId: { OrganizationId: null },
 } as const;
-export const FILTER_FIELD_REVISION = {
+const FILTER_FIELD_REVISION = {
   CreatedAt: { CreatedAt: null },
   DocumentId: { DocumentId: null },
   ProjectId: { ProjectId: null },
   Version: { Version: null },
 } as const;
-export const FILTER_FIELD_USER = {
+const FILTER_FIELD_USER = {
   FirstName: { FirstName: null },
   LastName: { LastName: null },
 } as const;
-export const FILTER_FIELD_WORKFLOW = {
+const FILTER_FIELD_WORKFLOW = {
   Name: { Name: null },
   ProjectId: { ProjectId: null },
 } as const;
-export const FILTER_FIELD_USER_WITH_ROLES = {
+const FILTER_FIELD_USER_WITH_ROLES = {
   FirstName: { FirstName: null },
   Id: { Id: null },
   LastName: { LastName: null },

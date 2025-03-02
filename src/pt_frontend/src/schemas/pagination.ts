@@ -62,7 +62,7 @@ export const filterFieldSchema = z.union([
   z.object({ UserWithRoles: userWithRolesFilterFieldSchema }).strict(),
   z.object({ Workflow: workflowFilterFieldSchema }).strict(),
 ]) satisfies z.ZodType<ApiFilterField>;
-export const filterOperatorSchema = z.union([
+const filterOperatorSchema = z.union([
   z.object({ Contains: z.null() }).strict(),
   z.object({ GreaterThan: z.null() }).strict(),
   z.object({ LessThan: z.null() }).strict(),
@@ -83,16 +83,16 @@ const sortOrderSchema = z.union([
   z.object({ Desc: z.null() }),
 ]) satisfies z.ZodType<ApiSortOrder>;
 
-export const sortCriteriaSchema = z
+const sortCriteriaSchema = z
   .object({
     field: filterFieldSchema,
     order: sortOrderSchema,
   })
   .strict() satisfies z.ZodType<ApiSortCriteria>;
 
-export const sortSchema = z.union([z.tuple([]), z.tuple([sortCriteriaSchema])]);
+const sortSchema = z.union([z.tuple([]), z.tuple([sortCriteriaSchema])]);
 
-export const filtersSchema = z.union([
+const filtersSchema = z.union([
   z.tuple([]),
   z.tuple([z.array(filterCriteriaSchema)]),
 ]);

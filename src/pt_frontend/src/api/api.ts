@@ -44,7 +44,24 @@ export async function createAuthenticatedActorWrapper(
   return wrappedActor;
 }
 
-export function handleResult<T>(
+async function createAuthenticatedActor(
+  canisterId: string,
+  createActor: CreateActorFn,
+  authClient: AuthClient,
+): Promise<ActorWithIndex> {
+  const agent = await HttpAgent.create({
+    host: HOST,
+    identity: authClient.getIdentity(),
+  });
+  if (!import.meta.env.PROD) {
+    await agent.fetchRootKey().catch(() => {
+      throw new Error('Failed to fetch root key');
+    });
+  }
+  return createActor(canisterId, { agent }) as unknown as ActorWithIndex;
+}
+
+function handleResult<T>(
   result: Result<T>,
   handlers: ResultHandler<T> = {},
 ): T {
@@ -65,23 +82,6 @@ export function handleResult<T>(
   }
 
   throw error;
-}
-
-async function createAuthenticatedActor(
-  canisterId: string,
-  createActor: CreateActorFn,
-  authClient: AuthClient,
-): Promise<ActorWithIndex> {
-  const agent = await HttpAgent.create({
-    host: HOST,
-    identity: authClient.getIdentity(),
-  });
-  if (!import.meta.env.PROD) {
-    await agent.fetchRootKey().catch(() => {
-      throw new Error('Failed to fetch root key');
-    });
-  }
-  return createActor(canisterId, { agent }) as unknown as ActorWithIndex;
 }
 
 function wrapActor<T extends ActorWithIndex>(actor: T): WrappedActorWithIndex {

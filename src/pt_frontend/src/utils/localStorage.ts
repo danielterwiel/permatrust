@@ -1,4 +1,4 @@
-export const getItem = <T>(key: string, initialValue: T): T => {
+const getItem = <T>(key: string, initialValue: T): T => {
   if (typeof globalThis === 'undefined') {
     return initialValue;
   }
@@ -12,7 +12,7 @@ export const getItem = <T>(key: string, initialValue: T): T => {
   }
 };
 
-export const setItem = <T>(key: string, value: T): void => {
+const setItem = <T>(key: string, value: T): void => {
   if (typeof globalThis === 'undefined') {
     return;
   }

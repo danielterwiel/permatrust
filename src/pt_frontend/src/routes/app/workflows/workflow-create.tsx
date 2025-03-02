@@ -126,7 +126,7 @@ const defaultGraphJson: MachineConfig = {
   },
 };
 
-export function CreateWorkflow() {
+function CreateWorkflow() {
   const { isPending: isSubmitting, mutate: createWorkflow } =
     mutations.useCreateWorkflow();
   const [nodes, setNodes] = useState<Node[]>([]);

@@ -17,5 +17,4 @@ export type Entity =
   | User
   | UserWithRoles
   | Workflow;
-export type EntityEnum = (typeof ENTITY)[EntityName];
 export type EntityName = keyof typeof ENTITY;

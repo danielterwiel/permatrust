@@ -23,7 +23,7 @@ export const Route = createFileRoute(
   },
 });
 
-export function CreateDocument() {
+function CreateDocument() {
   const { isPending: isSubmitting, mutate: createDocument } =
     mutations.useCreateDocument();
   const navigate = useNavigate();
