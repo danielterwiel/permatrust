@@ -10,7 +10,7 @@ import ReactFlow, {
 } from 'reactflow';
 import { z } from 'zod';
 
-import { api } from '@/api';
+import { mutations } from '@/api/mutations';
 
 import { Loading } from '@/components/loading';
 import { Button } from '@/components/ui/button';
@@ -127,7 +127,8 @@ const defaultGraphJson: MachineConfig = {
 };
 
 export function CreateWorkflow() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isPending: isSubmitting, mutate: createWorkflow } =
+    mutations.useCreateWorkflow();
   const [nodes, setNodes] = useState<Node[]>([]);
   const [edges, setEdges] = useState<Edge[]>([]);
   const navigate = useNavigate();
@@ -213,26 +214,29 @@ export function CreateWorkflow() {
       name: '',
     },
     onSubmit: async ({ value }) => {
-      setIsSubmitting(true);
-
       try {
         const machineConfig: MachineConfig = JSON.parse(value.graph_json);
         const graphJsonObject = generateWorkflowGraph(machineConfig);
         const graph_json = JSON.stringify(graphJsonObject);
-        const workflowId = await api.create_workflow({
-          graph_json,
-          initial_state: machineConfig.initial,
-          name: value.name,
-          project_id: 0, // TODO: project_id
-        });
-        navigate({
-          params: { workflowId: workflowId.toString() },
-          to: '/workflows/$workflowId',
-        });
+
+        createWorkflow(
+          {
+            graph_json,
+            initial_state: machineConfig.initial,
+            name: value.name,
+            project_id: 0, // TODO: project_id
+          },
+          {
+            onSuccess: (workflowId) => {
+              navigate({
+                params: { workflowId: workflowId.toString() },
+                to: '/workflows/$workflowId',
+              });
+            },
+          },
+        );
       } catch (_error) {
         // TODO: handle error
-      } finally {
-        setIsSubmitting(false);
       }
     },
   });

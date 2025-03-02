@@ -95,11 +95,14 @@ const authMachine = setup({
 
         const isAuthenticated = await client.isAuthenticated();
 
-        if (isAuthenticated) {
-          await createAuthenticatedActorWrapper(CANISTER_ID_PT_BACKEND, client);
-        }
+        const actor = isAuthenticated
+          ? await createAuthenticatedActorWrapper(
+              CANISTER_ID_PT_BACKEND,
+              client,
+            )
+          : undefined;
 
-        return { client, isAuthenticated };
+        return { actor, client, isAuthenticated };
       } catch (_error) {
         throw new Error('Auth initialization failed');
       }

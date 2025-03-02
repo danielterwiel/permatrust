@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { api } from '@/api';
+import { getProjectRolesOptions } from '@/api/queries/permissions';
 
 import { RolesList } from '@/components/roles-list';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,9 +11,11 @@ import { toNumberSchema } from '@/schemas/primitives';
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/list',
 )({
-  loader: async ({ params }) => {
+  loader: async ({ context, params }) => {
     const projectId = toNumberSchema.parse(params.projectId);
-    const roles = await api.get_project_roles({ project_id: projectId });
+    const roles = await context.query.ensureQueryData(
+      getProjectRolesOptions(projectId)
+    );
 
     return {
       roles,

@@ -15,6 +15,7 @@ import {
 import { Icon } from '@/components/ui/icon';
 import { Label } from '@/components/ui/label';
 
+// TODO: rename to MultiSelectItem
 export type Item = {
   group: string;
   id: string;

@@ -1,9 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import {
-  getWorkflowQueryOptions,
-  getWorkflowStateQueryOptions,
-} from '@/api/query';
+  getWorkflowOptions,
+  getWorkflowStateOptions,
+} from '@/api/queries';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
@@ -19,11 +19,11 @@ export const Route = createFileRoute(
   loader: async ({ context, params }) => {
     const workflowId = toNumberSchema.parse(params.workflowId);
     const workflow = await context.query.ensureQueryData(
-      getWorkflowQueryOptions({ id: workflowId }),
+      getWorkflowOptions({ id: workflowId }),
     );
 
     const workflowState = await context.query.ensureQueryData(
-      getWorkflowStateQueryOptions({ id: workflowId }),
+      getWorkflowStateOptions({ id: workflowId }),
     );
 
     return {

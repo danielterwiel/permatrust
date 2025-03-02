@@ -8,8 +8,9 @@ import {
   PaginationItem,
 } from '@/components/ui/pagination';
 
-import type { PaginationMetadata } from '@/declarations/pt_backend/pt_backend.did';
 import { toNumberSchema } from '@/schemas/primitives';
+
+import type { PaginationMetadata } from '@/declarations/pt_backend/pt_backend.did';
 
 type PaginationProps = {
   paginationMetaData: PaginationMetadata;

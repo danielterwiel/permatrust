@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { z } from 'zod';
 
-import { api } from '@/api';
+import { listWorkflowsOptions } from '@/api/queries/workflows';
 
 import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
@@ -69,8 +69,9 @@ export const Route = createFileRoute(
   }),
   loader: async ({ context, deps }) => {
     const workflowPagination = buildPaginationInput(deps.pagination);
-    const [workflows, paginationMetaData] =
-      await api.list_workflows(workflowPagination);
+    const [workflows, paginationMetaData] = await context.query.ensureQueryData(
+      listWorkflowsOptions(workflowPagination)
+    );
 
     return {
       context,

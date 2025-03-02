@@ -1,21 +1,23 @@
 import { headingsPlugin, MDXEditor } from '@mdxeditor/editor';
 import { createFileRoute } from '@tanstack/react-router';
 
-import { api } from '@/api';
+import { getRevisionOptions } from '@/api/queries/revisions';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 
+import { toBigIntSchema } from '@/schemas/primitives';
+
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId',
 )({
-  beforeLoad: async () => {
-    return {
-      getTitle: () => 'Revision',
-    };
-  },
-  loader: async ({ params: { revisionId } }) => {
-    const revision = await api.get_revision({ id: BigInt(revisionId) });
+  beforeLoad: async () => ({
+    getTitle: () => 'Revision',
+  }),
+  loader: async ({ context, params: { revisionId } }) => {
+    const revision = await context.query.ensureQueryData(
+      getRevisionOptions(toBigIntSchema.parse(revisionId)),
+    );
     return {
       revision,
     };

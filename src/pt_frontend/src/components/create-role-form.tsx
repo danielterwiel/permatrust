@@ -1,9 +1,8 @@
 import { capitalizeFirstLetter, permissionsToItems } from '@/utils';
 import { useForm } from '@tanstack/react-form';
-import { useEffect, useState } from 'react';
 import { z } from 'zod';
 
-import { api } from '@/api';
+import { mutations } from '@/api/mutations';
 
 import { Link } from '@/components/link';
 import { Loading } from '@/components/loading';
@@ -40,7 +39,7 @@ export const createRoleFormSchema = z.object({
 
 type CreateRoleFormProps = {
   permissions: Permission[];
-  projectId: string;
+  project: Project;
 };
 
 type FormValues = {
@@ -52,22 +51,9 @@ type FormValues = {
   };
 };
 
-export function CreateRoleForm({
-  permissions,
-  projectId,
-}: CreateRoleFormProps) {
-  const [projects, setProjects] = useState<Project[] | undefined>();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  useEffect(() => {
-    const getProjects = async () => {
-      const projectsResult = await api.get_projects();
-      setProjects(projectsResult);
-    };
-    if (!projects) {
-      getProjects();
-    }
-  }, [projects]);
+export function CreateRoleForm({ permissions, project }: CreateRoleFormProps) {
+  const { isPending: isSubmitting, mutateAsync: createRole } =
+    mutations.useCreateRole();
   const availablePermissions = permissionsToItems(permissions);
 
   const form = useForm<FormValues>({
@@ -80,7 +66,6 @@ export function CreateRoleForm({
       },
     },
     onSubmit: async ({ value }) => {
-      setIsSubmitting(true);
       const permissions = value.permissions.selected.map((p) => {
         const [entityName, permission] = p.id.split('::');
         if (!entityName || !permission) {
@@ -90,18 +75,13 @@ export function CreateRoleForm({
         const entityPermission = createPermissionVariant(entity, permission);
         return entityPermission;
       });
-      try {
-        const projectIdParsed = toNumberSchema.parse(projectId);
-        await api.create_role({
-          description: value.description ? [value.description] : [],
-          name: value.name,
-          permissions,
-          project_id: projectIdParsed,
-        });
-      } catch (_error) {
-        // TODO: handle error
-      }
-      setIsSubmitting(false);
+      const projectIdParsed = toNumberSchema.parse(project.id);
+      await createRole({
+        description: value.description ? [value.description] : [],
+        name: value.name,
+        permissions,
+        project_id: projectIdParsed,
+      });
     },
   });
 
@@ -128,11 +108,7 @@ export function CreateRoleForm({
     });
   };
 
-  if (!projects) {
-    return <Loading text="Loading project" />;
-  }
-
-  return projects.length === 0 ? (
+  return !project ? (
     <div>
       No projects found to assign roles to. First{' '}
       <Link to="/projects/create">create a project</Link>

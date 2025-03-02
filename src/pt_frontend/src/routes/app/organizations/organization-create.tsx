@@ -1,8 +1,7 @@
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
 
-import { api } from '@/api';
+import { mutations } from '@/api/mutations';
 
 import {
   CreateOrganizationForm,
@@ -29,24 +28,28 @@ function CreateOrganization() {
     '',
   );
   const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isPending: isSubmitting, mutate: createOrganization } =
+    mutations.useCreateOrganization();
 
   async function onSubmit(
     values: z.infer<typeof createOrganizationFormSchema>,
   ) {
     try {
-      setIsSubmitting(true);
-      const organizationId = await api.create_organization({
-        name: values.name,
-      });
-      setActiveOrganizationId(organizationId.toString());
-      navigate({
-        to: `/organizations/${organizationId.toString()}`,
-      });
+      createOrganization(
+        {
+          name: values.name,
+        },
+        {
+          onSuccess: (organizationId) => {
+            setActiveOrganizationId(organizationId.toString());
+            navigate({
+              to: `/organizations/${organizationId.toString()}`,
+            });
+          },
+        },
+      );
     } catch (_error) {
       // TODO: handle error
-    } finally {
-      setIsSubmitting(false);
     }
   }
 

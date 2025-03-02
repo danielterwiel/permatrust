@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { api } from '@/api';
+import { getUserOptions } from '@/api/queries/users';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
@@ -11,8 +11,8 @@ export const Route = createFileRoute(
   beforeLoad: () => ({
     getTitle: () => 'User',
   }),
-  loader: async () => {
-    const user = await api.get_user(); // TODO: params
+  loader: async ({ context }) => {
+    const user = await context.query.ensureQueryData(getUserOptions());
     return { user };
   },
   component: UserDetails,

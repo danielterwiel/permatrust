@@ -1,8 +1,7 @@
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
 
-import { api } from '@/api';
+import { mutations } from '@/api/mutations';
 
 import { CreateOrganizationForm } from '@/components/create-organization-form';
 
@@ -29,33 +28,33 @@ function CreateOrganization() {
     '',
   );
   const navigate = useNavigate();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<Error | undefined>();
+
+  const {
+    error,
+    isPending: isSubmitting,
+    mutate: createOrganization,
+  } = mutations.useCreateOrganization();
 
   async function onSubmit(
     values: z.infer<typeof createOrganizationFormSchema>,
   ) {
-    try {
-      setIsSubmitting(true);
+    const { id: userId } = authActor.getSnapshot().context.user ?? {};
 
-      const { id: userId } = authActor.getSnapshot().context.user ?? {};
-
-      if (userId === undefined) {
-        throw new Error('User not found');
-      }
-
-      const organizationId = await api.create_organization({
-        name: values.name,
-      });
-      setActiveOrganizationId(organizationId.toString());
-      navigate({ to: '/projects' });
-    } catch (submitError) {
-      if (submitError instanceof Error) {
-        setError(submitError);
-      }
-    } finally {
-      setIsSubmitting(false);
+    if (userId === undefined) {
+      throw new Error('User not found');
     }
+
+    createOrganization(
+      {
+        name: values.name,
+      },
+      {
+        onSuccess: (organizationId) => {
+          setActiveOrganizationId(organizationId.toString());
+          navigate({ to: '/projects' });
+        },
+      },
+    );
   }
 
   return (

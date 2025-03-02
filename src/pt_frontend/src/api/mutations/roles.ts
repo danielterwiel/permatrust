@@ -1,40 +1,60 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-
 import { api } from '@/api';
 
-import type { 
-  RoleInput, 
-  UpdateRolePermissionsInput 
-} from '@/declarations/pt_backend/pt_backend.did';
+import { createMutationHook } from '@/utils/createMutationHook';
 
-export function useCreateRole() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (input: RoleInput) => api.create_role(input),
-    onSuccess: (_, variables) => {
-      // Invalidate roles for this project
-      queryClient.invalidateQueries({ 
-        queryKey: ['project_roles', { project_id: variables.project_id }],
-        exact: false 
-      });
+export const createRoleMutations = () => {
+  const useCreateRole = createMutationHook(
+    api.create_role,
+    (variables) => ({
+      exact: false,
+      queryKey: ['project_roles', { project_id: variables.project_id }],
+    }),
+    {
+      successToast: {
+        title: 'Role created',
+      },
     },
-  });
-}
+  );
 
-export function useUpdateRolePermissions() {
-  const queryClient = useQueryClient();
-  
-  return useMutation({
-    mutationFn: (input: UpdateRolePermissionsInput) => api.update_role_permissions(input),
-    onSuccess: (_, variables) => {
-      // Invalidate related roles
-      queryClient.invalidateQueries({ 
-        queryKey: ['role', { id: variables.role_id }],
-        exact: false 
-      });
-      queryClient.invalidateQueries({ queryKey: ['user_roles'] });
-      queryClient.invalidateQueries({ queryKey: ['project_roles'] });
+  const useUpdateRolePermissions = createMutationHook(
+    api.update_role_permissions,
+    (variables) => ({
+      queries: [
+        {
+          exact: false,
+          queryKey: ['role', { id: variables.role_id }],
+        },
+        { queryKey: ['user_roles'] },
+        { queryKey: ['project_roles'] },
+      ],
+    }),
+    {
+      successToast: {
+        title: 'Role permissions updated',
+      },
     },
-  });
-}
+  );
+
+  const useAssignRoles = createMutationHook(
+    api.assign_roles,
+    () => ({
+      queries: [
+        { queryKey: ['user_roles'] },
+        { queryKey: ['project_roles'] },
+        { queryKey: ['project_members_roles'] },
+        { exact: false, queryKey: ['project_roles'] },
+      ],
+    }),
+    {
+      successToast: {
+        title: 'Roles assigned',
+      },
+    },
+  );
+
+  return {
+    useAssignRoles,
+    useCreateRole,
+    useUpdateRolePermissions,
+  };
+};

@@ -3,7 +3,8 @@ import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { useState } from 'react';
 import { z } from 'zod';
 
-import { api } from '@/api';
+import { listDocumentsOptions } from '@/api/queries/documents';
+import { getProjectsByOrganizationOptions } from '@/api/queries/projects';
 
 import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
@@ -96,14 +97,18 @@ export const Route = createFileRoute(
     const activeOrganizationId = getActiveOrganizationId();
     const documentPagination = buildPaginationInput(deps.pagination);
     const projectPagination = buildPaginationInput(DEFAULT_PAGINATION);
-    const [projects] = await api.list_projects_by_organization_id({
-      organization_id: activeOrganizationId,
-      pagination: projectPagination,
-    });
-    const [documents, paginationMetaData] = await api.list_documents({
-      pagination: documentPagination,
-      project_id: projects[0]?.id || 0, // TODO: selectable
-    });
+
+    const [projects] = await context.query.ensureQueryData(
+      getProjectsByOrganizationOptions(activeOrganizationId, projectPagination),
+    );
+
+    const [documents, paginationMetaData] = await context.query.ensureQueryData(
+      listDocumentsOptions({
+        pagination: documentPagination,
+        project_id: projects[0]?.id || 0, // TODO: selectable
+      }),
+    );
+
     return {
       context,
       documents,

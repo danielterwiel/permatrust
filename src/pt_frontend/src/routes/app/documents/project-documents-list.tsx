@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { z } from 'zod';
 
-import { api } from '@/api';
+import { listDocumentsByProjectIdOptions } from '@/api/queries/documents';
 
 import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
@@ -74,11 +74,12 @@ export const Route = createFileRoute(
   loader: async ({ context, deps, params }) => {
     const documentPagination = buildPaginationInput(deps.pagination);
     const projectId = toNumberSchema.parse(params.projectId);
-    const [documents, paginationMetaData] =
-      await api.list_documents_by_project_id({
+    const [documents, paginationMetaData] = await context.query.ensureQueryData(
+      listDocumentsByProjectIdOptions({
         pagination: documentPagination,
         project_id: projectId,
-      });
+      })
+    );
 
     return {
       context,

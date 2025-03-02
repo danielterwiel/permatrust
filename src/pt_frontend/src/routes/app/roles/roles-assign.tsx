@@ -5,7 +5,12 @@ import { Check, ChevronsUpDown } from 'lucide-react';
 import { useState } from 'react';
 import { z } from 'zod';
 
-import { api } from '@/api';
+import { mutations } from '@/api/mutations';
+import {
+  getProjectMembersOptions,
+  getProjectMembersRolesOptions,
+  getProjectRolesOptions,
+} from '@/api/queries/permissions';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -40,8 +45,9 @@ import {
   FILTER_OPERATOR,
 } from '@/consts/pagination';
 
-import { toNumberSchema } from '@/schemas/primitives';
+import { toBigIntSchema, toNumberSchema } from '@/schemas/primitives';
 
+import type { PaginationInput } from '@/declarations/pt_backend/pt_backend.did';
 import type { Role, User } from '@/declarations/pt_backend/pt_backend.did';
 
 const searchSchema = z.object({
@@ -52,47 +58,47 @@ export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/assign',
 )({
   validateSearch: zodSearchValidator(searchSchema),
-
   loaderDeps: ({ search }) => ({
     userId: search.userId,
   }),
-  loader: async ({ deps, params }) => {
+  loader: async ({ context, deps, params }) => {
     const projectId = toNumberSchema.parse(params.projectId);
-    const roles = await api.get_project_roles({ project_id: projectId });
-    const [users] = await api.list_project_members({
-      pagination: DEFAULT_PAGINATION,
-      project_id: projectId,
-    });
+    const roles = await context.query.ensureQueryData(
+      getProjectRolesOptions(projectId),
+    );
+
+    const [users] = await context.query.ensureQueryData(
+      getProjectMembersOptions(projectId, DEFAULT_PAGINATION),
+    );
 
     let preselectedUser: undefined | User;
     let userRoles: Role[] = [];
 
     if (!Number.isNaN(deps.userId)) {
       const userId = deps.userId;
-      // First find the user in the users list
       preselectedUser = users.find((user: User) => user.id === BigInt(userId));
 
-      // Then get their roles
       if (preselectedUser) {
-        const [assignedRoles] = await api.list_project_members_roles({
-          pagination: {
-            ...DEFAULT_PAGINATION,
-            filters: [
-              [
-                {
-                  entity: ENTITY.UserWithRoles,
-                  field: buildFilterField(
-                    ENTITY_NAME.UserWithRoles,
-                    FILTER_FIELD.UserWithRoles.Id,
-                  ),
-                  operator: FILTER_OPERATOR.Equals,
-                  value: userId,
-                },
-              ],
-            ],
+        const filterCriteria = [
+          {
+            entity: ENTITY.UserWithRoles,
+            field: buildFilterField(
+              ENTITY_NAME.UserWithRoles,
+              FILTER_FIELD.UserWithRoles.Id,
+            ),
+            operator: FILTER_OPERATOR.Equals,
+            value: userId,
           },
-          project_id: projectId,
-        });
+        ];
+
+        const userRolesPagination: PaginationInput = {
+          ...DEFAULT_PAGINATION,
+          filters: [filterCriteria],
+        };
+
+        const [assignedRoles] = await context.query.ensureQueryData(
+          getProjectMembersRolesOptions(projectId, userRolesPagination),
+        );
 
         if (assignedRoles.length > 0) {
           const userWithRoles = assignedRoles[0];
@@ -122,6 +128,8 @@ function RolesAssign() {
   const [openRoles, setOpenRoles] = useState(false);
   const { toast } = useToast();
 
+  const assignRolesMutation = mutations.useAssignRoles();
+
   const onSubmit = async () => {
     if (selectedUsers.length === 0 || selectedRoles.length === 0) {
       toast({
@@ -132,20 +140,33 @@ function RolesAssign() {
       return;
     }
 
-    const selectedUserIds = selectedUsers.map((u) => u.id);
-    const selectedRoleIds = selectedRoles.map((r) => r.id);
-    await api.assign_roles({
-      role_ids: selectedRoleIds,
-      user_ids: selectedUserIds,
-    });
+    const selectedUserIds = selectedUsers.map((u) =>
+      toBigIntSchema.parse(u.id),
+    );
+    const selectedRoleIds = selectedRoles.map((r) =>
+      toBigIntSchema.parse(r.id),
+    );
 
-    toast({
-      description: `Assigned ${selectedRoles.length} role(s) to ${selectedUsers.length} user(s).`,
-      title: 'Success',
-    });
+    try {
+      await assignRolesMutation.mutateAsync({
+        role_ids: selectedRoleIds,
+        user_ids: selectedUserIds,
+      });
 
-    setSelectedUsers([]);
-    setSelectedRoles([]);
+      toast({
+        description: `Assigned ${selectedRoles.length} role(s) to ${selectedUsers.length} user(s).`,
+        title: 'Success',
+      });
+
+      setSelectedUsers([]);
+      setSelectedRoles([]);
+    } catch (error: unknown) {
+      toast({
+        description: `Failed to assign roles. Please try again. Error: ${error}`,
+        title: 'Error',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (

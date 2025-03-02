@@ -23,14 +23,13 @@ import {
 } from '@/consts/pagination';
 
 import { paginationInputSchema } from '@/schemas/pagination';
-import { toNumberSchema } from '@/schemas/primitives';
+import { toBigIntSchema, toNumberSchema } from '@/schemas/primitives';
 
 import type {
   PaginationInput,
   Revision,
   SortCriteria,
 } from '@/declarations/pt_backend/pt_backend.did';
-import type { Entity } from '@/types/entities';
 import type { FilterCriteria } from '@/types/pagination';
 import type { Row } from '@tanstack/react-table';
 
@@ -72,7 +71,9 @@ export const Route = createFileRoute(
         document_id: BigInt(params.documentId),
         pagination: revisionPagination,
       });
-    const document = await api.get_document({ id: BigInt(params.documentId) });
+    const document = await api.get_document({
+      id: toBigIntSchema.parse(params.documentId),
+    });
 
     return {
       context,

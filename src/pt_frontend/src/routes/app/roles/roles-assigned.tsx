@@ -2,7 +2,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { z } from 'zod';
 
-import { api } from '@/api';
+import { listProjectMembersRolesOptions } from '@/api/queries/users';
 
 import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
@@ -72,11 +72,12 @@ export const Route = createFileRoute(
   loader: async ({ context, deps, params }) => {
     const projectId = toNumberSchema.parse(params.projectId);
     const rolePagination = buildPaginationInput(deps.pagination);
-    const [assignedRoles, paginationMetaData] =
-      await api.list_project_members_roles({
+    const [assignedRoles, paginationMetaData] = await context.query.ensureQueryData(
+      listProjectMembersRolesOptions({
         pagination: rolePagination,
         project_id: projectId,
-      });
+      })
+    );
 
     return {
       assignedRoles,

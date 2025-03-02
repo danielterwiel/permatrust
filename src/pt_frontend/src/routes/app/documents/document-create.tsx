@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
 
-import { api } from '@/api';
+import { mutations } from '@/api/mutations';
 
 import {
   CreateDocumentForm,
@@ -25,31 +24,35 @@ export const Route = createFileRoute(
 });
 
 export function CreateDocument() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isPending: isSubmitting, mutate: createDocument } =
+    mutations.useCreateDocument();
   const navigate = useNavigate();
   const params = Route.useParams();
 
   async function onSubmit(values: z.infer<typeof createDocumentFormSchema>) {
-    setIsSubmitting(true);
     const encoder = new TextEncoder();
     const content = encoder.encode(values.content);
 
     const projectId = toNumberSchema.parse(params.projectId);
 
-    const documentId = await api.create_document({
-      project_id: projectId,
-      title: values.title,
-      content,
-    });
-
-    setIsSubmitting(false);
-    navigate({
-      params: {
-        documentId: documentId.toString(),
-        projectId: params.projectId,
+    createDocument(
+      {
+        content,
+        project_id: projectId,
+        title: values.title,
       },
-      to: '/projects/$projectId/documents/$documentId',
-    });
+      {
+        onSuccess: (documentId) => {
+          navigate({
+            params: {
+              documentId: documentId.toString(),
+              projectId: params.projectId,
+            },
+            to: '/projects/$projectId/documents/$documentId',
+          });
+        },
+      },
+    );
   }
 
   return (

@@ -1,8 +1,7 @@
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
 
-import { api } from '@/api';
+import { mutations } from '@/api/mutations';
 
 import {
   CreateProjectForm,
@@ -26,29 +25,35 @@ export const Route = createFileRoute(
 });
 
 function CreateProject() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeOrganizationId] = useLocalStorage('activeOrganizationId', '');
   const navigate = useNavigate();
 
+  const { isPending: isSubmitting, mutate: createProject } =
+    mutations.useCreateProject();
+
   async function onSubmit(values: z.infer<typeof createProjectFormSchema>) {
-    setIsSubmitting(true);
     try {
       const activeOrganizationIdNumber =
         toNumberSchema.parse(activeOrganizationId);
-      const projectId = await api.create_project({
-        name: values.name,
-        organization_id: activeOrganizationIdNumber,
-      });
-      navigate({
-        params: {
-          projectId: projectId.toString(),
+
+      createProject(
+        {
+          name: values.name,
+          organization_id: activeOrganizationIdNumber,
         },
-        to: '/projects/$projectId',
-      });
+        {
+          onSuccess: (projectId: number) => {
+            navigate({
+              params: {
+                projectId,
+              },
+              to: '/projects/$projectId',
+            });
+          },
+        },
+      );
     } catch (_error) {
       // TODO: handle error
-    } finally {
-      setIsSubmitting(false);
     }
   }
 

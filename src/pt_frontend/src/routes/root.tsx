@@ -1,7 +1,6 @@
+import { QueryProvider } from '@/context/query-provider';
 import { createRootRouteWithContext, Outlet } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/router-devtools';
-
-import { QueryProvider } from '@/context/query-provider';
 
 import type { RootRouteContext } from '@/types/context';
 

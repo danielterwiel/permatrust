@@ -1,7 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
 
-import { api } from '@/api';
+import { mutations } from '@/api/mutations';
 
 import {
   CreateUserForm,
@@ -13,11 +12,9 @@ import type { z } from 'zod';
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/users/create',
 )({
-  beforeLoad: () => {
-    return {
-      getTitle: () => 'Create user',
-    };
-  },
+  beforeLoad: () => ({
+    getTitle: () => 'Create user',
+  }),
   component: CreateUser,
   errorComponent: ({ error }) => {
     return <div>Error: {error.message}</div>;
@@ -25,23 +22,27 @@ export const Route = createFileRoute(
 });
 
 function CreateUser() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = Route.useNavigate();
+
+  const { isPending: isSubmitting, mutate: createUser } =
+    mutations.useCreateUser();
 
   async function onSubmit(values: z.infer<typeof createUserFormSchema>) {
     try {
-      setIsSubmitting(true);
-      await api.create_user({
-        first_name: values.first_name,
-        last_name: values.last_name,
-        organizations: [],
-      });
-      navigate({ to: '/organizations' });
-      setIsSubmitting(false);
+      createUser(
+        {
+          first_name: values.first_name,
+          last_name: values.last_name,
+          organizations: [],
+        },
+        {
+          onSuccess: () => {
+            navigate({ to: '/organizations' });
+          },
+        },
+      );
     } catch (_error) {
       // TODO: handle error
-    } finally {
-      setIsSubmitting(false);
     }
   }
 

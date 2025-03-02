@@ -4,8 +4,7 @@ import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { useEffect } from 'react';
 import { z } from 'zod';
 
-import { api } from '@/api';
-import { getDiffRevisionsQueryOptions } from '@/api/query';
+import { getDiffRevisionsOptions } from '@/api/queries';
 
 import { decodeUint8Array } from '@/utils/decodeUint8Array';
 
@@ -30,10 +29,10 @@ export const Route = createFileRoute(
   loaderDeps: ({ search: { current, theirs } }) => ({ current, theirs }),
   loader: async ({ context, deps }) => {
     const revisions = await context.query.ensureQueryData(
-      getDiffRevisionsQueryOptions({
+      getDiffRevisionsOptions({
         original: BigInt(deps.current),
         updated: BigInt(deps.theirs),
-      })
+      }),
     );
     return { revisions };
   },

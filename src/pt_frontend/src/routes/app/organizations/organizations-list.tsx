@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { z } from 'zod';
 
-import { api } from '@/api';
+import { getOrganizationsOptions } from '@/api/queries/organizations';
 
 import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
@@ -78,9 +78,10 @@ export const Route = createFileRoute(
   }),
   loader: async ({ context, deps }) => {
     const organizationPagination = buildPaginationInput(deps.pagination);
-    const [organizations, paginationMetaData] = await api.list_organizations(
-      organizationPagination,
-    );
+    const [organizations, paginationMetaData] =
+      await context.query.ensureQueryData(
+        getOrganizationsOptions(organizationPagination),
+      );
 
     return {
       context,

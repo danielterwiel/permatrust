@@ -1,9 +1,14 @@
 import { createActor } from '@/declarations/pt_backend/index';
 import { type ActorSubclass, HttpAgent } from '@dfinity/agent';
 
+import { createMutations } from '@/api/mutations';
+
 import { isAppError } from '@/utils/isAppError';
 
-import type { _SERVICE } from '@/declarations/pt_backend/pt_backend.did';
+import type {
+  _SERVICE,
+  AppError,
+} from '@/declarations/pt_backend/pt_backend.did';
 import type { CreateActorFn, Result, ResultHandler } from '@/types/api';
 import type { AuthClient } from '@dfinity/auth-client';
 
@@ -35,6 +40,7 @@ export async function createAuthenticatedActorWrapper(
   );
   const wrappedActor = wrapActor(await wrapWithAuth(actor, authClient));
   api = wrappedActor;
+  createMutations();
   return wrappedActor;
 }
 
@@ -46,11 +52,19 @@ export function handleResult<T>(
     handlers.onOk?.(result.Ok);
     return result.Ok;
   }
-  handlers.onErr?.(result.Err);
-  if (isAppError(result.Err)) {
-    throw new Error(JSON.stringify(result.Err));
+
+  if (handlers.onErr) {
+    handlers.onErr(result.Err);
   }
-  throw new Error('Unknown error occurred');
+
+  let error: AppError | Error;
+  if (isAppError(result.Err)) {
+    error = result.Err;
+  } else {
+    error = new Error('Unknown error occurred');
+  }
+
+  throw error;
 }
 
 async function createAuthenticatedActor(

@@ -1,15 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { useState } from 'react';
+import { zodSearchValidator } from '@tanstack/router-zod-adapter';
+import { z } from 'zod';
 
-import { api } from '@/api';
+import { mutations } from '@/api/mutations';
+import { getRevisionsByDocumentIdOptions } from '@/api/queries';
 
 import {
   CreateRevisionForm,
   type createRevisionFormSchema,
 } from '@/components/create-revision-form';
+import { Loading } from '@/components/loading';
 
 import { buildFilterField } from '@/utils/buildFilterField';
-import { isAppError } from '@/utils/isAppError';
 
 import { ENTITY_NAME } from '@/consts/entities';
 import { FILTER_FIELD, SORT_ORDER } from '@/consts/pagination';
@@ -20,7 +22,6 @@ import type {
   PaginationInput,
   SortCriteria,
 } from '@/declarations/pt_backend/pt_backend.did';
-import type { z } from 'zod';
 
 const DEFAULT_SORT: [SortCriteria] = [
   {
@@ -39,57 +40,71 @@ const LAST_REVISION_PAGINATION: PaginationInput = {
   sort: DEFAULT_SORT,
 };
 
+const revisionCreateSearchSchema = z.object({
+  documentId: z.number(),
+  projectId: z.number(),
+});
+
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/create',
 )({
-  beforeLoad: async ({ params }) => {
-    const response = await api.list_revisions_by_document_id({
-      document_id: BigInt(params.documentId),
-      pagination: LAST_REVISION_PAGINATION,
-    });
-    if (isAppError(response)) {
-      throw new Error('Error fetching Revision');
-    }
-    const [[revision]] = response;
-
-    return {
-      getTitle: () => 'Create revision',
-      revision,
-    };
+  validateSearch: zodSearchValidator(revisionCreateSearchSchema),
+  loaderDeps: ({ search }) => ({
+    documentId: search.documentId,
+    projectId: search.projectId,
+  }),
+  beforeLoad: () => ({
+    getTitle: () => 'Create qrevision',
+  }),
+  loader: async ({ context, deps }) => {
+    const revisions = await context.query.ensureQueryData(
+      getRevisionsByDocumentIdOptions(
+        deps.documentId,
+        LAST_REVISION_PAGINATION,
+      ),
+    );
+    return { revisions };
   },
   component: RevisionsCreate,
 });
 
 function RevisionsCreate() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isPending: isSubmitting, mutate: createRevision } =
+    mutations.useCreateRevision();
   const params = Route.useParams();
-  const { revision } = Route.useRouteContext({
-    select: ({ revision }) => ({ revision }),
-  });
   const navigate = Route.useNavigate();
+  const { revisions: revisionData } = Route.useLoaderData();
+
+  const revision = revisionData?.[0]?.[0];
 
   async function onSubmit(values: z.infer<typeof createRevisionFormSchema>) {
     try {
-      setIsSubmitting(true);
       const encoder = new TextEncoder();
       const content = encoder.encode(values.content);
 
       const projectId = toNumberSchema.parse(params.projectId);
       const documentId = toBigIntSchema.parse(params.documentId);
 
-      await api.create_revision({
-        content,
-        document_id: documentId,
-        project_id: projectId,
-      });
-
-      navigate({
-        to: '/projects/$projectId/documents/$documentId',
-      });
+      createRevision(
+        {
+          content,
+          document_id: documentId,
+          project_id: projectId,
+        },
+        {
+          onSuccess: () => {
+            navigate({
+              params: {
+                documentId: params.documentId,
+                projectId: params.projectId,
+              },
+              to: '/projects/$projectId/documents/$documentId',
+            });
+          },
+        },
+      );
     } catch (_error) {
       // TODO: handle error
-    } finally {
-      setIsSubmitting(false);
     }
   }
 

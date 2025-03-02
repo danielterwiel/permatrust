@@ -2,7 +2,8 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { z } from 'zod';
 
-import { api } from '@/api';
+import { getOrganizationOptions } from '@/api/queries/organizations';
+import { getProjectsByOrganizationOptions } from '@/api/queries/projects';
 
 import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
@@ -76,13 +77,13 @@ export const Route = createFileRoute(
     const projectPagination = buildPaginationInput(deps.pagination);
     const organizationId = toNumberSchema.parse(params.organizationId);
 
-    const [projects, paginationMetaData] =
-      await api.list_projects_by_organization_id({
-        organization_id: organizationId,
-        pagination: projectPagination,
-      });
+    const [projects, paginationMetaData] = await context.query.ensureQueryData(
+      getProjectsByOrganizationOptions(organizationId, projectPagination),
+    );
 
-    const organization = await api.get_organization({ id: organizationId });
+    const organization = await context.query.ensureQueryData(
+      getOrganizationOptions(organizationId),
+    );
 
     return {
       context,

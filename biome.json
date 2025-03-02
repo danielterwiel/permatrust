@@ -1,10 +1,11 @@
 {
-	"formatter": {
-		"enabled": true
-	},
-	"overrides": [
-		{
-			"include": ["src/pt_frontend/**/*.{ts,tsx,js,jsx,json,md}"]
-		}
-	]
+  "formatter": {
+    "enabled": true
+  },
+  "overrides": [
+    {
+      "include": ["src/pt_frontend/**/*.{ts,tsx,js,jsx,json,md}"],
+      "ignore": ["src/pt_frontend/src/routeTree.gen.ts"]
+    }
+  ]
 }
