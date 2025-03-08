@@ -24,7 +24,7 @@ import {
 } from '@/components/ui/form';
 import { Icon } from '@/components/ui/icon';
 
-import { decodeUint8Array } from '@/utils/decodeUint8Array';
+import { decodeUint8Array } from '@/utils/decode-uint8-array';
 
 import type { Revision } from '@/declarations/pt_backend/pt_backend.did';
 import type { FC } from 'react';

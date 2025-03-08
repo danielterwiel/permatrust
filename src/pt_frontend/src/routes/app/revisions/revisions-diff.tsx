@@ -6,7 +6,7 @@ import { z } from 'zod';
 
 import { getDiffRevisionsOptions } from '@/api/queries';
 
-import { decodeUint8Array } from '@/utils/decodeUint8Array';
+import { decodeUint8Array } from '@/utils/decode-uint8-array';
 
 const revisionSchema = z.object({
   content: z.union([z.array(z.number()), z.instanceof(Uint8Array)]),

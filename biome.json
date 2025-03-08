@@ -1,11 +1,11 @@
 {
-  "formatter": {
-    "enabled": true
-  },
-  "overrides": [
-    {
-      "include": ["src/pt_frontend/**/*.{ts,tsx,js,jsx,json,md}"],
-      "ignore": ["src/pt_frontend/src/routeTree.gen.ts"]
-    }
-  ]
+	"formatter": {
+		"enabled": true
+	},
+	"overrides": [
+		{
+			"include": ["src/pt_frontend/**/*.{ts,tsx,js,jsx,json,md}"],
+			"ignore": ["src/pt_frontend/src/routeTree.gen.ts", "package-lock.json"]
+		}
+	]
 }

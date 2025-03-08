@@ -1,6 +1,6 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { usePagination } from '@/hooks/use-pagination';
+import { createFileRoute } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
-import { z } from 'zod';
 
 import { listDocumentsByProjectIdOptions } from '@/api/queries/documents';
 
@@ -10,75 +10,45 @@ import { Link } from '@/components/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 
-import { buildFilterField } from '@/utils/buildFilterField';
-import { buildPaginationInput } from '@/utils/buildPaginationInput';
+import { processPaginationInput } from '@/utils/pagination';
 
-import { ENTITY, ENTITY_NAME } from '@/consts/entities';
+import { ENTITY } from '@/consts/entities';
 import {
-  DEFAULT_PAGINATION,
-  FILTER_FIELD,
   FILTER_OPERATOR,
+  FILTER_SORT_FIELDS,
   SORT_ORDER,
 } from '@/consts/pagination';
 
-import { paginationInputSchema } from '@/schemas/pagination';
+import { createEntityPaginationSchema } from '@/schemas/pagination';
 import { toNumberSchema } from '@/schemas/primitives';
 
-import type {
-  Document,
-  PaginationInput,
-  SortCriteria,
-} from '@/declarations/pt_backend/pt_backend.did';
-import type { FilterCriteria } from '@/types/pagination';
+import type { Document } from '@/declarations/pt_backend/pt_backend.did';
 import type { Row } from '@tanstack/react-table';
 
-const DEFAULT_FILTERS: [FilterCriteria[]] = [
-  [
-    {
-      entity: ENTITY.Document,
-      field: buildFilterField(
-        ENTITY_NAME.Document,
-        FILTER_FIELD.Document.Title,
-      ),
-      operator: FILTER_OPERATOR.Contains,
-      value: '',
-    },
-  ],
-];
-
-const DEFAULT_SORT: [SortCriteria] = [
-  {
-    field: buildFilterField(ENTITY_NAME.Document, FILTER_FIELD.Document.Title),
-    order: SORT_ORDER.Asc,
-  },
-];
-
-const documentsSearchSchema = z.object({
-  pagination: paginationInputSchema.optional(),
-});
-
-const DEFAULT_DOCUMENT_PAGINATION: PaginationInput = {
-  filters: DEFAULT_FILTERS,
-  page_number: DEFAULT_PAGINATION.page_number,
-  page_size: DEFAULT_PAGINATION.page_size,
-  sort: DEFAULT_SORT,
-};
+const { schema: documentsSearchSchema, defaultPagination } =
+  createEntityPaginationSchema(ENTITY.DOCUMENT, {
+    defaultFilterField: FILTER_SORT_FIELDS.DOCUMENT.TITLE,
+    defaultFilterOperator: FILTER_OPERATOR.CONTAINS,
+    defaultFilterValue: '',
+    defaultSortField: FILTER_SORT_FIELDS.DOCUMENT.TITLE,
+    defaultSortOrder: SORT_ORDER.ASC,
+  });
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/',
 )({
   validateSearch: zodSearchValidator(documentsSearchSchema),
   loaderDeps: ({ search }) => ({
-    pagination: search.pagination ?? DEFAULT_DOCUMENT_PAGINATION,
+    pagination: { ...defaultPagination, ...search?.pagination },
   }),
   loader: async ({ context, deps, params }) => {
-    const documentPagination = buildPaginationInput(deps.pagination);
+    const documentPagination = processPaginationInput(deps.pagination);
     const projectId = toNumberSchema.parse(params.projectId);
     const [documents, paginationMetaData] = await context.query.ensureQueryData(
       listDocumentsByProjectIdOptions({
         pagination: documentPagination,
         project_id: projectId,
-      })
+      }),
     );
 
     return {
@@ -112,7 +82,15 @@ const RowActions = (row: Row<Document>) => {
 function Documents() {
   const { documents, pagination, paginationMetaData } = Route.useLoaderData();
   const { projectId } = Route.useParams();
-  const navigate = useNavigate();
+
+  const effectiveSort = pagination.sort?.length
+    ? pagination.sort
+    : defaultPagination.sort;
+
+  const { onFilterChange, onSortChange, getPageChangeParams } = usePagination(
+    pagination,
+    defaultPagination
+  );
 
   return (
     <Card>
@@ -132,17 +110,7 @@ function Documents() {
             <FilterInput
               filterCriteria={filterCriteria}
               key={filterCriteria.entity.toString()}
-              onChange={(filterCriteria: FilterCriteria) => {
-                navigate({
-                  search: {
-                    pagination: {
-                      ...pagination,
-                      filters: [[filterCriteria]],
-                    },
-                  },
-                  to: `/projects/${projectId}/documents`,
-                });
-              }}
+              onChange={onFilterChange}
               placeholder="Filter title..."
             />
           ))}
@@ -173,20 +141,11 @@ function Documents() {
               key: 'version',
             },
           ]}
-          entityName={ENTITY_NAME.Document}
-          onSortingChange={(newSort) => {
-            navigate({
-              search: {
-                pagination: {
-                  ...pagination,
-                  sort: newSort,
-                },
-              },
-              to: `/projects/${projectId}/documents`,
-            });
-          }}
+          entityName={ENTITY.DOCUMENT}
+          getPageChangeParams={getPageChangeParams}
+          onSortingChange={onSortChange}
           paginationMetaData={paginationMetaData}
-          sort={pagination.sort}
+          sort={effectiveSort}
           tableData={documents}
         />
       </CardContent>

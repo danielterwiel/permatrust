@@ -1,8 +1,8 @@
+import { usePagination } from '@/hooks/use-pagination';
 import { createFileRoute } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
-import { z } from 'zod';
 
-import { listUsersOptions } from '@/api/queries';
+import { listUsersOptions } from '@/api/queries/users';
 
 import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
@@ -10,67 +10,38 @@ import { Link } from '@/components/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 
-import { buildFilterField } from '@/utils/buildFilterField';
-import { buildPaginationInput } from '@/utils/buildPaginationInput';
+import { processPaginationInput } from '@/utils/pagination';
 
-import { ENTITY, ENTITY_NAME } from '@/consts/entities';
+import { ENTITY } from '@/consts/entities';
 import {
-  DEFAULT_PAGINATION,
-  FILTER_FIELD,
   FILTER_OPERATOR,
+  FILTER_SORT_FIELDS,
   SORT_ORDER,
 } from '@/consts/pagination';
 
-import { paginationInputSchema } from '@/schemas/pagination';
+import { createEntityPaginationSchema } from '@/schemas/pagination';
 
-import type {
-  PaginationInput,
-  SortCriteria,
-  User,
-} from '@/declarations/pt_backend/pt_backend.did';
-import type { FilterCriteria } from '@/types/pagination';
+import type { User } from '@/declarations/pt_backend/pt_backend.did';
 import type { Row } from '@tanstack/react-table';
 
-const DEFAULT_FILTERS: [FilterCriteria[]] = [
-  [
-    {
-      entity: ENTITY.User,
-      field: buildFilterField(ENTITY_NAME.User, FILTER_FIELD.User.FirstName),
-      operator: FILTER_OPERATOR.Contains,
-      value: '',
-    },
-  ],
-];
-
-const DEFAULT_SORT: [SortCriteria] = [
-  {
-    field: buildFilterField(ENTITY_NAME.User, FILTER_FIELD.User.FirstName),
-    order: SORT_ORDER.Asc,
-  },
-];
-
-const usersSearchSchema = z
-  .object({
-    pagination: paginationInputSchema.optional(),
-  })
-  .optional();
-
-const DEFAULT_USER_PAGINATION: PaginationInput = {
-  filters: DEFAULT_FILTERS,
-  page_number: DEFAULT_PAGINATION.page_number,
-  page_size: DEFAULT_PAGINATION.page_size,
-  sort: DEFAULT_SORT,
-};
+const { schema: usersSearchSchema, defaultPagination } =
+  createEntityPaginationSchema(ENTITY.USER, {
+    defaultFilterField: FILTER_SORT_FIELDS.USER.FIRST_NAME,
+    defaultFilterOperator: FILTER_OPERATOR.CONTAINS,
+    defaultFilterValue: '',
+    defaultSortField: FILTER_SORT_FIELDS.USER.FIRST_NAME,
+    defaultSortOrder: SORT_ORDER.ASC,
+  });
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/users/',
 )({
   validateSearch: zodSearchValidator(usersSearchSchema),
   loaderDeps: ({ search }) => ({
-    pagination: search?.pagination ?? DEFAULT_USER_PAGINATION,
+    pagination: { ...defaultPagination, ...search?.pagination },
   }),
   loader: async ({ context, deps }) => {
-    const userPagination = buildPaginationInput(deps.pagination);
+    const userPagination = processPaginationInput(deps.pagination);
     const [users, paginationMetaData] = await context.query.ensureQueryData(
       listUsersOptions({ pagination: userPagination }),
     );
@@ -103,7 +74,15 @@ const RowActions = (row: Row<User>) => {
 
 function Users() {
   const { pagination, paginationMetaData, users } = Route.useLoaderData();
-  const navigate = Route.useNavigate();
+  
+  const effectiveSort = pagination.sort?.length 
+    ? pagination.sort 
+    : defaultPagination.sort;
+  
+  const { onFilterChange, onSortChange, getPageChangeParams } = usePagination(
+    pagination,
+    defaultPagination
+  );
 
   return (
     <>
@@ -112,17 +91,7 @@ function Users() {
           <FilterInput
             filterCriteria={filterCriteria}
             key={filterCriteria.entity.toString()}
-            onChange={(filterCriteria: FilterCriteria) => {
-              navigate({
-                search: {
-                  pagination: {
-                    ...pagination,
-                    filters: [[filterCriteria]],
-                  },
-                },
-                to: '/users',
-              });
-            }}
+            onChange={onFilterChange}
             placeholder="Filter first name..."
           />
         ))}
@@ -153,20 +122,11 @@ function Users() {
                 key: 'last_name',
               },
             ]}
-            entityName={ENTITY_NAME.User}
-            onSortingChange={(newSort) => {
-              navigate({
-                search: {
-                  pagination: {
-                    ...pagination,
-                    sort: newSort,
-                  },
-                },
-                to: '/users',
-              });
-            }}
+            entityName={ENTITY.USER}
+            getPageChangeParams={getPageChangeParams}
+            onSortingChange={onSortChange}
             paginationMetaData={paginationMetaData}
-            sort={pagination.sort}
+            sort={effectiveSort}
             tableData={users}
           />
         </CardContent>

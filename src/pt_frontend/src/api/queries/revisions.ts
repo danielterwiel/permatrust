@@ -1,6 +1,6 @@
 import { api } from '@/api';
 
-import { createQueryOptions } from '@/utils/createQueryOptions';
+import { createQueryOptions } from '@/utils/create-query-options';
 
 import type {
   DiffRevisionsInput,

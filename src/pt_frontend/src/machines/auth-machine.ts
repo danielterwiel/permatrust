@@ -2,10 +2,14 @@ import { Auth } from '@/auth';
 import { router } from '@/router';
 import { assign, createActor, fromPromise, log, setup } from 'xstate';
 
-import { api, createAuthenticatedActorWrapper } from '@/api';
+import { createAuthenticatedActorWrapper } from '@/api';
+import { getOrganizationsOptions } from '@/api/queries/organizations';
+import { getUserOptions } from '@/api/queries/users';
+import { queryClient } from '@/api/query-client';
 
-import { CANISTER_ID_PT_BACKEND } from '@/consts/canisters';
 import { DEFAULT_PAGINATION } from '@/consts/pagination';
+
+const canisterIdPtBackend = process.env.CANISTER_ID_PT_BACKEND as string;
 
 import type {
   Organization,
@@ -52,7 +56,7 @@ const authMachine = setup({
         }
 
         const actor = await createAuthenticatedActorWrapper(
-          CANISTER_ID_PT_BACKEND,
+          canisterIdPtBackend,
           client,
         );
 
@@ -68,7 +72,7 @@ const authMachine = setup({
 
     get_user: fromPromise(async () => {
       try {
-        const userResult = await api.get_user();
+        const userResult = await queryClient.ensureQueryData(getUserOptions());
 
         if (!userResult) {
           throw new Error('User not found');
@@ -96,10 +100,7 @@ const authMachine = setup({
         const isAuthenticated = await client.isAuthenticated();
 
         const actor = isAuthenticated
-          ? await createAuthenticatedActorWrapper(
-              CANISTER_ID_PT_BACKEND,
-              client,
-            )
+          ? await createAuthenticatedActorWrapper(canisterIdPtBackend, client)
           : undefined;
 
         return { actor, client, isAuthenticated };
@@ -109,19 +110,26 @@ const authMachine = setup({
     }),
 
     list_organizations: fromPromise(async () => {
-      const organizationsResult =
-        await api.list_organizations(DEFAULT_PAGINATION);
-      const [organizations] = organizationsResult;
+      try {
+        const organizationsResult = await queryClient.ensureQueryData(
+          getOrganizationsOptions(DEFAULT_PAGINATION),
+        );
+        const [organizations] = organizationsResult;
 
-      if (!organizations.length) {
+        if (!organizations.length) {
+          return {
+            onboardedOrganizations: false,
+          };
+        }
+        return {
+          onboardedOrganizations: true,
+          organizations,
+        };
+      } catch (_error) {
         return {
           onboardedOrganizations: false,
         };
       }
-      return {
-        onboardedOrganizations: true,
-        organizations,
-      };
     }),
   },
   types: {} as AuthMachineTypes,

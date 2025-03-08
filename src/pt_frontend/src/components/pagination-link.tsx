@@ -3,13 +3,14 @@ import { buttonVariants } from '@/components/ui/button';
 
 import { cn } from '@/utils/cn';
 
+import type { PaginationSearchParams } from '@/schemas/pagination';
 import type * as React from 'react';
 
 interface PaginationLinkProps
   extends Omit<React.ComponentProps<typeof Link>, 'search'> {
   className?: string;
   isActive?: boolean;
-  search?: { page_number?: number };
+  search?: PaginationSearchParams;
 }
 
 export function PaginationLink({
@@ -26,8 +27,8 @@ export function PaginationLink({
         buttonVariants({ variant: isActive ? 'default' : 'outline' }),
         className,
       )}
-      // biome-ignore lint/suspicious/noExplicitAny: Cast to any to bypass type checking on a generic component as Pagination
-      search={search as any}
+      replace
+      search={search}
     >
       {children}
     </Link>

@@ -1,7 +1,7 @@
 import { toast } from '@/hooks/use-toast';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
-import { isAppError } from '@/utils/isAppError';
+import { isAppError } from '@/utils/is-app-error';
 
 import type { ToastProps } from '@/components/ui/toast';
 import type { AppError } from '@/declarations/pt_backend/pt_backend.did';

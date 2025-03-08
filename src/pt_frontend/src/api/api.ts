@@ -3,7 +3,7 @@ import { type ActorSubclass, HttpAgent } from '@dfinity/agent';
 
 import { createMutations } from '@/api/mutations';
 
-import { isAppError } from '@/utils/isAppError';
+import { isAppError } from '@/utils/is-app-error';
 
 import type {
   _SERVICE,

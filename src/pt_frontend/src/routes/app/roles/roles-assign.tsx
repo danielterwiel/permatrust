@@ -35,14 +35,14 @@ import {
 } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-import { buildFilterField } from '@/utils/buildFilterField';
 import { cn } from '@/utils/cn';
+import { createFilter } from '@/utils/pagination';
 
-import { ENTITY, ENTITY_NAME } from '@/consts/entities';
+import { ENTITY } from '@/consts/entities';
 import {
   DEFAULT_PAGINATION,
-  FILTER_FIELD,
   FILTER_OPERATOR,
+  FILTER_SORT_FIELDS,
 } from '@/consts/pagination';
 
 import { toBigIntSchema, toNumberSchema } from '@/schemas/primitives';
@@ -80,15 +80,12 @@ export const Route = createFileRoute(
 
       if (preselectedUser) {
         const filterCriteria = [
-          {
-            entity: ENTITY.UserWithRoles,
-            field: buildFilterField(
-              ENTITY_NAME.UserWithRoles,
-              FILTER_FIELD.UserWithRoles.Id,
-            ),
-            operator: FILTER_OPERATOR.Equals,
-            value: userId,
-          },
+          createFilter({
+            entity: ENTITY.USER_WITH_ROLES,
+            field: FILTER_SORT_FIELDS.USER_WITH_ROLES.FIRST_NAME,
+            operator: FILTER_OPERATOR.EQUALS,
+            value: userId.toString(),
+          }),
         ];
 
         const userRolesPagination: PaginationInput = {

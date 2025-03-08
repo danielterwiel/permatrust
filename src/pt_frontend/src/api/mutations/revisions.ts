@@ -1,6 +1,6 @@
 import { api } from '@/api';
 
-import { createMutationHook } from '@/utils/createMutationHook';
+import { createMutationHook } from '@/utils/create-mutation-hook';
 
 export const createRevisionMutations = () => {
   const useCreateRevision = createMutationHook(

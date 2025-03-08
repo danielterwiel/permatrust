@@ -3,6 +3,7 @@ import {
   ArrowUpIcon,
   CaretSortIcon,
 } from '@radix-ui/react-icons';
+import { useMatches } from '@tanstack/react-router';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -13,6 +14,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 import { cn } from '@/utils/cn';
+import { snakeToPascalCase } from '@/utils/snake-to-pascal-case';
+
+import { paginationSearchSchema } from '@/schemas/pagination';
 
 import type { Column } from '@tanstack/react-table';
 import type * as React from 'react';
@@ -20,6 +24,8 @@ import type * as React from 'react';
 type DataTableColumnHeaderProps<TData, TValue> =
   React.HTMLAttributes<HTMLDivElement> & {
     column: Column<TData, TValue>;
+    defaultSortDirection?: 'asc' | 'desc' | false;
+    defaultSortField?: string;
     title: React.ReactNode;
   };
 
@@ -27,10 +33,71 @@ export function DataTableColumnHeader<TData, TValue>({
   className,
   column,
   title,
+  defaultSortDirection,
+  defaultSortField,
 }: DataTableColumnHeaderProps<TData, TValue>) {
+  // Get current route match for URL params
+  const matches = useMatches();
+  const currentRoute = matches[matches.length - 1];
+  const search = currentRoute?.search || {};
+
+  const { pagination } = paginationSearchSchema.parse(search);
+
+  // This will be used for URL-based sorting
+  const urlSort = pagination?.sort?.[0];
+
+  // Get the base column ID without index suffix (e.g., "name-0" -> "name")
+  const baseColumnId = column.id.split('-')[0];
+
+  // Convert to PascalCase for comparison
+  const pascalColumnId = snakeToPascalCase(baseColumnId);
+
+  // Check if this column is being sorted based on URL params, table state, or default settings
+  const isColumnSorted = () => {
+    // First, check URL-based sorting
+    if (urlSort?.field) {
+      try {
+        // Get entity key and field
+        const entityKey = Object.keys(urlSort.field)[0];
+        if (!entityKey) return null;
+
+        const fieldObj = urlSort.field[entityKey as keyof typeof urlSort.field];
+        const sortFieldName = fieldObj ? Object.keys(fieldObj)[0] : null;
+
+        // If column matches sort field, return direction from URL
+        if (sortFieldName && pascalColumnId === sortFieldName) {
+          return urlSort.order && 'Desc' in urlSort.order ? 'desc' : 'asc';
+        }
+      } catch (_e) {
+        // If any errors in parsing, continue to check table state
+      }
+    }
+
+    // Next, check if table has an active sort state for this column
+    const tableSortDirection = column.getIsSorted();
+    if (tableSortDirection) {
+      return tableSortDirection;
+    }
+
+    // Finally, if no URL or table sort is active, check default sort
+    if (defaultSortField && defaultSortDirection) {
+      // Check if this column is the default sort column
+      if (pascalColumnId === defaultSortField) {
+        return defaultSortDirection;
+      }
+    }
+
+    // No sorting applies to this column
+    return false;
+  };
+
+  // Get sorting direction
+  const sortDirection = isColumnSorted();
+
   if (!column.getCanSort()) {
     return <div className={cn(className)}>{title}</div>;
   }
+
   return (
     <div className={cn('flex items-center space-x-2', className)}>
       <DropdownMenu>
@@ -41,10 +108,10 @@ export function DataTableColumnHeader<TData, TValue>({
             variant="ghost"
           >
             {title}
-            {column.getIsSorted() === 'desc' ? (
-              <ArrowUpIcon className="ml-2 h-4 w-4" />
-            ) : column.getIsSorted() === 'asc' ? (
+            {sortDirection === 'desc' ? (
               <ArrowDownIcon className="ml-2 h-4 w-4" />
+            ) : sortDirection === 'asc' ? (
+              <ArrowUpIcon className="ml-2 h-4 w-4" />
             ) : (
               <CaretSortIcon className="ml-2 h-4 w-4" />
             )}

@@ -9,35 +9,35 @@ import {
   CreateRevisionForm,
   type createRevisionFormSchema,
 } from '@/components/create-revision-form';
-import { Loading } from '@/components/loading';
 
-import { buildFilterField } from '@/utils/buildFilterField';
+import { processPaginationInput } from '@/utils/pagination';
 
-import { ENTITY_NAME } from '@/consts/entities';
-import { FILTER_FIELD, SORT_ORDER } from '@/consts/pagination';
+import { ENTITY } from '@/consts/entities';
+import {
+  FILTER_OPERATOR,
+  FILTER_SORT_FIELDS,
+  SORT_ORDER,
+} from '@/consts/pagination';
 
+import { createEntityPaginationSchema } from '@/schemas/pagination';
 import { toBigIntSchema, toNumberSchema } from '@/schemas/primitives';
 
-import type {
-  PaginationInput,
-  SortCriteria,
-} from '@/declarations/pt_backend/pt_backend.did';
+import type { PaginationInput } from '@/declarations/pt_backend/pt_backend.did';
 
-const DEFAULT_SORT: [SortCriteria] = [
+const { defaultPagination: revisionPagination } = createEntityPaginationSchema(
+  ENTITY.REVISION,
   {
-    field: buildFilterField(
-      ENTITY_NAME.Revision,
-      FILTER_FIELD.Revision.CreatedAt,
-    ),
-    order: SORT_ORDER.Desc,
+    defaultFilterField: FILTER_SORT_FIELDS.REVISION.CREATED_AT,
+    defaultFilterOperator: FILTER_OPERATOR.EQUALS,
+    defaultFilterValue: '',
+    defaultSortField: FILTER_SORT_FIELDS.REVISION.CREATED_AT,
+    defaultSortOrder: SORT_ORDER.DESC,
   },
-];
+);
 
 const LAST_REVISION_PAGINATION: PaginationInput = {
-  filters: [],
-  page_number: 1,
+  ...revisionPagination,
   page_size: 1,
-  sort: DEFAULT_SORT,
 };
 
 const revisionCreateSearchSchema = z.object({
@@ -57,11 +57,10 @@ export const Route = createFileRoute(
     getTitle: () => 'Create qrevision',
   }),
   loader: async ({ context, deps }) => {
+    const paginationInput = processPaginationInput(LAST_REVISION_PAGINATION);
+
     const revisions = await context.query.ensureQueryData(
-      getRevisionsByDocumentIdOptions(
-        deps.documentId,
-        LAST_REVISION_PAGINATION,
-      ),
+      getRevisionsByDocumentIdOptions(deps.documentId, paginationInput),
     );
     return { revisions };
   },

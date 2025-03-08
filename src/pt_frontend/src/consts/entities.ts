@@ -1,15 +1,17 @@
-import type { EntityName } from '@/types/entities';
+import { createCandidVariant } from '@/utils/create-candid-variant';
 
+// Entity constant definitions - single source of truth
 export const ENTITY = {
-  Document: { Document: null },
-  Organization: { Organization: null },
-  Project: { Project: null },
-  Revision: { Revision: null },
-  User: { User: null },
-  UserWithRoles: { UserWithRoles: null },
-  Workflow: { Workflow: null },
+  DOCUMENT: 'Document',
+  ORGANIZATION: 'Organization',
+  PROJECT: 'Project',
+  REVISION: 'Revision',
+  USER: 'User',
+  USER_WITH_ROLES: 'UserWithRoles',
+  WORKFLOW: 'Workflow',
 } as const;
 
-export const ENTITY_NAME = Object.fromEntries(
-  (Object.keys(ENTITY) as EntityName[]).map((key) => [key, key]),
-) as Record<EntityName, EntityName>;
+// Preserve existing structures for compatibility
+const entityNames = Object.values(ENTITY);
+
+export const entity = createCandidVariant(entityNames);

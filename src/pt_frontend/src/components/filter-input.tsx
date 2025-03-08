@@ -1,16 +1,15 @@
 import { useForm } from '@tanstack/react-form';
-import { useEffect } from 'react';
 import { z } from 'zod';
 
+import { Input } from '@/components/input';
 import {
   FormControl,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 
-import { filterCriteriaToFilterFieldName } from '@/utils/filterCriteriaToFilterFieldName';
+import { extractFilterFieldName } from '@/utils/pagination';
 
 import { filterCriteriaSchema } from '@/schemas/pagination';
 
@@ -29,9 +28,7 @@ export const FilterInput = ({
   placeholder,
   ...inputProps
 }: FilterProps) => {
-  const fieldName = filterCriteriaToFilterFieldName(
-    filterCriteria,
-  ) as keyof FilterCriteria;
+  const fieldName = extractFilterFieldName(filterCriteria);
 
   const form = useForm({
     defaultValues: {
@@ -42,21 +39,15 @@ export const FilterInput = ({
     },
   });
 
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      const value = form.state.values[fieldName];
-      if (value !== '') {
-        onChange?.({
-          entity: filterCriteria.entity,
-          field: filterCriteria.field,
-          operator: filterCriteria.operator,
-          value: String(value),
-        });
-      }
-    }, 300); // 300ms debounce
-
-    return () => clearTimeout(timeoutId);
-  }, [form.state.values, fieldName, filterCriteria, onChange]);
+  // Function to update filter criteria with new value
+  const updateFilter = (value: string) => {
+    onChange?.({
+      entity: filterCriteria.entity,
+      field: filterCriteria.field,
+      operator: filterCriteria.operator,
+      value: value,
+    });
+  };
 
   return (
     <form
@@ -86,7 +77,7 @@ export const FilterInput = ({
         }}
       >
         {(field) => (
-          <FormItem>
+          <FormItem className="relative">
             <FormLabel className="sr-only" field={field}>
               {placeholder}
             </FormLabel>
@@ -95,8 +86,14 @@ export const FilterInput = ({
                 {...inputProps}
                 aria-label={placeholder}
                 className="h-8 w-[250px] lg:w-[350px] text-sm"
-                onBlur={field.handleBlur}
-                onChange={(e) => field.handleChange(e.target.value)}
+                clearTooltip="Clear filter"
+                name={fieldName}
+                onChange={(value) => {
+                  updateFilter(value);
+                }}
+                onChangeImmediate={(value) => {
+                  field.handleChange(value);
+                }}
                 placeholder={placeholder}
                 type="text"
                 value={field.state.value}

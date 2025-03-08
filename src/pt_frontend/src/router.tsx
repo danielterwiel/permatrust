@@ -1,7 +1,9 @@
+import { rootContext } from '@/context/root';
+import { routeTree } from '@/routeTree.gen';
 import { createRouter } from '@tanstack/react-router';
 
-import { rootContext } from './context/root';
-import { routeTree } from './routeTree.gen';
+import { parseSearch } from '@/utils/parse-search';
+import { stringifySearch } from '@/utils/stringify-search';
 
 export const router = createRouter({
   context: rootContext,
@@ -11,6 +13,8 @@ export const router = createRouter({
   defaultPreloadStaleTime: 0,
   routeTree,
   scrollRestoration: true,
+  parseSearch,
+  stringifySearch,
 });
 
 declare module '@tanstack/react-router' {

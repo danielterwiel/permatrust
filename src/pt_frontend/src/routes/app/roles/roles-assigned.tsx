@@ -1,6 +1,6 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { usePagination } from '@/hooks/use-pagination';
+import { createFileRoute } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
-import { z } from 'zod';
 
 import { listProjectMembersRolesOptions } from '@/api/queries/users';
 
@@ -10,74 +10,50 @@ import { Link } from '@/components/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 
-import { buildFilterField } from '@/utils/buildFilterField';
-import { buildPaginationInput } from '@/utils/buildPaginationInput';
+import { processPaginationInput } from '@/utils/pagination';
 
-import { ENTITY, ENTITY_NAME } from '@/consts/entities';
+import { ENTITY } from '@/consts/entities';
 import {
-  DEFAULT_PAGINATION,
-  FILTER_FIELD,
   FILTER_OPERATOR,
+  FILTER_SORT_FIELDS,
   SORT_ORDER,
 } from '@/consts/pagination';
 
-import { paginationInputSchema } from '@/schemas/pagination';
+import { createEntityPaginationSchema } from '@/schemas/pagination';
 import { toNumberSchema } from '@/schemas/primitives';
 
 import type {
-  PaginationInput,
   Role,
-  SortCriteria,
   UserWithRoles,
 } from '@/declarations/pt_backend/pt_backend.did';
-import type { FilterCriteria } from '@/types/pagination';
 import type { Row } from '@tanstack/react-table';
 
-const DEFAULT_FILTERS: [FilterCriteria[]] = [
-  [
-    {
-      entity: ENTITY.User,
-      field: buildFilterField(ENTITY_NAME.User, FILTER_FIELD.User.FirstName),
-      operator: FILTER_OPERATOR.Contains,
-      value: '',
-    },
-  ],
-];
-
-const DEFAULT_SORT: [SortCriteria] = [
-  {
-    field: buildFilterField(ENTITY_NAME.User, FILTER_FIELD.User.FirstName),
-    order: SORT_ORDER.Asc,
-  },
-];
-
-const DEFAULT_ROLES_PAGINATION: PaginationInput = {
-  filters: DEFAULT_FILTERS,
-  page_number: DEFAULT_PAGINATION.page_number,
-  page_size: DEFAULT_PAGINATION.page_size,
-  sort: DEFAULT_SORT,
-};
-
-const rolesSearchSchema = z.object({
-  pagination: paginationInputSchema.optional(),
-});
+const { schema: rolesSearchSchema, defaultPagination } =
+  createEntityPaginationSchema(ENTITY.USER_WITH_ROLES, {
+    defaultFilterField: FILTER_SORT_FIELDS.USER_WITH_ROLES.FIRST_NAME,
+    defaultFilterOperator: FILTER_OPERATOR.CONTAINS,
+    defaultFilterValue: '',
+    defaultSortField: FILTER_SORT_FIELDS.USER_WITH_ROLES.FIRST_NAME,
+    defaultSortOrder: SORT_ORDER.ASC,
+  });
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/assigned',
 )({
   validateSearch: zodSearchValidator(rolesSearchSchema),
   loaderDeps: ({ search }) => ({
-    pagination: search?.pagination ?? DEFAULT_ROLES_PAGINATION,
+    pagination: { ...defaultPagination, ...search?.pagination },
   }),
   loader: async ({ context, deps, params }) => {
     const projectId = toNumberSchema.parse(params.projectId);
-    const rolePagination = buildPaginationInput(deps.pagination);
-    const [assignedRoles, paginationMetaData] = await context.query.ensureQueryData(
-      listProjectMembersRolesOptions({
-        pagination: rolePagination,
-        project_id: projectId,
-      })
-    );
+    const rolePagination = processPaginationInput(deps.pagination);
+    const [assignedRoles, paginationMetaData] =
+      await context.query.ensureQueryData(
+        listProjectMembersRolesOptions({
+          pagination: rolePagination,
+          project_id: projectId,
+        }),
+      );
 
     return {
       assignedRoles,
@@ -114,8 +90,15 @@ const RowActions = (row: Row<UserWithRoles>) => {
 function RolesAssigned() {
   const { assignedRoles, pagination, paginationMetaData } =
     Route.useLoaderData();
-  const navigate = useNavigate();
-  const search = Route.useSearch();
+  
+  const effectiveSort = pagination.sort?.length 
+    ? pagination.sort 
+    : defaultPagination.sort;
+  
+  const { onFilterChange, onSortChange, getPageChangeParams } = usePagination(
+    pagination,
+    defaultPagination
+  );
 
   return (
     <>
@@ -124,18 +107,7 @@ function RolesAssigned() {
           <FilterInput
             filterCriteria={filterCriteria}
             key={filterCriteria.entity.toString()}
-            onChange={(filterCriteria: FilterCriteria) => {
-              navigate({
-                search: {
-                  ...search,
-                  pagination: {
-                    ...search.pagination,
-                    filters: [[filterCriteria]],
-                  },
-                },
-                to: '/projects/$projectId/roles/assigned',
-              });
-            }}
+            onChange={onFilterChange}
             placeholder="Filter by name..."
           />
         ))}
@@ -177,21 +149,11 @@ function RolesAssigned() {
                   key: 'roles',
                 },
               ]}
-              entityName={ENTITY_NAME.User}
-              onSortingChange={(newSort) => {
-                navigate({
-                  search: {
-                    ...search,
-                    pagination: {
-                      ...(search.pagination ?? DEFAULT_ROLES_PAGINATION),
-                      sort: newSort,
-                    },
-                  },
-                  to: '/projects/$projectId/roles/assigned',
-                });
-              }}
+              entityName={ENTITY.USER_WITH_ROLES}
+              getPageChangeParams={getPageChangeParams}
+              onSortingChange={onSortChange}
               paginationMetaData={paginationMetaData}
-              sort={pagination.sort}
+              sort={effectiveSort}
               tableData={assignedRoles}
             />
           )}

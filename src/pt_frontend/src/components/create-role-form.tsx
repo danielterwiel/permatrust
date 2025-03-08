@@ -4,6 +4,7 @@ import { z } from 'zod';
 
 import { mutations } from '@/api/mutations';
 
+import { Input } from '@/components/input';
 import { Link } from '@/components/link';
 import { Loading } from '@/components/loading';
 import {
@@ -18,7 +19,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 
 import { createPermissionVariant } from '@/utils/variants/permissions';
@@ -30,7 +30,8 @@ import type {
   Project,
 } from '@/declarations/pt_backend/pt_backend.did';
 
-export const createRoleFormSchema = z.object({
+// TODO: trigger schema parse onSubmit
+const _createRoleFormSchema = z.object({
   description: z.string().optional(),
   name: z.string().min(2, {
     message: 'Role name must be at least 2 characters.',
@@ -128,7 +129,7 @@ export function CreateRoleForm({ permissions, project }: CreateRoleFormProps) {
             <FormControl field={field}>
               <Input
                 onBlur={field.handleBlur}
-                onChange={(e) => field.handleChange(e.target.value)}
+                onChange={(value) => field.handleChange(value)}
                 placeholder="e.g. Administrators"
                 value={field.state.value}
               />

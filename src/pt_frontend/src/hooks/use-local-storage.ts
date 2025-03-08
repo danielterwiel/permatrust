@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { storage } from '@/utils/localStorage';
+import { storage } from '@/utils/local-storage';
 
 const localStorageChangeEvent = new Event('localStorageChange');
 

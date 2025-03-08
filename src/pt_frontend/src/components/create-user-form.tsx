@@ -1,6 +1,7 @@
 import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
 
+import { Input } from '@/components/input';
 import { Loading } from '@/components/loading';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +13,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Icon } from '@/components/ui/icon';
-import { Input } from '@/components/ui/input';
 
 import type { FC } from 'react';
 
@@ -25,7 +25,7 @@ export const createUserFormSchema = z.object({
   }),
 });
 
-export type CreateUserFormProps = {
+type CreateUserFormProps = {
   isSubmitting: boolean;
   onSubmit: (values: z.infer<typeof createUserFormSchema>) => void;
 };
@@ -72,7 +72,7 @@ export const CreateUserForm: FC<CreateUserFormProps> = ({
                 <FormControl field={field}>
                   <Input
                     onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
+                    onChange={(value) => field.handleChange(value)}
                     placeholder="e.g. Peter"
                     value={field.state.value}
                   />
@@ -90,7 +90,7 @@ export const CreateUserForm: FC<CreateUserFormProps> = ({
                 <FormControl field={field}>
                   <Input
                     onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
+                    onChange={(value) => field.handleChange(value)}
                     placeholder="e.g. Raksis"
                     value={field.state.value}
                   />

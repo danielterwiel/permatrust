@@ -14,6 +14,7 @@ export default [
       '**/dist/**',
       '**/src/components/ui/**',
       '**/declarations/**',
+      'package-lock.json',
     ],
   },
   {

@@ -1,7 +1,7 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { usePagination } from '@/hooks/use-pagination';
+import { createFileRoute } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { useState } from 'react';
-import { z } from 'zod';
 
 import { api } from '@/api';
 
@@ -11,60 +11,40 @@ import { Link } from '@/components/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 
-import { buildFilterField } from '@/utils/buildFilterField';
-import { buildPaginationInput } from '@/utils/buildPaginationInput';
-import { formatDateTime } from '@/utils/formatDateTime';
+import { formatDateTime } from '@/utils/format-date-time';
+import { processPaginationInput } from '@/utils/pagination';
 
-import { ENTITY_NAME } from '@/consts/entities';
+import { ENTITY } from '@/consts/entities';
 import {
-  DEFAULT_PAGINATION,
-  FILTER_FIELD,
+  FILTER_OPERATOR,
+  FILTER_SORT_FIELDS,
   SORT_ORDER,
 } from '@/consts/pagination';
 
-import { paginationInputSchema } from '@/schemas/pagination';
+import { createEntityPaginationSchema } from '@/schemas/pagination';
 import { toBigIntSchema, toNumberSchema } from '@/schemas/primitives';
 
-import type {
-  PaginationInput,
-  Revision,
-  SortCriteria,
-} from '@/declarations/pt_backend/pt_backend.did';
-import type { FilterCriteria } from '@/types/pagination';
+import type { Revision } from '@/declarations/pt_backend/pt_backend.did';
 import type { Row } from '@tanstack/react-table';
 
-const DEFAULT_FILTERS: [] = [];
-
-const DEFAULT_SORT: [SortCriteria] = [
-  {
-    field: buildFilterField(
-      ENTITY_NAME.Revision,
-      FILTER_FIELD.Revision.CreatedAt,
-    ),
-    order: SORT_ORDER.Desc,
-  },
-];
-
-const revisionsSearchSchema = z.object({
-  pagination: paginationInputSchema.optional(),
-});
-
-const DEFAULT_REVISION_PAGINATION: PaginationInput = {
-  filters: DEFAULT_FILTERS,
-  page_number: DEFAULT_PAGINATION.page_number,
-  page_size: DEFAULT_PAGINATION.page_size,
-  sort: DEFAULT_SORT,
-};
+const { schema: revisionsSearchSchema, defaultPagination } =
+  createEntityPaginationSchema(ENTITY.REVISION, {
+    defaultFilterField: FILTER_SORT_FIELDS.REVISION.CREATED_AT,
+    defaultFilterOperator: FILTER_OPERATOR.CONTAINS,
+    defaultFilterValue: '',
+    defaultSortField: FILTER_SORT_FIELDS.REVISION.CREATED_AT,
+    defaultSortOrder: SORT_ORDER.DESC,
+  });
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/',
 )({
   validateSearch: zodSearchValidator(revisionsSearchSchema),
   loaderDeps: ({ search }) => ({
-    pagination: search.pagination ?? DEFAULT_REVISION_PAGINATION,
+    pagination: { ...defaultPagination, ...search?.pagination },
   }),
   loader: async ({ context, deps, params }) => {
-    const revisionPagination = buildPaginationInput(deps.pagination);
+    const revisionPagination = processPaginationInput(deps.pagination);
 
     const [revisions, paginationMetaData] =
       await api.list_revisions_by_document_id({
@@ -94,7 +74,15 @@ function DocumentDetails() {
   const { document, pagination, paginationMetaData, revisions } =
     Route.useLoaderData();
   const [selected, setSelected] = useState<Revision[]>([]);
-  const navigate = useNavigate();
+  
+  const effectiveSort = pagination.sort?.length 
+    ? pagination.sort 
+    : defaultPagination.sort;
+  
+  const { onFilterChange, onSortChange, getPageChangeParams } = usePagination(
+    pagination,
+    defaultPagination
+  );
 
   function handleCheckedChange(revisions: Revision[]) {
     setSelected(revisions);
@@ -123,17 +111,7 @@ function DocumentDetails() {
           <FilterInput
             filterCriteria={filterCriteria}
             key={filterCriteria.entity.toString()}
-            onChange={(filterCriteria: FilterCriteria) => {
-              navigate({
-                search: {
-                  pagination: {
-                    ...pagination,
-                    filters: [[filterCriteria]],
-                  },
-                },
-                to: `/projects/${projectId}/documents/${documentId}`,
-              });
-            }}
+            onChange={onFilterChange}
             placeholder="Filter content..."
           />
         ))}
@@ -221,21 +199,12 @@ function DocumentDetails() {
                 key: 'created_at',
               },
             ]}
-            entityName={ENTITY_NAME.Revision}
+            entityName={ENTITY.REVISION}
+            getPageChangeParams={getPageChangeParams}
             onSelectionChange={handleCheckedChange}
-            onSortingChange={(newSort) => {
-              navigate({
-                search: {
-                  pagination: {
-                    ...pagination,
-                    sort: newSort,
-                  },
-                },
-                to: `/projects/${projectId}/documents/${documentId}`,
-              });
-            }}
+            onSortingChange={onSortChange}
             paginationMetaData={paginationMetaData}
-            sort={pagination.sort}
+            sort={effectiveSort}
             tableData={revisions}
           />
         </CardContent>
