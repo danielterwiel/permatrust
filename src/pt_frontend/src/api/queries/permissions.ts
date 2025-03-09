@@ -3,6 +3,7 @@ import { api } from '@/api';
 import { createQueryOptions } from '@/utils/create-query-options';
 
 import type { PaginationInput } from '@/declarations/pt_backend/pt_backend.did';
+import type { ProjectId } from '@/types/entities';
 
 export const getPermissionsOptions = () =>
   createQueryOptions({
@@ -10,10 +11,10 @@ export const getPermissionsOptions = () =>
     queryKey: ['permissions'],
   });
 
-export const getProjectRolesOptions = (projectId: number) =>
+export const getProjectRolesOptions = (project_id: ProjectId) =>
   createQueryOptions({
-    queryFn: () => api.get_project_roles({ project_id: projectId }),
-    queryKey: ['project_roles', { project_id: projectId }],
+    queryFn: () => api.get_project_roles({ project_id }),
+    queryKey: ['project_roles', { project_id }],
   });
 
 export const getProjectMembersOptions = (

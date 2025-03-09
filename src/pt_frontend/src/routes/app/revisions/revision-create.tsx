@@ -1,6 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { zodSearchValidator } from '@tanstack/router-zod-adapter';
-import { z } from 'zod';
 
 import { mutations } from '@/api/mutations';
 import { getRevisionsByDocumentIdOptions } from '@/api/queries';
@@ -19,10 +17,12 @@ import {
   SORT_ORDER,
 } from '@/consts/pagination';
 
+import { documentIdSchema, projectIdSchema } from '@/schemas/entities';
 import { createEntityPaginationSchema } from '@/schemas/pagination';
-import { toBigIntSchema, toNumberSchema } from '@/schemas/primitives';
 
 import type { PaginationInput } from '@/declarations/pt_backend/pt_backend.did';
+import type { DocumentId, ProjectId } from '@/types/entities';
+import type { z } from 'zod';
 
 const { defaultPagination: revisionPagination } = createEntityPaginationSchema(
   ENTITY.REVISION,
@@ -40,27 +40,18 @@ const LAST_REVISION_PAGINATION: PaginationInput = {
   page_size: 1,
 };
 
-const revisionCreateSearchSchema = z.object({
-  documentId: z.number(),
-  projectId: z.number(),
-});
-
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/create',
 )({
-  validateSearch: zodSearchValidator(revisionCreateSearchSchema),
-  loaderDeps: ({ search }) => ({
-    documentId: search.documentId,
-    projectId: search.projectId,
-  }),
   beforeLoad: () => ({
-    getTitle: () => 'Create qrevision',
+    getTitle: () => 'Create revision',
   }),
-  loader: async ({ context, deps }) => {
+  loader: async ({ context, params }) => {
     const paginationInput = processPaginationInput(LAST_REVISION_PAGINATION);
+    const documentId = documentIdSchema.parse(params.documentId);
 
     const revisions = await context.query.ensureQueryData(
-      getRevisionsByDocumentIdOptions(deps.documentId, paginationInput),
+      getRevisionsByDocumentIdOptions(documentId, paginationInput),
     );
     return { revisions };
   },
@@ -81,8 +72,8 @@ function RevisionsCreate() {
       const encoder = new TextEncoder();
       const content = encoder.encode(values.content);
 
-      const projectId = toNumberSchema.parse(params.projectId);
-      const documentId = toBigIntSchema.parse(params.documentId);
+      const projectId = projectIdSchema.parse(params.projectId);
+      const documentId = documentIdSchema.parse(params.documentId);
 
       createRevision(
         {

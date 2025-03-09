@@ -63,7 +63,7 @@ const RowActions = (row: Row<Project>) => {
   return (
     <Link
       params={{
-        projectId: row.id,
+        projectId: row.original.id.toString(),
       }}
       to="/projects/$projectId"
       variant="outline"

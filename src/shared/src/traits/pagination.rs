@@ -43,7 +43,7 @@ impl Filterable for Document {
             FilterField::Document(DocumentFilterField::ProjectId) => {
                 let criteria_value = criteria.value.parse::<ProjectId>().unwrap_or(0);
                 match criteria.operator {
-                    FilterOperator::Equals => self.project == criteria_value,
+                    FilterOperator::Equals => self.project_id == criteria_value,
                     _ => false,
                 }
             }
@@ -228,7 +228,7 @@ impl Sortable for Document {
                 self.created_at.cmp(&other.created_at)
             }
             FilterField::Document(DocumentFilterField::ProjectId) => {
-                self.project.cmp(&other.project)
+                self.project_id.cmp(&other.project_id)
             }
             _ => Ordering::Equal,
         };

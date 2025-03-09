@@ -24,7 +24,10 @@ import {
 } from '@/components/ui/form';
 import { Icon } from '@/components/ui/icon';
 
+import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
 import { decodeUint8Array } from '@/utils/decode-uint8-array';
+
+import { projectIdSchema } from '@/schemas/entities';
 
 import type { Revision } from '@/declarations/pt_backend/pt_backend.did';
 import type { FC } from 'react';
@@ -33,7 +36,7 @@ export const createRevisionFormSchema = z.object({
   content: z.string().min(1, {
     message: 'Content must be at least 1 character.',
   }),
-  projects: z.array(z.bigint()),
+  project_id: projectIdSchema,
 });
 
 type CreateRevisionFormProps = {
@@ -55,7 +58,7 @@ export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
   const form = useForm({
     defaultValues: {
       content: markdown,
-      projects: [BigInt(projectId)],
+      project_id: projectIdSchema.parse(projectId),
     },
     onSubmit: async ({ value }) => {
       onSubmit(value);
@@ -89,24 +92,17 @@ export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
             <form.Field
               name="content"
               validators={{
-                onSubmit: ({ value }) => {
-                  try {
-                    createRevisionFormSchema.shape.content.parse(value);
-                    return undefined;
-                  } catch (error) {
-                    if (error instanceof z.ZodError) {
-                      return error.errors[0]?.message;
-                    }
-                    return 'Invalid input';
-                  }
-                },
+                onSubmit: createZodFieldValidator(
+                  createRevisionFormSchema,
+                  'content',
+                ),
               }}
             >
               {(field) => (
                 <FormItem>
                   <FormLabel field={field}>Content</FormLabel>
                   <FormControl field={field}>
-                    <div className="border border-input">
+                    <div className="rounded-lg border border-input">
                       <MDXEditor
                         className="rounded-md bg-background p-2 text-sm placeholder:text-muted-foreground focus:border-2 focus:border-accent-foreground focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-accent-foreground disabled:cursor-not-allowed disabled:opacity-50"
                         contentEditableClassName="prose"
@@ -129,7 +125,9 @@ export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
                       />
                     </div>
                   </FormControl>
-                  <FormDescription>This is your document.</FormDescription>
+                  <FormDescription>
+                    This is the new revision of your document.
+                  </FormDescription>
                   <FormMessage field={field} />
                 </FormItem>
               )}

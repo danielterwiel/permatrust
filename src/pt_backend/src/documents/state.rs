@@ -36,7 +36,7 @@ pub fn get_by_project(project_id: ProjectId) -> Vec<Document> {
         documents
             .borrow()
             .iter()
-            .filter(|(_, doc)| doc.project == project_id)
+            .filter(|(_, doc)| doc.project_id == project_id)
             .map(|(_, doc)| doc.clone())
             .collect()
     })

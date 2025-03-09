@@ -45,7 +45,11 @@ import {
   FILTER_SORT_FIELDS,
 } from '@/consts/pagination';
 
-import { toBigIntSchema, toNumberSchema } from '@/schemas/primitives';
+import {
+  projectIdSchema,
+  roleIdSchema,
+  userIdSchema,
+} from '@/schemas/entities';
 
 import type { PaginationInput } from '@/declarations/pt_backend/pt_backend.did';
 import type { Role, User } from '@/declarations/pt_backend/pt_backend.did';
@@ -62,7 +66,7 @@ export const Route = createFileRoute(
     userId: search.userId,
   }),
   loader: async ({ context, deps, params }) => {
-    const projectId = toNumberSchema.parse(params.projectId);
+    const projectId = projectIdSchema.parse(params.projectId);
     const roles = await context.query.ensureQueryData(
       getProjectRolesOptions(projectId),
     );
@@ -137,12 +141,8 @@ function RolesAssign() {
       return;
     }
 
-    const selectedUserIds = selectedUsers.map((u) =>
-      toBigIntSchema.parse(u.id),
-    );
-    const selectedRoleIds = selectedRoles.map((r) =>
-      toBigIntSchema.parse(r.id),
-    );
+    const selectedUserIds = selectedUsers.map((u) => userIdSchema.parse(u.id));
+    const selectedRoleIds = selectedRoles.map((r) => roleIdSchema.parse(r.id));
 
     try {
       await assignRolesMutation.mutateAsync({

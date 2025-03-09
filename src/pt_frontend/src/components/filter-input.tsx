@@ -97,6 +97,7 @@ export const FilterInput = ({
                 placeholder={placeholder}
                 type="text"
                 value={field.state.value}
+                withClearButton={true}
               />
             </FormControl>
             <FormMessage field={field} />

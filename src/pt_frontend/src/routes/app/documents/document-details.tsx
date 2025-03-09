@@ -3,7 +3,8 @@ import { createFileRoute } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { useState } from 'react';
 
-import { api } from '@/api';
+import { getRevisionsByDocumentIdOptions } from '@/api/queries';
+import { getDocumentOptions } from '@/api/queries/documents';
 
 import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
@@ -21,10 +22,12 @@ import {
   SORT_ORDER,
 } from '@/consts/pagination';
 
+import { documentIdSchema } from '@/schemas/entities';
 import { createEntityPaginationSchema } from '@/schemas/pagination';
-import { toBigIntSchema, toNumberSchema } from '@/schemas/primitives';
+import { toNumberSchema } from '@/schemas/primitives';
 
 import type { Revision } from '@/declarations/pt_backend/pt_backend.did';
+import type { DocumentId, RevisionId } from '@/types/entities';
 import type { Row } from '@tanstack/react-table';
 
 const { schema: revisionsSearchSchema, defaultPagination } =
@@ -45,15 +48,15 @@ export const Route = createFileRoute(
   }),
   loader: async ({ context, deps, params }) => {
     const revisionPagination = processPaginationInput(deps.pagination);
+    const documentId = documentIdSchema.parse(params.documentId);
 
-    const [revisions, paginationMetaData] =
-      await api.list_revisions_by_document_id({
-        document_id: BigInt(params.documentId),
-        pagination: revisionPagination,
-      });
-    const document = await api.get_document({
-      id: toBigIntSchema.parse(params.documentId),
-    });
+    const [revisions, paginationMetaData] = await context.query.ensureQueryData(
+      getRevisionsByDocumentIdOptions(documentId, revisionPagination),
+    );
+
+    const document = await context.query.ensureQueryData(
+      getDocumentOptions(documentId),
+    );
 
     return {
       context,
@@ -74,14 +77,14 @@ function DocumentDetails() {
   const { document, pagination, paginationMetaData, revisions } =
     Route.useLoaderData();
   const [selected, setSelected] = useState<Revision[]>([]);
-  
-  const effectiveSort = pagination.sort?.length 
-    ? pagination.sort 
+
+  const effectiveSort = pagination.sort?.length
+    ? pagination.sort
     : defaultPagination.sort;
-  
+
   const { onFilterChange, onSortChange, getPageChangeParams } = usePagination(
     pagination,
-    defaultPagination
+    defaultPagination,
   );
 
   function handleCheckedChange(revisions: Revision[]) {
@@ -89,12 +92,14 @@ function DocumentDetails() {
   }
 
   const RowActions = (row: Row<Revision>) => {
+    const revisionId: RevisionId = row.original.id;
+
     return (
       <Link
         params={{
           documentId,
           projectId,
-          revisionId: row.id,
+          revisionId: revisionId.toString(),
         }}
         to="/projects/$projectId/documents/$documentId/revisions/$revisionId"
         variant="outline"

@@ -45,7 +45,7 @@ type Document = record {
   created_at : nat64;
   created_by : nat64;
   version : nat8;
-  project : nat32;
+  project_id : nat32;
 };
 type DocumentFilterField = variant { ProjectId; Version; Title; CreatedAt };
 type DocumentIdInput = record { id : nat64 };

@@ -25,11 +25,13 @@ import {
 } from '@/components/ui/form';
 import { Icon } from '@/components/ui/icon';
 
-import { toNumberSchema } from '@/schemas/primitives';
-
-import type { FC } from 'react';
+import { projectIdSchema } from '@/schemas/entities';
+import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
+import { capitalizeFirstLetterValidator } from '@/schemas/form';
 
 import '@mdxeditor/editor/style.css';
+
+import type { FC } from 'react';
 
 export const createDocumentFormSchema = z.object({
   content: z.string().min(1, {
@@ -37,7 +39,7 @@ export const createDocumentFormSchema = z.object({
   }),
   projects: z.array(z.number()),
   title: z.string().min(2, {
-    message: 'Project name must be at least 2 characters.',
+    message: 'Document title must be at least 2 characters.',
   }),
 });
 
@@ -52,7 +54,7 @@ export const CreateDocumentForm: FC<CreateDocumentFormProps> = ({
   onSubmit,
   projectId,
 }) => {
-  const projectIdNumber = toNumberSchema.parse(projectId);
+  const projectIdNumber = projectIdSchema.parse(projectId);
 
   const form = useForm({
     defaultValues: {
@@ -92,17 +94,11 @@ export const CreateDocumentForm: FC<CreateDocumentFormProps> = ({
             <form.Field
               name="title"
               validators={{
-                onSubmit: ({ value }) => {
-                  try {
-                    createDocumentFormSchema.shape.title.parse(value);
-                    return undefined;
-                  } catch (error) {
-                    if (error instanceof z.ZodError) {
-                      return error.errors[0]?.message;
-                    }
-                    return 'Invalid input';
-                  }
-                },
+                onChange: capitalizeFirstLetterValidator,
+                onSubmit: createZodFieldValidator(
+                  createDocumentFormSchema,
+                  'title',
+                ),
               }}
             >
               {(field) => (
@@ -127,24 +123,17 @@ export const CreateDocumentForm: FC<CreateDocumentFormProps> = ({
             <form.Field
               name="content"
               validators={{
-                onSubmit: ({ value }) => {
-                  try {
-                    createDocumentFormSchema.shape.content.parse(value);
-                    return undefined;
-                  } catch (error) {
-                    if (error instanceof z.ZodError) {
-                      return error.errors[0]?.message;
-                    }
-                    return 'Invalid input';
-                  }
-                },
+                onSubmit: createZodFieldValidator(
+                  createDocumentFormSchema,
+                  'content',
+                ),
               }}
             >
               {(field) => (
                 <FormItem>
                   <FormLabel field={field}>Content</FormLabel>
                   <FormControl field={field}>
-                    <div className="border border-input">
+                    <div className="rounded-lg border border-input">
                       <MDXEditor
                         className="rounded-md bg-background p-2 text-sm placeholder:text-muted-foreground focus:border-2 focus:border-accent-foreground focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-accent-foreground disabled:cursor-not-allowed disabled:opacity-50"
                         contentEditableClassName="prose"

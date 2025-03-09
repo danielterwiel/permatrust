@@ -21,8 +21,8 @@ import {
   SORT_ORDER,
 } from '@/consts/pagination';
 
+import { organizationIdSchema } from '@/schemas/entities';
 import { createEntityPaginationSchema } from '@/schemas/pagination';
-import { toNumberSchema } from '@/schemas/primitives';
 
 import type { Project } from '@/declarations/pt_backend/pt_backend.did';
 import type { Row } from '@tanstack/react-table';
@@ -43,12 +43,9 @@ export const Route = createFileRoute(
   loaderDeps: ({ search }) => ({
     pagination: { ...defaultPagination, ...search?.pagination },
   }),
-  beforeLoad: () => ({
-    getTitle: () => 'Organization',
-  }),
   loader: async ({ context, deps, params }) => {
     const projectPagination = processPaginationInput(deps.pagination);
-    const organizationId = toNumberSchema.parse(params.organizationId);
+    const organizationId = organizationIdSchema.parse(params.organizationId);
 
     const [projects, paginationMetaData] = await context.query.ensureQueryData(
       getProjectsByOrganizationOptions(organizationId, projectPagination),
@@ -57,6 +54,8 @@ export const Route = createFileRoute(
     const organization = await context.query.ensureQueryData(
       getOrganizationOptions(organizationId),
     );
+
+    context.getTitle = () => organization.name;
 
     return {
       context,
@@ -75,21 +74,21 @@ export const Route = createFileRoute(
 function OrganizationDetails() {
   const { organization, pagination, paginationMetaData, projects } =
     Route.useLoaderData();
-  
-  const effectiveSort = pagination.sort?.length 
-    ? pagination.sort 
+
+  const effectiveSort = pagination.sort?.length
+    ? pagination.sort
     : defaultPagination.sort;
-  
+
   const { onFilterChange, onSortChange, getPageChangeParams } = usePagination(
     pagination,
-    defaultPagination
+    defaultPagination,
   );
 
   const RowActions = (row: Row<Project>) => {
     return (
       <Link
         params={{
-          projectId: row.id,
+          projectId: row.original.id.toString(),
         }}
         to="/projects/$projectId"
         variant="outline"

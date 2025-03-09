@@ -14,6 +14,10 @@ import {
 } from '@/components/ui/form';
 import { Icon } from '@/components/ui/icon';
 
+import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
+
+import { capitalizeFirstLetterValidator } from '@/schemas/form';
+
 import type { FC } from 'react';
 
 export const createProjectFormSchema = z.object({
@@ -63,17 +67,11 @@ export const CreateProjectForm: FC<CreateProjectFormProps> = ({
           <form.Field
             name="name"
             validators={{
-              onSubmit: ({ value }) => {
-                try {
-                  createProjectFormSchema.parse({ name: value });
-                  return undefined;
-                } catch (error) {
-                  if (error instanceof z.ZodError) {
-                    return error.errors[0]?.message;
-                  }
-                  return 'Invalid input';
-                }
-              },
+              onSubmit: createZodFieldValidator(
+                createProjectFormSchema,
+                'name',
+              ),
+              onChange: capitalizeFirstLetterValidator,
             }}
           >
             {(field) => (

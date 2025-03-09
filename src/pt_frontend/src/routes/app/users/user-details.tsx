@@ -5,14 +5,14 @@ import { getUserOptions } from '@/api/queries/users';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 
+import { formatUserName } from '@/utils/format-user-name';
+
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/users/$userId',
 )({
-  beforeLoad: () => ({
-    getTitle: () => 'User',
-  }),
   loader: async ({ context }) => {
     const user = await context.query.ensureQueryData(getUserOptions());
+    context.getTitle = () => formatUserName(user);
     return { user };
   },
   component: UserDetails,

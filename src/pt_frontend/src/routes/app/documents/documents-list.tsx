@@ -101,8 +101,8 @@ const RowActions = (row: Row<Document>) => {
   return (
     <Link
       params={{
-        documentId: row.id,
-        projectId: row.original.project.toString(),
+        documentId: row.original.id.toString(),
+        projectId: row.original.project_id.toString(),
       }}
       to="/projects/$projectId/documents/$documentId"
       variant="outline"
@@ -123,7 +123,7 @@ function Documents() {
 
   const { onFilterChange, onSortChange, getPageChangeParams } = usePagination(
     pagination,
-    documentsPagination
+    documentsPagination,
   );
 
   return (

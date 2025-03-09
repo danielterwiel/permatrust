@@ -7,7 +7,7 @@ import {
   type createDocumentFormSchema,
 } from '@/components/create-document-form';
 
-import { toNumberSchema } from '@/schemas/primitives';
+import { projectIdSchema } from '@/schemas/entities';
 
 import type { z } from 'zod';
 
@@ -33,7 +33,7 @@ function CreateDocument() {
     const encoder = new TextEncoder();
     const content = encoder.encode(values.content);
 
-    const projectId = toNumberSchema.parse(params.projectId);
+    const projectId = projectIdSchema.parse(params.projectId);
 
     createDocument(
       {

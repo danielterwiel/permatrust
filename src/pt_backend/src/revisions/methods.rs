@@ -14,7 +14,7 @@ use shared::utils::pagination::paginate;
 #[ic_cdk_macros::update]
 pub fn create_revision(input: CreateRevisionInput) -> CreateRevisionResult {
     match documents::get_by_id(input.document_id) {
-        Some(document) if document.project == input.project_id => {
+        Some(document) if document.project_id == input.project_id => {
             let new_revision_id = state::get_next_id();
             let version = document.version + 1;
             let user = match get_user_by_principal(ic_cdk::caller()) {

@@ -14,6 +14,9 @@ import {
 } from '@/components/ui/form';
 import { Icon } from '@/components/ui/icon';
 
+import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
+import { capitalizeFirstLetterValidator } from '@/schemas/form';
+
 import type { FC } from 'react';
 
 export const createUserFormSchema = z.object({
@@ -40,7 +43,6 @@ export const CreateUserForm: FC<CreateUserFormProps> = ({
       last_name: '',
     },
     onSubmit: async ({ value }) => {
-      createUserFormSchema.parse(value);
       onSubmit(value);
     },
   });
@@ -65,7 +67,16 @@ export const CreateUserForm: FC<CreateUserFormProps> = ({
             form.handleSubmit();
           }}
         >
-          <form.Field name="first_name">
+          <form.Field
+            name="first_name"
+            validators={{
+              onChange: capitalizeFirstLetterValidator,
+              onSubmit: createZodFieldValidator(
+                createUserFormSchema,
+                'first_name',
+              ),
+            }}
+          >
             {(field) => (
               <FormItem>
                 <FormLabel field={field}>First name</FormLabel>
@@ -83,7 +94,16 @@ export const CreateUserForm: FC<CreateUserFormProps> = ({
             )}
           </form.Field>
 
-          <form.Field name="last_name">
+          <form.Field
+            name="last_name"
+            validators={{
+              onChange: capitalizeFirstLetterValidator,
+              onSubmit: createZodFieldValidator(
+                createUserFormSchema,
+                'last_name',
+              ),
+            }}
+          >
             {(field) => (
               <FormItem>
                 <FormLabel field={field}>Last name</FormLabel>

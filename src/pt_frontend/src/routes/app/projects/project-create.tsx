@@ -8,7 +8,7 @@ import {
   type createProjectFormSchema,
 } from '@/components/create-project-form';
 
-import { toNumberSchema } from '@/schemas/primitives';
+import { organizationIdSchema } from '@/schemas/entities';
 
 import type { z } from 'zod';
 
@@ -34,7 +34,7 @@ function CreateProject() {
   async function onSubmit(values: z.infer<typeof createProjectFormSchema>) {
     try {
       const activeOrganizationIdNumber =
-        toNumberSchema.parse(activeOrganizationId);
+        organizationIdSchema.parse(activeOrganizationId);
 
       createProject(
         {

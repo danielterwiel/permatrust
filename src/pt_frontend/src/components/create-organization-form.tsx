@@ -14,6 +14,9 @@ import {
 } from '@/components/ui/form';
 import { Icon } from '@/components/ui/icon';
 
+import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
+import { capitalizeFirstLetterValidator } from '@/schemas/form';
+
 import type { FC } from 'react';
 
 export const createOrganizationFormSchema = z.object({
@@ -36,7 +39,6 @@ export const CreateOrganizationForm: FC<CreateOrganizationFormProps> = ({
       name: '',
     },
     onSubmit: async ({ value }) => {
-      createOrganizationFormSchema.parse(value);
       onSubmit(value);
     },
   });
@@ -62,7 +64,16 @@ export const CreateOrganizationForm: FC<CreateOrganizationFormProps> = ({
             form.handleSubmit();
           }}
         >
-          <form.Field name="name">
+          <form.Field
+            name="name"
+            validators={{
+              onChange: capitalizeFirstLetterValidator,
+              onSubmit: createZodFieldValidator(
+                createOrganizationFormSchema,
+                'name',
+              ),
+            }}
+          >
             {(field) => (
               <FormItem>
                 <FormLabel field={field}>Name</FormLabel>

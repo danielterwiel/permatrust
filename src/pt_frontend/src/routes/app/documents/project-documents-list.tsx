@@ -19,8 +19,8 @@ import {
   SORT_ORDER,
 } from '@/consts/pagination';
 
+import { projectIdSchema } from '@/schemas/entities';
 import { createEntityPaginationSchema } from '@/schemas/pagination';
-import { toNumberSchema } from '@/schemas/primitives';
 
 import type { Document } from '@/declarations/pt_backend/pt_backend.did';
 import type { Row } from '@tanstack/react-table';
@@ -43,7 +43,7 @@ export const Route = createFileRoute(
   }),
   loader: async ({ context, deps, params }) => {
     const documentPagination = processPaginationInput(deps.pagination);
-    const projectId = toNumberSchema.parse(params.projectId);
+    const projectId = projectIdSchema.parse(params.projectId);
     const [documents, paginationMetaData] = await context.query.ensureQueryData(
       listDocumentsByProjectIdOptions({
         pagination: documentPagination,
@@ -68,8 +68,8 @@ const RowActions = (row: Row<Document>) => {
   return (
     <Link
       params={{
-        documentId: row.id,
-        projectId: row.original.project.toString(),
+        documentId: row.original.id.toString(),
+        projectId: row.original.project_id.toString(),
       }}
       to="/projects/$projectId/documents/$documentId"
       variant="outline"
@@ -89,7 +89,7 @@ function Documents() {
 
   const { onFilterChange, onSortChange, getPageChangeParams } = usePagination(
     pagination,
-    defaultPagination
+    defaultPagination,
   );
 
   return (

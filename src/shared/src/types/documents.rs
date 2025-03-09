@@ -18,7 +18,7 @@ pub struct Document {
     pub created_at: u64,
     pub created_by: UserId,
     pub version: u8,
-    pub project: ProjectId,
+    pub project_id: ProjectId,
 }
 
 // Inputs

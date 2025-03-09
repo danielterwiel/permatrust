@@ -31,7 +31,7 @@ pub fn create_document(input: CreateDocumentInput) -> CreateDocumentResult {
         revisions: Vec::new(),
         created_by: user.id,
         created_at: ic_cdk::api::time(),
-        project: input.project_id,
+        project_id: input.project_id,
     };
 
     state::insert(document_id, document.clone());

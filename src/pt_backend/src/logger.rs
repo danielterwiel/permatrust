@@ -67,7 +67,7 @@ impl std::fmt::Display for LoggableRevision<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Revision {{ id: {}, document_id: {} }}",
+            "Revision {{ id: {}, document_id: {},  }}",
             self.0.id, self.0.document_id
         )
     }

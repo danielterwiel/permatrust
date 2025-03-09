@@ -1,4 +1,4 @@
-import { capitalizeFirstLetter, permissionsToItems } from '@/utils';
+import { permissionsToItems } from '@/utils';
 import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
 
@@ -21,17 +21,18 @@ import {
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 
+import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
 import { createPermissionVariant } from '@/utils/variants/permissions';
 
-import { toNumberSchema } from '@/schemas/primitives';
+import { projectIdSchema } from '@/schemas/entities';
+import { capitalizeFirstLetterValidator } from '@/schemas/form';
 
 import type {
   Permission,
   Project,
 } from '@/declarations/pt_backend/pt_backend.did';
 
-// TODO: trigger schema parse onSubmit
-const _createRoleFormSchema = z.object({
+export const createRoleFormSchema = z.object({
   description: z.string().optional(),
   name: z.string().min(2, {
     message: 'Role name must be at least 2 characters.',
@@ -72,11 +73,13 @@ export function CreateRoleForm({ permissions, project }: CreateRoleFormProps) {
         if (!entityName || !permission) {
           throw new Error('Entity not found');
         }
-        const entity = capitalizeFirstLetter(entityName);
-        const entityPermission = createPermissionVariant(entity, permission);
+        const entityPermission = createPermissionVariant(
+          entityName,
+          permission,
+        );
         return entityPermission;
       });
-      const projectIdParsed = toNumberSchema.parse(project.id);
+      const projectIdParsed = projectIdSchema.parse(project.id);
       await createRole({
         description: value.description ? [value.description] : [],
         name: value.name,
@@ -122,7 +125,13 @@ export function CreateRoleForm({ permissions, project }: CreateRoleFormProps) {
         form.handleSubmit();
       }}
     >
-      <form.Field name="name">
+      <form.Field
+        name="name"
+        validators={{
+          onChange: capitalizeFirstLetterValidator,
+          onSubmit: createZodFieldValidator(createRoleFormSchema, 'name'),
+        }}
+      >
         {(field) => (
           <FormItem>
             <FormLabel field={field}>Name</FormLabel>
@@ -140,7 +149,15 @@ export function CreateRoleForm({ permissions, project }: CreateRoleFormProps) {
         )}
       </form.Field>
 
-      <form.Field name="description">
+      <form.Field
+        name="description"
+        validators={{
+          onSubmit: createZodFieldValidator(
+            createRoleFormSchema,
+            'description',
+          ),
+        }}
+      >
         {(field) => (
           <FormItem>
             <FormLabel field={field}>Description</FormLabel>

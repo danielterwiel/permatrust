@@ -1,23 +1,17 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import {
-  getWorkflowOptions,
-  getWorkflowStateOptions,
-} from '@/api/queries';
+import { getWorkflowOptions, getWorkflowStateOptions } from '@/api/queries';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 
-import { toNumberSchema } from '@/schemas/primitives';
+import { workflowIdSchema } from '@/schemas/entities';
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/workflows/$workflowId/',
 )({
-  beforeLoad: () => ({
-    getTitle: () => 'Workflow',
-  }),
   loader: async ({ context, params }) => {
-    const workflowId = toNumberSchema.parse(params.workflowId);
+    const workflowId = workflowIdSchema.parse(params.workflowId);
     const workflow = await context.query.ensureQueryData(
       getWorkflowOptions({ id: workflowId }),
     );
@@ -25,6 +19,8 @@ export const Route = createFileRoute(
     const workflowState = await context.query.ensureQueryData(
       getWorkflowStateOptions({ id: workflowId }),
     );
+
+    context.getTitle = () => workflow.name;
 
     return {
       context,

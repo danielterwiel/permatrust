@@ -21,7 +21,6 @@ import {
 } from '@/consts/pagination';
 
 import { createEntityPaginationSchema } from '@/schemas/pagination';
-import { toNumberSchema } from '@/schemas/primitives';
 
 import type { Document } from '@/declarations/pt_backend/pt_backend.did';
 import type { Row } from '@tanstack/react-table';
@@ -42,12 +41,9 @@ export const Route = createFileRoute(
   loaderDeps: ({ search }) => ({
     pagination: { ...defaultPagination, ...search?.pagination },
   }),
-  beforeLoad: () => ({
-    getTitle: () => 'Project',
-  }),
   loader: async ({ context, deps, params }) => {
     const documentPagination = processPaginationInput(deps.pagination);
-    const projectId = toNumberSchema.parse(params.projectId);
+    const projectId = Number(params.projectId);
     const project = await context.query.ensureQueryData(
       getProjectOptions(projectId),
     );
@@ -76,14 +72,14 @@ function ProjectDetails() {
   const { projectId } = Route.useParams();
   const { documents, pagination, paginationMetaData, project } =
     Route.useLoaderData();
-  
-  const effectiveSort = pagination.sort?.length 
-    ? pagination.sort 
+
+  const effectiveSort = pagination.sort?.length
+    ? pagination.sort
     : defaultPagination.sort;
-  
+
   const { onFilterChange, onSortChange, getPageChangeParams } = usePagination(
     pagination,
-    defaultPagination
+    defaultPagination,
   );
 
   const RowActions = (row: Row<Document>) => {
@@ -91,7 +87,7 @@ function ProjectDetails() {
       <Link
         params={{
           documentId: row.id,
-          projectId: row.original.project.toString(),
+          projectId: row.original.project_id.toString(),
         }}
         to="/projects/$projectId/documents/$documentId"
         variant="outline"

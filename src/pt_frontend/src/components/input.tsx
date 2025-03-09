@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { forwardRef, memo, useCallback, useEffect, useRef, useState } from 'react';
 
 import { Icon } from '@/components/ui/icon';
 import { Input as InputBase } from '@/components/ui/input';
@@ -8,7 +8,7 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 
-import type { ChangeEvent, ComponentProps, FocusEvent } from 'react';
+import type { ChangeEvent, ComponentProps, FocusEvent, ForwardedRef, MutableRefObject } from 'react';
 
 type InputProps = Omit<ComponentProps<typeof InputBase>, 'onChange'> & {
   clearTooltip?: string;
@@ -16,87 +16,123 @@ type InputProps = Omit<ComponentProps<typeof InputBase>, 'onChange'> & {
   onChange: (value: string) => void;
   onChangeImmediate?: (value: string) => void;
   onClear?: () => void;
+  withClearButton?: boolean;
 };
 
-export const Input = ({
-  className = '',
-  debounceDelay = 300,
-  onChange,
-  onChangeImmediate,
-  onClear,
-  clearTooltip = 'Clear',
-  value = '',
-  ...inputProps
-}: InputProps) => {
+// Create the component with forwardRef to handle inputRef properly
+const InputComponent = forwardRef(function Input(
+  {
+    className = '',
+    debounceDelay = 300,
+    onChange,
+    onChangeImmediate,
+    onClear,
+    clearTooltip = 'Clear',
+    value = '',
+    withClearButton = false, // Default to false for better performance
+    onBlur,
+    onFocus,
+    ...inputProps
+  }: InputProps, 
+  ref: ForwardedRef<HTMLInputElement>
+) {
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [inputValue, setInputValue] = useState(value as string);
   const [isButtonFocused, setIsButtonFocused] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const internalRef = useRef<HTMLInputElement>(null);
+  
+  // Use the forwarded ref if available, otherwise fall back to internal ref
+  const inputRef = (ref || internalRef) as MutableRefObject<HTMLInputElement | null>;
 
+  // Sync input value with external value prop when it changes
   useEffect(() => {
     if (value !== inputValue) {
       setInputValue(value as string);
     }
   }, [value, inputValue]);
 
-  const handleClearInput = () => {
+  // For title inputs, we want to update immediately (no debounce)
+  // For filter inputs with withClearButton=true, we want to debounce
+  const shouldDebounce = withClearButton && debounceDelay > 0;
+
+  const handleClearInput = useCallback(() => {
     setInputValue('');
     onChangeImmediate?.('');
-    handleDebouncedChange('');
-    onClear?.();
-
-    const inputElement = document.querySelector(
-      `input[name="${inputProps.name}"]`,
-    ) as HTMLInputElement;
-    if (inputElement) {
-      inputElement.focus();
-    }
-  };
-
-  const handleDebouncedChange = (value: string) => {
+    
+    // Cancel any pending debounce
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
+    
+    // Immediately call onChange without debounce
+    onChange('');
+    onClear?.();
 
-    timeoutRef.current = setTimeout(() => {
-      onChange(value);
-    }, debounceDelay);
-  };
+    // Focus the input element 
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [onChange, onChangeImmediate, onClear, inputRef]);
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setInputValue(value);
-    onChangeImmediate?.(value);
-    handleDebouncedChange(value);
-  };
+  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setInputValue(newValue);
+    
+    // Always call onChangeImmediate if provided
+    onChangeImmediate?.(newValue);
+    
+    // If we should debounce, set up the timer
+    if (shouldDebounce) {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+      
+      timeoutRef.current = setTimeout(() => {
+        onChange(newValue);
+      }, debounceDelay);
+    } else {
+      // Otherwise call onChange immediately
+      onChange(newValue);
+    }
+  }, [onChange, onChangeImmediate, shouldDebounce, debounceDelay]);
 
-  const handleBlur = (e: FocusEvent<HTMLInputElement>) => {
+  const handleBlur = useCallback((e: FocusEvent<HTMLInputElement>) => {
     setIsFocused(false);
-    inputProps.onBlur?.(e);
-  };
+    onBlur?.(e);
+  }, [onBlur]);
 
-  const handleFocus = (e: FocusEvent<HTMLInputElement>) => {
+  const handleFocus = useCallback((e: FocusEvent<HTMLInputElement>) => {
     setIsFocused(true);
-    inputProps.onFocus?.(e);
-  };
+    onFocus?.(e);
+  }, [onFocus]);
 
-  const hasValue = inputValue.length > 0;
+  // Cancel any pending debounce on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
-  // Always render the clear button when there's a value
-  const shouldRenderClearButton = hasValue;
+  // Only calculate these values if we're using the clear button
+  const hasValue = withClearButton ? inputValue.length > 0 : false;
+  const shouldRenderClearButton = withClearButton && hasValue;
 
-  // Determine the visibility class based on focus, hover, and button focus states
-  const clearButtonVisibilityClass =
-    isFocused || isHovered || isButtonFocused
-      ? 'opacity-100 visible'
-      : 'opacity-0 invisible';
+  // Only calculate visibility class if we're showing the clear button
+  const clearButtonVisibilityClass = shouldRenderClearButton
+    ? (isFocused || isHovered || isButtonFocused
+        ? 'opacity-100 visible'
+        : 'opacity-0 invisible')
+    : '';
 
   return (
-    <div
+    <div 
       className="relative"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      onMouseEnter={withClearButton ? () => setIsHovered(true) : undefined}
+      onMouseLeave={withClearButton ? () => setIsHovered(false) : undefined}
     >
       <InputBase
         {...inputProps}
@@ -104,6 +140,7 @@ export const Input = ({
         onBlur={handleBlur}
         onChange={handleChange}
         onFocus={handleFocus}
+        ref={inputRef}
         value={inputValue}
       />
       {shouldRenderClearButton && (
@@ -135,4 +172,8 @@ export const Input = ({
       )}
     </div>
   );
-};
+});
+
+// Memoize the component to prevent unnecessary re-renders
+export const Input = memo(InputComponent);
+Input.displayName = 'Input';

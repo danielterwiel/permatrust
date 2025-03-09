@@ -43,21 +43,15 @@ pub fn get_by_id(revision_id: RevisionId) -> Option<Revision> {
 }
 
 pub fn get_by_document_id(document_id: DocumentId) -> Result<Vec<Revision>, AppError> {
-    if let Some(document) = documents::get_by_id(document_id) {
-        let revisions = REVISIONS.with(|revisions| {
-            revisions
-                .borrow()
-                .iter()
-                .filter(|(_, rev)| rev.document_id == document.id)
-                .map(|(_, rev)| rev.clone())
-                .collect()
-        });
-        Ok(revisions)
-    } else {
-        Err(AppError::EntityNotFound(
-            "Document does not belong to the specified project".to_string(),
-        ))
-    }
+    let revisions = REVISIONS.with(|revisions| {
+        revisions
+            .borrow()
+            .iter()
+            .filter(|(_, rev)| rev.document_id == document_id)
+            .map(|(_, rev)| rev.clone())
+            .collect()
+    });
+    Ok(revisions)
 }
 
 pub fn get_revision_range(

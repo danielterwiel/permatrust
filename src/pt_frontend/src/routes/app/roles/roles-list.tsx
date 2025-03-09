@@ -6,15 +6,15 @@ import { RolesList } from '@/components/roles-list';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 
-import { toNumberSchema } from '@/schemas/primitives';
+import { projectIdSchema } from '@/schemas/entities';
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/list',
 )({
   loader: async ({ context, params }) => {
-    const projectId = toNumberSchema.parse(params.projectId);
+    const projectId = projectIdSchema.parse(params.projectId);
     const roles = await context.query.ensureQueryData(
-      getProjectRolesOptions(projectId)
+      getProjectRolesOptions(projectId),
     );
 
     return {

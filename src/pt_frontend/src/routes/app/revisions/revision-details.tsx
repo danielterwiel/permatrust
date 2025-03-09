@@ -6,7 +6,7 @@ import { getRevisionOptions } from '@/api/queries/revisions';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 
-import { toBigIntSchema } from '@/schemas/primitives';
+import { revisionIdSchema } from '@/schemas/entities';
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId',
@@ -16,7 +16,7 @@ export const Route = createFileRoute(
   }),
   loader: async ({ context, params: { revisionId } }) => {
     const revision = await context.query.ensureQueryData(
-      getRevisionOptions(toBigIntSchema.parse(revisionId)),
+      getRevisionOptions(revisionIdSchema.parse(revisionId)),
     );
     return {
       revision,

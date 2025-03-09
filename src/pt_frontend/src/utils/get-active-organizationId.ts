@@ -1,11 +1,13 @@
-import { toNumberSchema } from '@/schemas/primitives';
+import { organizationIdSchema } from '@/schemas/entities';
 
 import { storage } from './local-storage';
 
-export function getActiveOrganizationId(): number {
+import type { OrganizationId } from '@/types/entities';
+
+export function getActiveOrganizationId(): OrganizationId {
   const activeOrganizationId = storage.getItem('activeOrganizationId', '');
   if (!activeOrganizationId) {
     throw new Error('No activeOrganizationId found');
   }
-  return toNumberSchema.parse(activeOrganizationId);
+  return organizationIdSchema.parse(activeOrganizationId);
 }

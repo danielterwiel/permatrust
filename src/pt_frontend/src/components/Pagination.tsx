@@ -77,7 +77,7 @@ export function Pagination({
       );
     }
   }
-  
+
   return (
     <PaginationBase>
       <PaginationContent className="flex justify-center gap-8">
@@ -85,14 +85,15 @@ export function Pagination({
           {has_previous_page && (
             <PaginationItem>
               <PaginationPrevious
-                search={getPageChangeParams 
-                  ? getPageChangeParams(currentPage - 1)
-                  : {
-                      pagination: {
-                        ...currentPagination,
-                        page_number: currentPage - 1,
-                      },
-                    }
+                search={
+                  getPageChangeParams
+                    ? getPageChangeParams(currentPage - 1)
+                    : {
+                        pagination: {
+                          ...currentPagination,
+                          page_number: currentPage - 1,
+                        },
+                      }
                 }
                 to=""
               >
@@ -115,14 +116,15 @@ export function Pagination({
               <PaginationItem key={pageNumber}>
                 <PaginationLink
                   isActive={pageNumber === currentPage}
-                  search={getPageChangeParams 
-                    ? getPageChangeParams(pageNumber)
-                    : {
-                        pagination: {
-                          ...currentPagination,
-                          page_number: pageNumber,
-                        },
-                      }
+                  search={
+                    getPageChangeParams
+                      ? getPageChangeParams(pageNumber)
+                      : {
+                          pagination: {
+                            ...currentPagination,
+                            page_number: pageNumber,
+                          },
+                        }
                   }
                   to=""
                 >
@@ -136,14 +138,15 @@ export function Pagination({
           {has_next_page && (
             <PaginationItem>
               <PaginationNext
-                search={getPageChangeParams 
-                  ? getPageChangeParams(currentPage + 1)
-                  : {
-                      pagination: {
-                        ...currentPagination,
-                        page_number: currentPage + 1,
-                      },
-                    }
+                search={
+                  getPageChangeParams
+                    ? getPageChangeParams(currentPage + 1)
+                    : {
+                        pagination: {
+                          ...currentPagination,
+                          page_number: currentPage + 1,
+                        },
+                      }
                 }
                 to=""
               >

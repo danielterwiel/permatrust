@@ -4,16 +4,21 @@ import type {
   Organization,
   Project,
   Revision,
+  Role,
   User,
   UserWithRoles,
   Workflow,
 } from '@/declarations/pt_backend/pt_backend.did';
 
-// Union type of all entity types
+export type DocumentId = Document['id'];
 export type Entity = EntityTypeMap[EntityName];
-
-// Entity type name (string literal union type)
 export type EntityName = keyof typeof entity;
+export type OrganizationId = Organization['id'];
+export type ProjectId = Project['id'];
+export type RevisionId = Revision['id'];
+export type RoleId = Role['id'];
+export type UserId = User['id'];
+export type WorkflowId = Workflow['id'];
 
 // Map entity names to their concrete types
 interface EntityTypeMap {
