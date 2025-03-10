@@ -1,4 +1,4 @@
-# PermatrustDev Commands & Style Guide
+# Permatrust Commands & Style Guide
 
 ## Build/Test/Lint Commands
 - Build: `npm run build` (all) or `npm run build --prefix src/pt_frontend` (frontend only)

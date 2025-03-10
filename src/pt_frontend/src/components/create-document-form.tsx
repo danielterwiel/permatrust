@@ -25,8 +25,9 @@ import {
 } from '@/components/ui/form';
 import { Icon } from '@/components/ui/icon';
 
-import { projectIdSchema } from '@/schemas/entities';
 import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
+
+import { projectIdSchema } from '@/schemas/entities';
 import { capitalizeFirstLetterValidator } from '@/schemas/form';
 
 import '@mdxeditor/editor/style.css';
