@@ -1,26 +1,27 @@
 {
 	"name": "pt",
-	"packageManager": "npm@10.9.2",
+	"packageManager": "pnpm@8.15.5",
 	"private": true,
 	"engines": {
-		"node": "=23.7.0",
-		"npm": "=10.9.2"
+		"node": "=23.7.0"
 	},
 	"scripts": {
-		"build": "npm run build --workspaces --if-present",
-		"build:icons": "npm run build:icons --workspaces --if-present",
-		"add:icons": "npm run add:icons --workspaces --if-present",
-		"add:components": "npm run add:components --workspaces --if-present",
-		"pretest": "npm run prebuild --workspaces --if-present",
-		"start": "npm start --workspaces --if-present",
-		"typecheck": "npm run typecheck --workspaces --if-present",
-		"test": "npm run test --workspaces --if-present",
-		"format": "npm run format --workspaces --if-present",
-		"lint": "npm run lint --workspaces --if-present",
+		"build": "pnpm -r build",
+		"build:icons": "pnpm -r build:icons",
+		"add:icons": "pnpm -r add:icons",
+		"add:components": "pnpm -r add:components",
+		"pretest": "pnpm -r prebuild",
+		"start": "pnpm -r start",
+		"typecheck": "pnpm -r typecheck",
+		"test": "pnpm -r test",
+		"format": "pnpm -r format",
+		"lint": "pnpm -r lint",
 		"deploy": "./scripts/deploy.sh",
 		"clean": "./scripts/clean.sh",
 		"generate": "./scripts/codegen/generate.sh"
 	},
 	"type": "module",
-	"workspaces": ["src/pt_frontend"]
+	"pnpm": {
+		"workspaces": ["src/pt_frontend"]
+	}
 }

@@ -23,30 +23,42 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          cache: 'npm'
           node-version-file: '.nvmrc'
 
-      - name: Enable Corepack to enforce npm as package manager
+      - name: Enable Corepack
         run: corepack enable
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 8.15.5
+          run_install: false
 
       - name: Configure environment
         run: |
           echo "$HOME/.local/share/dfx/bin" >> $GITHUB_PATH
           dfx cache install
 
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
       - name: Cache Dependencies
         uses: actions/cache@v3
         with:
           path: |
-            node_modules
-            ~/.npm
+            ${{ steps.pnpm-cache.outputs.STORE_PATH }}
             ~/.cache/dfx
             ~/.cargo
             target
-            src/pt_frontend/node_modules
-          key: ${{ runner.os }}-${{ hashFiles('**/Cargo.lock', '**/package-lock.json', 'dfx.json') }}
+          key: ${{ runner.os }}-${{ hashFiles('**/Cargo.lock', '**/pnpm-lock.yaml', 'dfx.json') }}
           restore-keys: |
             ${{ runner.os }}-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
 
       - name: Full Build Process
         run: ./scripts/build.sh

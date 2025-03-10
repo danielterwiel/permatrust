@@ -1,10 +1,14 @@
 #!/usr/bin/env bash
 set -eo pipefail
 
-# Ensure corepack is enabled to enforce the correct npm version
+# Ensure corepack is enabled to enforce the correct pnpm version
 corepack enable
 
-npm install -g nvm # Install nvm globally
+# Install nvm if needed
+if ! command -v nvm &> /dev/null; then
+  echo "Installing nvm..."
+  npm install -g nvm
+fi
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
@@ -15,7 +19,7 @@ if [ -f ".nvmrc" ]; then
   REQUIRED_VERSION=$(cat .nvmrc)
   echo "Using Node.js version from .nvmrc: $REQUIRED_VERSION"
 else
-  echo "Error: .nvmrc file not found.  Please create one with the desired Node.js version."
+  echo "Error: .nvmrc file not found. Please create one with the desired Node.js version."
   exit 1
 fi
 
@@ -23,7 +27,7 @@ fi
 NODE_VERSION=$(node -v)
 
 if [[ "$NODE_VERSION" != "$REQUIRED_VERSION" ]]; then
-  echo "Incorrect Node.js version.  Required: $REQUIRED_VERSION, Found: $NODE_VERSION"
+  echo "Incorrect Node.js version. Required: $REQUIRED_VERSION, Found: $NODE_VERSION"
   echo "Attempting to use nvm to install and use the correct version."
   nvm install "$REQUIRED_VERSION"
   nvm use "$REQUIRED_VERSION"
@@ -34,10 +38,6 @@ if [[ "$NODE_VERSION" != "$REQUIRED_VERSION" ]]; then
   fi
 fi
 
-# Install Node.js dependencies
-npm ci
-
-# Install frontend dependencies
-cd src/pt_frontend
-npm ci
-cd ../..
+# Install dependencies with pnpm
+echo "Installing dependencies with pnpm..."
+pnpm install --frozen-lockfile
