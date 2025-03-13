@@ -8,13 +8,13 @@ import { z } from 'zod';
  * @returns A validation function for use with @tanstack/react-form
  */
 export function createZodFieldValidator<
-  T extends z.ZodObject<z.ZodRawShape>,
-  K extends keyof z.infer<T>,
->(schema: T, fieldName: K) {
+  TSchema extends z.ZodObject<z.ZodRawShape>,
+  TFieldName extends keyof z.infer<TSchema>,
+>(schema: TSchema, fieldName: TFieldName) {
   return ({ value }: { value: unknown }) => {
     try {
       // Get the specific field schema and validate
-      const fieldSchema = schema.shape[fieldName as string] as z.ZodTypeAny;
+      const fieldSchema = schema.shape[fieldName as string];
       fieldSchema.parse(value);
       return undefined;
     } catch (error) {

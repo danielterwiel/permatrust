@@ -1,12 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { mutations } from '@/api/mutations';
+import { CreateUserForm } from '@/components/create-user-form';
 
-import {
-  CreateUserForm,
-  type createUserFormSchema,
-} from '@/components/create-user-form';
-
+import type { createUserFormSchema } from '@/components/create-user-form';
 import type { z } from 'zod';
 
 export const Route = createFileRoute(
@@ -15,7 +12,7 @@ export const Route = createFileRoute(
   beforeLoad: () => ({
     getTitle: () => 'Create user',
   }),
-  loader: async ({ context }) => ({
+  loader: ({ context }) => ({
     authActor: context.actors.auth,
   }),
   component: CreateUser,
@@ -31,7 +28,7 @@ function CreateUser() {
     mutate: createUser,
   } = mutations.useCreateUser();
 
-  async function onSubmit(values: z.infer<typeof createUserFormSchema>) {
+  function onSubmit(values: z.infer<typeof createUserFormSchema>) {
     createUser(
       {
         first_name: values.first_name,

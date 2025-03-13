@@ -1,3 +1,4 @@
+
 import {
   ArrowDownIcon,
   ArrowUpIcon,
@@ -12,11 +13,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-
+import { paginationSearchSchema } from '@/schemas/pagination';
 import { cn } from '@/utils/cn';
 import { snakeToPascalCase } from '@/utils/snake-to-pascal-case';
-
-import { paginationSearchSchema } from '@/schemas/pagination';
 
 import type { Column } from '@tanstack/react-table';
 import type * as React from 'react';
@@ -39,7 +38,7 @@ export function DataTableColumnHeader<TData, TValue>({
   // Get current route match for URL params
   const matches = useMatches();
   const currentRoute = matches[matches.length - 1];
-  const search = currentRoute?.search || {};
+  const search = currentRoute.search || {};
 
   const { pagination } = paginationSearchSchema.parse(search);
 
@@ -61,12 +60,18 @@ export function DataTableColumnHeader<TData, TValue>({
         const entityKey = Object.keys(urlSort.field)[0];
         if (!entityKey) return null;
 
+        // Get the field object for this entity
         const fieldObj = urlSort.field[entityKey as keyof typeof urlSort.field];
-        const sortFieldName = fieldObj ? Object.keys(fieldObj)[0] : null;
+
+        // Extract the field name using type assertion
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        const sortFieldName = fieldObj
+          ? Object.keys(fieldObj as Record<string, unknown>)[0]
+          : null;
 
         // If column matches sort field, return direction from URL
         if (sortFieldName && pascalColumnId === sortFieldName) {
-          return urlSort.order && 'Desc' in urlSort.order ? 'desc' : 'asc';
+          return 'Desc' in urlSort.order ? 'desc' : 'asc';
         }
       } catch (_e) {
         // If any errors in parsing, continue to check table state

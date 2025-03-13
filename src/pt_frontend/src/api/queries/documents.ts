@@ -1,5 +1,4 @@
 import { api } from '@/api';
-
 import { createQueryOptions } from '@/utils/create-query-options';
 
 import type { ListDocumentsInput } from '@/declarations/pt_backend/pt_backend.did';

@@ -1,5 +1,4 @@
 import { api } from '@/api';
-
 import { createMutationHook } from '@/utils/create-mutation-hook';
 
 export const createOrganizationMutations = () => {

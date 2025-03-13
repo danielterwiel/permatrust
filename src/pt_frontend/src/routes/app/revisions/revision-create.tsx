@@ -2,26 +2,19 @@ import { createFileRoute } from '@tanstack/react-router';
 
 import { mutations } from '@/api/mutations';
 import { getRevisionsByDocumentIdOptions } from '@/api/queries';
-
-import {
-  CreateRevisionForm,
-  type createRevisionFormSchema,
-} from '@/components/create-revision-form';
-
-import { processPaginationInput } from '@/utils/pagination';
-
+import { CreateRevisionForm } from '@/components/create-revision-form';
 import { ENTITY } from '@/consts/entities';
 import {
   FILTER_OPERATOR,
   FILTER_SORT_FIELDS,
   SORT_ORDER,
 } from '@/consts/pagination';
-
 import { documentIdSchema, projectIdSchema } from '@/schemas/entities';
 import { createEntityPaginationSchema } from '@/schemas/pagination';
+import { processPaginationInput } from '@/utils/pagination';
 
+import type { createRevisionFormSchema } from '@/components/create-revision-form';
 import type { PaginationInput } from '@/declarations/pt_backend/pt_backend.did';
-import type { DocumentId, ProjectId } from '@/types/entities';
 import type { z } from 'zod';
 
 const { defaultPagination: revisionPagination } = createEntityPaginationSchema(
@@ -65,9 +58,9 @@ function RevisionsCreate() {
   const navigate = Route.useNavigate();
   const { revisions: revisionData } = Route.useLoaderData();
 
-  const revision = revisionData?.[0]?.[0];
+  const revision = revisionData[0][0];
 
-  async function onSubmit(values: z.infer<typeof createRevisionFormSchema>) {
+  function onSubmit(values: z.infer<typeof createRevisionFormSchema>) {
     try {
       const encoder = new TextEncoder();
       const content = encoder.encode(values.content);

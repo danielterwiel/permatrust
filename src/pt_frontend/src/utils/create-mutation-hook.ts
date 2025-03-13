@@ -1,6 +1,7 @@
-import { toast } from '@/hooks/use-toast';
+
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
+import { toast } from '@/hooks/use-toast';
 import { isAppError } from '@/utils/is-app-error';
 
 import type { ToastProps } from '@/components/ui/toast';
@@ -11,7 +12,7 @@ import type {
 } from '@tanstack/react-query';
 import type * as React from 'react';
 
-type ApiFunction<T, R> = (variables: T) => Promise<R>;
+type ApiFunction<TVariables, TData> = (variables: TVariables) => Promise<TData>;
 
 // Extended mutation options with our custom toast controls
 type ExtendedMutationOptions<TData, TError, TVariables> = Omit<
@@ -33,10 +34,10 @@ type ExtendedMutationOptions<TData, TError, TVariables> = Omit<
 
 type InvalidationScheme<TVariables> =
   | ((variables: TVariables) => InvalidateQueryFilters | MultiQueryInvalidation)
-  | string[];
+  | Array<string>;
 
 type MultiQueryInvalidation = {
-  queries: InvalidateQueryFilters[];
+  queries: Array<InvalidateQueryFilters>;
 };
 
 // Toast options that can be passed to control toast appearance
@@ -118,7 +119,7 @@ export function createMutationHook<TVariables, TData>(
       mutationFn,
       onError: (error, variables, context) => {
         // First call custom error handler if provided
-        if (standardOptions?.onError) {
+        if (standardOptions.onError) {
           standardOptions.onError(error, variables, context);
         } else {
           // Otherwise use default error handler that shows a toast
@@ -144,7 +145,7 @@ export function createMutationHook<TVariables, TData>(
         }
 
         // Call custom onSuccess if provided in options
-        if (standardOptions?.onSuccess) {
+        if (standardOptions.onSuccess) {
           standardOptions.onSuccess(data, variables, context);
         }
       },

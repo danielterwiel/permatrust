@@ -1,26 +1,25 @@
-import { Auth } from '@/auth';
-import { router } from '@/router';
 import { assign, createActor, fromPromise, log, setup } from 'xstate';
 
 import { createAuthenticatedActorWrapper } from '@/api';
 import { getOrganizationsOptions } from '@/api/queries/organizations';
 import { getUserOptions } from '@/api/queries/users';
 import { queryClient } from '@/api/query-client';
-
+import { Auth } from '@/auth';
 import { DEFAULT_PAGINATION } from '@/consts/pagination';
-
-const canisterIdPtBackend = process.env.CANISTER_ID_PT_BACKEND as string;
+import { router } from '@/router';
 
 import type {
   Organization,
   User,
 } from '@/declarations/pt_backend/pt_backend.did';
 
+const canisterIdPtBackend = process.env.CANISTER_ID_PT_BACKEND as string;
+
 type AuthMachineTypes = {
   context: {
     isAuthenticated: boolean;
 
-    organizations?: Organization[];
+    organizations?: Array<Organization>;
 
     user?: User;
   };
@@ -72,14 +71,11 @@ const authMachine = setup({
 
     get_user: fromPromise(async () => {
       try {
-        const userResult = await queryClient.ensureQueryData(getUserOptions());
+        const user = await queryClient.ensureQueryData(getUserOptions());
 
-        if (!userResult) {
-          throw new Error('User not found');
-        }
         return {
           onboardedUser: true,
-          user: userResult,
+          user,
         };
       } catch (_error) {
         return {
@@ -92,10 +88,6 @@ const authMachine = setup({
       try {
         const auth = Auth.getInstance();
         const client = await auth.initializeClient();
-
-        if (!client) {
-          throw new Error('Failed to initialize auth client');
-        }
 
         const isAuthenticated = await client.isAuthenticated();
 
@@ -188,7 +180,7 @@ const authMachine = setup({
                             event.output.organizations,
                         }),
                         guard: ({ event }) =>
-                          event.output?.onboardedOrganizations,
+                          event.output.onboardedOrganizations,
                         target: 'onboarding_complete',
                       },
                       {
@@ -216,7 +208,7 @@ const authMachine = setup({
                         actions: assign({
                           user: ({ event }) => event.output.user,
                         }),
-                        guard: ({ event }) => event.output?.onboardedUser,
+                        guard: ({ event }) => event.output.onboardedUser,
                         target: 'check_organizations',
                       },
                       {

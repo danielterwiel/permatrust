@@ -1,9 +1,7 @@
+
 import {
-  type ColumnDef,
   flexRender,
   getCoreRowModel,
-  type Row,
-  type SortingState,
   useReactTable,
 } from '@tanstack/react-table';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -17,10 +15,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-
-import { snakeToPascalCase } from '@/utils/snake-to-pascal-case';
-
 import { SORT_ORDER } from '@/consts/pagination';
+import { createSort } from '@/utils/pagination';
+import { pascalCaseToSnakeCase } from '@/utils/pascal-case-to-snake-case';
+import { snakeToPascalCase } from '@/utils/snake-to-pascal-case';
 
 import { Pagination } from './Pagination';
 import { DataTableColumnHeader } from './table-column-header';
@@ -29,9 +27,13 @@ import type {
   PaginationMetadata,
   SortCriteria,
 } from '@/declarations/pt_backend/pt_backend.did';
-import type { Entity, EntityName } from '@/types/entities';
-import type { EntityName as EntityNameType } from '@/types/entities';
+import type {
+  Entity,
+  EntityName,
+  EntityName as EntityNameType,
+} from '@/types/entities';
 import type { FilterFieldName } from '@/types/pagination';
+import type { ColumnDef, Row, SortingState } from '@tanstack/react-table';
 import type * as React from 'react';
 
 /**
@@ -46,12 +48,12 @@ const sortingStateToSort = (
   sortingStates: SortingState,
 ): [] | [SortCriteria] => {
   // Handle empty sorting states
-  if (!sortingStates || sortingStates.length === 0) {
+  if (sortingStates.length === 0) {
     return [];
   }
 
   const [sortingState] = sortingStates;
-  if (!sortingState || !sortingState.id) {
+  if (!sortingState.id) {
     return [];
   }
 
@@ -65,7 +67,7 @@ const sortingStateToSort = (
     const sortOrder = sortingState.desc ? SORT_ORDER.DESC : SORT_ORDER.ASC;
 
     // Type cast to make TypeScript happy - we've already verified the entity exists
-    const entity = entityName as unknown as EntityNameType;
+    const entity = entityName satisfies EntityNameType;
     const field = fieldName as FilterFieldName;
 
     // Create the sort criteria and return it in a tuple
@@ -83,52 +85,48 @@ const sortingStateToSort = (
 };
 
 interface ColumnConfigItem {
-  // biome-ignore lint/suspicious/noExplicitAny: columnConfig can pass any value
   cellPreprocess?: (value: any) => any;
   headerName?: string;
   key: string;
 }
 
-import { createSort } from '@/utils/pagination';
-import { pascalCaseToSnakeCase } from '@/utils/pascal-case-to-snake-case';
-
 // TableProps interface is defined below
 
 interface TableProps<T extends Entity = Entity> {
   actions?: ((row: Row<T>) => React.ReactNode) | React.ReactNode;
-  columnConfig?: ColumnConfigItem[];
+  columnConfig?: Array<ColumnConfigItem>;
   entityName: EntityName;
   getPageChangeParams?: (pageNumber: number) => Record<string, unknown>;
-  onSelectionChange?: (selectedRows: T[]) => void;
+  onSelectionChange?: (selectedRows: Array<T>) => void;
   onSortingChange?: (sort: [] | [SortCriteria]) => void;
   paginationMetaData?: PaginationMetadata;
   sort: [] | [SortCriteria];
-  tableData?: T[];
+  tableData?: Array<T>;
 }
 
 /**
  * Determines if a header column matches the default sort field and returns the sort direction
  */
 function getDefaultSortDirection(
-  sort: [] | [SortCriteria], 
-  header: { column: { id: string } }
+  sort: [] | [SortCriteria],
+  header: { column: { id: string } },
 ): 'asc' | 'desc' | false {
   if (sort.length === 0) return false;
-  
+
   const sortField = getDefaultSortField(sort);
   if (!sortField) return false;
-  
+
   // Get column ID without index suffix
   const columnId = header.column.id.split('-')[0];
-  
+
   // Convert to PascalCase for comparison with sort field
   const pascalColumnId = snakeToPascalCase(columnId);
-  
+
   if (pascalColumnId !== sortField) return false;
-  
+
   // Determine sort direction
   const sortCriteria = sort[0];
-  return sortCriteria.order && 'Desc' in sortCriteria.order ? 'desc' : 'asc';
+  return 'Desc' in sortCriteria.order ? 'desc' : 'asc';
 }
 
 /**
@@ -136,16 +134,16 @@ function getDefaultSortDirection(
  */
 function getDefaultSortField(sort: [] | [SortCriteria]): string | undefined {
   if (sort.length === 0) return undefined;
-  
+
   const sortCriteria = sort[0];
-  if (!sortCriteria?.field) return undefined;
-  
+
   try {
     const entityKey = Object.keys(sortCriteria.field)[0];
     if (!entityKey) return undefined;
 
-    const fieldObj = sortCriteria.field[entityKey as keyof typeof sortCriteria.field];
-    return fieldObj ? Object.keys(fieldObj)[0] : undefined;
+    const fieldObj =
+      sortCriteria.field[entityKey as keyof typeof sortCriteria.field];
+    return Object.keys(fieldObj)[0];
   } catch (_e) {
     return undefined;
   }
@@ -186,7 +184,7 @@ export const Table = <T extends Entity = Entity>({
     onSortingChange?.(newSort);
   };
 
-  const columns: ColumnDef<T>[] = useMemo(() => {
+  const columns: Array<ColumnDef<T>> = useMemo(() => {
     // Conditionally include the selectColumn based on the presence of onSelectionChange
     const selectColumn: ColumnDef<T> = {
       cell: ({ row }) => (
@@ -234,7 +232,7 @@ export const Table = <T extends Entity = Entity>({
           : undefined,
         header: config.headerName,
         id: `${config.key}-${idx}`,
-      })) as ColumnDef<T>[];
+      })) as Array<ColumnDef<T>>;
     });
 
     return onSelectionChange ? [selectColumn, ...allColumns] : allColumns;
@@ -262,14 +260,14 @@ export const Table = <T extends Entity = Entity>({
           if (entityKey) {
             const fieldObj =
               sortCriteria.field[entityKey as keyof typeof sortCriteria.field];
-            const fieldName = fieldObj ? Object.keys(fieldObj)[0] : undefined;
+            const fieldName = Object.keys(fieldObj)[0];
 
             if (fieldName) {
               // Convert PascalCase to snake_case for column ID
               const columnId = pascalCaseToSnakeCase(fieldName);
 
               // Determine sort direction
-              const isDesc = sortCriteria.order && 'Desc' in sortCriteria.order;
+              const isDesc = 'Desc' in sortCriteria.order;
 
               // Return sorting state
               return [{ id: columnId, desc: isDesc }];
@@ -318,9 +316,6 @@ export const Table = <T extends Entity = Entity>({
     }
   }, [onSelectionChange, rowSelection, table]);
 
-  if (tableData === undefined) {
-    return <p>No data fetched yet</p>;
-  }
   if (tableData.length === 0) {
     return <p>No data available</p>;
   }
@@ -340,7 +335,10 @@ export const Table = <T extends Entity = Entity>({
                     <TableHead key={header.id}>
                       <DataTableColumnHeader
                         column={header.column}
-                        defaultSortDirection={getDefaultSortDirection(sort, header)}
+                        defaultSortDirection={getDefaultSortDirection(
+                          sort,
+                          header,
+                        )}
                         defaultSortField={getDefaultSortField(sort)}
                         title={
                           flexRender(
@@ -379,9 +377,9 @@ export const Table = <T extends Entity = Entity>({
         </TableBase>
         <div className="pt-16">
           {paginationMetaData && (
-            <Pagination 
+            <Pagination
               getPageChangeParams={getPageChangeParams}
-              paginationMetaData={paginationMetaData} 
+              paginationMetaData={paginationMetaData}
             />
           )}
         </div>

@@ -1,8 +1,8 @@
+
 import { ChevronLeftIcon } from '@radix-ui/react-icons';
 
 import { Link } from '@/components/link';
 import { buttonVariants } from '@/components/ui/button';
-
 import { cn } from '@/utils/cn';
 
 import type { PaginationSearchParams } from '@/schemas/pagination';

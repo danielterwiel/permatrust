@@ -1,17 +1,15 @@
-import { headingsPlugin, MDXEditor } from '@mdxeditor/editor';
+import { MDXEditor, headingsPlugin } from '@mdxeditor/editor';
 import { createFileRoute } from '@tanstack/react-router';
 
 import { getRevisionOptions } from '@/api/queries/revisions';
-
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
-
 import { revisionIdSchema } from '@/schemas/entities';
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId',
 )({
-  beforeLoad: async () => ({
+  beforeLoad: () => ({
     getTitle: () => 'Revision',
   }),
   loader: async ({ context, params: { revisionId } }) => {
@@ -40,16 +38,14 @@ function RevisionDetails() {
             name="file-stack-outline"
             size="lg"
           />
-          Revision #{revision?.version}
+          Revision #{revision.version}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <MDXEditor
           contentEditableClassName="prose"
           markdown={new TextDecoder().decode(
-            new Uint8Array(
-              revision?.content ? Object.values(revision?.content) : [],
-            ),
+            new Uint8Array(Object.values(revision.content)),
           )}
           onError={(_error) => {
             // TODO: handle error

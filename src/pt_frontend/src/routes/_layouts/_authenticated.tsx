@@ -1,6 +1,7 @@
-import { Auth } from '@/auth';
-import { createFileRoute, Outlet, redirect } from '@tanstack/react-router';
+import { Outlet, createFileRoute, redirect } from '@tanstack/react-router';
 import { waitFor } from 'xstate';
+
+import { Auth } from '@/auth';
 
 export const Route = createFileRoute('/_initialized/_authenticated')({
   beforeLoad: async ({ context }) => {

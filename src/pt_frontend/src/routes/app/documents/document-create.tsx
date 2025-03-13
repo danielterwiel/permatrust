@@ -1,14 +1,10 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { mutations } from '@/api/mutations';
-
-import {
-  CreateDocumentForm,
-  type createDocumentFormSchema,
-} from '@/components/create-document-form';
-
+import { CreateDocumentForm } from '@/components/create-document-form';
 import { projectIdSchema } from '@/schemas/entities';
 
+import type { createDocumentFormSchema } from '@/components/create-document-form';
 import type { z } from 'zod';
 
 export const Route = createFileRoute(
@@ -29,7 +25,7 @@ function CreateDocument() {
   const navigate = useNavigate();
   const params = Route.useParams();
 
-  async function onSubmit(values: z.infer<typeof createDocumentFormSchema>) {
+  function onSubmit(values: z.infer<typeof createDocumentFormSchema>) {
     const encoder = new TextEncoder();
     const content = encoder.encode(values.content);
 

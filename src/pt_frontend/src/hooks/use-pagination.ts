@@ -20,7 +20,7 @@ export function usePagination(
 ) {
   const navigate = useNavigate();
   const location = useLocation();
-  const currentPath = location?.pathname || '/';
+  const currentPath = location.pathname || '/';
 
   /**
    * Removes default values from pagination using Zod schema validation
@@ -46,17 +46,17 @@ export function usePagination(
     }
 
     // Process filters - only include if they exist and are non-default
-    if (validatedPagination.filters?.[0]?.length) {
+    if (validatedPagination.filters[0]?.length) {
       const firstFilter = validatedPagination.filters[0][0];
 
       // Use utility function to compare with default empty value
-      if (firstFilter && !isDefaultFilter(firstFilter)) {
+      if (!isDefaultFilter(firstFilter)) {
         result.filters = validatedPagination.filters;
       }
     }
 
     // Process sort - only include if they exist and are non-default
-    if (validatedPagination.sort?.length) {
+    if (validatedPagination.sort.length) {
       // For deep comparison, stringify both sort arrays
       const currentSortStr = JSON.stringify(validatedPagination.sort);
       const defaultSortStr = JSON.stringify(defaultPagination.sort);

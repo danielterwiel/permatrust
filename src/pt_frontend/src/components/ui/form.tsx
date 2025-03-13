@@ -1,20 +1,19 @@
-import { Label } from "@/components/ui/label";
-import { cn } from "@/utils/cn";
-import type * as LabelPrimitive from "@radix-ui/react-label";
-import { Slot } from "@radix-ui/react-slot";
-import type { FieldApi, Validator } from "@tanstack/react-form";
-import * as React from "react";
+import { Label } from '@/components/ui/label';
+import { cn } from '@/utils/cn';
+import type * as LabelPrimitive from '@radix-ui/react-label';
+import { Slot } from '@radix-ui/react-slot';
+import type { FieldApi } from '@tanstack/react-form';
+import * as React from 'react';
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 type Field = FieldApi<any, any, any, any>;
 
 const FormItem = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => {
-  return <div ref={ref} className={cn("space-y-2", className)} {...props} />;
+  return <div ref={ref} className={cn('space-y-2', className)} {...props} />;
 });
-FormItem.displayName = "FormItem";
+FormItem.displayName = 'FormItem';
 
 const FormLabel = React.forwardRef<
   React.ElementRef<typeof LabelPrimitive.Root>,
@@ -27,12 +26,12 @@ const FormLabel = React.forwardRef<
   return (
     <Label
       ref={ref}
-      className={cn(hasError && "text-destructive", className)}
+      className={cn(hasError && 'text-destructive', className)}
       {...props}
     />
   );
 });
-FormLabel.displayName = "FormLabel";
+FormLabel.displayName = 'FormLabel';
 
 const FormControl = React.forwardRef<
   React.ElementRef<typeof Slot>,
@@ -44,7 +43,7 @@ const FormControl = React.forwardRef<
 
   return <Slot ref={ref} aria-invalid={hasError} {...props} />;
 });
-FormControl.displayName = "FormControl";
+FormControl.displayName = 'FormControl';
 
 const FormDescription = React.forwardRef<
   HTMLParagraphElement,
@@ -53,12 +52,12 @@ const FormDescription = React.forwardRef<
   return (
     <p
       ref={ref}
-      className={cn("text-sm text-muted-foreground", className)}
+      className={cn('text-sm text-muted-foreground', className)}
       {...props}
     />
   );
 });
-FormDescription.displayName = "FormDescription";
+FormDescription.displayName = 'FormDescription';
 
 const FormMessage = React.forwardRef<
   HTMLParagraphElement,
@@ -76,13 +75,13 @@ const FormMessage = React.forwardRef<
   return (
     <p
       ref={ref}
-      className={cn("text-sm font-medium text-destructive", className)}
+      className={cn('text-sm font-medium text-destructive', className)}
       {...props}
     >
       {body}
     </p>
   );
 });
-FormMessage.displayName = "FormMessage";
+FormMessage.displayName = 'FormMessage';
 
 export { FormItem, FormLabel, FormControl, FormDescription, FormMessage };

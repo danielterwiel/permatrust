@@ -1,4 +1,3 @@
-import { useToast } from '@/hooks/use-toast';
 import { createFileRoute } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { Check, ChevronsUpDown } from 'lucide-react';
@@ -11,7 +10,6 @@ import {
   getProjectMembersRolesOptions,
   getProjectRolesOptions,
 } from '@/api/queries/permissions';
-
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -34,25 +32,26 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
-
-import { cn } from '@/utils/cn';
-import { createFilter } from '@/utils/pagination';
-
 import { ENTITY } from '@/consts/entities';
 import {
   DEFAULT_PAGINATION,
   FILTER_OPERATOR,
   FILTER_SORT_FIELDS,
 } from '@/consts/pagination';
-
+import { useToast } from '@/hooks/use-toast';
 import {
   projectIdSchema,
   roleIdSchema,
   userIdSchema,
 } from '@/schemas/entities';
+import { cn } from '@/utils/cn';
+import { createFilter } from '@/utils/pagination';
 
-import type { PaginationInput } from '@/declarations/pt_backend/pt_backend.did';
-import type { Role, User } from '@/declarations/pt_backend/pt_backend.did';
+import type {
+  PaginationInput,
+  Role,
+  User,
+} from '@/declarations/pt_backend/pt_backend.did';
 
 const searchSchema = z.object({
   userId: z.number().optional(),
@@ -76,7 +75,7 @@ export const Route = createFileRoute(
     );
 
     let preselectedUser: undefined | User;
-    let userRoles: Role[] = [];
+    let userRoles: Array<Role> = [];
 
     if (!Number.isNaN(deps.userId)) {
       const userId = deps.userId;
@@ -103,7 +102,7 @@ export const Route = createFileRoute(
 
         if (assignedRoles.length > 0) {
           const userWithRoles = assignedRoles[0];
-          userRoles = userWithRoles?.roles ?? [];
+          userRoles = userWithRoles.roles;
         }
       }
     }
@@ -116,15 +115,19 @@ export const Route = createFileRoute(
     };
   },
   component: RolesAssign,
+  errorComponent: ({ error }) => {
+    return <div>Error: {error.message}</div>;
+  },
 });
 
 function RolesAssign() {
   const { preselectedUser, roles, userRoles, users } = Route.useLoaderData();
   const search = Route.useSearch();
-  const [selectedUsers, setSelectedUsers] = useState<User[]>(
+  const [selectedUsers, setSelectedUsers] = useState<Array<User>>(
     preselectedUser ? [preselectedUser] : [],
   );
-  const [selectedRoles, setSelectedRoles] = useState<Role[]>(userRoles || []);
+
+  const [selectedRoles, setSelectedRoles] = useState<Array<Role>>(userRoles);
   const [openUsers, setOpenUsers] = useState(false);
   const [openRoles, setOpenRoles] = useState(false);
   const { toast } = useToast();
@@ -251,7 +254,7 @@ function RolesAssign() {
                       <CommandItem
                         key={role.id}
                         onSelect={() => {
-                          setSelectedRoles((prev: Role[]) =>
+                          setSelectedRoles((prev: Array<Role>) =>
                             prev.some((r) => r.id === role.id)
                               ? prev.filter((r) => r.id !== role.id)
                               : [...prev, role],

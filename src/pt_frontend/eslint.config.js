@@ -1,13 +1,50 @@
-import pluginJs from '@eslint/js';
+import { tanstackConfig } from '@tanstack/config/eslint';
 import pluginRouter from '@tanstack/eslint-plugin-router';
-import pluginBiome from 'eslint-config-biome';
-import pluginPerfectionist from 'eslint-plugin-perfectionist';
 import pluginReact from 'eslint-plugin-react';
+import pluginBiome from 'eslint-config-biome';
 import pluginXState from 'eslint-plugin-xstate';
-import tseslint from 'typescript-eslint';
 
 /** @type {import('eslint').Linter.Config[]} */
 export default [
+  ...tanstackConfig,
+  {
+    rules: {
+      'import/order': [
+        'warn',
+        {
+          groups: [
+            'builtin',
+            'external',
+            'internal',
+            'parent',
+            'sibling',
+            'index',
+            'object',
+            'type',
+          ],
+          pathGroups: [
+            { pattern: 'react', group: 'external', position: 'before' },
+            { pattern: '@/**', group: 'internal' },
+            { pattern: 'src/components/**', group: 'internal' },
+            { pattern: 'src/utils/**', group: 'internal' },
+            { pattern: 'src/types/**/*', group: 'type' },
+          ],
+          pathGroupsExcludedImportTypes: [
+            'builtin',
+            'external',
+            'internal',
+            'type',
+          ],
+          'newlines-between': 'always',
+          alphabetize: {
+            order: 'asc',
+            caseInsensitive: true,
+          },
+        },
+      ],
+    },
+  },
+  // Ignore patterns
   {
     ignores: [
       '**/node_modules/**',
@@ -17,6 +54,7 @@ export default [
       'package-lock.json',
     ],
   },
+  // Settings
   {
     settings: {
       react: {
@@ -27,6 +65,7 @@ export default [
       },
     },
   },
+  // File patterns and language options
   {
     files: ['./src/**/*.{js,mjs,cjs,ts,jsx,tsx}'],
     languageOptions: {
@@ -39,110 +78,97 @@ export default [
       },
     },
   },
-  pluginJs.configs.recommended,
-  ...tseslint.configs.recommended,
+  // JS-only files configuration
+  {
+    files: ['*.js', '*.cjs', '*.mjs'],
+    ignores: ['dist/**/*'],
+    languageOptions: {
+      parser: null,
+    },
+  },
+  // Plugin configs
   ...pluginRouter.configs['flat/recommended'],
   pluginReact.configs.flat.recommended,
-  pluginPerfectionist.configs['recommended-natural'],
   pluginBiome,
+
+  // ESLint formatting rules
+  {
+    rules: {
+      // Indentation
+      indent: ['warn', 2, { SwitchCase: 1 }],
+      // Semicolons
+      semi: ['warn', 'always'],
+      // Quotes - warn instead of error to auto-fix without blocking
+      quotes: ['warn', 'single', { avoidEscape: true }],
+      // Comma dangle
+      'comma-dangle': ['warn', 'only-multiline'],
+      // Spacing
+      'object-curly-spacing': ['warn', 'always'],
+      'array-bracket-spacing': ['warn', 'never'],
+      'space-in-parens': ['warn', 'never'],
+      'space-before-function-paren': [
+        'warn',
+        {
+          anonymous: 'never',
+          named: 'never',
+          asyncArrow: 'always',
+        },
+      ],
+      'keyword-spacing': ['warn', { before: true, after: true }],
+      'space-infix-ops': 'warn',
+      // Line breaks
+      'eol-last': ['warn', 'always'],
+      'no-multiple-empty-lines': ['warn', { max: 1, maxEOF: 1 }],
+      // Max line length
+      'max-len': [
+        'warn',
+        {
+          code: 100,
+          ignoreUrls: true,
+          ignoreStrings: true,
+          ignoreTemplateLiterals: true,
+          ignoreRegExpLiterals: true,
+          ignoreComments: true,
+        },
+      ],
+    },
+  },
+  // XState plugin and rules
   {
     plugins: {
       xstate: pluginXState,
     },
     rules: {
-      'xstate/entry-exit-action': 'error',
+      'xstate/entry-exit-action': 'warn',
       'xstate/event-names': ['warn', 'macroCase'],
-      'xstate/invoke-usage': 'error',
-      'xstate/no-async-guard': 'error',
+      'xstate/invoke-usage': 'warn',
+      'xstate/no-async-guard': 'warn',
       'xstate/no-auto-forward': 'warn',
-      'xstate/no-imperative-action': 'error',
-      'xstate/no-infinite-loop': 'error',
+      'xstate/no-imperative-action': 'warn',
+      'xstate/no-infinite-loop': 'warn',
       'xstate/no-inline-implementation': 'warn',
-      'xstate/no-invalid-conditional-action': 'error',
-      'xstate/no-invalid-state-props': 'error',
-      'xstate/no-invalid-transition-props': 'error',
-      'xstate/no-misplaced-on-transition': 'error',
-      'xstate/no-ondone-outside-compound-state': 'error',
-      'xstate/prefer-always': 'error',
-      'xstate/prefer-predictable-action-arguments': 'error',
-      // XState rules
-      'xstate/spawn-usage': 0,
+      'xstate/no-invalid-conditional-action': 'warn',
+      'xstate/no-invalid-state-props': 'warn',
+      'xstate/no-invalid-transition-props': 'warn',
+      'xstate/no-misplaced-on-transition': 'warn',
+      'xstate/no-ondone-outside-compound-state': 'warn',
+      'xstate/prefer-always': 'warn',
+      'xstate/prefer-predictable-action-arguments': 'warn',
+      'xstate/spawn-usage': 'off',
       'xstate/state-names': ['warn', 'camelCase'],
       'xstate/system-id': 'warn',
     },
   },
+  // Custom rules
   {
     rules: {
-      '@typescript-eslint/consistent-type-imports': [
-        'error',
-        {
-          fixStyle: 'separate-type-imports',
-          prefer: 'type-imports',
-        },
-      ],
-      '@typescript-eslint/no-unused-expressions': [
-        'error',
-        {
-          allowShortCircuit: true,
-          allowTaggedTemplates: true,
-          allowTernary: true,
-        },
-      ],
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
-        {
-          argsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_',
-          destructuredArrayIgnorePattern: '^_',
-          ignoreRestSiblings: true,
-          varsIgnorePattern: '^(_|type|interface|[A-Z])',
-        },
-      ],
-
-      'no-console': 'error',
-      'no-unused-expressions': 'off',
-
-      'no-unused-vars': 'off',
-      'no-void': ['error', { allowAsStatement: true }],
-      'perfectionist/sort-imports': [
-        'error',
-        {
-          customGroups: {
-            value: {
-              components: ['@/components/.*'],
-              api: ['@/api'],
-              consts: ['@/consts/.*'],
-              dfinity: ['^@dfinity/.*'],
-              hooks: ['@/hooks/.*'],
-              react: ['^react$', '^react-.+'],
-              schemas: ['@/schemas/.*'],
-              utils: ['@/utils/.*'],
-            },
-          },
-          groups: [
-            ['builtin', 'external'],
-            'api',
-            'components',
-            'utils',
-            'consts',
-            'schemas',
-            'internal',
-            ['parent', 'sibling', 'index'],
-            'type',
-            'internal-type',
-            ['parent-type', 'sibling-type', 'index-type'],
-          ],
-          newlinesBetween: 'always',
-          order: 'asc',
-          type: 'natural',
-        },
-      ],
-
-      'perfectionist/sort-objects': 'off',
-
       'react/jsx-uses-react': 'off',
-      'react/no-multi-comp': ['error', { ignoreStateless: true }],
+      'react/no-multi-comp': ['warn', { ignoreStateless: true }],
       'react/react-in-jsx-scope': 'off',
+      '@typescript-eslint/no-unnecessary-condition': 'warn',
+      '@typescript-eslint/naming-convention': 'warn',
+      '@typescript-eslint/require-await': 'warn',
+      'no-shadow': 'warn',
     },
   },
 ];

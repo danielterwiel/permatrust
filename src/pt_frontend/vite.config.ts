@@ -1,8 +1,9 @@
+import { fileURLToPath } from 'node:url';
+
 import { TanStackRouterVite } from '@tanstack/router-plugin/vite';
 import react from '@vitejs/plugin-react';
 import dotenv from 'dotenv';
-import { fileURLToPath } from 'node:url';
-import { defineConfig, type Plugin } from 'vite';
+import { defineConfig } from 'vite';
 import environment from 'vite-plugin-environment';
 
 import { routes } from './src/routes';
@@ -34,7 +35,7 @@ export default defineConfig({
       defineOn: 'import.meta.env',
       prefix: 'VITE_CANISTER_ID_',
     }),
-  ] as Plugin[],
+  ],
   resolve: {
     alias: [
       {

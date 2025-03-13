@@ -1,4 +1,3 @@
-import { permissionsToItems } from '@/utils';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { useState } from 'react';
 
@@ -17,15 +16,16 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { permissionsToItems } from '@/utils';
 
 import type { Role } from '@/declarations/pt_backend/pt_backend.did';
 
 type RoleListProps = {
-  roles: Role[];
+  roles: Array<Role>;
 };
 
 export const RolesList = ({ roles }: RoleListProps) => {
-  const [expandedRoles, setExpandedRoles] = useState<string[]>([]);
+  const [expandedRoles, setExpandedRoles] = useState<Array<string>>([]);
 
   const toggleRole = (roleId: string) => {
     setExpandedRoles((prev) =>
@@ -40,10 +40,7 @@ export const RolesList = ({ roles }: RoleListProps) => {
   ) => {
     return permissions.reduce(
       (acc, permission) => {
-        if (!acc[permission.group]) {
-          acc[permission.group] = [];
-        }
-        acc[permission.group]?.push(permission);
+        acc[permission.group].push(permission);
         return acc;
       },
       {} as Record<string, typeof permissions>,

@@ -1,33 +1,29 @@
-import { usePagination } from '@/hooks/use-pagination';
 import { createFileRoute } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { useState } from 'react';
 
 import { getRevisionsByDocumentIdOptions } from '@/api/queries';
 import { getDocumentOptions } from '@/api/queries/documents';
-
 import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
 import { Link } from '@/components/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
-
-import { formatDateTime } from '@/utils/format-date-time';
-import { processPaginationInput } from '@/utils/pagination';
-
 import { ENTITY } from '@/consts/entities';
 import {
   FILTER_OPERATOR,
   FILTER_SORT_FIELDS,
   SORT_ORDER,
 } from '@/consts/pagination';
-
+import { usePagination } from '@/hooks/use-pagination';
 import { documentIdSchema } from '@/schemas/entities';
 import { createEntityPaginationSchema } from '@/schemas/pagination';
 import { toNumberSchema } from '@/schemas/primitives';
+import { formatDateTime } from '@/utils/format-date-time';
+import { processPaginationInput } from '@/utils/pagination';
 
 import type { Revision } from '@/declarations/pt_backend/pt_backend.did';
-import type { DocumentId, RevisionId } from '@/types/entities';
+import type { RevisionId } from '@/types/entities';
 import type { Row } from '@tanstack/react-table';
 
 const { schema: revisionsSearchSchema, defaultPagination } =
@@ -76,9 +72,9 @@ function DocumentDetails() {
   const { documentId, projectId } = Route.useParams();
   const { document, pagination, paginationMetaData, revisions } =
     Route.useLoaderData();
-  const [selected, setSelected] = useState<Revision[]>([]);
+  const [selected, setSelected] = useState<Array<Revision>>([]);
 
-  const effectiveSort = pagination.sort?.length
+  const effectiveSort = pagination.sort.length
     ? pagination.sort
     : defaultPagination.sort;
 
@@ -87,8 +83,8 @@ function DocumentDetails() {
     defaultPagination,
   );
 
-  function handleCheckedChange(revisions: Revision[]) {
-    setSelected(revisions);
+  function handleCheckedChange(revisionsList: Array<Revision>) {
+    setSelected(revisionsList);
   }
 
   const RowActions = (row: Row<Revision>) => {
@@ -130,11 +126,11 @@ function DocumentDetails() {
             }}
             search={{
               current:
-                selected[1]?.id !== undefined
+                selected[1]
                   ? toNumberSchema.parse(selected[1].id)
                   : undefined,
               theirs:
-                selected[0]?.id !== undefined
+                selected[0]
                   ? toNumberSchema.parse(selected[0].id)
                   : undefined,
             }}
@@ -194,12 +190,12 @@ function DocumentDetails() {
                 key: 'content',
               },
               {
-                cellPreprocess: (createdBy) => createdBy.toString(),
+                cellPreprocess: (createdBy) => (createdBy as bigint).toString(),
                 headerName: 'Created by',
                 key: 'created_by',
               },
               {
-                cellPreprocess: (createdAt) => formatDateTime(createdAt),
+                cellPreprocess: (createdAt) => formatDateTime(createdAt as bigint),
                 headerName: 'Created at',
                 key: 'created_at',
               },

@@ -1,26 +1,22 @@
-import { usePagination } from '@/hooks/use-pagination';
 import { createFileRoute } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 
 import { listDocumentsByProjectIdOptions } from '@/api/queries/documents';
 import { getProjectOptions } from '@/api/queries/projects';
-
 import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
 import { Link } from '@/components/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
-
-import { processPaginationInput } from '@/utils/pagination';
-
 import { ENTITY } from '@/consts/entities';
 import {
   FILTER_OPERATOR,
   FILTER_SORT_FIELDS,
   SORT_ORDER,
 } from '@/consts/pagination';
-
+import { usePagination } from '@/hooks/use-pagination';
 import { createEntityPaginationSchema } from '@/schemas/pagination';
+import { processPaginationInput } from '@/utils/pagination';
 
 import type { Document } from '@/declarations/pt_backend/pt_backend.did';
 import type { Row } from '@tanstack/react-table';
@@ -73,7 +69,7 @@ function ProjectDetails() {
   const { documents, pagination, paginationMetaData, project } =
     Route.useLoaderData();
 
-  const effectiveSort = pagination.sort?.length
+  const effectiveSort = pagination.sort.length
     ? pagination.sort
     : defaultPagination.sort;
 

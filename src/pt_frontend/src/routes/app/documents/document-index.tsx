@@ -1,7 +1,6 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router';
+import { Outlet, createFileRoute } from '@tanstack/react-router';
 
 import { getDocumentOptions } from '@/api/queries';
-
 import { documentIdSchema } from '@/schemas/entities';
 
 export const Route = createFileRoute(

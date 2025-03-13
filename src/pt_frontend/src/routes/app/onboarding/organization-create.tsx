@@ -1,9 +1,8 @@
-import { useLocalStorage } from '@/hooks/use-local-storage';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { mutations } from '@/api/mutations';
-
 import { CreateOrganizationForm } from '@/components/create-organization-form';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
 import type { createOrganizationFormSchema } from '@/components/create-organization-form';
 import type { z } from 'zod';
@@ -35,9 +34,7 @@ function CreateOrganization() {
     mutate: createOrganization,
   } = mutations.useCreateOrganization();
 
-  async function onSubmit(
-    values: z.infer<typeof createOrganizationFormSchema>,
-  ) {
+  function onSubmit(values: z.infer<typeof createOrganizationFormSchema>) {
     const { id: userId } = authActor.getSnapshot().context.user ?? {};
 
     if (userId === undefined) {

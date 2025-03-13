@@ -70,7 +70,7 @@ function Home() {
         {/* SVG Abstract Graph Background - hardware accelerated with transform-gpu */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none bg-gradient-to-r from-background via-primary/5 to-background">
           {/* SVG abstract graph with hardware acceleration */}
-          <svg 
+          <svg
             aria-hidden="true"
             className="absolute inset-0 w-full h-full opacity-75"
             height="100%"
@@ -103,7 +103,7 @@ function Home() {
                 <rect fill="white" height="100%" width="100%" />
               </mask>
             </defs>
-            
+
             {/* Dense grid lines - horizontal */}
             <g mask="url(#graph-mask)" stroke="currentColor" strokeOpacity="0.03">
               <line x1="0" x2="1440" y1="50" y2="50" />
@@ -122,7 +122,7 @@ function Home() {
               <line x1="0" x2="1440" y1="700" y2="700" />
               <line x1="0" x2="1440" y1="750" y2="750" />
             </g>
-            
+
             {/* Dense grid lines - vertical */}
             <g mask="url(#graph-mask)" stroke="currentColor" strokeOpacity="0.03">
               <line x1="80" x2="80" y1="0" y2="800" />
@@ -143,7 +143,7 @@ function Home() {
               <line x1="1280" x2="1280" y1="0" y2="800" />
               <line x1="1360" x2="1360" y1="0" y2="800" />
             </g>
-            
+
             {/* Main grid lines - highlighted */}
             <g mask="url(#graph-mask)" stroke="currentColor" strokeOpacity="0.07">
               <line x1="0" x2="1440" y1="200" y2="200" />
@@ -154,51 +154,51 @@ function Home() {
               <line x1="960" x2="960" y1="0" y2="800" />
               <line x1="1280" x2="1280" y1="0" y2="800" />
             </g>
-            
+
             {/* Wave patterns - animated with different speeds/phases */}
-            <path 
+            <path
               className="transform-gpu animate-wave-1"
               d="M0,500 C120,470 240,530 360,500 C480,470 600,530 720,500 C840,470 960,530 1080,500 C1200,470 1320,530 1440,500"
               fill="none"
               stroke="url(#wave-gradient)"
               strokeWidth="2"
             />
-            
-            <path 
+
+            <path
               className="transform-gpu animate-wave-2"
               d="M0,300 C120,330 240,270 360,300 C480,330 600,270 720,300 C840,330 960,270 1080,300 C1200,330 1320,270 1440,300"
               fill="none"
               stroke="url(#wave-gradient)"
               strokeWidth="2"
             />
-            
-            <path 
+
+            <path
               className="transform-gpu animate-wave-3"
               d="M0,600 C160,550 320,650 480,600 C640,550 800,650 960,600 C1120,550 1280,650 1440,600"
               fill="none"
               stroke="url(#wave-gradient)"
               strokeWidth="2.5"
             />
-            
+
             {/* Additional wave patterns */}
-            <path 
+            <path
               className="transform-gpu animate-wave-4"
               d="M0,200 C90,220 180,180 270,200 C360,220 450,180 540,200 C630,220 720,180 810,200 C900,220 990,180 1080,200 C1170,220 1260,180 1350,200 C1440,220"
               fill="none"
               stroke="url(#wave-gradient)"
               strokeWidth="2"
             />
-            
-            <path 
+
+            <path
               className="transform-gpu animate-wave-5"
               d="M0,400 C160,380 320,420 480,400 C640,380 800,420 960,400 C1120,380 1280,420 1440,400"
               fill="none"
               stroke="url(#wave-gradient)"
               strokeWidth="2"
             />
-            
+
             {/* Path 1 - Quality trend line */}
-            <path 
+            <path
               className="transform-gpu animate-path-draw"
               d="M0,650 C160,620 320,480 480,510 C640,540 800,430 960,410 C1120,390 1280,450 1440,430"
               fill="none"
@@ -206,70 +206,70 @@ function Home() {
               stroke="url(#graph-gradient)"
               strokeWidth="3"
             />
-            
+
             {/* Path 2 - Secondary metric line */}
-            <path 
+            <path
               className="transform-gpu animate-path-slide"
               d="M0,580 C160,560 320,590 480,570 C640,550 800,580 960,550 C1120,520 1280,540 1440,510"
               fill="none"
-              stroke="url(#graph-gradient)" 
+              stroke="url(#graph-gradient)"
               strokeDasharray="5,5"
               strokeWidth="2"
             />
-            
+
             {/* Path 3 - Additional trend line */}
-            <path 
+            <path
               className="transform-gpu animate-path-slide-alt"
               d="M0,350 C120,320 240,380 360,350 C480,320 600,380 720,350 C840,320 960,380 1080,350 C1200,320 1320,380 1440,350"
               fill="none"
-              stroke="url(#graph-gradient)" 
+              stroke="url(#graph-gradient)"
               strokeDasharray="3,3"
               strokeWidth="2"
             />
-            
+
             {/* Data points - Primary with glow effect */}
             <g className="transform-gpu animate-pulse-slow" fill="url(#pulse-gradient)" filter="url(#glow)">
               <circle cx="0" cy="650" opacity="0.7" r="4" />
               <circle cx="480" cy="510" opacity="0.8" r="5" />
               <circle cx="960" cy="410" opacity="0.8" r="5" />
               <circle cx="1440" cy="430" opacity="0.7" r="4" />
-              
+
               <circle cx="0" cy="580" opacity="0.6" r="3" />
               <circle cx="480" cy="570" opacity="0.7" r="3" />
               <circle cx="960" cy="550" opacity="0.7" r="3" />
               <circle cx="1440" cy="510" opacity="0.6" r="3" />
             </g>
-            
+
             {/* Wave data points */}
             <g className="transform-gpu animate-pulse-alternate" fill="var(--primary)">
               <circle cx="360" cy="500" opacity="0.5" r="2.5" />
               <circle cx="720" cy="500" opacity="0.5" r="2.5" />
               <circle cx="1080" cy="500" opacity="0.5" r="2.5" />
-              
+
               <circle cx="240" cy="300" opacity="0.5" r="2" />
               <circle cx="480" cy="300" opacity="0.5" r="2" />
               <circle cx="720" cy="300" opacity="0.5" r="2" />
               <circle cx="960" cy="300" opacity="0.5" r="2" />
               <circle cx="1200" cy="300" opacity="0.5" r="2" />
-              
+
               <circle cx="240" cy="200" opacity="0.4" r="1.5" />
               <circle cx="540" cy="200" opacity="0.4" r="1.5" />
               <circle cx="810" cy="200" opacity="0.4" r="1.5" />
               <circle cx="1080" cy="200" opacity="0.4" r="1.5" />
               <circle cx="1350" cy="200" opacity="0.4" r="1.5" />
-              
+
               <circle cx="320" cy="400" opacity="0.4" r="2" />
               <circle cx="640" cy="400" opacity="0.4" r="2" />
               <circle cx="960" cy="400" opacity="0.4" r="2" />
               <circle cx="1280" cy="400" opacity="0.4" r="2" />
-              
+
               <circle cx="160" cy="600" opacity="0.5" r="2.5" />
               <circle cx="480" cy="600" opacity="0.5" r="2.5" />
               <circle cx="800" cy="600" opacity="0.5" r="2.5" />
               <circle cx="1120" cy="600" opacity="0.5" r="2.5" />
               <circle cx="1440" cy="600" opacity="0.5" r="2.5" />
             </g>
-            
+
             {/* Additional effect nodes with pulse animations */}
             <g className="transform-gpu" filter="url(#glow)">
               <circle className="animate-node-pulse-1" cx="480" cy="510" fill="var(--primary)" opacity="0.7" r="6" />
@@ -278,7 +278,7 @@ function Home() {
               <circle className="animate-node-pulse-2" cx="1080" cy="500" fill="var(--primary)" opacity="0.6" r="4" />
               <circle className="animate-node-pulse-3" cx="240" cy="300" fill="var(--primary)" opacity="0.6" r="4" />
             </g>
-            
+
             {/* Mathematical-looking patterns with enhanced visibility */}
             <g fill="none" stroke="var(--primary)" strokeOpacity="0.15" strokeWidth="1.5">
               <path className="transform-gpu animate-path-fade" d="M100,350 Q150,300 200,350 T300,350" />
@@ -287,7 +287,7 @@ function Home() {
               <path className="transform-gpu animate-path-fade-delayed" d="M400,250 Q450,200 500,250 T600,250" />
               <path className="transform-gpu animate-path-fade-delayed" d="M900,400 Q950,350 1000,400 T1100,400" />
             </g>
-            
+
             {/* Digital circuit-like pattern */}
             <g fill="none" stroke="var(--primary)" strokeLinecap="square" strokeOpacity="0.2" strokeWidth="1.5">
               <path className="transform-gpu animate-circuit-fade" d="M100,150 L180,150 L180,250 L280,250" />
@@ -297,7 +297,7 @@ function Home() {
               <path className="transform-gpu animate-circuit-fade-delayed" d="M700,500 L800,500 L800,600 L900,600" />
               <path className="transform-gpu animate-circuit-fade-delayed" d="M1200,350 L1200,450 L1300,450" />
             </g>
-            
+
             {/* Connection nodes for circuit patterns */}
             <g className="transform-gpu" fill="var(--primary)">
               <circle className="animate-node-pulse-1" cx="180" cy="150" opacity="0.3" r="3" />
@@ -311,7 +311,7 @@ function Home() {
               <circle className="animate-node-pulse-3" cx="1200" cy="450" opacity="0.3" r="3" />
             </g>
           </svg>
-          
+
           {/* Subtle gradient overlay */}
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/5 to-background/20" />
         </div>

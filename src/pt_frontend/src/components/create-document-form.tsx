@@ -1,13 +1,14 @@
+
 import {
   BlockTypeSelect,
   BoldItalicUnderlineToggles,
-  diffSourcePlugin,
   DiffSourceToggleWrapper,
-  headingsPlugin,
   ListsToggle,
   MDXEditor,
-  toolbarPlugin,
   UndoRedo,
+  diffSourcePlugin,
+  headingsPlugin,
+  toolbarPlugin,
 } from '@mdxeditor/editor';
 import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
@@ -24,15 +25,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Icon } from '@/components/ui/icon';
-
-import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
-
 import { projectIdSchema } from '@/schemas/entities';
 import { capitalizeFirstLetterValidator } from '@/schemas/form';
-
-import '@mdxeditor/editor/style.css';
+import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
 
 import type { FC } from 'react';
+
+import '@mdxeditor/editor/style.css';
 
 export const createDocumentFormSchema = z.object({
   content: z.string().min(1, {
@@ -63,7 +62,7 @@ export const CreateDocumentForm: FC<CreateDocumentFormProps> = ({
       projects: [projectIdNumber],
       title: '',
     },
-    onSubmit: async ({ value }) => {
+    onSubmit: ({ value }) => {
       onSubmit(value);
     },
   });

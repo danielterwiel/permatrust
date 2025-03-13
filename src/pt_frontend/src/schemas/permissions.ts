@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from 'zod';
 
 const documentPermissionSchema = z.union([
   z.object({ Share: z.null() }),
@@ -63,7 +63,6 @@ const workflowPermissionSchema = z.union([
   z.object({ Create: z.null() }),
   z.object({ Update: z.null() })
 ]);
-
 
 export const entityPermissionSchema = z.union([
   z.object({ User: userPermissionSchema }),

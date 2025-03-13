@@ -1,11 +1,10 @@
-import { diffSourcePlugin, headingsPlugin, MDXEditor } from '@mdxeditor/editor';
+import { MDXEditor, diffSourcePlugin, headingsPlugin } from '@mdxeditor/editor';
 import { createFileRoute } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { useEffect } from 'react';
 import { z } from 'zod';
 
 import { getDiffRevisionsOptions } from '@/api/queries';
-
 import { decodeUint8Array } from '@/utils/decode-uint8-array';
 
 const revisionSchema = z.object({
@@ -54,10 +53,6 @@ function RevisionDiff() {
   }, [revisions]);
 
   const [original, updated] = revisions;
-
-  if (!original || !updated) {
-    return <div> TODO: hoax</div>;
-  }
 
   const contentOriginal = decodeUint8Array(original.content);
   const contentUpdated = decodeUint8Array(updated.content);

@@ -21,7 +21,7 @@ export const Route = createFileRoute('/_initialized/login')({
     error: search?.error,
     redirect: search?.redirect,
   }),
-  beforeLoad: async ({ context, location }) => ({
+  beforeLoad: ({ context, location }) => ({
     authActor: context.actors.auth,
     getTitle: () => 'Login',
     location,
@@ -34,7 +34,7 @@ function Login() {
   const { authActor } = Route.useRouteContext();
   const search = Route.useSearch();
 
-  async function handleLogin() {
+  function handleLogin() {
     setIsAuthenticating(true);
     authActor.send({ type: 'LOGIN' });
   }

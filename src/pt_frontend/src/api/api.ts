@@ -1,15 +1,15 @@
-import { createActor } from '@/declarations/pt_backend/index';
-import { type ActorSubclass, HttpAgent } from '@dfinity/agent';
+import { HttpAgent } from '@dfinity/agent';
 
 import { createMutations } from '@/api/mutations';
-
+import { createActor } from '@/declarations/pt_backend/index';
 import { isAppError } from '@/utils/is-app-error';
 
 import type {
-  _SERVICE,
   AppError,
+  _SERVICE,
 } from '@/declarations/pt_backend/pt_backend.did';
 import type { CreateActorFn, Result, ResultHandler } from '@/types/api';
+import type { ActorSubclass } from '@dfinity/agent';
 import type { AuthClient } from '@dfinity/auth-client';
 
 const HOST = import.meta.env.PROD ? 'https://icp0.io' : 'http://localhost:8080';
@@ -30,15 +30,12 @@ export async function createAuthenticatedActorWrapper(
   canisterId: string,
   authClient: AuthClient,
 ): Promise<WrappedActorWithIndex> {
-  if (!authClient) {
-    throw new Error('AuthClient not set');
-  }
   const actor = await createAuthenticatedActor(
     canisterId,
     createActor,
     authClient,
   );
-  const wrappedActor = wrapActor(await wrapWithAuth(actor, authClient));
+  const wrappedActor = wrapActor(wrapWithAuth(actor, authClient));
   api = wrappedActor;
   createMutations();
   return wrappedActor;
@@ -46,7 +43,7 @@ export async function createAuthenticatedActorWrapper(
 
 async function createAuthenticatedActor(
   canisterId: string,
-  createActor: CreateActorFn,
+  createActorFn: CreateActorFn,
   authClient: AuthClient,
 ): Promise<ActorWithIndex> {
   const agent = await HttpAgent.create({
@@ -58,7 +55,7 @@ async function createAuthenticatedActor(
       throw new Error('Failed to fetch root key');
     });
   }
-  return createActor(canisterId, { agent }) as unknown as ActorWithIndex;
+  return createActorFn(canisterId, { agent }) as ActorWithIndex;
 }
 
 function handleResult<T>(
@@ -89,11 +86,10 @@ function wrapActor<T extends ActorWithIndex>(actor: T): WrappedActorWithIndex {
   for (const key in actor) {
     const method = actor[key];
     if (typeof method === 'function') {
-      wrappedActor[key] = (async (...args: unknown[]) => {
+      wrappedActor[key] = (async (...args: Array<T>) => {
         let handlers: ResultHandler<unknown> | undefined;
         const lastArg = args[args.length - 1];
         if (
-          lastArg &&
           typeof lastArg === 'object' &&
           ('onOk' in lastArg || 'onErr' in lastArg)
         ) {
@@ -109,15 +105,15 @@ function wrapActor<T extends ActorWithIndex>(actor: T): WrappedActorWithIndex {
   return wrappedActor as WrappedActorWithIndex;
 }
 
-async function wrapWithAuth<T extends ActorWithIndex>(
+function wrapWithAuth<T extends ActorWithIndex>(
   actor: T,
   authClient: AuthClient,
-): Promise<T> {
+): T {
   return new Proxy(actor, {
     get(target, prop, receiver) {
       const original = Reflect.get(target, prop, receiver);
       if (typeof original === 'function') {
-        return async (...args: unknown[]) => {
+        return async (...args: Array<T>) => {
           if (!(await authClient.isAuthenticated())) {
             throw new Error('User is not authenticated');
           }

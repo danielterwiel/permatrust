@@ -1,17 +1,10 @@
 import { useForm } from '@tanstack/react-form';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useCallback, useEffect, useState } from 'react';
-import ReactFlow, {
-  Background,
-  Controls,
-  type Edge,
-  type Node,
-  ReactFlowProvider,
-} from 'reactflow';
+import ReactFlow, { Background, Controls, ReactFlowProvider } from 'reactflow';
 import { z } from 'zod';
 
 import { mutations } from '@/api/mutations';
-
 import { Input } from '@/components/input';
 import { Loading } from '@/components/loading';
 import { Button } from '@/components/ui/button';
@@ -26,6 +19,8 @@ import {
 import { Icon } from '@/components/ui/icon';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+
+import type { Edge, Node } from 'reactflow';
 
 import 'reactflow/dist/style.css';
 
@@ -51,12 +46,12 @@ interface MachineConfig {
 
 interface StateConfig {
   on?: {
-    [event: string]: Transition | Transition[];
+    [event: string]: Array<Transition> | Transition;
   };
 }
 
 interface Transition {
-  actions?: string | string[];
+  actions?: Array<string> | string;
   target: string;
 }
 
@@ -129,19 +124,19 @@ const defaultGraphJson: MachineConfig = {
 function CreateWorkflow() {
   const { isPending: isSubmitting, mutate: createWorkflow } =
     mutations.useCreateWorkflow();
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [edges, setEdges] = useState<Edge[]>([]);
+  const [nodes, setNodes] = useState<Array<Node>>([]);
+  const [edges, setEdges] = useState<Array<Edge>>([]);
   const navigate = useNavigate();
 
   const generateGraphElements = useCallback(
     (
       machineConfig: MachineConfig,
     ): {
-      edges: Edge[];
-      nodes: Node[];
+      edges: Array<Edge>;
+      nodes: Array<Node>;
     } => {
-      const stateNodes: Node[] = [];
-      const stateEdges: Edge[] = [];
+      const stateNodes: Array<Node> = [];
+      const stateEdges: Array<Edge> = [];
 
       for (const [index, [stateId, state]] of Object.entries(
         machineConfig.states,
@@ -177,13 +172,13 @@ function CreateWorkflow() {
   );
 
   function generateWorkflowGraph(machineConfig: MachineConfig) {
-    const nodes = Object.keys(machineConfig.states);
+    const nodeStates = Object.keys(machineConfig.states);
     const stateIndexMap: { [state: string]: number } = {};
-    for (const [index, state] of nodes.entries()) {
+    for (const [index, state] of nodeStates.entries()) {
       stateIndexMap[state] = index;
     }
 
-    const edges: [number, number, string][] = [];
+    const edgeStates: Array<[number, number, string]> = [];
 
     for (const [stateId, state] of Object.entries(machineConfig.states)) {
       if (state.on) {
@@ -194,17 +189,15 @@ function CreateWorkflow() {
           for (const transition of transitionArray) {
             const sourceIndex = stateIndexMap[stateId];
             const targetIndex = stateIndexMap[transition.target];
-            if (sourceIndex !== undefined && targetIndex !== undefined) {
-              edges.push([sourceIndex, targetIndex, event]);
-            }
+            edgeStates.push([sourceIndex, targetIndex, event]);
           }
         }
       }
     }
 
     return {
-      edges,
-      nodes,
+      edges: edgeStates,
+      nodes: nodeStates,
     };
   }
 
@@ -213,7 +206,7 @@ function CreateWorkflow() {
       graph_json: JSON.stringify(defaultGraphJson, null, 2),
       name: '',
     },
-    onSubmit: async ({ value }) => {
+    onSubmit: ({ value }) => {
       try {
         const machineConfig: MachineConfig = JSON.parse(value.graph_json);
         const graphJsonObject = generateWorkflowGraph(machineConfig);

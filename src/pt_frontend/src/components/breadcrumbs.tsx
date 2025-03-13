@@ -16,9 +16,8 @@ export function Breadcrumbs() {
     .filter((match) => match.routeId !== '__root__')
     .map((match) => {
       const { context, pathname } = match;
-      return { path: pathname, title: context?.getTitle?.() };
-    })
-    .filter((item) => item !== null);
+      return { path: pathname, title: context.getTitle?.() };
+    });
 
   const breadcrumbs = filterDuplicates(crumbs, 'title');
 
@@ -26,16 +25,16 @@ export function Breadcrumbs() {
     <BreadcrumbBase className="pt-1">
       <BreadcrumbList>
         {breadcrumbs.map((crumb, index) => (
-          <BreadcrumbItem key={crumb?.path}>
+          <BreadcrumbItem key={crumb.path}>
             {index < breadcrumbs.length - 1 ? (
               <>
                 <BreadcrumbLink asChild>
-                  <Link to={crumb.path}>{crumb?.title}</Link>
+                  <Link to={crumb.path}>{crumb.title}</Link>
                 </BreadcrumbLink>
                 <BreadcrumbSeparator />
               </>
             ) : (
-              <BreadcrumbPage>{crumb?.title}</BreadcrumbPage>
+              <BreadcrumbPage>{crumb.title}</BreadcrumbPage>
             )}
           </BreadcrumbItem>
         ))}
@@ -44,7 +43,10 @@ export function Breadcrumbs() {
   );
 }
 
-function filterDuplicates<T extends object>(arr: T[], key: keyof T): T[] {
+function filterDuplicates<T extends object>(
+  arr: Array<T>,
+  key: keyof T,
+): Array<T> {
   const seen = new Set<T[keyof T]>();
   return arr.filter((obj) => {
     const value = obj[key];

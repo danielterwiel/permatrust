@@ -45,7 +45,7 @@ type Action =
 type ActionType = typeof _actionTypes;
 
 interface State {
-  toasts: ToasterToast[];
+  toasts: Array<ToasterToast>;
 }
 
 function genId() {
@@ -87,8 +87,8 @@ const reducer = (state: State, action: Action): State => {
       if (toastId) {
         addToRemoveQueue(toastId);
       } else {
-        for (const toast of state.toasts) {
-          addToRemoveQueue(toast.id);
+        for (const t of state.toasts) {
+          addToRemoveQueue(t.id);
         }
       }
 
@@ -97,9 +97,9 @@ const reducer = (state: State, action: Action): State => {
         toasts: state.toasts.map((t) =>
           t.id === toastId || toastId === undefined
             ? {
-                ...t,
-                open: false,
-              }
+              ...t,
+              open: false,
+            }
             : t,
         ),
       };
@@ -142,9 +142,9 @@ function dispatch(action: Action) {
 function toast({ ...props }: Toast) {
   const id = genId();
 
-  const update = (props: ToasterToast) =>
+  const update = (toastProps: ToasterToast) =>
     dispatch({
-      toast: { ...props, id },
+      toast: { ...toastProps, id },
       type: 'UPDATE_TOAST',
     });
   const dismiss = () => dispatch({ toastId: id, type: 'DISMISS_TOAST' });

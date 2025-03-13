@@ -1,8 +1,7 @@
 import { z } from 'zod';
 
-import { createFilter, createSort } from '@/utils/pagination';
-
 import { DEFAULT_PAGINATION } from '@/consts/pagination';
+import { createFilter, createSort } from '@/utils/pagination';
 
 import type {
   DocumentFilterField as ApiDocumentFilterField,
@@ -191,7 +190,7 @@ export function createEntityPaginationSchema(
         value: config.defaultFilterValue,
       }),
     ],
-  ] satisfies [ApiFilterCriteria[]];
+  ] satisfies [Array<ApiFilterCriteria>];
 
   // Create default sort
   const defaultSort = [

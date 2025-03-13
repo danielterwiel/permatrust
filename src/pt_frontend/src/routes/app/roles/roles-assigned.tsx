@@ -1,26 +1,22 @@
-import { usePagination } from '@/hooks/use-pagination';
 import { createFileRoute } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 
 import { listProjectMembersRolesOptions } from '@/api/queries/users';
-
 import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
 import { Link } from '@/components/link';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
-
-import { processPaginationInput } from '@/utils/pagination';
-
 import { ENTITY } from '@/consts/entities';
 import {
   FILTER_OPERATOR,
   FILTER_SORT_FIELDS,
   SORT_ORDER,
 } from '@/consts/pagination';
-
+import { usePagination } from '@/hooks/use-pagination';
 import { createEntityPaginationSchema } from '@/schemas/pagination';
 import { toNumberSchema } from '@/schemas/primitives';
+import { processPaginationInput } from '@/utils/pagination';
 
 import type {
   Role,
@@ -74,7 +70,7 @@ const RowActions = (row: Row<UserWithRoles>) => {
   return (
     <Link
       params={{
-        projectId: firstRole?.project_id.toString(),
+        projectId: firstRole.project_id.toString(),
       }}
       search={{
         userId: toNumberSchema.parse(row.original.user.id),
@@ -90,14 +86,14 @@ const RowActions = (row: Row<UserWithRoles>) => {
 function RolesAssigned() {
   const { assignedRoles, pagination, paginationMetaData } =
     Route.useLoaderData();
-  
-  const effectiveSort = pagination.sort?.length 
-    ? pagination.sort 
+
+  const effectiveSort = pagination.sort.length
+    ? pagination.sort
     : defaultPagination.sort;
-  
+
   const { onFilterChange, onSortChange, getPageChangeParams } = usePagination(
     pagination,
-    defaultPagination
+    defaultPagination,
   );
 
   return (

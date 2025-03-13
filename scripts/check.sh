@@ -16,8 +16,7 @@ fi
 # Run auto-fixes for linters
 if [ "$CI" = "true" ]; then
     echo "Running auto-fixes for linters..."
-    pnpm run --filter pt_frontend lint:eslint || handle_error "eslint auto-fix"
-    pnpm run --filter pt_frontend format:write || handle_error "biome format"
+    pnpm run --filter pt_frontend format || handle_error "eslint format/fix"
 fi
 
 # Check if fixes resolved all issues
@@ -29,5 +28,4 @@ echo "Running TypeScript typecheck..."
 pnpm run --filter pt_frontend typecheck || echo "TypeScript errors detected (expected during migration)"
 
 # Continue with other checks
-pnpm run --filter pt_frontend lint:biome || handle_error "biome lint"
-pnpm run --filter pt_frontend lint:eslint --no-fix || handle_error "eslint"
+pnpm run --filter pt_frontend lint || handle_error "eslint"

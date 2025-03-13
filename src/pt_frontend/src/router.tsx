@@ -1,7 +1,7 @@
-import { rootContext } from '@/context/root';
-import { routeTree } from '@/routeTree.gen';
 import { createRouter } from '@tanstack/react-router';
 
+import { rootContext } from '@/context/root';
+import { routeTree } from '@/routeTree.gen';
 import { parseSearch } from '@/utils/parse-search';
 import { stringifySearch } from '@/utils/stringify-search';
 

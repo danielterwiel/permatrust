@@ -1,6 +1,7 @@
-import { toast } from '@/hooks/use-toast';
+
 import { queryOptions } from '@tanstack/react-query';
 
+import { toast } from '@/hooks/use-toast';
 import { isAppError } from '@/utils/is-app-error';
 
 import type { ToastProps } from '@/components/ui/toast';
@@ -55,7 +56,7 @@ export function createQueryOptions<
 
     if (isAppError(error)) {
       // Handle AppError with appropriate message based on error type
-      const appError = error as AppError;
+      const appError = error;
       if ('Internal' in appError) {
         errorMessage = 'Internal server error. Please try again later.';
       } else if ('NotFound' in appError) {

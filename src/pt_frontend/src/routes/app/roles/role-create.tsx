@@ -1,30 +1,21 @@
 import { createFileRoute } from '@tanstack/react-router';
-import { zodSearchValidator } from '@tanstack/router-zod-adapter';
-import { z } from 'zod';
 
 import { getPermissionsOptions, getProjectOptions } from '@/api/queries';
-
 import { CreateRoleForm } from '@/components/create-role-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
-
-const roleCreateSearchSchema = z.object({
-  projectId: z.number(),
-});
+import { projectIdSchema } from '@/schemas/entities';
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/create',
 )({
-  validateSearch: zodSearchValidator(roleCreateSearchSchema),
-  loaderDeps: ({ search }) => ({
-    projectId: search.projectId,
-  }),
   beforeLoad: () => ({
     getTitle: () => 'Create role',
   }),
-  loader: async ({ context, deps }) => {
+  loader: async ({ context, params }) => {
+    const projectId = projectIdSchema.parse(params.projectId);
     const getProjectQuery = context.query.ensureQueryData(
-      getProjectOptions(deps.projectId),
+      getProjectOptions(projectId),
     );
     const getPermissionsQuery = context.query.ensureQueryData(
       getPermissionsOptions(),

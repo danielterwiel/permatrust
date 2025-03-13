@@ -1,13 +1,10 @@
-import { useLocalStorage } from '@/hooks/use-local-storage';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { mutations } from '@/api/mutations';
+import { CreateOrganizationForm } from '@/components/create-organization-form';
+import { useLocalStorage } from '@/hooks/use-local-storage';
 
-import {
-  CreateOrganizationForm,
-  type createOrganizationFormSchema,
-} from '@/components/create-organization-form';
-
+import type { createOrganizationFormSchema } from '@/components/create-organization-form';
 import type { z } from 'zod';
 
 export const Route = createFileRoute(
@@ -31,9 +28,7 @@ function CreateOrganization() {
   const { isPending: isSubmitting, mutate: createOrganization } =
     mutations.useCreateOrganization();
 
-  async function onSubmit(
-    values: z.infer<typeof createOrganizationFormSchema>,
-  ) {
+  function onSubmit(values: z.infer<typeof createOrganizationFormSchema>) {
     try {
       createOrganization(
         {

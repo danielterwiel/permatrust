@@ -9,7 +9,6 @@ import {
   PaginationEllipsis,
   PaginationItem,
 } from '@/components/ui/pagination';
-
 import { paginationSearchSchema } from '@/schemas/pagination';
 import { toNumberSchema } from '@/schemas/primitives';
 
@@ -35,7 +34,7 @@ export function Pagination({
 
   const matches = useMatches();
   const currentRoute = matches[matches.length - 1];
-  const search = currentRoute?.search || {};
+  const search = currentRoute.search || {};
 
   const { pagination: currentPagination } =
     paginationSearchSchema.parse(search);
@@ -45,7 +44,7 @@ export function Pagination({
     return null;
   }
 
-  const pageNumbers: ('ellipsis' | number)[] = [];
+  const pageNumbers: Array<'ellipsis' | number> = [];
 
   if (totalPages <= 5) {
     // Less than 5 total pages, show all pages
@@ -89,11 +88,11 @@ export function Pagination({
                   getPageChangeParams
                     ? getPageChangeParams(currentPage - 1)
                     : {
-                        pagination: {
-                          ...currentPagination,
-                          page_number: currentPage - 1,
-                        },
-                      }
+                      pagination: {
+                        ...currentPagination,
+                        page_number: currentPage - 1,
+                      },
+                    }
                 }
                 to=""
               >
@@ -120,11 +119,11 @@ export function Pagination({
                     getPageChangeParams
                       ? getPageChangeParams(pageNumber)
                       : {
-                          pagination: {
-                            ...currentPagination,
-                            page_number: pageNumber,
-                          },
-                        }
+                        pagination: {
+                          ...currentPagination,
+                          page_number: pageNumber,
+                        },
+                      }
                   }
                   to=""
                 >
@@ -142,11 +141,11 @@ export function Pagination({
                   getPageChangeParams
                     ? getPageChangeParams(currentPage + 1)
                     : {
-                        pagination: {
-                          ...currentPagination,
-                          page_number: currentPage + 1,
-                        },
-                      }
+                      pagination: {
+                        ...currentPagination,
+                        page_number: currentPage + 1,
+                      },
+                    }
                 }
                 to=""
               >

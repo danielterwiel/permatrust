@@ -1,4 +1,4 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router';
+import { Outlet, createFileRoute } from '@tanstack/react-router';
 
 import { Breadcrumbs } from '@/components/breadcrumbs';
 import { Sidebar } from '@/components/sidebar';
@@ -7,7 +7,7 @@ import { Toaster } from '@/components/ui/toaster';
 
 export const Route = createFileRoute('/_initialized/_authenticated/_onboarded')(
   {
-    loader: async ({ context }) => {
+    loader: ({ context }) => {
       const authActor = context.actors.auth;
       return {
         authActor,

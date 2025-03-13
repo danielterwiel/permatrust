@@ -1,4 +1,4 @@
-# permatrust
+# Permatrust
 
 ## Getting started
 

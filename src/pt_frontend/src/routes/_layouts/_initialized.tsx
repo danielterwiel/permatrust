@@ -1,8 +1,9 @@
+import { Outlet, createFileRoute } from '@tanstack/react-router';
+
 import { authActor } from '@/machines/auth-machine';
-import { createFileRoute, Outlet } from '@tanstack/react-router';
 
 export const Route = createFileRoute('/_initialized')({
-  beforeLoad: async ({ context }) => {
+  beforeLoad: ({ context }) => {
     context.actors.auth = authActor;
     return {
       getTitle: () => 'Home',

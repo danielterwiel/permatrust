@@ -1,11 +1,9 @@
-import { usePagination } from '@/hooks/use-pagination';
 import { createFileRoute } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { useState } from 'react';
 
 import { listDocumentsOptions } from '@/api/queries/documents';
 import { getProjectsByOrganizationOptions } from '@/api/queries/projects';
-
 import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
 import { Link } from '@/components/link';
@@ -26,10 +24,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-
-import { getActiveOrganizationId } from '@/utils/get-active-organizationId';
-import { processPaginationInput } from '@/utils/pagination';
-
 import { ENTITY } from '@/consts/entities';
 import {
   DEFAULT_PAGINATION,
@@ -37,8 +31,10 @@ import {
   FILTER_SORT_FIELDS,
   SORT_ORDER,
 } from '@/consts/pagination';
-
+import { usePagination } from '@/hooks/use-pagination';
 import { createEntityPaginationSchema } from '@/schemas/pagination';
+import { getActiveOrganizationId } from '@/utils/get-active-organizationId';
+import { processPaginationInput } from '@/utils/pagination';
 
 import type {
   Document,
@@ -117,7 +113,7 @@ function Documents() {
     Route.useLoaderData();
   const [selectedProjectId, setSelectedProjectId] = useState<string>();
 
-  const effectiveSort = pagination.sort?.length
+  const effectiveSort = pagination.sort.length
     ? pagination.sort
     : documentsPagination.sort;
 

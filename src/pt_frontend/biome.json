@@ -20,7 +20,7 @@
         "useDefaultParameterLast": "error",
         "useEnumInitializers": "error",
         "useSelfClosingElements": "error",
-        "useShorthandArrayType": "error",
+        "useShorthandArrayType": "off",
         "useTemplate": "error",
         "useWhile": "error"
       },

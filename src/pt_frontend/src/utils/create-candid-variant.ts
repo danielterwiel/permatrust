@@ -6,7 +6,7 @@
 export type VariantRecord<T extends string> = { [K in T]: { [P in K]: null } };
 
 export const createCandidVariant = <T extends string>(
-  variantNames: readonly T[],
+  variantNames: ReadonlyArray<T>,
 ) => {
   const result = {} as VariantRecord<T>;
 

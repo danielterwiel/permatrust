@@ -1,16 +1,10 @@
-import { permissionsToItems } from '@/utils';
 import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
 
 import { mutations } from '@/api/mutations';
-
 import { Input } from '@/components/input';
-import { Link } from '@/components/link';
 import { Loading } from '@/components/loading';
-import {
-  type Item,
-  MultiSelectTransfer,
-} from '@/components/multi-select-transfer';
+import { MultiSelectTransfer } from '@/components/multi-select-transfer';
 import { Button } from '@/components/ui/button';
 import {
   FormControl,
@@ -20,13 +14,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
-
+import { projectIdSchema } from '@/schemas/entities';
+import { capitalizeFirstLetterValidator } from '@/schemas/form';
+import { permissionsToItems } from '@/utils';
 import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
 import { createPermissionVariant } from '@/utils/variants/permissions';
 
-import { projectIdSchema } from '@/schemas/entities';
-import { capitalizeFirstLetterValidator } from '@/schemas/form';
-
+import type { MultiSelectItem } from '@/components/multi-select-transfer';
 import type {
   Permission,
   Project,
@@ -40,7 +34,7 @@ export const createRoleFormSchema = z.object({
 });
 
 type CreateRoleFormProps = {
-  permissions: Permission[];
+  permissions: Array<Permission>;
   project: Project;
 };
 
@@ -48,8 +42,8 @@ type FormValues = {
   description?: string;
   name: string;
   permissions: {
-    available: Item[];
-    selected: Item[];
+    available: Array<MultiSelectItem>;
+    selected: Array<MultiSelectItem>;
   };
 };
 
@@ -68,7 +62,7 @@ export function CreateRoleForm({ permissions, project }: CreateRoleFormProps) {
       },
     },
     onSubmit: async ({ value }) => {
-      const permissions = value.permissions.selected.map((p) => {
+      const selectedPermissions = value.permissions.selected.map((p) => {
         const [entityName, permission] = p.id.split('::');
         if (!entityName || !permission) {
           throw new Error('Entity not found');
@@ -83,27 +77,30 @@ export function CreateRoleForm({ permissions, project }: CreateRoleFormProps) {
       await createRole({
         description: value.description ? [value.description] : [],
         name: value.name,
-        permissions,
+        permissions: selectedPermissions,
         project_id: projectIdParsed,
       });
     },
   });
 
-  const handleTransfer = (items: Item[], direction: 'left' | 'right') => {
+  const handleTransfer = (
+    items: Array<MultiSelectItem>,
+    direction: 'left' | 'right',
+  ) => {
     form.setFieldValue('permissions', (prev) => {
       const newAvailable =
         direction === 'left'
           ? [...prev.available, ...items]
           : prev.available.filter(
-              (item) => !items.find((i) => i.id === item.id),
-            );
+            (item) => !items.find((i) => i.id === item.id),
+          );
 
       const newSelected =
         direction === 'right'
           ? [...prev.selected, ...items]
           : prev.selected.filter(
-              (item) => !items.find((i) => i.id === item.id),
-            );
+            (item) => !items.find((i) => i.id === item.id),
+          );
 
       return {
         available: newAvailable,
@@ -112,12 +109,7 @@ export function CreateRoleForm({ permissions, project }: CreateRoleFormProps) {
     });
   };
 
-  return !project ? (
-    <div>
-      No projects found to assign roles to. First{' '}
-      <Link to="/projects/create">create a project</Link>
-    </div>
-  ) : (
+  return (
     <form
       className="space-y-8"
       onSubmit={(e) => {

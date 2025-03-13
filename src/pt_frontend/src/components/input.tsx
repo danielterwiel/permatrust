@@ -1,3 +1,4 @@
+
 import { forwardRef, memo, useCallback, useEffect, useRef, useState } from 'react';
 
 import { Icon } from '@/components/ui/icon';
@@ -124,8 +125,8 @@ const InputComponent = forwardRef(function Input(
   // Only calculate visibility class if we're showing the clear button
   const clearButtonVisibilityClass = shouldRenderClearButton
     ? (isFocused || isHovered || isButtonFocused
-        ? 'opacity-100 visible'
-        : 'opacity-0 invisible')
+      ? 'opacity-100 visible'
+      : 'opacity-0 invisible')
     : '';
 
   return (

@@ -1,13 +1,14 @@
+
 import {
   BlockTypeSelect,
   BoldItalicUnderlineToggles,
-  diffSourcePlugin,
   DiffSourceToggleWrapper,
-  headingsPlugin,
   ListsToggle,
   MDXEditor,
-  toolbarPlugin,
   UndoRedo,
+  diffSourcePlugin,
+  headingsPlugin,
+  toolbarPlugin,
 } from '@mdxeditor/editor';
 import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
@@ -23,11 +24,9 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Icon } from '@/components/ui/icon';
-
+import { projectIdSchema } from '@/schemas/entities';
 import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
 import { decodeUint8Array } from '@/utils/decode-uint8-array';
-
-import { projectIdSchema } from '@/schemas/entities';
 
 import type { Revision } from '@/declarations/pt_backend/pt_backend.did';
 import type { FC } from 'react';
@@ -53,14 +52,13 @@ export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
   revision,
 }) => {
   const content = decodeUint8Array(revision?.content);
-  const markdown = content ?? '';
 
   const form = useForm({
     defaultValues: {
-      content: markdown,
+      content,
       project_id: projectIdSchema.parse(projectId),
     },
-    onSubmit: async ({ value }) => {
+    onSubmit: ({ value }) => {
       onSubmit(value);
     },
   });

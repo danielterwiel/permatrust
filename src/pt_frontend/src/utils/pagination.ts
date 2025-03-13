@@ -1,6 +1,5 @@
 import { entity } from '@/consts/entities';
 import { filterField, filterOperator, sortOrder } from '@/consts/pagination';
-
 import {
   filterCriteriaSchema,
   paginationInputSchema,
@@ -141,9 +140,6 @@ export function extractFilterFieldName(
 
   // Get field object for this entity
   const fieldObj = validated.field[entityKey as keyof typeof validated.field];
-  if (!fieldObj) {
-    throw new Error(`No field found for entity "${entityKey}"`);
-  }
 
   // Get field name (first and only key in the field object)
   const fieldName = Object.keys(fieldObj)[0];

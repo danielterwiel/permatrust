@@ -1,4 +1,3 @@
-import { useMediaQuery } from '@/hooks/use-media-query';
 import { Grip } from 'lucide-react';
 import * as React from 'react';
 
@@ -14,9 +13,9 @@ import {
 } from '@/components/ui/command';
 import { Icon } from '@/components/ui/icon';
 import { Label } from '@/components/ui/label';
+import { useMediaQuery } from '@/hooks/use-media-query';
 
-// TODO: rename to MultiSelectItem
-export type Item = {
+export type MultiSelectItem = {
   group: string;
   id: string;
   label: string;
@@ -26,7 +25,7 @@ type ListContainerProps = {
   handleDragOver: (e: React.DragEvent<HTMLDivElement>) => void;
   handleDragStart: (
     e: React.DragEvent<HTMLDivElement>,
-    item: Item,
+    item: MultiSelectItem,
     source: 'available' | 'selected',
     selectedSet: Set<string>,
   ) => void;
@@ -36,17 +35,23 @@ type ListContainerProps = {
   ) => void;
   handleSelect: (itemId: string, isAvailable: boolean) => void;
   isAvailable: boolean;
-  items: Item[];
-  onTransfer: (items: Item[], direction: 'left' | 'right') => void;
+  items: Array<MultiSelectItem>;
+  onTransfer: (
+    items: Array<MultiSelectItem>,
+    direction: 'left' | 'right',
+  ) => void;
   selected: Set<string>;
   title: string;
 };
 
 type MultiSelectTransferProps = {
-  availableItems: Item[];
+  availableItems: Array<MultiSelectItem>;
   description: string;
-  onTransfer: (selectedItems: Item[], direction: 'left' | 'right') => void;
-  selectedItems: Item[];
+  onTransfer: (
+    selectedItems: Array<MultiSelectItem>,
+    direction: 'left' | 'right',
+  ) => void;
+  selectedItems: Array<MultiSelectItem>;
   title: string;
 };
 
@@ -67,12 +72,10 @@ const ListContainer = React.memo(
     }, [items, isAvailable, onTransfer]);
 
     const groupedItems = React.useMemo(() => {
-      const map: Record<string, Item[]> = {};
+      const map: Record<string, Array<MultiSelectItem>> = {};
       for (const item of items) {
-        if (!map[item.group]) {
-          map[item.group] = [];
-        }
-        map[item.group]?.push(item);
+        map[item.group] = [];
+        map[item.group].push(item);
       }
       return map;
     }, [items]);
@@ -181,7 +184,7 @@ export const MultiSelectTransfer: React.FC<MultiSelectTransferProps> = ({
   const handleDragStart = React.useCallback(
     (
       e: React.DragEvent<HTMLDivElement>,
-      item: Item,
+      item: MultiSelectItem,
       source: 'available' | 'selected',
       selectedSet: Set<string>,
     ) => {
@@ -189,7 +192,7 @@ export const MultiSelectTransfer: React.FC<MultiSelectTransferProps> = ({
 
       const sourceItems =
         source === 'available' ? availableItems : selectedItems;
-      let itemsToDrag: Item[] = [];
+      let itemsToDrag: Array<MultiSelectItem> = [];
 
       if (selectedSet.size > 1 && selectedSet.has(item.id)) {
         itemsToDrag = sourceItems.filter((srcItem) =>
@@ -231,7 +234,7 @@ export const MultiSelectTransfer: React.FC<MultiSelectTransferProps> = ({
       const eventTarget = e.currentTarget;
 
       const handleDragEnd = () => {
-        if (dragPreview?.parentNode) {
+        if (dragPreview.parentNode) {
           dragPreview.parentNode.removeChild(dragPreview);
         }
 

@@ -1,19 +1,24 @@
-import { createFileRoute, Outlet } from '@tanstack/react-router';
+
+import { Outlet, createFileRoute } from '@tanstack/react-router';
 
 import { Link } from '@/components/link';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { projectIdSchema } from '@/schemas/entities';
 
+import type { ProjectId } from '@/types/entities';
 import type { ReactNode } from 'react';
 
 const TabsLinkTrigger = ({
   children,
   href,
+  projectId,
 }: {
   children: ReactNode;
   href: 'assign' | 'assigned' | 'create' | 'list';
+  projectId: ProjectId;
 }) => (
   <TabsTrigger asChild value={href}>
-    <Link href={href}>{children}</Link>
+    <Link href={`/projects/${projectId}/roles/${href}`}>{children}</Link>
   </TabsTrigger>
 );
 
@@ -30,13 +35,24 @@ export const Route = createFileRoute(
 });
 
 function Roles() {
+  const params = Route.useParams();
+  const projectId = projectIdSchema.parse(params.projectId);
+
   return (
     <Tabs defaultValue="list">
       <TabsList className="w-full justify-start">
-        <TabsLinkTrigger href="assigned">Assigned</TabsLinkTrigger>
-        <TabsLinkTrigger href="assign">Assign</TabsLinkTrigger>
-        <TabsLinkTrigger href="list">Roles</TabsLinkTrigger>
-        <TabsLinkTrigger href="create">Create</TabsLinkTrigger>
+        <TabsLinkTrigger projectId={projectId} href="assigned">
+          Assigned
+        </TabsLinkTrigger>
+        <TabsLinkTrigger projectId={projectId} href="assign">
+          Assign
+        </TabsLinkTrigger>
+        <TabsLinkTrigger projectId={projectId} href="list">
+          Roles
+        </TabsLinkTrigger>
+        <TabsLinkTrigger projectId={projectId} href="create">
+          Create
+        </TabsLinkTrigger>
       </TabsList>
       <Outlet />
     </Tabs>

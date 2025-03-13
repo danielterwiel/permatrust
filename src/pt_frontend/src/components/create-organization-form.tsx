@@ -1,3 +1,4 @@
+
 import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
 
@@ -13,10 +14,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Icon } from '@/components/ui/icon';
-
-import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
-
 import { capitalizeFirstLetterValidator } from '@/schemas/form';
+import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
 
 import type { FC } from 'react';
 
@@ -39,7 +38,7 @@ export const CreateOrganizationForm: FC<CreateOrganizationFormProps> = ({
     defaultValues: {
       name: '',
     },
-    onSubmit: async ({ value }) => {
+    onSubmit: ({ value }) => {
       onSubmit(value);
     },
   });

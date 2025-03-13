@@ -1,11 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { getProjectRolesOptions } from '@/api/queries/permissions';
-
 import { RolesList } from '@/components/roles-list';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
-
 import { projectIdSchema } from '@/schemas/entities';
 
 export const Route = createFileRoute(

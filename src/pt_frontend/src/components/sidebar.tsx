@@ -1,7 +1,8 @@
-import { Link } from "@tanstack/react-router";
 
-import { Button } from "@/components/ui/button";
-import { Icon } from "@/components/ui/icon";
+import { Link } from '@tanstack/react-router';
+
+import { Button } from '@/components/ui/button';
+import { Icon } from '@/components/ui/icon';
 import {
   Sidebar as SidebarBase,
   SidebarContent,
@@ -12,24 +13,24 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/components/ui/sidebar";
+} from '@/components/ui/sidebar';
 
-import type { authActor } from "@/machines/auth-machine";
-import type { FC } from "react";
+import type { authActor as AuthActor } from '@/machines/auth-machine';
+import type { FC } from 'react';
 
-type SidebarProps = { authActor: typeof authActor };
+type SidebarProps = { authActor: typeof AuthActor };
 
 export const Sidebar: FC<SidebarProps> = ({ authActor }) => {
   const items = [
-    ["/organizations", "Organizations", "building-outline"],
-    ["/projects", "Projects", "briefcase-outline"],
-    ["/documents", "Documents", "files-outline"],
-    ["/users", "Users", "users-outline"],
-    ["/workflows", "Workflows", "file-orientation-outline"],
+    ['/organizations', 'Organizations', 'building-outline'],
+    ['/projects', 'Projects', 'briefcase-outline'],
+    ['/documents', 'Documents', 'files-outline'],
+    ['/users', 'Users', 'users-outline'],
+    ['/workflows', 'Workflows', 'file-orientation-outline'],
   ] as const;
 
   function logout() {
-    authActor.send({ type: "LOGOUT" });
+    authActor.send({ type: 'LOGOUT' });
   }
 
   return (
@@ -50,7 +51,7 @@ export const Sidebar: FC<SidebarProps> = ({ authActor }) => {
                           // exact: to === '.',
                         }
                       }
-                      activeProps={{ className: "font-bold" }}
+                      activeProps={{ className: 'font-bold' }}
                       className="block py-2 px-3 text-nowrap"
                       preload="intent"
                       to={to}

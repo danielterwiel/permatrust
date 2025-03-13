@@ -18,7 +18,7 @@ export const capitalizeFirstLetterValidator = ({
   value,
   fieldApi,
 }: {
-  fieldApi: { setValue: (value: string) => void };
+  fieldApi: { setValue: (val: string) => void };
   value: string;
 }) => {
   if (!value) return undefined;
