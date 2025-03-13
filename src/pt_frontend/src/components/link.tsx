@@ -1,11 +1,11 @@
 
 import {  Link as RouterLink } from '@tanstack/react-router';
+import type { ReactNode } from 'react';
 
 import {  buttonVariants } from '@/components/ui/button';
-
 import type { ButtonProps } from '@/components/ui/button';
+
 import type { LinkProps } from '@tanstack/react-router';
-import type { ReactNode } from 'react';
 
 type CustomLinkProps = Omit<LinkProps, 'className'> & {
   children: ReactNode;

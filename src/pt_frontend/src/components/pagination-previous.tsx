@@ -1,12 +1,12 @@
 
 import { ChevronLeftIcon } from '@radix-ui/react-icons';
+import type * as React from 'react';
+
+import type { PaginationSearchParams } from '@/schemas/pagination';
+import { cn } from '@/utils/cn';
 
 import { Link } from '@/components/link';
 import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/utils/cn';
-
-import type { PaginationSearchParams } from '@/schemas/pagination';
-import type * as React from 'react';
 
 interface PaginationPreviousProps
   extends Omit<React.ComponentProps<typeof Link>, 'search'> {

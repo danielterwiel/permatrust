@@ -1,6 +1,8 @@
 import { Grip } from 'lucide-react';
 import * as React from 'react';
 
+import { useMediaQuery } from '@/hooks/use-media-query';
+
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -13,7 +15,6 @@ import {
 } from '@/components/ui/command';
 import { Icon } from '@/components/ui/icon';
 import { Label } from '@/components/ui/label';
-import { useMediaQuery } from '@/hooks/use-media-query';
 
 export type MultiSelectItem = {
   group: string;

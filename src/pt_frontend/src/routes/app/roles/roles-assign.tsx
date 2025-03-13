@@ -10,6 +10,15 @@ import {
   getProjectMembersRolesOptions,
   getProjectRolesOptions,
 } from '@/api/queries/permissions';
+import { useToast } from '@/hooks/use-toast';
+import {
+  projectIdSchema,
+  roleIdSchema,
+  userIdSchema,
+} from '@/schemas/entities';
+import { cn } from '@/utils/cn';
+import { createFilter } from '@/utils/pagination';
+
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -32,20 +41,13 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
+
 import { ENTITY } from '@/consts/entities';
 import {
   DEFAULT_PAGINATION,
   FILTER_OPERATOR,
   FILTER_SORT_FIELDS,
 } from '@/consts/pagination';
-import { useToast } from '@/hooks/use-toast';
-import {
-  projectIdSchema,
-  roleIdSchema,
-  userIdSchema,
-} from '@/schemas/entities';
-import { cn } from '@/utils/cn';
-import { createFilter } from '@/utils/pagination';
 
 import type {
   PaginationInput,

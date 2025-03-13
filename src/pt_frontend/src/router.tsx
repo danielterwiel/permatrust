@@ -1,9 +1,10 @@
 import { createRouter } from '@tanstack/react-router';
 
-import { rootContext } from '@/context/root';
-import { routeTree } from '@/routeTree.gen';
 import { parseSearch } from '@/utils/parse-search';
 import { stringifySearch } from '@/utils/stringify-search';
+
+import { rootContext } from '@/context/root';
+import { routeTree } from '@/routeTree.gen';
 
 export const router = createRouter({
   context: rootContext,

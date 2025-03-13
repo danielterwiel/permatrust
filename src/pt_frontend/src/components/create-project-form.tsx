@@ -1,6 +1,10 @@
 
 import { useForm } from '@tanstack/react-form';
+import type { FC } from 'react';
 import { z } from 'zod';
+
+import { capitalizeFirstLetterValidator } from '@/schemas/form';
+import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
 
 import { Input } from '@/components/input';
 import { Loading } from '@/components/loading';
@@ -14,10 +18,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Icon } from '@/components/ui/icon';
-import { capitalizeFirstLetterValidator } from '@/schemas/form';
-import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
-
-import type { FC } from 'react';
 
 export const createProjectFormSchema = z.object({
   name: z.string().min(2, {

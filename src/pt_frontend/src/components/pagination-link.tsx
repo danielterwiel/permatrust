@@ -1,10 +1,11 @@
 
-import { Link } from '@/components/link';
-import { buttonVariants } from '@/components/ui/button';
-import { cn } from '@/utils/cn';
+import type * as React from 'react';
 
 import type { PaginationSearchParams } from '@/schemas/pagination';
-import type * as React from 'react';
+import { cn } from '@/utils/cn';
+
+import { Link } from '@/components/link';
+import { buttonVariants } from '@/components/ui/button';
 
 interface PaginationLinkProps
   extends Omit<React.ComponentProps<typeof Link>, 'search'> {

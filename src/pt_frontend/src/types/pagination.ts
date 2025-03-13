@@ -1,14 +1,16 @@
 import type {
-  filterField,
-  filterOperator,
-  sortOrder,
-} from '@/consts/pagination';
-import type {
   filterCriteriaSchema,
   filterFieldSchema,
   paginationInputSchema,
   sortCriteriaSchema,
 } from '@/schemas/pagination';
+
+import type {
+  filterField,
+  filterOperator,
+  sortOrder,
+} from '@/consts/pagination';
+
 import type { EntityName } from '@/types/entities';
 import type { z } from 'zod';
 

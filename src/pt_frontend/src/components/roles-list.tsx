@@ -16,9 +16,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { permissionsToItems } from '@/utils';
 
 import type { Role } from '@/declarations/pt_backend/pt_backend.did';
+
+import { permissionsToItems } from '@/utils';
 
 type RoleListProps = {
   roles: Array<Role>;

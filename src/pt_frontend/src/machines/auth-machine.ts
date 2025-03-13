@@ -1,17 +1,19 @@
 import { assign, createActor, fromPromise, log, setup } from 'xstate';
 
-import { createAuthenticatedActorWrapper } from '@/api';
 import { getOrganizationsOptions } from '@/api/queries/organizations';
 import { getUserOptions } from '@/api/queries/users';
 import { queryClient } from '@/api/query-client';
-import { Auth } from '@/auth';
+
 import { DEFAULT_PAGINATION } from '@/consts/pagination';
-import { router } from '@/router';
 
 import type {
   Organization,
   User,
 } from '@/declarations/pt_backend/pt_backend.did';
+
+import { createAuthenticatedActorWrapper } from '@/api';
+import { Auth } from '@/auth';
+import { router } from '@/router';
 
 const canisterIdPtBackend = process.env.CANISTER_ID_PT_BACKEND as string;
 

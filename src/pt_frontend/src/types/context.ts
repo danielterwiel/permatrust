@@ -1,5 +1,6 @@
-import type { User } from '@/declarations/pt_backend/pt_backend.did';
 import type { authActor } from '@/machines/auth-machine';
+
+import type { User } from '@/declarations/pt_backend/pt_backend.did';
 import type { QueryClient } from '@tanstack/react-query';
 
 export type RootRouteContext = {

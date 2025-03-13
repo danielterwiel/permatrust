@@ -1,8 +1,9 @@
-import { api } from '@/api';
 import { createQueryOptions } from '@/utils/create-query-options';
 
 import type { PaginationInput } from '@/declarations/pt_backend/pt_backend.did';
 import type { OrganizationId } from '@/types/entities';
+
+import { api } from '@/api';
 
 export const getProjectOptions = (id: number) =>
   createQueryOptions({

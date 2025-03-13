@@ -1,13 +1,14 @@
 
 import { useQuery } from '@tanstack/react-query';
+import type * as React from 'react';
 
 import type { ToastProps } from '@/components/ui/toast';
+
 import type {
   QueryKey,
   UseQueryOptions,
   UseQueryResult,
 } from '@tanstack/react-query';
-import type * as React from 'react';
 
 // Options that can be passed to the hook
 type ExtendedHookOptions<

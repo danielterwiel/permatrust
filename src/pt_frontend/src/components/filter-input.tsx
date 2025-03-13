@@ -1,6 +1,10 @@
 
 import { useForm } from '@tanstack/react-form';
+import type { ComponentProps } from 'react';
 import { z } from 'zod';
+
+import { filterCriteriaSchema } from '@/schemas/pagination';
+import { extractFilterFieldName } from '@/utils/pagination';
 
 import { Input } from '@/components/input';
 import {
@@ -9,11 +13,8 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { filterCriteriaSchema } from '@/schemas/pagination';
-import { extractFilterFieldName } from '@/utils/pagination';
 
 import type { FilterCriteria } from '@/declarations/pt_backend/pt_backend.did';
-import type { ComponentProps } from 'react';
 
 type FilterProps = Omit<ComponentProps<typeof Input>, 'onChange'> & {
   filterCriteria: FilterCriteria;

@@ -1,7 +1,8 @@
 import { z } from 'zod';
 
-import { DEFAULT_PAGINATION } from '@/consts/pagination';
 import { createFilter, createSort } from '@/utils/pagination';
+
+import { DEFAULT_PAGINATION } from '@/consts/pagination';
 
 import type {
   DocumentFilterField as ApiDocumentFilterField,

@@ -2,9 +2,10 @@ import { MDXEditor, headingsPlugin } from '@mdxeditor/editor';
 import { createFileRoute } from '@tanstack/react-router';
 
 import { getRevisionOptions } from '@/api/queries/revisions';
+import { revisionIdSchema } from '@/schemas/entities';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
-import { revisionIdSchema } from '@/schemas/entities';
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/$revisionId',

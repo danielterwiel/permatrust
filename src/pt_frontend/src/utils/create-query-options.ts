@@ -1,13 +1,14 @@
 
 import { queryOptions } from '@tanstack/react-query';
+import type * as React from 'react';
 
 import { toast } from '@/hooks/use-toast';
 import { isAppError } from '@/utils/is-app-error';
 
 import type { ToastProps } from '@/components/ui/toast';
+
 import type { AppError } from '@/declarations/pt_backend/pt_backend.did';
 import type { QueryKey, UseQueryOptions } from '@tanstack/react-query';
-import type * as React from 'react';
 
 // Create a type for options with our custom properties
 type QueryOptionsWithErrorHandler<

@@ -1,9 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { getUserOptions } from '@/api/queries/users';
+import { formatUserName } from '@/utils/format-user-name';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
-import { formatUserName } from '@/utils/format-user-name';
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/users/$userId',

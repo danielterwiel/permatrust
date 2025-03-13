@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { mutations } from '@/api/mutations';
-import { CreateDocumentForm } from '@/components/create-document-form';
 import { projectIdSchema } from '@/schemas/entities';
 
+import { CreateDocumentForm } from '@/components/create-document-form';
 import type { createDocumentFormSchema } from '@/components/create-document-form';
+
 import type { z } from 'zod';
 
 export const Route = createFileRoute(

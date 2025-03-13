@@ -1,4 +1,5 @@
 import type { entity } from '@/consts/entities';
+
 import type {
   Document,
   Organization,

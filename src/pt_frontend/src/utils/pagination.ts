@@ -1,10 +1,11 @@
-import { entity } from '@/consts/entities';
-import { filterField, filterOperator, sortOrder } from '@/consts/pagination';
 import {
   filterCriteriaSchema,
   paginationInputSchema,
   sortCriteriaSchema,
 } from '@/schemas/pagination';
+
+import { entity } from '@/consts/entities';
+import { filterField, filterOperator, sortOrder } from '@/consts/pagination';
 
 import type {
   FilterCriteria as ApiFilterCriteria,

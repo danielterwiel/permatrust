@@ -1,12 +1,13 @@
 
 import { Outlet, createFileRoute } from '@tanstack/react-router';
+import type { ReactNode } from 'react';
+
+import { projectIdSchema } from '@/schemas/entities';
 
 import { Link } from '@/components/link';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { projectIdSchema } from '@/schemas/entities';
 
 import type { ProjectId } from '@/types/entities';
-import type { ReactNode } from 'react';
 
 const TabsLinkTrigger = ({
   children,

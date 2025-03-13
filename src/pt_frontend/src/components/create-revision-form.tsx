@@ -11,7 +11,12 @@ import {
   toolbarPlugin,
 } from '@mdxeditor/editor';
 import { useForm } from '@tanstack/react-form';
+import type { FC } from 'react';
 import { z } from 'zod';
+
+import { projectIdSchema } from '@/schemas/entities';
+import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
+import { decodeUint8Array } from '@/utils/decode-uint8-array';
 
 import { Loading } from '@/components/loading';
 import { Button } from '@/components/ui/button';
@@ -24,12 +29,8 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Icon } from '@/components/ui/icon';
-import { projectIdSchema } from '@/schemas/entities';
-import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
-import { decodeUint8Array } from '@/utils/decode-uint8-array';
 
 import type { Revision } from '@/declarations/pt_backend/pt_backend.did';
-import type { FC } from 'react';
 
 export const createRevisionFormSchema = z.object({
   content: z.string().min(1, {

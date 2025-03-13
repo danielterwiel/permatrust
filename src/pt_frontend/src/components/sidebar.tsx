@@ -1,5 +1,8 @@
 
 import { Link } from '@tanstack/react-router';
+import type { FC } from 'react';
+
+import type { authActor as AuthActor } from '@/machines/auth-machine';
 
 import { Button } from '@/components/ui/button';
 import { Icon } from '@/components/ui/icon';
@@ -14,9 +17,6 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar';
-
-import type { authActor as AuthActor } from '@/machines/auth-machine';
-import type { FC } from 'react';
 
 type SidebarProps = { authActor: typeof AuthActor };
 

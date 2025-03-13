@@ -1,9 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { getWorkflowOptions, getWorkflowStateOptions } from '@/api/queries';
+import { workflowIdSchema } from '@/schemas/entities';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
-import { workflowIdSchema } from '@/schemas/entities';
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/workflows/$workflowId/',

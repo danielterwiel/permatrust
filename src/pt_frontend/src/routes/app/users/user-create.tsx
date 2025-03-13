@@ -1,9 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { mutations } from '@/api/mutations';
-import { CreateUserForm } from '@/components/create-user-form';
 
+import { CreateUserForm } from '@/components/create-user-form';
 import type { createUserFormSchema } from '@/components/create-user-form';
+
 import type { z } from 'zod';
 
 export const Route = createFileRoute(

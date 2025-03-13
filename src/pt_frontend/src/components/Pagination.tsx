@@ -1,5 +1,8 @@
 import { useMatches } from '@tanstack/react-router';
 
+import { paginationSearchSchema } from '@/schemas/pagination';
+import { toNumberSchema } from '@/schemas/primitives';
+
 import { PaginationLink } from '@/components/pagination-link';
 import { PaginationNext } from '@/components/pagination-next';
 import { PaginationPrevious } from '@/components/pagination-previous';
@@ -9,8 +12,6 @@ import {
   PaginationEllipsis,
   PaginationItem,
 } from '@/components/ui/pagination';
-import { paginationSearchSchema } from '@/schemas/pagination';
-import { toNumberSchema } from '@/schemas/primitives';
 
 import type { PaginationMetadata } from '@/declarations/pt_backend/pt_backend.did';
 

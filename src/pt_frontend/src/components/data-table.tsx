@@ -4,7 +4,12 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table';
+import type * as React from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+import { createSort } from '@/utils/pagination';
+import { pascalCaseToSnakeCase } from '@/utils/pascal-case-to-snake-case';
+import { snakeToPascalCase } from '@/utils/snake-to-pascal-case';
 
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -15,13 +20,11 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { SORT_ORDER } from '@/consts/pagination';
-import { createSort } from '@/utils/pagination';
-import { pascalCaseToSnakeCase } from '@/utils/pascal-case-to-snake-case';
-import { snakeToPascalCase } from '@/utils/snake-to-pascal-case';
 
 import { Pagination } from './Pagination';
 import { DataTableColumnHeader } from './table-column-header';
+
+import { SORT_ORDER } from '@/consts/pagination';
 
 import type {
   PaginationMetadata,
@@ -34,7 +37,6 @@ import type {
 } from '@/types/entities';
 import type { FilterFieldName } from '@/types/pagination';
 import type { ColumnDef, Row, SortingState } from '@tanstack/react-table';
-import type * as React from 'react';
 
 /**
  * Converts a TanStack Table sorting state to a backend-compatible sort criteria

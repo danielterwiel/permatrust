@@ -2,9 +2,15 @@ import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
 
 import { mutations } from '@/api/mutations';
+import { projectIdSchema } from '@/schemas/entities';
+import { capitalizeFirstLetterValidator } from '@/schemas/form';
+import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
+import { createPermissionVariant } from '@/utils/variants/permissions';
+
 import { Input } from '@/components/input';
 import { Loading } from '@/components/loading';
 import { MultiSelectTransfer } from '@/components/multi-select-transfer';
+import type { MultiSelectItem } from '@/components/multi-select-transfer';
 import { Button } from '@/components/ui/button';
 import {
   FormControl,
@@ -14,17 +20,13 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
-import { projectIdSchema } from '@/schemas/entities';
-import { capitalizeFirstLetterValidator } from '@/schemas/form';
-import { permissionsToItems } from '@/utils';
-import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
-import { createPermissionVariant } from '@/utils/variants/permissions';
 
-import type { MultiSelectItem } from '@/components/multi-select-transfer';
 import type {
   Permission,
   Project,
 } from '@/declarations/pt_backend/pt_backend.did';
+
+import { permissionsToItems } from '@/utils';
 
 export const createRoleFormSchema = z.object({
   description: z.string().optional(),

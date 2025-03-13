@@ -1,4 +1,3 @@
-import { api } from '@/api';
 import { createQueryOptions } from '@/utils/create-query-options';
 
 import type {
@@ -6,6 +5,8 @@ import type {
   PaginationInput,
 } from '@/declarations/pt_backend/pt_backend.did';
 import type { DocumentId, RevisionId } from '@/types/entities';
+
+import { api } from '@/api';
 
 export const getRevisionOptions = (id: RevisionId) =>
   createQueryOptions({

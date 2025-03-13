@@ -1,4 +1,5 @@
 
+import type { ChangeEvent, ComponentProps, FocusEvent, ForwardedRef, MutableRefObject } from 'react';
 import { forwardRef, memo, useCallback, useEffect, useRef, useState } from 'react';
 
 import { Icon } from '@/components/ui/icon';
@@ -8,8 +9,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-
-import type { ChangeEvent, ComponentProps, FocusEvent, ForwardedRef, MutableRefObject } from 'react';
 
 type InputProps = Omit<ComponentProps<typeof InputBase>, 'onChange'> & {
   clearTooltip?: string;

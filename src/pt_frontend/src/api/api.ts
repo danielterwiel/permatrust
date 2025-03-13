@@ -1,9 +1,9 @@
 import { HttpAgent } from '@dfinity/agent';
 
 import { createMutations } from '@/api/mutations';
-import { createActor } from '@/declarations/pt_backend/index';
 import { isAppError } from '@/utils/is-app-error';
 
+import { createActor } from '@/declarations/pt_backend/index';
 import type {
   AppError,
   _SERVICE,

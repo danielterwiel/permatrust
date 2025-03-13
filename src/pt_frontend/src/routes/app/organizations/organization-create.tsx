@@ -1,10 +1,11 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
 import { mutations } from '@/api/mutations';
-import { CreateOrganizationForm } from '@/components/create-organization-form';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 
+import { CreateOrganizationForm } from '@/components/create-organization-form';
 import type { createOrganizationFormSchema } from '@/components/create-organization-form';
+
 import type { z } from 'zod';
 
 export const Route = createFileRoute(
