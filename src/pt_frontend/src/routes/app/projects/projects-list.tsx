@@ -3,32 +3,28 @@ import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 
 import { listProjectsOptions } from '@/api/queries/projects';
 import { usePagination } from '@/hooks/use-pagination';
-import { createEntityPaginationSchema } from '@/schemas/pagination';
+import { createPaginationSchema } from '@/schemas/pagination';
 import { formatDateTime } from '@/utils/format-date-time';
 import { processPaginationInput } from '@/utils/pagination';
 
-import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
 import { Link } from '@/components/link';
+import { Table } from '@/components/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 
 import { ENTITY } from '@/consts/entities';
-import {
-  FILTER_OPERATOR,
-  FILTER_SORT_FIELDS,
-  SORT_ORDER,
-} from '@/consts/pagination';
+import { FIELDS, FILTER_OPERATOR, SORT_ORDER } from '@/consts/pagination';
 
 import type { Project } from '@/declarations/pt_backend/pt_backend.did';
 import type { Row } from '@tanstack/react-table';
 
 const { schema: projectsSearchSchema, defaultPagination } =
-  createEntityPaginationSchema(ENTITY.PROJECT, {
-    defaultFilterField: FILTER_SORT_FIELDS.PROJECT.NAME,
+  createPaginationSchema(ENTITY.PROJECT, {
+    defaultFilterField: FIELDS.PROJECT.NAME,
     defaultFilterOperator: FILTER_OPERATOR.CONTAINS,
     defaultFilterValue: '',
-    defaultSortField: FILTER_SORT_FIELDS.PROJECT.CREATED_AT,
+    defaultSortField: FIELDS.PROJECT.CREATED_AT,
     defaultSortOrder: SORT_ORDER.DESC,
   });
 
@@ -40,13 +36,13 @@ export const Route = createFileRoute(
     pagination: { ...defaultPagination, ...search?.pagination },
   }),
   loader: async ({ context, deps }) => {
-    const projectPagination = processPaginationInput(deps.pagination);
+    const pagination = processPaginationInput(deps.pagination);
     const [projects, paginationMetaData] = await context.query.ensureQueryData(
-      listProjectsOptions(projectPagination),
+      listProjectsOptions({ pagination }),
     );
     return {
       context,
-      pagination: projectPagination,
+      pagination,
       paginationMetaData,
       projects,
     };
@@ -123,17 +119,17 @@ function Projects() {
             actions={RowActions}
             columnConfig={[
               {
-                cellPreprocess: (v) => v,
+                cellPreprocess: (project) => project.name,
                 headerName: 'Name',
                 key: 'name',
               },
               {
-                cellPreprocess: (createdBy) => createdBy.toString(),
+                cellPreprocess: (project) => project.created_by.toString(),
                 headerName: 'Created by',
                 key: 'created_by',
               },
               {
-                cellPreprocess: (createdAt) => formatDateTime(createdAt),
+                cellPreprocess: (project) => formatDateTime(project.created_at),
                 headerName: 'Created at',
                 key: 'created_at',
               },
@@ -143,7 +139,7 @@ function Projects() {
             onSortingChange={onSortChange}
             paginationMetaData={paginationMetaData}
             sort={effectiveSort}
-            tableData={projects}
+            data={projects}
           />
         </CardContent>
       </Card>

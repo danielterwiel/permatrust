@@ -22,7 +22,6 @@ pub struct Project {
 }
 
 // Inputs
-
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct ProjectIdInput {
     pub id: ProjectId,
@@ -40,14 +39,7 @@ pub struct ListProjectMembersInput {
     pub pagination: PaginationInput,
 }
 
-#[derive(CandidType, Deserialize, Clone, Debug)]
-pub struct ListProjectsByOrganizationIdInput {
-    pub organization_id: OrganizationId,
-    pub pagination: PaginationInput,
-}
-
 // Results
-
 #[derive(CandidType, Deserialize)]
 pub enum CreateProjectResult {
     Ok(ProjectId),
@@ -67,21 +59,7 @@ pub enum ListProjectsResult {
 }
 
 #[derive(CandidType, Deserialize)]
-pub enum ListProjectsByOrganizationResult {
-    Ok((Vec<Project>, PaginationMetadata)),
-    Err(AppError),
-}
-
-#[derive(CandidType, Deserialize)]
 pub enum ListProjectMembersResult {
     Ok((Vec<User>, PaginationMetadata)),
-    Err(AppError),
-}
-
-#[derive(CandidType, Deserialize)]
-pub enum ProjectResult {
-    // #[serde(rename = "ok")]
-    Ok(Project),
-    // #[serde(rename = "err")]
     Err(AppError),
 }

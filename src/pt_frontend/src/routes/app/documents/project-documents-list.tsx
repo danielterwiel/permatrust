@@ -4,31 +4,27 @@ import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { listDocumentsByProjectIdOptions } from '@/api/queries/documents';
 import { usePagination } from '@/hooks/use-pagination';
 import { projectIdSchema } from '@/schemas/entities';
-import { createEntityPaginationSchema } from '@/schemas/pagination';
+import { createPaginationSchema } from '@/schemas/pagination';
 import { processPaginationInput } from '@/utils/pagination';
 
-import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
 import { Link } from '@/components/link';
+import { Table } from '@/components/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 
 import { ENTITY } from '@/consts/entities';
-import {
-  FILTER_OPERATOR,
-  FILTER_SORT_FIELDS,
-  SORT_ORDER,
-} from '@/consts/pagination';
+import { FIELDS, FILTER_OPERATOR, SORT_ORDER } from '@/consts/pagination';
 
 import type { Document } from '@/declarations/pt_backend/pt_backend.did';
 import type { Row } from '@tanstack/react-table';
 
 const { schema: documentsSearchSchema, defaultPagination } =
-  createEntityPaginationSchema(ENTITY.DOCUMENT, {
-    defaultFilterField: FILTER_SORT_FIELDS.DOCUMENT.TITLE,
+  createPaginationSchema(ENTITY.DOCUMENT, {
+    defaultFilterField: FIELDS.DOCUMENT.TITLE,
     defaultFilterOperator: FILTER_OPERATOR.CONTAINS,
     defaultFilterValue: '',
-    defaultSortField: FILTER_SORT_FIELDS.DOCUMENT.TITLE,
+    defaultSortField: FIELDS.DOCUMENT.TITLE,
     defaultSortOrder: SORT_ORDER.ASC,
   });
 
@@ -44,8 +40,8 @@ export const Route = createFileRoute(
     const projectId = projectIdSchema.parse(params.projectId);
     const [documents, paginationMetaData] = await context.query.ensureQueryData(
       listDocumentsByProjectIdOptions({
-        pagination: documentPagination,
-        project_id: projectId,
+        projectId,
+        pagination: documentPagination
       }),
     );
 
@@ -129,12 +125,12 @@ function Documents() {
           actions={RowActions}
           columnConfig={[
             {
-              cellPreprocess: (title) => title,
+              cellPreprocess: (document) => document.title,
               headerName: 'Title',
               key: 'title',
             },
             {
-              cellPreprocess: (version) => version,
+              cellPreprocess: (document) => document.version,
               headerName: 'Version',
               key: 'version',
             },
@@ -144,7 +140,7 @@ function Documents() {
           onSortingChange={onSortChange}
           paginationMetaData={paginationMetaData}
           sort={effectiveSort}
-          tableData={documents}
+          data={documents}
         />
       </CardContent>
     </Card>

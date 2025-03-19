@@ -6,6 +6,7 @@ export const ENTITY = {
   ORGANIZATION: 'Organization',
   PROJECT: 'Project',
   REVISION: 'Revision',
+  ROLE: 'Role',
   USER: 'User',
   USER_WITH_ROLES: 'UserWithRoles',
   WORKFLOW: 'Workflow',

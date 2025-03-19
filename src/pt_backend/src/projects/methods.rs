@@ -6,8 +6,7 @@ use shared::types::entities::Entity;
 use shared::types::pagination::{FilterCriteria, FilterField, FilterOperator, ProjectFilterField};
 use shared::types::projects::{
     CreateProjectInput, CreateProjectResult, GetProjectsResult, ListProjectMembersInput,
-    ListProjectMembersResult, ListProjectsByOrganizationIdInput, ListProjectsByOrganizationResult,
-    ListProjectsResult, ProjectIdInput,
+    ListProjectMembersResult, ListProjectsResult,
 };
 use shared::types::users::GetUserResult;
 use shared::utils::filter::filter;
@@ -87,23 +86,6 @@ pub fn list_projects(pagination: PaginationInput) -> ListProjectsResult {
 }
 
 #[ic_cdk_macros::query]
-pub fn list_projects_by_organization_id(
-    input: ListProjectsByOrganizationIdInput,
-) -> ListProjectsByOrganizationResult {
-    let projects = state::get_by_organization_id(input.organization_id);
-    match paginate(
-        &projects,
-        input.pagination.page_size,
-        input.pagination.page_number,
-        input.pagination.filters,
-        input.pagination.sort,
-    ) {
-        Ok(result) => ListProjectsByOrganizationResult::Ok(result),
-        Err(e) => ListProjectsByOrganizationResult::Err(e),
-    }
-}
-
-#[ic_cdk_macros::query]
 pub fn list_project_members(input: ListProjectMembersInput) -> ListProjectMembersResult {
     let project = match state::get_by_id(input.project_id) {
         Some(p) => p,
@@ -136,13 +118,5 @@ pub fn list_project_members(input: ListProjectMembersInput) -> ListProjectMember
     ) {
         Ok(result) => ListProjectMembersResult::Ok(result),
         Err(e) => ListProjectMembersResult::Err(e),
-    }
-}
-
-#[ic_cdk_macros::query]
-pub fn get_project(input: ProjectIdInput) -> ProjectResult {
-    match state::get_by_id(input.id) {
-        Some(project) => ProjectResult::Ok(project),
-        None => ProjectResult::Err(AppError::EntityNotFound("Project not found".to_string())),
     }
 }

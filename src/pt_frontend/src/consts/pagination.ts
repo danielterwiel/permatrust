@@ -2,14 +2,22 @@ import { createCandidVariant } from '@/utils/create-candid-variant';
 
 import type { PaginationInput } from '@/declarations/pt_backend/pt_backend.did';
 
+export const PAGE_SIZE = {
+  SINGLE: 1,
+  DEFAULT: 10,
+  MEDIUM: 25,
+  LARGE: 50,
+} as const;
+
 export const DEFAULT_PAGINATION: PaginationInput = {
   filters: [],
   page_number: 1,
-  page_size: 10,
+  page_size: PAGE_SIZE.DEFAULT,
   sort: [],
 } as const;
 
 const DOCUMENT_FIELD = {
+  ID: 'Id',
   CREATED_AT: 'CreatedAt',
   PROJECT_ID: 'ProjectId',
   TITLE: 'Title',
@@ -17,6 +25,7 @@ const DOCUMENT_FIELD = {
 } as const;
 
 const ORGANIZATION_FIELD = {
+  ID: 'Id',
   CREATED_AT: 'CreatedAt',
   CREATED_BY: 'CreatedBy',
   NAME: 'Name',
@@ -25,6 +34,7 @@ const ORGANIZATION_FIELD = {
 const PROJECT_FIELD = {
   CREATED_AT: 'CreatedAt',
   CREATED_BY: 'CreatedBy',
+  ID: 'Id',
   MEMBERS: 'Members',
   NAME: 'Name',
   ORGANIZATION_ID: 'OrganizationId',
@@ -33,6 +43,7 @@ const PROJECT_FIELD = {
 const REVISION_FIELD = {
   CREATED_AT: 'CreatedAt',
   DOCUMENT_ID: 'DocumentId',
+  ID: 'Id',
   PROJECT_ID: 'ProjectId',
   VERSION: 'Version',
 } as const;
@@ -44,35 +55,56 @@ const USER_FIELD = {
 } as const;
 
 const USER_WITH_ROLES_FIELD = {
+  ID: 'Id',
   FIRST_NAME: 'FirstName',
   LAST_NAME: 'LastName',
+  PROJECT_ID: 'ProjectId',
+} as const;
+
+const ROLE_FIELD = {
+  ID: 'Id',
+  NAME: 'Name',
+  PROJECT_ID: 'ProjectId',
+  CREATED_AT: 'CreatedAt',
 } as const;
 
 const WORKFLOW_FIELD = {
+  ID: 'Id',
   NAME: 'Name',
   PROJECT_ID: 'ProjectId',
 } as const;
 
-export const FILTER_SORT_FIELDS = {
+export const FIELDS = {
+  CREATED_AT: DOCUMENT_FIELD.CREATED_AT,
   DOCUMENT: {
+    ID: DOCUMENT_FIELD.ID,
     CREATED_AT: DOCUMENT_FIELD.CREATED_AT,
     PROJECT_ID: DOCUMENT_FIELD.PROJECT_ID,
     TITLE: DOCUMENT_FIELD.TITLE,
     VERSION: DOCUMENT_FIELD.VERSION,
   },
+  ROLE: {
+    ID: ROLE_FIELD.ID,
+    NAME: ROLE_FIELD.NAME,
+    PROJECT_ID: ROLE_FIELD.PROJECT_ID,
+    CREATED_AT: ROLE_FIELD.CREATED_AT,
+  },
   ORGANIZATION: {
+    ID: ORGANIZATION_FIELD.ID,
     CREATED_AT: ORGANIZATION_FIELD.CREATED_AT,
     NAME: ORGANIZATION_FIELD.NAME,
   },
   PROJECT: {
     CREATED_AT: PROJECT_FIELD.CREATED_AT,
     CREATED_BY: PROJECT_FIELD.CREATED_BY,
+    ID: PROJECT_FIELD.ID,
     NAME: PROJECT_FIELD.NAME,
     ORGANIZATION_ID: PROJECT_FIELD.ORGANIZATION_ID,
   },
   REVISION: {
     CREATED_AT: REVISION_FIELD.CREATED_AT,
     DOCUMENT_ID: REVISION_FIELD.DOCUMENT_ID,
+    ID: REVISION_FIELD.ID,
     PROJECT_ID: REVISION_FIELD.PROJECT_ID,
     VERSION: REVISION_FIELD.VERSION,
   },
@@ -82,10 +114,13 @@ export const FILTER_SORT_FIELDS = {
     LAST_NAME: USER_FIELD.LAST_NAME,
   },
   USER_WITH_ROLES: {
+    ID: USER_WITH_ROLES_FIELD.ID,
     FIRST_NAME: USER_WITH_ROLES_FIELD.FIRST_NAME,
     LAST_NAME: USER_WITH_ROLES_FIELD.LAST_NAME,
+    PROJECT_ID: USER_WITH_ROLES_FIELD.PROJECT_ID,
   },
   WORKFLOW: {
+    ID: WORKFLOW_FIELD.ID,
     NAME: WORKFLOW_FIELD.NAME,
     PROJECT_ID: WORKFLOW_FIELD.PROJECT_ID,
   },
@@ -120,11 +155,15 @@ export const filterOperator = createCandidVariant(
 );
 export const sortOrder = createCandidVariant(Object.values(SORT_ORDER));
 
+// Create variant for Role fields
+const roleFields = createCandidVariant(Object.values(ROLE_FIELD));
+
 export const filterField = {
   Document: documentFields,
   Organization: organizationFields,
   Project: projectFields,
   Revision: revisionFields,
+  Role: roleFields,
   User: userFields,
   UserWithRoles: userWithRolesFields,
   Workflow: workflowFields,

@@ -31,17 +31,6 @@ pub fn get_all() -> Vec<Document> {
     })
 }
 
-pub fn get_by_project(project_id: ProjectId) -> Vec<Document> {
-    DOCUMENTS.with(|documents| {
-        documents
-            .borrow()
-            .iter()
-            .filter(|(_, doc)| doc.project_id == project_id)
-            .map(|(_, doc)| doc.clone())
-            .collect()
-    })
-}
-
 pub fn insert(document_id: DocumentId, document: Document) {
     DOCUMENTS.with(|documents| {
         documents.borrow_mut().insert(document_id, document);

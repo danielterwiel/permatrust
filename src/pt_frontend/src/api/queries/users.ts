@@ -1,9 +1,6 @@
 import { createQueryOptions } from '@/utils/create-query-options';
 
-import type {
-  ListDocumentsInput,
-  ListUsersInput,
-} from '@/declarations/pt_backend/pt_backend.did';
+import type { ListUsersInput } from '@/declarations/pt_backend/pt_backend.did';
 
 import { api } from '@/api';
 
@@ -17,10 +14,4 @@ export const listUsersOptions = (input: ListUsersInput) =>
   createQueryOptions({
     queryFn: () => api.list_users(input),
     queryKey: ['users', input],
-  });
-
-export const listProjectMembersRolesOptions = (input: ListDocumentsInput) =>
-  createQueryOptions({
-    queryFn: () => api.list_project_members_roles(input),
-    queryKey: ['project_members_roles', input],
   });

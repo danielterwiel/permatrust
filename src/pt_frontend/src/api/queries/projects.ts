@@ -1,34 +1,66 @@
+import { createPagination } from '@/schemas/pagination';
 import { createQueryOptions } from '@/utils/create-query-options';
 
+import { getSingleApiResult } from '../utils/get-single-api-result';
+
+import { ENTITY } from '@/consts/entities';
+import {
+  FIELDS,
+  FILTER_OPERATOR,
+  PAGE_SIZE,
+  SORT_ORDER,
+} from '@/consts/pagination';
+
 import type { PaginationInput } from '@/declarations/pt_backend/pt_backend.did';
-import type { OrganizationId } from '@/types/entities';
+import type { OrganizationId, ProjectId } from '@/types/entities';
 
 import { api } from '@/api';
 
-export const getProjectOptions = (id: number) =>
-  createQueryOptions({
-    queryFn: () => api.get_project({ id }),
+export const getProjectOptions = (id: ProjectId) => {
+  const pagination = createPagination(ENTITY.PROJECT, {
+    defaultFilterField: FIELDS.PROJECT.ID,
+    defaultFilterOperator: FILTER_OPERATOR.EQUALS,
+    defaultFilterValue: id.toString(),
+    defaultSortField: FIELDS.PROJECT.NAME,
+    defaultSortOrder: SORT_ORDER.ASC,
+    pageSize: PAGE_SIZE.SINGLE,
+  });
+
+  return createQueryOptions({
+    queryFn: async () =>
+      getSingleApiResult(
+        () => api.list_projects(pagination),
+        'Project not found',
+      ),
     queryKey: ['project', { id }],
   });
+};
 
-export const listProjectsOptions = (input: PaginationInput) =>
+export const listProjectsOptions = (input: { pagination: PaginationInput }) =>
   createQueryOptions({
-    queryFn: () => api.list_projects(input),
-    queryKey: ['projects_list', input],
+    queryFn: () => api.list_projects(input.pagination),
+    queryKey: ['projects', input],
   });
 
-export const getProjectsByOrganizationOptions = (
-  organizationId: OrganizationId,
-  pagination: PaginationInput,
-) =>
-  createQueryOptions({
-    queryFn: () =>
-      api.list_projects_by_organization_id({
-        organization_id: organizationId,
-        pagination,
-      }),
-    queryKey: [
-      'projects_by_organization',
-      { organization_id: organizationId, pagination },
-    ],
+export const listProjectsByOrganizationIdOptions = ({
+  organizationId,
+  pagination: customPagination,
+}: {
+  organizationId: OrganizationId;
+  pagination?: PaginationInput;
+}) => {
+  const defaultPagination = createPagination(ENTITY.PROJECT, {
+    defaultFilterField: FIELDS.PROJECT.ORGANIZATION_ID,
+    defaultFilterOperator: FILTER_OPERATOR.EQUALS,
+    defaultFilterValue: organizationId.toString(),
+    defaultSortField: FIELDS.PROJECT.NAME,
+    defaultSortOrder: SORT_ORDER.ASC,
   });
+
+  const pagination = customPagination || defaultPagination;
+
+  return createQueryOptions({
+    queryFn: () => api.list_projects(pagination),
+    queryKey: ['projects_by_organization', { organizationId, pagination }],
+  });
+};

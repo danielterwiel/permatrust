@@ -32,10 +32,6 @@ pub fn get_by_user_id(user_id: UserId) -> Vec<Organization> {
     })
 }
 
-pub fn get_by_id(organization_id: OrganizationId) -> Option<Organization> {
-    ORGANIZATIONS.with(|organizations| organizations.borrow().get(&organization_id))
-}
-
 pub fn insert(id: OrganizationId, organization: Organization) {
     ORGANIZATIONS.with(|organizations| {
         organizations.borrow_mut().insert(id, organization);

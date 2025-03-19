@@ -23,9 +23,10 @@ fi
 echo "Running linters in check mode..."
 cargo clippy -- -D warnings || handle_error "cargo clippy"
 
-# Run TypeScript typecheck but don't fail the build if it fails
+# Run TypeScript typecheck and fail if it fails
 echo "Running TypeScript typecheck..."
-pnpm run --filter pt_frontend typecheck || echo "TypeScript errors detected (expected during migration)"
+pnpm run --filter pt_frontend typecheck || handle_error "TypeScript typecheck"
 
-# Continue with other checks
-pnpm run --filter pt_frontend lint || handle_error "eslint"
+# Continue with other checks and fail if linting fails
+echo "Running ESLint..."
+pnpm run --filter pt_frontend lint || handle_error "ESLint"

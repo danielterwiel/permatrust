@@ -1,24 +1,20 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 
-import { listProjectMembersRolesOptions } from '@/api/queries/users';
+import { listUserWithRolesByProjectIdOptions } from '@/api/queries/access-control';
 import { usePagination } from '@/hooks/use-pagination';
-import { createEntityPaginationSchema } from '@/schemas/pagination';
+import { createPaginationSchema } from '@/schemas/pagination';
 import { toNumberSchema } from '@/schemas/primitives';
 import { processPaginationInput } from '@/utils/pagination';
 
-import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
 import { Link } from '@/components/link';
+import { Table } from '@/components/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 
 import { ENTITY } from '@/consts/entities';
-import {
-  FILTER_OPERATOR,
-  FILTER_SORT_FIELDS,
-  SORT_ORDER,
-} from '@/consts/pagination';
+import { FIELDS, FILTER_OPERATOR, SORT_ORDER } from '@/consts/pagination';
 
 import type {
   Role,
@@ -26,14 +22,16 @@ import type {
 } from '@/declarations/pt_backend/pt_backend.did';
 import type { Row } from '@tanstack/react-table';
 
-const { schema: rolesSearchSchema, defaultPagination } =
-  createEntityPaginationSchema(ENTITY.USER_WITH_ROLES, {
-    defaultFilterField: FILTER_SORT_FIELDS.USER_WITH_ROLES.FIRST_NAME,
+const { schema: rolesSearchSchema, defaultPagination } = createPaginationSchema(
+  ENTITY.USER_WITH_ROLES,
+  {
+    defaultFilterField: FIELDS.USER_WITH_ROLES.FIRST_NAME,
     defaultFilterOperator: FILTER_OPERATOR.CONTAINS,
     defaultFilterValue: '',
-    defaultSortField: FILTER_SORT_FIELDS.USER_WITH_ROLES.FIRST_NAME,
+    defaultSortField: FIELDS.USER_WITH_ROLES.FIRST_NAME,
     defaultSortOrder: SORT_ORDER.ASC,
-  });
+  },
+);
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/roles/assigned',
@@ -44,19 +42,16 @@ export const Route = createFileRoute(
   }),
   loader: async ({ context, deps, params }) => {
     const projectId = toNumberSchema.parse(params.projectId);
-    const rolePagination = processPaginationInput(deps.pagination);
+    const pagination = processPaginationInput(deps.pagination);
     const [assignedRoles, paginationMetaData] =
       await context.query.ensureQueryData(
-        listProjectMembersRolesOptions({
-          pagination: rolePagination,
-          project_id: projectId,
-        }),
+        listUserWithRolesByProjectIdOptions(projectId),
       );
 
     return {
       assignedRoles,
       context,
-      pagination: rolePagination,
+      pagination,
       paginationMetaData,
     };
   },
@@ -131,18 +126,22 @@ function RolesAssigned() {
               actions={RowActions}
               columnConfig={[
                 {
-                  cellPreprocess: (user) => user.last_name,
+                  cellPreprocess: (userWithRoles) =>
+                    userWithRoles.user.last_name || '',
                   headerName: 'Last Name',
                   key: 'user',
                 },
                 {
-                  cellPreprocess: (user) => user.first_name,
+                  cellPreprocess: (userWithRoles) =>
+                    userWithRoles.user.first_name || '',
                   headerName: 'First Name',
                   key: 'user',
                 },
                 {
-                  cellPreprocess: (roles) =>
-                    roles?.map((role: Role) => role.name).join(', '),
+                  cellPreprocess: (userWithRoles) =>
+                    userWithRoles.roles
+                      .map((role: Role) => role.name)
+                      .join(', ') || '',
                   headerName: 'Roles',
                   key: 'roles',
                 },
@@ -152,7 +151,7 @@ function RolesAssigned() {
               onSortingChange={onSortChange}
               paginationMetaData={paginationMetaData}
               sort={effectiveSort}
-              tableData={assignedRoles}
+              data={assignedRoles}
             />
           )}
         </CardContent>

@@ -1,6 +1,6 @@
 import { assign, createActor, fromPromise, log, setup } from 'xstate';
 
-import { getOrganizationsOptions } from '@/api/queries/organizations';
+import { listOrganizationsOptions } from '@/api/queries/organizations';
 import { getUserOptions } from '@/api/queries/users';
 import { queryClient } from '@/api/query-client';
 
@@ -106,7 +106,7 @@ const authMachine = setup({
     list_organizations: fromPromise(async () => {
       try {
         const organizationsResult = await queryClient.ensureQueryData(
-          getOrganizationsOptions(DEFAULT_PAGINATION),
+          listOrganizationsOptions(DEFAULT_PAGINATION),
         );
         const [organizations] = organizationsResult;
 

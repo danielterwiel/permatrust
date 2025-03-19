@@ -6,10 +6,10 @@ import { z } from 'zod';
 
 import { mutations } from '@/api/mutations';
 import {
-  getProjectMembersOptions,
-  getProjectMembersRolesOptions,
   getProjectRolesOptions,
-} from '@/api/queries/permissions';
+  listProjectMembersOptions,
+  listUserWithRolesByProjectIdOptions,
+} from '@/api/queries/access-control';
 import { useToast } from '@/hooks/use-toast';
 import {
   projectIdSchema,
@@ -17,7 +17,6 @@ import {
   userIdSchema,
 } from '@/schemas/entities';
 import { cn } from '@/utils/cn';
-import { createFilter } from '@/utils/pagination';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -42,18 +41,9 @@ import {
 } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-import { ENTITY } from '@/consts/entities';
-import {
-  DEFAULT_PAGINATION,
-  FILTER_OPERATOR,
-  FILTER_SORT_FIELDS,
-} from '@/consts/pagination';
+import { DEFAULT_PAGINATION } from '@/consts/pagination';
 
-import type {
-  PaginationInput,
-  Role,
-  User,
-} from '@/declarations/pt_backend/pt_backend.did';
+import type { Role, User } from '@/declarations/pt_backend/pt_backend.did';
 
 const searchSchema = z.object({
   userId: z.number().optional(),
@@ -73,7 +63,7 @@ export const Route = createFileRoute(
     );
 
     const [users] = await context.query.ensureQueryData(
-      getProjectMembersOptions(projectId, DEFAULT_PAGINATION),
+      listProjectMembersOptions(projectId, DEFAULT_PAGINATION),
     );
 
     let preselectedUser: undefined | User;
@@ -84,22 +74,8 @@ export const Route = createFileRoute(
       preselectedUser = users.find((user: User) => user.id === BigInt(userId));
 
       if (preselectedUser) {
-        const filterCriteria = [
-          createFilter({
-            entity: ENTITY.USER_WITH_ROLES,
-            field: FILTER_SORT_FIELDS.USER_WITH_ROLES.FIRST_NAME,
-            operator: FILTER_OPERATOR.EQUALS,
-            value: userId.toString(),
-          }),
-        ];
-
-        const userRolesPagination: PaginationInput = {
-          ...DEFAULT_PAGINATION,
-          filters: [filterCriteria],
-        };
-
         const [assignedRoles] = await context.query.ensureQueryData(
-          getProjectMembersRolesOptions(projectId, userRolesPagination),
+          listUserWithRolesByProjectIdOptions(projectId),
         );
 
         if (assignedRoles.length > 0) {

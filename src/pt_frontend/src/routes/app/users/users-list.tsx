@@ -3,33 +3,31 @@ import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 
 import { listUsersOptions } from '@/api/queries/users';
 import { usePagination } from '@/hooks/use-pagination';
-import { createEntityPaginationSchema } from '@/schemas/pagination';
+import { createPaginationSchema } from '@/schemas/pagination';
 import { processPaginationInput } from '@/utils/pagination';
 
-import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
 import { Link } from '@/components/link';
+import { Table } from '@/components/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 
 import { ENTITY } from '@/consts/entities';
-import {
-  FILTER_OPERATOR,
-  FILTER_SORT_FIELDS,
-  SORT_ORDER,
-} from '@/consts/pagination';
+import { FIELDS, FILTER_OPERATOR, SORT_ORDER } from '@/consts/pagination';
 
 import type { User } from '@/declarations/pt_backend/pt_backend.did';
 import type { Row } from '@tanstack/react-table';
 
-const { schema: usersSearchSchema, defaultPagination } =
-  createEntityPaginationSchema(ENTITY.USER, {
-    defaultFilterField: FILTER_SORT_FIELDS.USER.FIRST_NAME,
+const { schema: usersSearchSchema, defaultPagination } = createPaginationSchema(
+  ENTITY.USER,
+  {
+    defaultFilterField: FIELDS.USER.FIRST_NAME,
     defaultFilterOperator: FILTER_OPERATOR.CONTAINS,
     defaultFilterValue: '',
-    defaultSortField: FILTER_SORT_FIELDS.USER.FIRST_NAME,
+    defaultSortField: FIELDS.USER.FIRST_NAME,
     defaultSortOrder: SORT_ORDER.ASC,
-  });
+  },
+);
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/users/',
@@ -72,14 +70,14 @@ const RowActions = (row: Row<User>) => {
 
 function Users() {
   const { pagination, paginationMetaData, users } = Route.useLoaderData();
-  
-  const effectiveSort = pagination.sort.length 
-    ? pagination.sort 
+
+  const effectiveSort = pagination.sort.length
+    ? pagination.sort
     : defaultPagination.sort;
-  
+
   const { onFilterChange, onSortChange, getPageChangeParams } = usePagination(
     pagination,
-    defaultPagination
+    defaultPagination,
   );
 
   return (
@@ -110,12 +108,12 @@ function Users() {
             actions={RowActions}
             columnConfig={[
               {
-                cellPreprocess: (firstName) => firstName,
+                cellPreprocess: (user) => user.first_name,
                 headerName: 'First name',
                 key: 'first_name',
               },
               {
-                cellPreprocess: (lastName) => lastName,
+                cellPreprocess: (user) => user.last_name,
                 headerName: 'Last name',
                 key: 'last_name',
               },
@@ -125,7 +123,7 @@ function Users() {
             onSortingChange={onSortChange}
             paginationMetaData={paginationMetaData}
             sort={effectiveSort}
-            tableData={users}
+            data={users}
           />
         </CardContent>
       </Card>

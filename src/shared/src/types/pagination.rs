@@ -13,6 +13,7 @@ pub enum UserFilterField {
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub enum DocumentFilterField {
+    Id,
     ProjectId,
     Version,
     Title,
@@ -21,6 +22,7 @@ pub enum DocumentFilterField {
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub enum RevisionFilterField {
+    Id,
     ProjectId,
     Version,
     DocumentId,
@@ -29,12 +31,14 @@ pub enum RevisionFilterField {
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub enum OrganizationFilterField {
+    Id,
     Name,
     CreatedAt,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub enum ProjectFilterField {
+    Id,
     Members,
     OrganizationId,
     Name,
@@ -44,14 +48,25 @@ pub enum ProjectFilterField {
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub enum WorkflowFilterField {
+    Id,
     Name,
     ProjectId,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub enum UserWithRolesFilterField {
+    Id,
+    ProjectId,
     FirstName,
     LastName,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug)]
+pub enum RoleFilterField {
+    Id,
+    Name,
+    ProjectId,
+    CreatedAt,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
@@ -63,6 +78,7 @@ pub enum FilterField {
     Organization(OrganizationFilterField),
     Project(ProjectFilterField),
     Workflow(WorkflowFilterField),
+    Role(RoleFilterField),
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug)]

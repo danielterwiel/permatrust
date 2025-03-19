@@ -3,11 +3,9 @@ use super::*;
 use crate::logger::{log_info, loggable_workflow};
 use shared::types::workflows::{
     CreateWorkflowResult, ExecuteWorkflowInput, ExecuteWorkflowResult, GetWorkflowDefinitionResult,
-    GetWorkflowResult, GetWorkflowStateResult, ListWorkflowsResult, WorkflowIdInput,
+    GetWorkflowStateResult, ListWorkflowsResult, WorkflowIdInput,
 };
 use shared::utils::pagination::paginate;
-
-// Implement similar FromResidual for other workflow Result types
 
 #[ic_cdk_macros::update]
 pub fn create_workflow(workflow: CreateWorkflowInput) -> CreateWorkflowResult {
@@ -44,14 +42,6 @@ pub fn list_workflows(pagination: PaginationInput) -> ListWorkflowsResult {
     )
     .map(|(data, meta)| ListWorkflowsResult::Ok((data, meta)))
     .unwrap_or_else(ListWorkflowsResult::Err)
-}
-
-#[ic_cdk_macros::query]
-pub fn get_workflow(input: WorkflowIdInput) -> GetWorkflowResult {
-    match state::get_by_id(&input.id) {
-        Some(workflow) => GetWorkflowResult::Ok(workflow.clone()),
-        None => GetWorkflowResult::Err(AppError::EntityNotFound("Workflow not found".to_string())),
-    }
 }
 
 #[ic_cdk_macros::update]

@@ -1,36 +1,32 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 
-import { getOrganizationsOptions } from '@/api/queries/organizations';
+import { listOrganizationsOptions } from '@/api/queries/organizations';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 import { usePagination } from '@/hooks/use-pagination';
-import { createEntityPaginationSchema } from '@/schemas/pagination';
+import { createPaginationSchema } from '@/schemas/pagination';
 import { formatDateTime } from '@/utils/format-date-time';
 import { processPaginationInput } from '@/utils/pagination';
 
-import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
 import { Link } from '@/components/link';
+import { Table } from '@/components/table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 
 import { ENTITY } from '@/consts/entities';
-import {
-  FILTER_OPERATOR,
-  FILTER_SORT_FIELDS,
-  SORT_ORDER,
-} from '@/consts/pagination';
+import { FIELDS, FILTER_OPERATOR, SORT_ORDER } from '@/consts/pagination';
 
 import type { Organization } from '@/declarations/pt_backend/pt_backend.did';
 import type { Row } from '@tanstack/react-table';
 
 const { schema: organizationsSearchSchema, defaultPagination } =
-  createEntityPaginationSchema(ENTITY.ORGANIZATION, {
-    defaultFilterField: FILTER_SORT_FIELDS.ORGANIZATION.NAME,
+  createPaginationSchema(ENTITY.ORGANIZATION, {
+    defaultFilterField: FIELDS.ORGANIZATION.NAME,
     defaultFilterOperator: FILTER_OPERATOR.CONTAINS,
     defaultFilterValue: '',
-    defaultSortField: FILTER_SORT_FIELDS.ORGANIZATION.NAME,
+    defaultSortField: FIELDS.ORGANIZATION.NAME,
     defaultSortOrder: SORT_ORDER.ASC,
   });
 
@@ -42,16 +38,14 @@ export const Route = createFileRoute(
     pagination: { ...defaultPagination, ...search?.pagination },
   }),
   loader: async ({ context, deps }) => {
-    const organizationPagination = processPaginationInput(deps.pagination);
+    const pagination = processPaginationInput(deps.pagination);
     const [organizations, paginationMetaData] =
-      await context.query.ensureQueryData(
-        getOrganizationsOptions(organizationPagination),
-      );
+      await context.query.ensureQueryData(listOrganizationsOptions(pagination));
 
     return {
       context,
       organizations,
-      pagination: organizationPagination,
+      pagination,
       paginationMetaData,
     };
   },
@@ -67,7 +61,7 @@ const RowActions = (row: Row<Organization>) => {
     '',
   );
   const navigate = useNavigate();
-  
+
   const setOrganizationIdLocalStorage = () => {
     setActiveOrganizationId(row.id);
     navigate({ to: `/organizations/${row.id}` });
@@ -83,14 +77,14 @@ const RowActions = (row: Row<Organization>) => {
 function Organizations() {
   const { organizations, pagination, paginationMetaData } =
     Route.useLoaderData();
-  
-  const effectiveSort = pagination.sort.length 
-    ? pagination.sort 
+
+  const effectiveSort = pagination.sort.length
+    ? pagination.sort
     : defaultPagination.sort;
-  
+
   const { onFilterChange, onSortChange, getPageChangeParams } = usePagination(
     pagination,
-    defaultPagination
+    defaultPagination,
   );
 
   return (
@@ -132,17 +126,19 @@ function Organizations() {
             actions={RowActions}
             columnConfig={[
               {
-                cellPreprocess: (v) => v,
+                cellPreprocess: (organization) => organization.name,
                 headerName: 'Name',
                 key: 'name',
               },
               {
-                cellPreprocess: (createdBy) => createdBy.toString(),
+                cellPreprocess: (organization) =>
+                  organization.created_by.toString(),
                 headerName: 'Created by',
                 key: 'created_by',
               },
               {
-                cellPreprocess: (createdAt) => formatDateTime(createdAt),
+                cellPreprocess: (organization) =>
+                  formatDateTime(organization.created_at),
                 headerName: 'Created at',
                 key: 'created_at',
               },
@@ -152,7 +148,7 @@ function Organizations() {
             onSortingChange={onSortChange}
             paginationMetaData={paginationMetaData}
             sort={effectiveSort}
-            tableData={organizations}
+            data={organizations}
           />
         </CardContent>
       </Card>

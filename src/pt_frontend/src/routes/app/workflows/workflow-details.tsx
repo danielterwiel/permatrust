@@ -12,11 +12,11 @@ export const Route = createFileRoute(
   loader: async ({ context, params }) => {
     const workflowId = workflowIdSchema.parse(params.workflowId);
     const workflow = await context.query.ensureQueryData(
-      getWorkflowOptions({ id: workflowId }),
+      getWorkflowOptions(workflowId),
     );
 
     const workflowState = await context.query.ensureQueryData(
-      getWorkflowStateOptions({ id: workflowId }),
+      getWorkflowStateOptions(workflow.id),
     );
 
     context.getTitle = () => workflow.name;

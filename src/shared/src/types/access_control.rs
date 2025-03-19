@@ -5,7 +5,7 @@ use candid::CandidType;
 use serde::Deserialize;
 use strum_macros::EnumIter;
 
-use super::pagination::PaginationMetadata;
+use super::pagination::{PaginationInput, PaginationMetadata};
 use super::users::UserId;
 
 pub type RoleId = u64;
@@ -115,6 +115,11 @@ pub struct UserWithRoles {
 }
 
 // Inputs
+#[derive(candid::CandidType, serde::Deserialize)]
+pub struct ListProjectMembersRolesInput {
+    pub project_id: ProjectId,
+    pub pagination: PaginationInput,
+}
 
 #[derive(CandidType, Deserialize)]
 pub struct UpdateRolePermissionsInput {
@@ -153,12 +158,6 @@ pub enum CreateRoleResult {
 #[derive(CandidType, Deserialize)]
 pub enum AssignRolesResult {
     Ok,
-    Err(AppError),
-}
-
-#[derive(CandidType, Deserialize)]
-pub enum GetRoleResult {
-    Ok(Role),
     Err(AppError),
 }
 

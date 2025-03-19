@@ -36,13 +36,6 @@ pub struct RevisionIdInput {
 
 #[derive(CandidType, Deserialize)]
 pub struct ListRevisionsInput {
-    pub revision_id: RevisionId,
-    pub pagination: PaginationInput,
-}
-
-#[derive(CandidType, Deserialize)]
-pub struct ListRevisionsByDocumentIdInput {
-    pub document_id: DocumentId,
     pub pagination: PaginationInput,
 }
 
@@ -78,12 +71,6 @@ pub enum PaginatedRevisionsResult {
 #[derive(CandidType, Deserialize)]
 pub enum CreateRevisionResult {
     Ok(RevisionId),
-    Err(AppError),
-}
-
-#[derive(CandidType, Deserialize)]
-pub enum GetRevisionResult {
-    Ok(Revision),
     Err(AppError),
 }
 

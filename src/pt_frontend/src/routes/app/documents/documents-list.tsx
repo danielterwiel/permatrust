@@ -3,15 +3,15 @@ import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { useState } from 'react';
 
 import { listDocumentsOptions } from '@/api/queries/documents';
-import { getProjectsByOrganizationOptions } from '@/api/queries/projects';
+import { listProjectsByOrganizationIdOptions } from '@/api/queries/projects';
 import { usePagination } from '@/hooks/use-pagination';
-import { createEntityPaginationSchema } from '@/schemas/pagination';
+import { createPagination, createPaginationSchema } from '@/schemas/pagination';
 import { getActiveOrganizationId } from '@/utils/get-active-organizationId';
 import { processPaginationInput } from '@/utils/pagination';
 
-import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
 import { Link } from '@/components/link';
+import { Table } from '@/components/table';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
@@ -31,12 +31,7 @@ import {
 } from '@/components/ui/select';
 
 import { ENTITY } from '@/consts/entities';
-import {
-  DEFAULT_PAGINATION,
-  FILTER_OPERATOR,
-  FILTER_SORT_FIELDS,
-  SORT_ORDER,
-} from '@/consts/pagination';
+import { FIELDS, FILTER_OPERATOR, SORT_ORDER } from '@/consts/pagination';
 
 import type {
   Document,
@@ -47,11 +42,11 @@ import type { Row } from '@tanstack/react-table';
 const {
   schema: documentsSearchSchema,
   defaultPagination: documentsPagination,
-} = createEntityPaginationSchema(ENTITY.DOCUMENT, {
-  defaultFilterField: FILTER_SORT_FIELDS.DOCUMENT.TITLE,
+} = createPaginationSchema(ENTITY.DOCUMENT, {
+  defaultFilterField: FIELDS.DOCUMENT.TITLE,
   defaultFilterOperator: FILTER_OPERATOR.CONTAINS,
   defaultFilterValue: '',
-  defaultSortField: FILTER_SORT_FIELDS.DOCUMENT.TITLE,
+  defaultSortField: FIELDS.DOCUMENT.TITLE,
   defaultSortOrder: SORT_ORDER.ASC,
 });
 
@@ -67,24 +62,36 @@ export const Route = createFileRoute(
   }),
   loader: async ({ context, deps }) => {
     const activeOrganizationId = getActiveOrganizationId();
-    const documentPagination = processPaginationInput(deps.pagination);
-    const projectPagination = processPaginationInput(DEFAULT_PAGINATION);
+    const pagination = processPaginationInput(deps.pagination);
 
     const [projects] = await context.query.ensureQueryData(
-      getProjectsByOrganizationOptions(activeOrganizationId, projectPagination),
+      listProjectsByOrganizationIdOptions({
+        organizationId: activeOrganizationId,
+      }),
     );
 
+    const projectId = projects[0].id;
+
+    if (!projectId) {
+      throw new Error('Not implemented');
+    }
+
+    const defaultPagination = createPagination(ENTITY.DOCUMENT, {
+      defaultFilterField: FIELDS.DOCUMENT.PROJECT_ID,
+      defaultFilterOperator: FILTER_OPERATOR.EQUALS,
+      defaultFilterValue: projectId.toString(),
+      defaultSortField: FIELDS.DOCUMENT.TITLE,
+      defaultSortOrder: SORT_ORDER.ASC,
+    });
+
     const [documents, paginationMetaData] = await context.query.ensureQueryData(
-      listDocumentsOptions({
-        pagination: documentPagination,
-        project_id: projects[0]?.id || 0, // TODO: selectable
-      }),
+      listDocumentsOptions({ pagination: defaultPagination }),
     );
 
     return {
       context,
       documents,
-      pagination: documentPagination,
+      pagination,
       paginationMetaData,
       projects,
     };
@@ -209,12 +216,12 @@ function Documents() {
             actions={RowActions}
             columnConfig={[
               {
-                cellPreprocess: (title) => title,
+                cellPreprocess: (document) => document.title,
                 headerName: 'Document title',
                 key: 'title',
               },
               {
-                cellPreprocess: (version) => version,
+                cellPreprocess: (document) => document.version,
                 headerName: 'Version',
                 key: 'version',
               },
@@ -224,7 +231,7 @@ function Documents() {
             onSortingChange={onSortChange}
             paginationMetaData={paginationMetaData}
             sort={effectiveSort}
-            tableData={documents}
+            data={documents}
           />
         </CardContent>
       </Card>

@@ -11,9 +11,9 @@ use crate::types::pagination::{
     FilterCriteria, FilterField, FilterOperator, SortCriteria, SortOrder,
 };
 use crate::types::projects::{Project, ProjectId};
-use crate::types::revisions::Revision;
+use crate::types::revisions::{Revision, RevisionId};
 use crate::types::users::{User, UserId};
-use crate::types::workflows::Workflow;
+use crate::types::workflows::{Workflow, WorkflowId};
 
 pub trait Filterable {
     fn matches(&self, criteria: &FilterCriteria) -> bool;
@@ -26,13 +26,23 @@ pub trait Sortable {
 impl Filterable for Document {
     fn matches(&self, criteria: &FilterCriteria) -> bool {
         match &criteria.field {
+            FilterField::Document(DocumentFilterField::Id) => {
+                let criteria_value = criteria.value.parse::<DocumentId>().unwrap_or(0);
+                match criteria.operator {
+                    FilterOperator::Equals => self.id == criteria_value,
+                    _ => false,
+                }
+            }
+
             FilterField::Document(DocumentFilterField::Title) => match criteria.operator {
                 FilterOperator::Equals => self.title == criteria.value,
                 FilterOperator::Contains => self.title.contains(&criteria.value),
                 _ => false,
             },
+
             FilterField::Document(DocumentFilterField::CreatedAt) => {
-                let criteria_value = criteria.value.parse::<u64>().unwrap_or(0);
+                let parse_result = criteria.value.parse::<u64>();
+                let criteria_value = parse_result.unwrap_or(0);
                 match criteria.operator {
                     FilterOperator::GreaterThan => self.created_at > criteria_value,
                     FilterOperator::LessThan => self.created_at < criteria_value,
@@ -40,10 +50,21 @@ impl Filterable for Document {
                     _ => false,
                 }
             }
+
             FilterField::Document(DocumentFilterField::ProjectId) => {
-                let criteria_value = criteria.value.parse::<ProjectId>().unwrap_or(0);
+                let parse_result = criteria.value.parse::<ProjectId>();
+                let criteria_value = parse_result.unwrap_or(0);
                 match criteria.operator {
                     FilterOperator::Equals => self.project_id == criteria_value,
+                    _ => false,
+                }
+            }
+
+            FilterField::Document(DocumentFilterField::Version) => {
+                let parse_result = criteria.value.parse::<u8>();
+                let criteria_value = parse_result.unwrap_or(0);
+                match criteria.operator {
+                    FilterOperator::Equals => self.version == criteria_value,
                     _ => false,
                 }
             }
@@ -56,7 +77,7 @@ impl Filterable for User {
     fn matches(&self, criteria: &FilterCriteria) -> bool {
         match &criteria.field {
             FilterField::User(UserFilterField::Id) => {
-                let parsed_value = criteria.value.parse::<u64>().ok();
+                let parsed_value = criteria.value.parse::<UserId>().ok();
                 match (criteria.operator.clone(), parsed_value) {
                     (FilterOperator::Equals, Some(value)) => self.id == value,
                     (FilterOperator::Equals, None) => false,
@@ -82,7 +103,7 @@ impl Filterable for UserWithRoles {
     fn matches(&self, criteria: &FilterCriteria) -> bool {
         match &criteria.field {
             FilterField::User(UserFilterField::Id) => {
-                let parsed_value = criteria.value.parse::<u64>().ok();
+                let parsed_value = criteria.value.parse::<UserId>().ok();
                 match (criteria.operator.clone(), parsed_value) {
                     (FilterOperator::Equals, Some(value)) => self.user.id == value,
                     (FilterOperator::Equals, None) => false,
@@ -107,8 +128,18 @@ impl Filterable for UserWithRoles {
 impl Filterable for Revision {
     fn matches(&self, criteria: &FilterCriteria) -> bool {
         match &criteria.field {
+            FilterField::Revision(RevisionFilterField::Id) => {
+                let parse_result = criteria.value.parse::<RevisionId>();
+                let criteria_value = parse_result.unwrap_or(0);
+
+                match criteria.operator {
+                    FilterOperator::Equals => self.id == criteria_value,
+                    _ => false,
+                }
+            }
             FilterField::Revision(RevisionFilterField::CreatedAt) => {
-                let criteria_value = criteria.value.parse::<u64>().unwrap_or(0);
+                let parse_result = criteria.value.parse::<u64>();
+                let criteria_value = parse_result.unwrap_or(0);
                 match criteria.operator {
                     FilterOperator::GreaterThan => self.created_at > criteria_value,
                     FilterOperator::LessThan => self.created_at < criteria_value,
@@ -117,21 +148,27 @@ impl Filterable for Revision {
                 }
             }
             FilterField::Revision(RevisionFilterField::DocumentId) => {
-                let criteria_value = criteria.value.parse::<DocumentId>().unwrap_or(0);
+                let parse_result = criteria.value.parse::<DocumentId>();
+
+                let criteria_value = parse_result.unwrap_or(0);
                 match criteria.operator {
                     FilterOperator::Equals => self.document_id == criteria_value,
                     _ => false,
                 }
             }
             FilterField::Revision(RevisionFilterField::ProjectId) => {
-                let criteria_value = criteria.value.parse::<ProjectId>().unwrap_or(0);
+                let parse_result = criteria.value.parse::<ProjectId>();
+                let criteria_value = parse_result.unwrap_or(0);
+
                 match criteria.operator {
                     FilterOperator::Equals => self.project_id == criteria_value,
                     _ => false,
                 }
             }
             FilterField::Revision(RevisionFilterField::Version) => {
-                let criteria_value = criteria.value.parse::<u8>().unwrap_or(0);
+                let parse_result = criteria.value.parse::<u8>();
+
+                let criteria_value = parse_result.unwrap_or(0);
                 match criteria.operator {
                     FilterOperator::Equals => self.version == criteria_value,
                     _ => false,
@@ -145,6 +182,13 @@ impl Filterable for Revision {
 impl Filterable for Organization {
     fn matches(&self, criteria: &FilterCriteria) -> bool {
         match &criteria.field {
+            FilterField::Organization(OrganizationFilterField::Id) => {
+                let criteria_value = criteria.value.parse::<OrganizationId>().unwrap_or(0);
+                match criteria.operator {
+                    FilterOperator::Equals => self.id == criteria_value,
+                    _ => false,
+                }
+            }
             FilterField::Organization(OrganizationFilterField::CreatedAt) => {
                 let criteria_value = criteria.value.parse::<u64>().unwrap_or(0);
                 match criteria.operator {
@@ -167,6 +211,13 @@ impl Filterable for Organization {
 impl Filterable for Project {
     fn matches(&self, criteria: &FilterCriteria) -> bool {
         match &criteria.field {
+            FilterField::Project(ProjectFilterField::Id) => {
+                let criteria_value = criteria.value.parse::<ProjectId>().unwrap_or(0);
+                match criteria.operator {
+                    FilterOperator::Equals => self.id == criteria_value,
+                    _ => false,
+                }
+            }
             FilterField::Project(ProjectFilterField::Members) => {
                 let criteria_value = criteria.value.parse::<UserId>().unwrap_or(0);
                 match criteria.operator {
@@ -203,6 +254,13 @@ impl Filterable for Project {
 impl Filterable for Workflow {
     fn matches(&self, criteria: &FilterCriteria) -> bool {
         match &criteria.field {
+            FilterField::Workflow(WorkflowFilterField::Id) => {
+                let criteria_value = criteria.value.parse::<WorkflowId>().unwrap_or(0);
+                match criteria.operator {
+                    FilterOperator::Equals => self.id == criteria_value,
+                    _ => false,
+                }
+            }
             FilterField::Workflow(WorkflowFilterField::Name) => match criteria.operator {
                 FilterOperator::Equals => self.name == criteria.value,
                 FilterOperator::Contains => self.name.contains(&criteria.value),

@@ -1,28 +1,27 @@
 {
-	"name": "pt",
-	"packageManager": "pnpm@8.15.5",
-	"private": true,
-	"engines": {
-		"node": "=23.7.0"
-	},
-	"scripts": {
-		"build": "pnpm --filter=pt_frontend run build",
-		"build:icons": "pnpm --filter=pt_frontend build:icons",
-		"add:icons": "pnpm --filter=pt_frontend add:icons",
-		"add:components": "pnpm --filter=pt_frontend add:components",
-		"pretest": "pnpm --filter=pt_frontend prebuild",
-		"start": "pnpm --filter=pt_frontend start",
-		"typecheck": "pnpm --filter=pt_frontend typecheck",
-		"test": "pnpm --filter=pt_frontend test",
-		"format": "pnpm --filter=pt_frontend format",
-		"lint": "pnpm --filter=pt_frontend lint",
-		"lint:fix": "pnpm --filter=pt_frontend run lint --fix",
-		"deploy": "./scripts/deploy.sh",
-		"clean": "./scripts/clean.sh",
-		"generate": "./scripts/codegen/generate.sh"
-	},
-	"type": "module",
-	"pnpm": {
-		"workspaces": ["src/pt_frontend"]
-	}
+  "name": "pt",
+  "packageManager": "pnpm@8.15.5",
+  "private": true,
+  "engines": {
+    "node": "=23.7.0"
+  },
+  "scripts": {
+    "preinstall": "./scripts/check-node-version.sh",
+    "build": "pnpm --filter=pt_frontend run build",
+    "build:icons": "pnpm --filter=pt_frontend build:icons",
+    "add:icons": "pnpm --filter=pt_frontend add:icons",
+    "add:components": "pnpm --filter=pt_frontend add:components",
+    "pretest": "pnpm --filter=pt_frontend prebuild",
+    "start": "pnpm --filter=pt_frontend start",
+    "typecheck": "pnpm --filter=pt_frontend typecheck",
+    "test": "pnpm --filter=pt_frontend test",
+    "format": "pnpm --filter=pt_frontend format",
+    "lint": "pnpm --filter=pt_frontend lint",
+    "lint:fix": "pnpm --filter=pt_frontend run lint --fix",
+    "deploy": "./scripts/deploy.sh",
+    "clean": "./scripts/clean.sh",
+    "generate": "./scripts/codegen/generate.sh",
+    "check-node": "./scripts/check-node-version.sh"
+  },
+  "type": "module"
 }

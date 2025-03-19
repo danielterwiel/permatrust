@@ -3,31 +3,27 @@ import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 
 import { listWorkflowsOptions } from '@/api/queries/workflows';
 import { usePagination } from '@/hooks/use-pagination';
-import { createEntityPaginationSchema } from '@/schemas/pagination';
+import { createPaginationSchema } from '@/schemas/pagination';
 import { processPaginationInput } from '@/utils/pagination';
 
-import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
 import { Link } from '@/components/link';
+import { Table } from '@/components/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 
 import { ENTITY } from '@/consts/entities';
-import {
-  FILTER_OPERATOR,
-  FILTER_SORT_FIELDS,
-  SORT_ORDER,
-} from '@/consts/pagination';
+import { FIELDS, FILTER_OPERATOR, SORT_ORDER } from '@/consts/pagination';
 
 import type { Workflow } from '@/declarations/pt_backend/pt_backend.did';
 import type { Row } from '@tanstack/react-table';
 
 const { schema: workflowsSearchSchema, defaultPagination } =
-  createEntityPaginationSchema(ENTITY.WORKFLOW, {
-    defaultFilterField: FILTER_SORT_FIELDS.WORKFLOW.NAME,
+  createPaginationSchema(ENTITY.WORKFLOW, {
+    defaultFilterField: FIELDS.WORKFLOW.NAME,
     defaultFilterOperator: FILTER_OPERATOR.CONTAINS,
     defaultFilterValue: '',
-    defaultSortField: FILTER_SORT_FIELDS.WORKFLOW.NAME,
+    defaultSortField: FIELDS.WORKFLOW.NAME,
     defaultSortOrder: SORT_ORDER.ASC,
   });
 
@@ -73,14 +69,14 @@ const RowActions = (row: Row<Workflow>) => {
 
 function Workflows() {
   const { pagination, paginationMetaData, workflows } = Route.useLoaderData();
-  
-  const effectiveSort = pagination.sort.length 
-    ? pagination.sort 
+
+  const effectiveSort = pagination.sort.length
+    ? pagination.sort
     : defaultPagination.sort;
-  
+
   const { onFilterChange, onSortChange, getPageChangeParams } = usePagination(
     pagination,
-    defaultPagination
+    defaultPagination,
   );
 
   return (
@@ -122,7 +118,7 @@ function Workflows() {
             actions={RowActions}
             columnConfig={[
               {
-                cellPreprocess: (name) => name,
+                cellPreprocess: (workflow) => workflow.name,
                 headerName: 'Name',
                 key: 'name',
               },
@@ -132,7 +128,7 @@ function Workflows() {
             onSortingChange={onSortChange}
             paginationMetaData={paginationMetaData}
             sort={effectiveSort}
-            tableData={workflows}
+            data={workflows}
           />
         </CardContent>
       </Card>

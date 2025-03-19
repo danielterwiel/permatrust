@@ -42,14 +42,3 @@ pub fn insert(id: ProjectId, project: Project) {
         projects.borrow_mut().insert(id, project);
     });
 }
-
-pub fn get_by_organization_id(organization_id: OrganizationId) -> Vec<Project> {
-    PROJECTS.with(|projects| {
-        projects
-            .borrow()
-            .iter()
-            .filter(|(_, proj)| proj.organizations.contains(&organization_id))
-            .map(|(_, proj)| proj.clone())
-            .collect()
-    })
-}

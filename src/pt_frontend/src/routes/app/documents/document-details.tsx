@@ -2,38 +2,34 @@ import { createFileRoute } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { useState } from 'react';
 
-import { getRevisionsByDocumentIdOptions } from '@/api/queries';
+import { listRevisionsByDocumentIdOptions } from '@/api/queries';
 import { getDocumentOptions } from '@/api/queries/documents';
 import { usePagination } from '@/hooks/use-pagination';
 import { documentIdSchema } from '@/schemas/entities';
-import { createEntityPaginationSchema } from '@/schemas/pagination';
+import { createPaginationSchema } from '@/schemas/pagination';
 import { toNumberSchema } from '@/schemas/primitives';
 import { formatDateTime } from '@/utils/format-date-time';
 import { processPaginationInput } from '@/utils/pagination';
 
-import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
 import { Link } from '@/components/link';
+import { Table } from '@/components/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 
 import { ENTITY } from '@/consts/entities';
-import {
-  FILTER_OPERATOR,
-  FILTER_SORT_FIELDS,
-  SORT_ORDER,
-} from '@/consts/pagination';
+import { FIELDS, FILTER_OPERATOR, SORT_ORDER } from '@/consts/pagination';
 
 import type { Revision } from '@/declarations/pt_backend/pt_backend.did';
 import type { RevisionId } from '@/types/entities';
 import type { Row } from '@tanstack/react-table';
 
 const { schema: revisionsSearchSchema, defaultPagination } =
-  createEntityPaginationSchema(ENTITY.REVISION, {
-    defaultFilterField: FILTER_SORT_FIELDS.REVISION.CREATED_AT,
+  createPaginationSchema(ENTITY.REVISION, {
+    defaultFilterField: FIELDS.REVISION.CREATED_AT,
     defaultFilterOperator: FILTER_OPERATOR.CONTAINS,
     defaultFilterValue: '',
-    defaultSortField: FILTER_SORT_FIELDS.REVISION.CREATED_AT,
+    defaultSortField: FIELDS.REVISION.CREATED_AT,
     defaultSortOrder: SORT_ORDER.DESC,
   });
 
@@ -45,13 +41,15 @@ export const Route = createFileRoute(
     pagination: { ...defaultPagination, ...search?.pagination },
   }),
   loader: async ({ context, deps, params }) => {
-    const revisionPagination = processPaginationInput(deps.pagination);
     const documentId = documentIdSchema.parse(params.documentId);
 
+    const pagination = processPaginationInput(deps.pagination);
     const [revisions, paginationMetaData] = await context.query.ensureQueryData(
-      getRevisionsByDocumentIdOptions(documentId, revisionPagination),
+      listRevisionsByDocumentIdOptions({
+        documentId,
+        pagination,
+      }),
     );
-
     const document = await context.query.ensureQueryData(
       getDocumentOptions(documentId),
     );
@@ -59,7 +57,7 @@ export const Route = createFileRoute(
     return {
       context,
       document,
-      pagination: revisionPagination,
+      pagination,
       paginationMetaData,
       revisions,
     };
@@ -127,14 +125,12 @@ function DocumentDetails() {
               projectId,
             }}
             search={{
-              current:
-                selected[1]
-                  ? toNumberSchema.parse(selected[1].id)
-                  : undefined,
-              theirs:
-                selected[0]
-                  ? toNumberSchema.parse(selected[0].id)
-                  : undefined,
+              current: selected[1]
+                ? toNumberSchema.parse(selected[1].id)
+                : undefined,
+              theirs: selected[0]
+                ? toNumberSchema.parse(selected[0].id)
+                : undefined,
             }}
             to="/projects/$projectId/documents/$documentId/revisions/diff"
             variant={selected.length !== 2 ? 'secondary' : 'outline'}
@@ -174,16 +170,20 @@ function DocumentDetails() {
             actions={RowActions}
             columnConfig={[
               {
-                cellPreprocess: (v) => v,
+                cellPreprocess: (revision) => revision.version,
                 headerName: 'Version',
                 key: 'version',
               },
               {
-                cellPreprocess: (content) => {
+                cellPreprocess: (revision) => {
                   return (
                     <div className="truncate max-w-md">
                       {new TextDecoder().decode(
-                        new Uint8Array(content ? Object.values(content) : []),
+                        new Uint8Array(
+                          // revision.content !== undefined ?
+                          Object.values(revision.content),
+                          // : [],
+                        ),
                       )}
                     </div>
                   );
@@ -192,12 +192,13 @@ function DocumentDetails() {
                 key: 'content',
               },
               {
-                cellPreprocess: (createdBy) => (createdBy as bigint).toString(),
+                cellPreprocess: (revision) => revision.created_by.toString(),
                 headerName: 'Created by',
                 key: 'created_by',
               },
               {
-                cellPreprocess: (createdAt) => formatDateTime(createdAt as bigint),
+                cellPreprocess: (revision) =>
+                  formatDateTime(revision.created_at),
                 headerName: 'Created at',
                 key: 'created_at',
               },
@@ -208,7 +209,7 @@ function DocumentDetails() {
             onSortingChange={onSortChange}
             paginationMetaData={paginationMetaData}
             sort={effectiveSort}
-            tableData={revisions}
+            data={revisions}
           />
         </CardContent>
       </Card>

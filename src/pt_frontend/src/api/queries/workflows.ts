@@ -1,22 +1,45 @@
+import { createPagination } from '@/schemas/pagination';
 import { createQueryOptions } from '@/utils/create-query-options';
 
-import type {
-  PaginationInput,
-  ProjectIdInput,
-} from '@/declarations/pt_backend/pt_backend.did';
+import { getSingleApiResult } from '../utils/get-single-api-result';
+
+import { ENTITY } from '@/consts/entities';
+import {
+  FIELDS,
+  FILTER_OPERATOR,
+  PAGE_SIZE,
+  SORT_ORDER,
+} from '@/consts/pagination';
+
+import type { PaginationInput } from '@/declarations/pt_backend/pt_backend.did';
+import type { ProjectId } from '@/types/entities';
 
 import { api } from '@/api';
 
-export const getWorkflowOptions = (input: ProjectIdInput) =>
-  createQueryOptions({
-    queryFn: () => api.get_workflow(input),
-    queryKey: ['workflow', input],
+export const getWorkflowOptions = (id: ProjectId) => {
+  const pagination = createPagination(ENTITY.WORKFLOW, {
+    defaultFilterField: FIELDS.WORKFLOW.ID,
+    defaultFilterOperator: FILTER_OPERATOR.EQUALS,
+    defaultFilterValue: id.toString(),
+    defaultSortField: FIELDS.WORKFLOW.NAME,
+    defaultSortOrder: SORT_ORDER.ASC,
+    pageSize: PAGE_SIZE.SINGLE,
   });
 
-export const getWorkflowStateOptions = (input: ProjectIdInput) =>
+  return createQueryOptions({
+    queryFn: async () =>
+      getSingleApiResult(
+        () => api.list_workflows(pagination),
+        'Workflow not found',
+      ),
+    queryKey: ['workflow', { id: id }],
+  });
+};
+
+export const getWorkflowStateOptions = (id: ProjectId) =>
   createQueryOptions({
-    queryFn: () => api.get_workflow_state(input),
-    queryKey: ['workflow_state', input],
+    queryFn: () => api.get_workflow_state({ id }),
+    queryKey: ['workflow_state', id],
   });
 
 export const listWorkflowsOptions = (input: PaginationInput) =>

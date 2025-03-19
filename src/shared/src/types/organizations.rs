@@ -21,11 +21,6 @@ pub struct Organization {
 // Inputs
 
 #[derive(CandidType, Deserialize)]
-pub struct OrganizationIdInput {
-    pub id: OrganizationId,
-}
-
-#[derive(CandidType, Deserialize)]
 pub struct CreateOrganizationInput {
     pub name: String,
 }
@@ -56,11 +51,5 @@ pub enum CreateOrganizationResult {
 #[derive(CandidType, Deserialize)]
 pub enum ListOrganizationsResult {
     Ok((Vec<Organization>, PaginationMetadata)),
-    Err(AppError),
-}
-
-#[derive(CandidType, Deserialize)]
-pub enum GetOrganizationResult {
-    Ok(Organization),
     Err(AppError),
 }

@@ -65,12 +65,6 @@ pub enum ListWorkflowsResult {
 }
 
 #[derive(CandidType, Deserialize)]
-pub enum GetWorkflowResult {
-    Ok(Workflow),
-    Err(AppError),
-}
-
-#[derive(CandidType, Deserialize)]
 pub enum ExecuteWorkflowResult {
     Ok(()),
     Err(AppError),

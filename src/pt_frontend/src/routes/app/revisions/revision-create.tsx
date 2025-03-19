@@ -1,39 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router';
 
 import { mutations } from '@/api/mutations';
-import { getRevisionsByDocumentIdOptions } from '@/api/queries';
+import { listRevisionsByDocumentIdOptions } from '@/api/queries';
 import { documentIdSchema, projectIdSchema } from '@/schemas/entities';
-import { createEntityPaginationSchema } from '@/schemas/pagination';
-import { processPaginationInput } from '@/utils/pagination';
 
 import { CreateRevisionForm } from '@/components/create-revision-form';
 import type { createRevisionFormSchema } from '@/components/create-revision-form';
 
-import { ENTITY } from '@/consts/entities';
-import {
-  FILTER_OPERATOR,
-  FILTER_SORT_FIELDS,
-  SORT_ORDER,
-} from '@/consts/pagination';
-
-import type { PaginationInput } from '@/declarations/pt_backend/pt_backend.did';
 import type { z } from 'zod';
-
-const { defaultPagination: revisionPagination } = createEntityPaginationSchema(
-  ENTITY.REVISION,
-  {
-    defaultFilterField: FILTER_SORT_FIELDS.REVISION.CREATED_AT,
-    defaultFilterOperator: FILTER_OPERATOR.EQUALS,
-    defaultFilterValue: '',
-    defaultSortField: FILTER_SORT_FIELDS.REVISION.CREATED_AT,
-    defaultSortOrder: SORT_ORDER.DESC,
-  },
-);
-
-const LAST_REVISION_PAGINATION: PaginationInput = {
-  ...revisionPagination,
-  page_size: 1,
-};
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents/$documentId/revisions/create',
@@ -42,11 +16,10 @@ export const Route = createFileRoute(
     getTitle: () => 'Create revision',
   }),
   loader: async ({ context, params }) => {
-    const paginationInput = processPaginationInput(LAST_REVISION_PAGINATION);
     const documentId = documentIdSchema.parse(params.documentId);
 
     const revisions = await context.query.ensureQueryData(
-      getRevisionsByDocumentIdOptions(documentId, paginationInput),
+      listRevisionsByDocumentIdOptions({ documentId }),
     );
     return { revisions };
   },

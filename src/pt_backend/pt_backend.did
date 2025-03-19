@@ -47,8 +47,7 @@ type Document = record {
   version : nat8;
   project_id : nat32;
 };
-type DocumentFilterField = variant { ProjectId; Version; Title; CreatedAt };
-type DocumentIdInput = record { id : nat64 };
+type DocumentFilterField = variant { Id; ProjectId; Version; Title; CreatedAt };
 type DocumentPermission = variant {
   Share;
   Read;
@@ -77,6 +76,7 @@ type FilterCriteria = record {
   operator : FilterOperator;
 };
 type FilterField = variant {
+  Role : RoleFilterField;
   User : UserFilterField;
   UserWithRoles : UserWithRolesFilterField;
   Document : DocumentFilterField;
@@ -86,26 +86,18 @@ type FilterField = variant {
   Workflow : WorkflowFilterField;
 };
 type FilterOperator = variant { Contains; GreaterThan; LessThan; Equals };
-type GetDocumentResult = variant { Ok : Document; Err : AppError };
-type GetOrganizationResult = variant { Ok : Organization; Err : AppError };
 type GetPermissionsResult = variant { Ok : vec Permission; Err : AppError };
 type GetProjectRolesInput = record { project_id : nat32 };
 type GetProjectRolesResult = variant { Ok : vec Role; Err : AppError };
 type GetProjectsResult = variant { Ok : vec Project; Err : AppError };
-type GetRevisionResult = variant { Ok : Revision; Err : AppError };
-type GetRoleResult = variant { Ok : Role; Err : AppError };
 type GetUserResult = variant { Ok : User; Err : AppError };
 type GetUserRolesResult = variant { Ok : vec Role; Err : AppError };
 type GetWorkflowDefinitionResult = variant {
   Ok : WorkflowGraph;
   Err : AppError;
 };
-type GetWorkflowResult = variant { Ok : Workflow; Err : AppError };
 type GetWorkflowStateResult = variant { Ok : text; Err : AppError };
-type ListDocumentsInput = record {
-  pagination : PaginationInput;
-  project_id : nat32;
-};
+type ListDocumentsInput = record { pagination : PaginationInput };
 type ListDocumentsResult = variant {
   Ok : record { vec Document; PaginationMetadata };
   Err : AppError;
@@ -113,6 +105,10 @@ type ListDocumentsResult = variant {
 type ListOrganizationsResult = variant {
   Ok : record { vec Organization; PaginationMetadata };
   Err : AppError;
+};
+type ListProjectMembersInput = record {
+  pagination : PaginationInput;
+  project_id : nat32;
 };
 type ListProjectMembersResult = variant {
   Ok : record { vec User; PaginationMetadata };
@@ -122,21 +118,9 @@ type ListProjectMembersRolesResult = variant {
   Ok : record { vec UserWithRoles; PaginationMetadata };
   Err : AppError;
 };
-type ListProjectsByOrganizationIdInput = record {
-  pagination : PaginationInput;
-  organization_id : nat32;
-};
 type ListProjectsResult = variant {
   Ok : record { vec Project; PaginationMetadata };
   Err : AppError;
-};
-type ListRevisionsByDocumentIdInput = record {
-  document_id : nat64;
-  pagination : PaginationInput;
-};
-type ListRevisionsInput = record {
-  pagination : PaginationInput;
-  revision_id : nat64;
 };
 type ListRevisionsResult = variant {
   Ok : record { vec Revision; PaginationMetadata };
@@ -159,8 +143,7 @@ type Organization = record {
   created_at : nat64;
   created_by : nat64;
 };
-type OrganizationFilterField = variant { Name; CreatedAt };
-type OrganizationIdInput = record { id : nat32 };
+type OrganizationFilterField = variant { Id; Name; CreatedAt };
 type OrganizationPermission = variant {
   Read;
   ConfigureSettings;
@@ -203,13 +186,13 @@ type Project = record {
   organizations : vec nat32;
 };
 type ProjectFilterField = variant {
+  Id;
   Name;
   OrganizationId;
   Members;
   CreatedAt;
   CreatedBy;
 };
-type ProjectIdInput = record { id : nat32 };
 type ProjectPermission = variant {
   ManageSettings;
   Read;
@@ -222,7 +205,6 @@ type ProjectPermission = variant {
   Update;
   ViewMetrics;
 };
-type ProjectResult = variant { Ok : Project; Err : AppError };
 type Revision = record {
   id : nat64;
   content : blob;
@@ -233,6 +215,7 @@ type Revision = record {
   project_id : nat32;
 };
 type RevisionFilterField = variant {
+  Id;
   ProjectId;
   Version;
   DocumentId;
@@ -255,6 +238,7 @@ type Role = record {
   created_at : nat64;
   project_id : nat32;
 };
+type RoleFilterField = variant { Id; Name; ProjectId; CreatedAt };
 type RoleInput = record {
   permissions : vec Permission;
   name : text;
@@ -285,7 +269,7 @@ type UserPermission = variant {
   Invite;
 };
 type UserWithRoles = record { user : User; roles : vec Role };
-type UserWithRolesFilterField = variant { FirstName; LastName };
+type UserWithRolesFilterField = variant { Id; ProjectId; FirstName; LastName };
 type Workflow = record {
   id : nat32;
   current_state : text;
@@ -293,11 +277,12 @@ type Workflow = record {
   graph : WorkflowGraph;
   project_id : nat32;
 };
-type WorkflowFilterField = variant { Name; ProjectId };
+type WorkflowFilterField = variant { Id; Name; ProjectId };
 type WorkflowGraph = record {
   edges : vec record { nat64; nat64; text };
   nodes : vec text;
 };
+type WorkflowIdInput = record { id : nat32 };
 type WorkflowPermission = variant {
   ViewHistory;
   Read;
@@ -319,41 +304,25 @@ service : () -> {
   create_workflow : (CreateWorkflowInput) -> (CreateProjectResult);
   execute_workflow : (ExecuteWorkflowInput) -> (ExecuteWorkflowResult);
   get_diff_revisions : (DiffRevisionsInput) -> (DiffRevisionsResult) query;
-  get_document : (DocumentIdInput) -> (GetDocumentResult) query;
-  get_organization : (OrganizationIdInput) -> (GetOrganizationResult) query;
   get_permissions : () -> (GetPermissionsResult) query;
-  get_project : (ProjectIdInput) -> (ProjectResult) query;
   get_project_roles : (GetProjectRolesInput) -> (GetProjectRolesResult) query;
   get_projects : () -> (GetProjectsResult) query;
-  get_revision : (DocumentIdInput) -> (GetRevisionResult) query;
-  get_role : (DocumentIdInput) -> (GetRoleResult) query;
   get_user : () -> (GetUserResult) query;
-  get_user_permissions : (UserIdInput) -> (GetPermissionsResult) query;
   get_user_roles : (UserIdInput) -> (GetUserRolesResult) query;
-  get_workflow : (ProjectIdInput) -> (GetWorkflowResult) query;
-  get_workflow_definition : (ProjectIdInput) -> (
+  get_workflow_definition : (WorkflowIdInput) -> (
       GetWorkflowDefinitionResult,
     ) query;
-  get_workflow_state : (ProjectIdInput) -> (GetWorkflowStateResult) query;
+  get_workflow_state : (WorkflowIdInput) -> (GetWorkflowStateResult) query;
   list_documents : (ListDocumentsInput) -> (ListDocumentsResult) query;
-  list_documents_by_project_id : (ListDocumentsInput) -> (
-      ListDocumentsResult,
-    ) query;
   list_organizations : (PaginationInput) -> (ListOrganizationsResult) query;
-  list_project_members : (ListDocumentsInput) -> (
+  list_project_members : (ListProjectMembersInput) -> (
       ListProjectMembersResult,
     ) query;
-  list_project_members_roles : (ListDocumentsInput) -> (
+  list_project_members_roles : (ListProjectMembersInput) -> (
       ListProjectMembersRolesResult,
     ) query;
   list_projects : (PaginationInput) -> (ListProjectsResult) query;
-  list_projects_by_organization_id : (ListProjectsByOrganizationIdInput) -> (
-      ListProjectsResult,
-    ) query;
-  list_revisions : (ListRevisionsInput) -> (ListRevisionsResult) query;
-  list_revisions_by_document_id : (ListRevisionsByDocumentIdInput) -> (
-      ListRevisionsResult,
-    ) query;
+  list_revisions : (ListDocumentsInput) -> (ListRevisionsResult) query;
   list_users : (ListUsersInput) -> (ListUsersResult) query;
   list_workflows : (PaginationInput) -> (ListWorkflowsResult) query;
   update_role_permissions : (UpdateRolePermissionsInput) -> (

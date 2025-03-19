@@ -4,31 +4,27 @@ import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { listDocumentsByProjectIdOptions } from '@/api/queries/documents';
 import { getProjectOptions } from '@/api/queries/projects';
 import { usePagination } from '@/hooks/use-pagination';
-import { createEntityPaginationSchema } from '@/schemas/pagination';
+import { createPaginationSchema } from '@/schemas/pagination';
 import { processPaginationInput } from '@/utils/pagination';
 
-import { Table } from '@/components/data-table';
 import { FilterInput } from '@/components/filter-input';
 import { Link } from '@/components/link';
+import { Table } from '@/components/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 
 import { ENTITY } from '@/consts/entities';
-import {
-  FILTER_OPERATOR,
-  FILTER_SORT_FIELDS,
-  SORT_ORDER,
-} from '@/consts/pagination';
+import { FIELDS, FILTER_OPERATOR, SORT_ORDER } from '@/consts/pagination';
 
 import type { Document } from '@/declarations/pt_backend/pt_backend.did';
 import type { Row } from '@tanstack/react-table';
 
 const { schema: projectsSearchSchema, defaultPagination } =
-  createEntityPaginationSchema(ENTITY.DOCUMENT, {
-    defaultFilterField: FILTER_SORT_FIELDS.DOCUMENT.TITLE,
+  createPaginationSchema(ENTITY.DOCUMENT, {
+    defaultFilterField: FIELDS.DOCUMENT.TITLE,
     defaultFilterOperator: FILTER_OPERATOR.CONTAINS,
     defaultFilterValue: '',
-    defaultSortField: FILTER_SORT_FIELDS.DOCUMENT.TITLE,
+    defaultSortField: FIELDS.DOCUMENT.TITLE,
     defaultSortOrder: SORT_ORDER.ASC,
   });
 
@@ -40,7 +36,7 @@ export const Route = createFileRoute(
     pagination: { ...defaultPagination, ...search?.pagination },
   }),
   loader: async ({ context, deps, params }) => {
-    const documentPagination = processPaginationInput(deps.pagination);
+    const pagination = processPaginationInput(deps.pagination);
     const projectId = Number(params.projectId);
     const project = await context.query.ensureQueryData(
       getProjectOptions(projectId),
@@ -48,14 +44,14 @@ export const Route = createFileRoute(
 
     const [documents, paginationMetaData] = await context.query.ensureQueryData(
       listDocumentsByProjectIdOptions({
-        pagination: documentPagination,
-        project_id: projectId,
+        projectId,
+        pagination,
       }),
     );
     return {
       context,
       documents,
-      pagination: documentPagination,
+      pagination,
       paginationMetaData,
       project,
     };
@@ -84,8 +80,8 @@ function ProjectDetails() {
     return (
       <Link
         params={{
-          documentId: row.id,
-          projectId: row.original.project_id.toString(),
+          documentId: String(row.original.id),
+          projectId: String(row.original.project_id),
         }}
         to="/projects/$projectId/documents/$documentId"
         variant="outline"
@@ -151,12 +147,12 @@ function ProjectDetails() {
               actions={RowActions}
               columnConfig={[
                 {
-                  cellPreprocess: (title) => title,
+                  cellPreprocess: (document) => document.title,
                   headerName: 'Title',
                   key: 'title',
                 },
                 {
-                  cellPreprocess: (version) => version,
+                  cellPreprocess: (document) => document.version,
                   headerName: 'Version',
                   key: 'version',
                 },
@@ -166,7 +162,7 @@ function ProjectDetails() {
               onSortingChange={onSortChange}
               paginationMetaData={paginationMetaData}
               sort={effectiveSort}
-              tableData={documents}
+              data={documents}
             />
           </CardContent>
         </Card>

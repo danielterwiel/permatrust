@@ -5,8 +5,7 @@ use crate::logger::{log_info, loggable_revision};
 use crate::users::get_user_by_principal;
 use shared::types::revisions::{
     CreateRevisionInput, CreateRevisionResult, DiffRevisionsInput, DiffRevisionsResult,
-    GetRevisionResult, ListRevisionsByDocumentIdInput, ListRevisionsInput, ListRevisionsResult,
-    RevisionIdInput,
+    ListRevisionsInput, ListRevisionsResult,
 };
 use shared::types::users::GetUserResult;
 use shared::utils::pagination::paginate;
@@ -48,34 +47,8 @@ pub fn create_revision(input: CreateRevisionInput) -> CreateRevisionResult {
 }
 
 #[ic_cdk_macros::query]
-pub fn get_revision(input: RevisionIdInput) -> GetRevisionResult {
-    match state::get_by_id(input.id) {
-        Some(revision) => GetRevisionResult::Ok(revision),
-        None => GetRevisionResult::Err(AppError::EntityNotFound("Revision not found".to_string())),
-    }
-}
-
-#[ic_cdk_macros::query]
 pub fn list_revisions(input: ListRevisionsInput) -> ListRevisionsResult {
     let revisions = state::get_all();
-    match paginate(
-        &revisions,
-        input.pagination.page_size,
-        input.pagination.page_number,
-        input.pagination.filters,
-        input.pagination.sort,
-    ) {
-        Ok(result) => ListRevisionsResult::Ok(result),
-        Err(e) => ListRevisionsResult::Err(e),
-    }
-}
-
-#[ic_cdk_macros::query]
-pub fn list_revisions_by_document_id(input: ListRevisionsByDocumentIdInput) -> ListRevisionsResult {
-    let revisions = match state::get_by_document_id(input.document_id) {
-        Ok(r) => r,
-        Err(e) => return ListRevisionsResult::Err(e),
-    };
 
     match paginate(
         &revisions,

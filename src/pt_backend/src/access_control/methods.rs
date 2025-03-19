@@ -5,11 +5,11 @@ use strum::IntoEnumIterator;
 
 use shared::types::access_control::{
     AssignRolesInput, AssignRolesResult, CreateRoleResult, GetPermissionsResult,
-    GetProjectRolesInput, GetProjectRolesResult, GetRoleResult, GetUserPermissionsResult,
-    GetUserRolesResult, ListProjectMembersRolesResult, RoleIdInput, UpdateRolePermissionsInput,
-    UpdateRolePermissionsResult, UserWithRoles,
+    GetProjectRolesInput, GetProjectRolesResult, GetUserRolesResult, ListProjectMembersRolesInput,
+    ListProjectMembersRolesResult, UpdateRolePermissionsInput, UpdateRolePermissionsResult,
+    UserWithRoles,
 };
-use shared::types::users::{GetUserResult, ListProjectMembersRolesInput, UserIdInput};
+use shared::types::users::{GetUserResult, UserIdInput};
 
 #[ic_cdk_macros::update]
 pub fn create_role(input: RoleInput) -> CreateRoleResult {
@@ -26,14 +26,6 @@ pub fn create_role(input: RoleInput) -> CreateRoleResult {
 
     state::insert_role(role_id, role);
     CreateRoleResult::Ok(role_id)
-}
-
-#[ic_cdk_macros::query]
-pub fn get_role(input: RoleIdInput) -> GetRoleResult {
-    match state::get_role(&input.id) {
-        Some(role) => GetRoleResult::Ok(role),
-        None => GetRoleResult::Err(AppError::EntityNotFound("Role not found".to_string())),
-    }
 }
 
 pub fn get_all_read_permissions() -> Vec<Permission> {
@@ -120,20 +112,6 @@ pub fn update_role_permissions(input: UpdateRolePermissionsInput) -> UpdateRoleP
     state::update_role(input.role_id, role);
 
     UpdateRolePermissionsResult::Ok
-}
-
-#[ic_cdk_macros::query]
-pub fn get_user_permissions(input: UserIdInput) -> GetUserPermissionsResult {
-    match get_user_roles(input) {
-        GetUserRolesResult::Ok(roles) => {
-            let permissions = roles
-                .iter()
-                .flat_map(|role| role.permissions.clone())
-                .collect();
-            GetUserPermissionsResult::Ok(permissions)
-        }
-        GetUserRolesResult::Err(e) => GetUserPermissionsResult::Err(e),
-    }
 }
 
 #[ic_cdk_macros::query]

@@ -21,6 +21,7 @@ pub fn paginate<T: Clone + Filterable + Sortable>(
         Some(ref f) => filter(items, f.clone()),
         None => items.to_vec(),
     };
+
     let items = match sorting {
         Some(ref s) => {
             let mut items_copy = items.clone();

@@ -4,7 +4,6 @@ use serde::Deserialize;
 use crate::types::errors::AppError;
 use crate::types::organizations::OrganizationId;
 use crate::types::pagination::PaginationInput;
-use crate::types::projects::ProjectId;
 
 use super::pagination::PaginationMetadata;
 
@@ -24,12 +23,6 @@ pub struct User {
 #[derive(candid::CandidType, serde::Deserialize)]
 pub struct UserIdInput {
     pub id: UserId,
-}
-
-#[derive(candid::CandidType, serde::Deserialize)]
-pub struct ListProjectMembersRolesInput {
-    pub project_id: ProjectId,
-    pub pagination: PaginationInput,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug)]

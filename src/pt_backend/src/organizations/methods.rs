@@ -3,8 +3,7 @@ use super::*;
 use crate::logger::{log_info, loggable_organization};
 use crate::users::get_user_by_principal;
 use shared::types::organizations::{
-    CreateOrganizationInput, CreateOrganizationResult, GetOrganizationResult,
-    ListOrganizationsResult, OrganizationIdInput,
+    CreateOrganizationInput, CreateOrganizationResult, ListOrganizationsResult,
 };
 use shared::types::users::GetUserResult;
 use shared::utils::pagination::paginate;
@@ -56,15 +55,5 @@ pub fn list_organizations(pagination: PaginationInput) -> ListOrganizationsResul
     ) {
         Ok(result) => ListOrganizationsResult::Ok(result),
         Err(e) => ListOrganizationsResult::Err(e),
-    }
-}
-
-#[ic_cdk_macros::query]
-pub fn get_organization(input: OrganizationIdInput) -> GetOrganizationResult {
-    match state::get_by_id(input.id) {
-        Some(org) => GetOrganizationResult::Ok(org),
-        None => GetOrganizationResult::Err(AppError::EntityNotFound(
-            "Organization not found".to_string(),
-        )),
     }
 }

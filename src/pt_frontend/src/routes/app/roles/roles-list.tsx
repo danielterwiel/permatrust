@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { getProjectRolesOptions } from '@/api/queries/permissions';
+import { getProjectRolesOptions } from '@/api/queries/access-control';
 import { projectIdSchema } from '@/schemas/entities';
 
 import { RolesList } from '@/components/roles-list';

@@ -42,18 +42,6 @@ pub fn get_by_id(revision_id: RevisionId) -> Option<Revision> {
     REVISIONS.with(|revisions| revisions.borrow().get(&revision_id))
 }
 
-pub fn get_by_document_id(document_id: DocumentId) -> Result<Vec<Revision>, AppError> {
-    let revisions = REVISIONS.with(|revisions| {
-        revisions
-            .borrow()
-            .iter()
-            .filter(|(_, rev)| rev.document_id == document_id)
-            .map(|(_, rev)| rev.clone())
-            .collect()
-    });
-    Ok(revisions)
-}
-
 pub fn get_revision_range(
     document_id: DocumentId,
     start_index: usize,

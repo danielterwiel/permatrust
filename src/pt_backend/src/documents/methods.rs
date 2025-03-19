@@ -4,9 +4,7 @@ use crate::logger::{log_info, loggable_document};
 use crate::revisions::create_revision;
 use crate::users::state::get_by_principal;
 use shared::types::documents::{
-    CreateDocumentInput, CreateDocumentResult, DocumentIdInput, GetDocumentResult,
-    ListDocumentsByProjectIdInput, ListDocumentsByProjectIdResult, ListDocumentsInput,
-    ListDocumentsResult,
+    CreateDocumentInput, CreateDocumentResult, ListDocumentsInput, ListDocumentsResult,
 };
 use shared::types::revisions::{CreateRevisionInput, CreateRevisionResult};
 use shared::utils::pagination::paginate;
@@ -55,6 +53,7 @@ pub fn create_document(input: CreateDocumentInput) -> CreateDocumentResult {
 #[ic_cdk_macros::query]
 pub fn list_documents(input: ListDocumentsInput) -> ListDocumentsResult {
     let documents = state::get_all();
+    ic_cdk::println!("Total documents: {}", documents.len());
     match paginate(
         &documents,
         input.pagination.page_size,
@@ -62,32 +61,10 @@ pub fn list_documents(input: ListDocumentsInput) -> ListDocumentsResult {
         input.pagination.filters,
         input.pagination.sort,
     ) {
-        Ok(result) => ListDocumentsResult::Ok(result),
+        Ok(result) => {
+            ic_cdk::println!("Filtered documents: {}", result.0.len());
+            ListDocumentsResult::Ok(result)
+        }
         Err(e) => ListDocumentsResult::Err(e),
-    }
-}
-
-#[ic_cdk_macros::query]
-pub fn list_documents_by_project_id(
-    input: ListDocumentsByProjectIdInput,
-) -> ListDocumentsByProjectIdResult {
-    let documents = state::get_by_project(input.project_id);
-    match paginate(
-        &documents,
-        input.pagination.page_size,
-        input.pagination.page_number,
-        input.pagination.filters,
-        input.pagination.sort,
-    ) {
-        Ok(result) => ListDocumentsByProjectIdResult::Ok(result),
-        Err(e) => ListDocumentsByProjectIdResult::Err(e),
-    }
-}
-
-#[ic_cdk_macros::query]
-pub fn get_document(input: DocumentIdInput) -> GetDocumentResult {
-    match state::get_by_id(input.id) {
-        Some(doc) => GetDocumentResult::Ok(doc),
-        None => GetDocumentResult::Err(AppError::EntityNotFound("Document not found".to_string())),
     }
 }

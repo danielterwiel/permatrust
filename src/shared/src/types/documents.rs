@@ -32,13 +32,6 @@ pub struct CreateDocumentInput {
 
 #[derive(CandidType, Deserialize)]
 pub struct ListDocumentsInput {
-    pub project_id: ProjectId,
-    pub pagination: PaginationInput,
-}
-
-#[derive(CandidType, Deserialize)]
-pub struct ListDocumentsByProjectIdInput {
-    pub project_id: ProjectId,
     pub pagination: PaginationInput,
 }
 
@@ -85,17 +78,5 @@ pub enum CreateDocumentResult {
 #[derive(CandidType, Deserialize)]
 pub enum ListDocumentsResult {
     Ok((Vec<Document>, PaginationMetadata)),
-    Err(AppError),
-}
-
-#[derive(CandidType, Deserialize)]
-pub enum ListDocumentsByProjectIdResult {
-    Ok((Vec<Document>, PaginationMetadata)),
-    Err(AppError),
-}
-
-#[derive(CandidType, Deserialize)]
-pub enum GetDocumentResult {
-    Ok(Document),
     Err(AppError),
 }

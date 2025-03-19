@@ -27,6 +27,7 @@ interface EntityTypeMap {
   Organization: Organization;
   Project: Project;
   Revision: Revision;
+  Role: Role;
   User: User;
   UserWithRoles: UserWithRoles;
   Workflow: Workflow;

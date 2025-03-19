@@ -14,6 +14,7 @@ import type {
   PaginationInput as ApiPaginationInput,
   ProjectFilterField as ApiProjectFilterField,
   RevisionFilterField as ApiRevisionFilterField,
+  RoleFilterField as ApiRoleFilterField,
   SortCriteria as ApiSortCriteria,
   SortOrder as ApiSortOrder,
   UserFilterField as ApiUserFilterField,
@@ -25,6 +26,7 @@ import type { FilterFieldName, SortOrderName } from '@/types/pagination';
 
 // Document field schema
 const documentFieldSchema = z.union([
+  z.object({ Id: z.null() }).strict(),
   z.object({ Title: z.null() }).strict(),
   z.object({ Version: z.null() }).strict(),
   z.object({ ProjectId: z.null() }).strict(),
@@ -33,12 +35,14 @@ const documentFieldSchema = z.union([
 
 // Organization field schema
 const organizationFieldSchema = z.union([
+  z.object({ Id: z.null() }).strict(),
   z.object({ Name: z.null() }).strict(),
   z.object({ CreatedAt: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiOrganizationFilterField>;
 
 // Project field schema
 const projectFieldSchema = z.union([
+  z.object({ Id: z.null() }).strict(),
   z.object({ Name: z.null() }).strict(),
   z.object({ OrganizationId: z.null() }).strict(),
   z.object({ Members: z.null() }).strict(),
@@ -48,6 +52,7 @@ const projectFieldSchema = z.union([
 
 // Revision field schema
 const revisionFieldSchema = z.union([
+  z.object({ Id: z.null() }).strict(),
   z.object({ Version: z.null() }).strict(),
   z.object({ ProjectId: z.null() }).strict(),
   z.object({ DocumentId: z.null() }).strict(),
@@ -63,12 +68,23 @@ const userFieldSchema = z.union([
 
 // UserWithRoles field schema
 const userWithRolesFieldSchema = z.union([
+  z.object({ Id: z.null() }).strict(),
+  z.object({ ProjectId: z.null() }).strict(),
   z.object({ FirstName: z.null() }).strict(),
   z.object({ LastName: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiUserWithRolesFilterField>;
 
+// Role field schema
+const roleFieldSchema = z.union([
+  z.object({ Id: z.null() }).strict(),
+  z.object({ Name: z.null() }).strict(),
+  z.object({ ProjectId: z.null() }).strict(),
+  z.object({ CreatedAt: z.null() }).strict(),
+]) satisfies z.ZodType<ApiRoleFilterField>;
+
 // Workflow field schema
 const workflowFieldSchema = z.union([
+  z.object({ Id: z.null() }).strict(),
   z.object({ Name: z.null() }).strict(),
   z.object({ ProjectId: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiWorkflowFilterField>;
@@ -90,6 +106,7 @@ export const filterFieldSchema = z.union([
   z.object({ Organization: organizationFieldSchema }).strict(),
   z.object({ Project: projectFieldSchema }).strict(),
   z.object({ Revision: revisionFieldSchema }).strict(),
+  z.object({ Role: roleFieldSchema }).strict(),
   z.object({ User: userFieldSchema }).strict(),
   z.object({ UserWithRoles: userWithRolesFieldSchema }).strict(),
   z.object({ Workflow: workflowFieldSchema }).strict(),
@@ -167,22 +184,25 @@ export const paginationSearchSchema = z
 export type PaginationSearchParams = z.infer<typeof paginationSearchSchema>;
 
 /**
- * Creates entity-specific search schema with default pagination
+ * Configuration for creating pagination defaults
  */
-interface EntityPaginationConfig {
+interface PaginationConfig {
   defaultFilterField: FilterFieldName;
   defaultFilterOperator: 'Contains' | 'Equals' | 'GreaterThan' | 'LessThan';
   defaultFilterValue: string;
   defaultSortField: FilterFieldName;
   defaultSortOrder: SortOrderName;
+  pageSize?: number;
 }
 
-export function createEntityPaginationSchema(
+/**
+ * Creates default pagination input with entity-specific filters and sorting
+ */
+export function createPagination(
   entityName: EntityName,
-  config: EntityPaginationConfig,
-) {
-  // Create default filter
-  const defaultFilters = [
+  config: PaginationConfig,
+): ApiPaginationInput {
+  const filters = [
     [
       createFilter({
         entity: entityName,
@@ -193,8 +213,7 @@ export function createEntityPaginationSchema(
     ],
   ] satisfies [Array<ApiFilterCriteria>];
 
-  // Create default sort
-  const defaultSort = [
+  const sort = [
     createSort({
       entity: entityName,
       field: config.defaultSortField,
@@ -202,15 +221,23 @@ export function createEntityPaginationSchema(
     }),
   ] satisfies [ApiSortCriteria];
 
-  // Create default pagination
-  const defaultEntityPagination = {
-    filters: defaultFilters,
+  return {
+    filters,
+    sort,
     page_number: DEFAULT_PAGINATION.page_number,
-    page_size: DEFAULT_PAGINATION.page_size,
-    sort: defaultSort,
-  } satisfies ApiPaginationInput;
+    page_size: config.pageSize || DEFAULT_PAGINATION.page_size,
+  };
+}
 
-  // Create the schema - use the lenient URL schema for validating search params
+/**
+ * Creates entity-specific search schema with default pagination
+ */
+export function createPaginationSchema(
+  entityName: EntityName,
+  config: PaginationConfig,
+) {
+  const defaultEntityPagination = createPagination(entityName, config);
+
   const searchSchema = z.object({
     pagination: paginationUrlSchema.optional(),
   });
