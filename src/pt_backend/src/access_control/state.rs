@@ -46,10 +46,6 @@ pub fn get_roles_by_project(project_id: u32) -> Vec<Role> {
     })
 }
 
-pub fn get_user_role_ids(user_id: &UserId) -> Option<RoleIdVec> {
-    USER_ROLES.with(|user_roles| user_roles.borrow().get(user_id))
-}
-
 pub fn insert_user_roles(user: UserId, roles: RoleIdVec) {
     USER_ROLES.with(|user_roles| user_roles.borrow_mut().insert(user, roles));
 }

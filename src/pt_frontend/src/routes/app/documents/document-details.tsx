@@ -45,10 +45,7 @@ export const Route = createFileRoute(
 
     const pagination = processPaginationInput(deps.pagination);
     const [revisions, paginationMetaData] = await context.query.ensureQueryData(
-      listRevisionsByDocumentIdOptions({
-        documentId,
-        pagination,
-      }),
+      listRevisionsByDocumentIdOptions(documentId),
     );
     const document = await context.query.ensureQueryData(
       getDocumentOptions(documentId),

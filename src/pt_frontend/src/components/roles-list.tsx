@@ -41,6 +41,10 @@ export const RolesList = ({ roles }: RoleListProps) => {
   ) => {
     return permissions.reduce(
       (acc, permission) => {
+        // Initialize the array for this group if it doesn't exist yet
+        if (!acc[permission.group]) {
+          acc[permission.group] = [];
+        }
         acc[permission.group].push(permission);
         return acc;
       },

@@ -42,23 +42,14 @@ export const listDocumentsOptions = (input: ListDocumentsInput) =>
     queryKey: ['documents', input],
   });
 
-export const listDocumentsByProjectIdOptions = ({
-  projectId,
-  pagination: customPagination,
-}: {
-  projectId: ProjectId;
-  pagination?: any;
-}) => {
-  const defaultPagination = createPagination(ENTITY.DOCUMENT, {
+export const listDocumentsByProjectIdOptions = (projectId: ProjectId) => {
+  const pagination = createPagination(ENTITY.DOCUMENT, {
     defaultFilterField: FIELDS.DOCUMENT.PROJECT_ID,
     defaultFilterOperator: FILTER_OPERATOR.EQUALS,
     defaultFilterValue: projectId.toString(),
     defaultSortField: FIELDS.DOCUMENT.VERSION,
     defaultSortOrder: SORT_ORDER.DESC,
   });
-
-  // Use provided pagination or fallback to default
-  const pagination = customPagination || defaultPagination;
 
   return createQueryOptions({
     queryFn: () => api.list_documents({ pagination }),

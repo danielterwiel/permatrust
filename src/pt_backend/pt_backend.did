@@ -60,7 +60,6 @@ type DocumentPermission = variant {
 };
 type Entity = variant {
   User;
-  UserWithRoles;
   Document;
   Organization;
   Revision;
@@ -78,7 +77,6 @@ type FilterCriteria = record {
 type FilterField = variant {
   Role : RoleFilterField;
   User : UserFilterField;
-  UserWithRoles : UserWithRolesFilterField;
   Document : DocumentFilterField;
   Organization : OrganizationFilterField;
   Revision : RevisionFilterField;
@@ -89,9 +87,7 @@ type FilterOperator = variant { Contains; GreaterThan; LessThan; Equals };
 type GetPermissionsResult = variant { Ok : vec Permission; Err : AppError };
 type GetProjectRolesInput = record { project_id : nat32 };
 type GetProjectRolesResult = variant { Ok : vec Role; Err : AppError };
-type GetProjectsResult = variant { Ok : vec Project; Err : AppError };
 type GetUserResult = variant { Ok : User; Err : AppError };
-type GetUserRolesResult = variant { Ok : vec Role; Err : AppError };
 type GetWorkflowDefinitionResult = variant {
   Ok : WorkflowGraph;
   Err : AppError;
@@ -106,16 +102,8 @@ type ListOrganizationsResult = variant {
   Ok : record { vec Organization; PaginationMetadata };
   Err : AppError;
 };
-type ListProjectMembersInput = record {
-  pagination : PaginationInput;
-  project_id : nat32;
-};
 type ListProjectMembersResult = variant {
   Ok : record { vec User; PaginationMetadata };
-  Err : AppError;
-};
-type ListProjectMembersRolesResult = variant {
-  Ok : record { vec UserWithRoles; PaginationMetadata };
   Err : AppError;
 };
 type ListProjectsResult = variant {
@@ -256,10 +244,10 @@ type User = record {
   first_name : text;
   last_name : text;
   principals : vec principal;
+  roles : vec Role;
   organizations : vec nat32;
 };
-type UserFilterField = variant { Id; FirstName; LastName };
-type UserIdInput = record { id : nat64 };
+type UserFilterField = variant { Id; ProjectId; FirstName; LastName };
 type UserPermission = variant {
   ChangeRole;
   Deactivate;
@@ -268,8 +256,6 @@ type UserPermission = variant {
   Update;
   Invite;
 };
-type UserWithRoles = record { user : User; roles : vec Role };
-type UserWithRolesFilterField = variant { Id; ProjectId; FirstName; LastName };
 type Workflow = record {
   id : nat32;
   current_state : text;
@@ -306,20 +292,15 @@ service : () -> {
   get_diff_revisions : (DiffRevisionsInput) -> (DiffRevisionsResult) query;
   get_permissions : () -> (GetPermissionsResult) query;
   get_project_roles : (GetProjectRolesInput) -> (GetProjectRolesResult) query;
-  get_projects : () -> (GetProjectsResult) query;
   get_user : () -> (GetUserResult) query;
-  get_user_roles : (UserIdInput) -> (GetUserRolesResult) query;
   get_workflow_definition : (WorkflowIdInput) -> (
       GetWorkflowDefinitionResult,
     ) query;
   get_workflow_state : (WorkflowIdInput) -> (GetWorkflowStateResult) query;
   list_documents : (ListDocumentsInput) -> (ListDocumentsResult) query;
   list_organizations : (PaginationInput) -> (ListOrganizationsResult) query;
-  list_project_members : (ListProjectMembersInput) -> (
+  list_project_members : (ListDocumentsInput) -> (
       ListProjectMembersResult,
-    ) query;
-  list_project_members_roles : (ListProjectMembersInput) -> (
-      ListProjectMembersRolesResult,
     ) query;
   list_projects : (PaginationInput) -> (ListProjectsResult) query;
   list_revisions : (ListDocumentsInput) -> (ListRevisionsResult) query;

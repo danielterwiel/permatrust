@@ -4,6 +4,7 @@
 
 - Build: `pnpm run build`
 - Start dev server: `pnpm run start`
+- Generate types: `pnpm run generate`
 - Lint: `pnpm run lint`
 - Lint fix: `pnpm run lint:fix`
 - Typecheck: `pnpm run typecheck`
@@ -13,6 +14,7 @@
 
 ## Style Guidelines
 
+- Type generation: After changing Rust code, run generate to generate types
 - **TypeScript**: Strict mode, verbatim module syntax with path aliases. Never
   use `any` or `unknown` types. Neither use @ts-ignore.
 - **Formatting**: Biome for JS/TS, 2-space indent, 80-char line length

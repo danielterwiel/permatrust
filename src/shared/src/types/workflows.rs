@@ -45,7 +45,7 @@ pub struct WorkflowIdInput {
     pub id: WorkflowId,
 }
 
-#[derive(candid::CandidType, serde::Deserialize)]
+#[derive(CandidType, Deserialize)]
 pub struct ExecuteWorkflowInput {
     pub workflow_id: WorkflowId,
     pub event_id: EventId,

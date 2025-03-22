@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 
-import { listUserWithRolesByProjectIdOptions } from '@/api/queries/access-control';
+import { listUsersByProjectIdOptions } from '@/api/queries/users';
 import { usePagination } from '@/hooks/use-pagination';
 import { createPaginationSchema } from '@/schemas/pagination';
 import { toNumberSchema } from '@/schemas/primitives';
@@ -16,19 +16,16 @@ import { Icon } from '@/components/ui/icon';
 import { ENTITY } from '@/consts/entities';
 import { FIELDS, FILTER_OPERATOR, SORT_ORDER } from '@/consts/pagination';
 
-import type {
-  Role,
-  UserWithRoles,
-} from '@/declarations/pt_backend/pt_backend.did';
+import type { Role, User } from '@/declarations/pt_backend/pt_backend.did';
 import type { Row } from '@tanstack/react-table';
 
 const { schema: rolesSearchSchema, defaultPagination } = createPaginationSchema(
-  ENTITY.USER_WITH_ROLES,
+  ENTITY.USER,
   {
-    defaultFilterField: FIELDS.USER_WITH_ROLES.FIRST_NAME,
+    defaultFilterField: FIELDS.USER.FIRST_NAME,
     defaultFilterOperator: FILTER_OPERATOR.CONTAINS,
     defaultFilterValue: '',
-    defaultSortField: FIELDS.USER_WITH_ROLES.FIRST_NAME,
+    defaultSortField: FIELDS.USER.FIRST_NAME,
     defaultSortOrder: SORT_ORDER.ASC,
   },
 );
@@ -43,13 +40,12 @@ export const Route = createFileRoute(
   loader: async ({ context, deps, params }) => {
     const projectId = toNumberSchema.parse(params.projectId);
     const pagination = processPaginationInput(deps.pagination);
-    const [assignedRoles, paginationMetaData] =
-      await context.query.ensureQueryData(
-        listUserWithRolesByProjectIdOptions(projectId),
-      );
+    const [users, paginationMetaData] = await context.query.ensureQueryData(
+      listUsersByProjectIdOptions(projectId),
+    );
 
     return {
-      assignedRoles,
+      users,
       context,
       pagination,
       paginationMetaData,
@@ -61,8 +57,10 @@ export const Route = createFileRoute(
   },
 });
 
-const RowActions = (row: Row<UserWithRoles>) => {
+const RowActions = (row: Row<User>) => {
   const [firstRole] = row.original.roles;
+
+  if (!firstRole) return null;
 
   return (
     <Link
@@ -70,7 +68,7 @@ const RowActions = (row: Row<UserWithRoles>) => {
         projectId: firstRole.project_id.toString(),
       }}
       search={{
-        userId: toNumberSchema.parse(row.original.user.id),
+        userId: toNumberSchema.parse(row.original.id),
       }}
       to="/projects/$projectId/roles/assign"
       variant="outline"
@@ -81,8 +79,7 @@ const RowActions = (row: Row<UserWithRoles>) => {
 };
 
 function RolesAssigned() {
-  const { assignedRoles, pagination, paginationMetaData } =
-    Route.useLoaderData();
+  const { users, pagination, paginationMetaData } = Route.useLoaderData();
 
   const effectiveSort = pagination.sort.length
     ? pagination.sort
@@ -117,41 +114,37 @@ function RolesAssigned() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {assignedRoles.length === 0 ? (
+          {users.length === 0 ? (
             <div className="text-center text-muted-foreground">
               No roles assigned yet.
             </div>
           ) : (
-            <Table<UserWithRoles>
+            <Table<User>
               actions={RowActions}
               columnConfig={[
                 {
-                  cellPreprocess: (userWithRoles) =>
-                    userWithRoles.user.last_name || '',
+                  cellPreprocess: (user) => user.last_name || '',
                   headerName: 'Last Name',
-                  key: 'user',
+                  key: 'last_name',
                 },
                 {
-                  cellPreprocess: (userWithRoles) =>
-                    userWithRoles.user.first_name || '',
+                  cellPreprocess: (user) => user.first_name || '',
                   headerName: 'First Name',
-                  key: 'user',
+                  key: 'first_name',
                 },
                 {
-                  cellPreprocess: (userWithRoles) =>
-                    userWithRoles.roles
-                      .map((role: Role) => role.name)
-                      .join(', ') || '',
+                  cellPreprocess: (user) =>
+                    user.roles.map((role: Role) => role.name).join(', ') || '',
                   headerName: 'Roles',
                   key: 'roles',
                 },
               ]}
-              entityName={ENTITY.USER_WITH_ROLES}
+              entityName={ENTITY.USER}
               getPageChangeParams={getPageChangeParams}
               onSortingChange={onSortChange}
               paginationMetaData={paginationMetaData}
               sort={effectiveSort}
-              data={assignedRoles}
+              data={users}
             />
           )}
         </CardContent>

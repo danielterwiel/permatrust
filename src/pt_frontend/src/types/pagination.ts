@@ -6,6 +6,7 @@ import type {
 } from '@/schemas/pagination';
 
 import type {
+  PAGE_SIZE,
   filterField,
   filterOperator,
   sortOrder,
@@ -49,3 +50,14 @@ type FilterFields = typeof filterField;
 type FilterOperators = typeof filterOperator;
 
 type SortOrders = typeof sortOrder;
+
+type PageSize = (typeof PAGE_SIZE)[keyof typeof PAGE_SIZE];
+
+export type PaginationConfig = {
+  defaultFilterField: FilterFieldName;
+  defaultFilterOperator: FilterOperatorName;
+  defaultFilterValue: string;
+  defaultSortField: FilterFieldName;
+  defaultSortOrder: SortOrderName;
+  pageSize?: PageSize;
+};

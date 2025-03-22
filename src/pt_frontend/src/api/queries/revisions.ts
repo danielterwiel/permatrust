@@ -36,14 +36,8 @@ export const getRevisionOptions = (id: RevisionId) => {
   });
 };
 
-export const listRevisionsByDocumentIdOptions = ({
-  documentId,
-  pagination: customPagination,
-}: {
-  documentId: DocumentId;
-  pagination?: any;
-}) => {
-  const defaultPagination = createPagination(ENTITY.REVISION, {
+export const listRevisionsByDocumentIdOptions = (documentId: DocumentId) => {
+  const pagination = createPagination(ENTITY.REVISION, {
     defaultFilterField: FIELDS.REVISION.DOCUMENT_ID,
     defaultFilterOperator: FILTER_OPERATOR.EQUALS,
     defaultFilterValue: documentId.toString(),
@@ -51,9 +45,6 @@ export const listRevisionsByDocumentIdOptions = ({
     defaultSortOrder: SORT_ORDER.DESC,
     pageSize: PAGE_SIZE.DEFAULT,
   });
-
-  // Use provided pagination or fallback to default
-  const pagination = customPagination || defaultPagination;
 
   return createQueryOptions({
     queryFn: () => api.list_revisions({ pagination }),

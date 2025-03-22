@@ -3,6 +3,8 @@ use std::cell::RefCell;
 use std::env;
 use std::fmt::Debug;
 
+use ::candid::CandidType;
+
 use shared::types::documents::Document;
 use shared::types::organizations::Organization;
 use shared::types::projects::Project;
@@ -97,7 +99,7 @@ pub fn loggable_revision(revision: &Revision) -> LoggableRevision {
     LoggableRevision(revision)
 }
 
-#[derive(Clone, Debug, candid::CandidType, PartialEq, Ord, PartialOrd, Eq)]
+#[derive(Clone, Debug, CandidType, PartialEq, Ord, PartialOrd, Eq)]
 pub enum LogLevel {
     Error,
     Warn,

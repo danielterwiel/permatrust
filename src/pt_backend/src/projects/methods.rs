@@ -1,12 +1,12 @@
 use super::state;
 use super::*;
-use crate::users::{get_user_by_id, get_user_by_principal};
+use crate::users::get_user_by_principal;
 
 use shared::types::entities::Entity;
 use shared::types::pagination::{FilterCriteria, FilterField, FilterOperator, ProjectFilterField};
 use shared::types::projects::{
-    CreateProjectInput, CreateProjectResult, GetProjectsResult, ListProjectMembersInput,
-    ListProjectMembersResult, ListProjectsResult,
+    CreateProjectInput, CreateProjectResult, ListProjectMembersInput, ListProjectMembersResult,
+    ListProjectsResult,
 };
 use shared::types::users::GetUserResult;
 use shared::utils::filter::filter;
@@ -46,35 +46,28 @@ pub fn create_project(input: CreateProjectInput) -> CreateProjectResult {
 }
 
 #[ic_cdk_macros::query]
-pub fn get_projects() -> GetProjectsResult {
+pub fn list_projects(pagination: PaginationInput) -> ListProjectsResult {
     let caller = ic_cdk::caller();
     let user = match get_user_by_principal(caller) {
         GetUserResult::Ok(u) => u,
-        GetUserResult::Err(e) => return GetProjectsResult::Err(e),
+        GetUserResult::Err(e) => return ListProjectsResult::Err(e),
     };
 
-    let filter_criteria = FilterCriteria {
+    // Filter projects where user is a member
+    let member_filter = FilterCriteria {
         field: FilterField::Project(ProjectFilterField::Members),
         entity: Entity::Project,
         value: user.id.to_string(),
         operator: FilterOperator::Contains,
     };
 
+    // Get projects and apply member filter
     let projects = state::get_all();
-    let projects = filter(&projects, vec![filter_criteria]);
+    let filtered_projects = filter(&projects, vec![member_filter]);
 
-    GetProjectsResult::Ok(projects)
-}
-
-#[ic_cdk_macros::query]
-pub fn list_projects(pagination: PaginationInput) -> ListProjectsResult {
-    let projects = match get_projects() {
-        GetProjectsResult::Ok(p) => p,
-        GetProjectsResult::Err(e) => return ListProjectsResult::Err(e),
-    };
-
+    // Apply pagination with any additional filters
     match paginate(
-        &projects,
+        &filtered_projects,
         pagination.page_size,
         pagination.page_number,
         pagination.filters,
@@ -87,30 +80,10 @@ pub fn list_projects(pagination: PaginationInput) -> ListProjectsResult {
 
 #[ic_cdk_macros::query]
 pub fn list_project_members(input: ListProjectMembersInput) -> ListProjectMembersResult {
-    let project = match state::get_by_id(input.project_id) {
-        Some(p) => p,
-        None => {
-            return ListProjectMembersResult::Err(AppError::EntityNotFound(
-                "Project not found".to_string(),
-            ))
-        }
-    };
-
-    let mut users = Vec::new();
-    for user_id in project.members {
-        match get_user_by_id(user_id) {
-            GetUserResult::Ok(user) => users.push(user),
-            GetUserResult::Err(e) => {
-                return ListProjectMembersResult::Err(AppError::InternalError(format!(
-                    "Failed to get user with id: {}. Cause: {:#?}",
-                    user_id, e
-                )))
-            }
-        }
-    }
+    let all_users = crate::users::state::get_all();
 
     match paginate(
-        &users,
+        &all_users,
         input.pagination.page_size,
         input.pagination.page_number,
         input.pagination.filters,

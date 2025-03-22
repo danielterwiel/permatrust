@@ -12,11 +12,11 @@ import {
 } from '@/consts/pagination';
 
 import type { PaginationInput } from '@/declarations/pt_backend/pt_backend.did';
-import type { ProjectId } from '@/types/entities';
+import type { WorkflowId } from '@/types/entities';
 
 import { api } from '@/api';
 
-export const getWorkflowOptions = (id: ProjectId) => {
+export const getWorkflowOptions = (id: WorkflowId) => {
   const pagination = createPagination(ENTITY.WORKFLOW, {
     defaultFilterField: FIELDS.WORKFLOW.ID,
     defaultFilterOperator: FILTER_OPERATOR.EQUALS,
@@ -32,11 +32,11 @@ export const getWorkflowOptions = (id: ProjectId) => {
         () => api.list_workflows(pagination),
         'Workflow not found',
       ),
-    queryKey: ['workflow', { id: id }],
+    queryKey: ['workflow', { id, pagination }],
   });
 };
 
-export const getWorkflowStateOptions = (id: ProjectId) =>
+export const getWorkflowStateOptions = (id: WorkflowId) =>
   createQueryOptions({
     queryFn: () => api.get_workflow_state({ id }),
     queryKey: ['workflow_state', id],

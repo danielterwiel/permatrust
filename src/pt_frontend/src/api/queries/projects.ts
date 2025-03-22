@@ -42,14 +42,10 @@ export const listProjectsOptions = (input: { pagination: PaginationInput }) =>
     queryKey: ['projects', input],
   });
 
-export const listProjectsByOrganizationIdOptions = ({
-  organizationId,
-  pagination: customPagination,
-}: {
-  organizationId: OrganizationId;
-  pagination?: PaginationInput;
-}) => {
-  const defaultPagination = createPagination(ENTITY.PROJECT, {
+export const listProjectsByOrganizationIdOptions = (
+  organizationId: OrganizationId,
+) => {
+  const pagination = createPagination(ENTITY.PROJECT, {
     defaultFilterField: FIELDS.PROJECT.ORGANIZATION_ID,
     defaultFilterOperator: FILTER_OPERATOR.EQUALS,
     defaultFilterValue: organizationId.toString(),
@@ -57,10 +53,8 @@ export const listProjectsByOrganizationIdOptions = ({
     defaultSortOrder: SORT_ORDER.ASC,
   });
 
-  const pagination = customPagination || defaultPagination;
-
   return createQueryOptions({
     queryFn: () => api.list_projects(pagination),
-    queryKey: ['projects_by_organization', { organizationId, pagination }],
+    queryKey: ['projects_by_organization_id', { organizationId, pagination }],
   });
 };

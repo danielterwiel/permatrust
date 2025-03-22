@@ -19,7 +19,7 @@ export const Route = createFileRoute(
     const documentId = documentIdSchema.parse(params.documentId);
 
     const revisions = await context.query.ensureQueryData(
-      listRevisionsByDocumentIdOptions({ documentId }),
+      listRevisionsByDocumentIdOptions(documentId),
     );
     return { revisions };
   },

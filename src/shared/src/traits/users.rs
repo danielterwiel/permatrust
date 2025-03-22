@@ -38,6 +38,7 @@ impl User {
             last_name,
             organizations,
             principals,
+            roles: Vec::new(),
         }
     }
 }

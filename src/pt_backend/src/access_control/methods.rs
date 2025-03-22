@@ -1,15 +1,12 @@
 use super::state;
 use super::*;
-use shared::utils::pagination::paginate;
 use strum::IntoEnumIterator;
 
 use shared::types::access_control::{
     AssignRolesInput, AssignRolesResult, CreateRoleResult, GetPermissionsResult,
-    GetProjectRolesInput, GetProjectRolesResult, GetUserRolesResult, ListProjectMembersRolesInput,
-    ListProjectMembersRolesResult, UpdateRolePermissionsInput, UpdateRolePermissionsResult,
-    UserWithRoles,
+    GetProjectRolesInput, GetProjectRolesResult, UpdateRolePermissionsInput,
+    UpdateRolePermissionsResult,
 };
-use shared::types::users::{GetUserResult, UserIdInput};
 
 #[ic_cdk_macros::update]
 pub fn create_role(input: RoleInput) -> CreateRoleResult {
@@ -60,36 +57,20 @@ pub fn get_permissions() -> GetPermissionsResult {
 }
 
 #[ic_cdk_macros::query]
-pub fn get_user_roles(input: UserIdInput) -> GetUserRolesResult {
-    let user_role_ids = match state::get_user_role_ids(&input.id) {
-        Some(ids) => ids,
-        None => {
-            return GetUserRolesResult::Err(AppError::EntityNotFound(
-                "User roles not found".to_string(),
-            ))
-        }
-    };
-
-    let roles: Vec<Role> = user_role_ids.0.iter().filter_map(state::get_role).collect();
-    GetUserRolesResult::Ok(roles)
-}
-
-#[ic_cdk_macros::query]
 pub fn get_project_roles(input: GetProjectRolesInput) -> GetProjectRolesResult {
     GetProjectRolesResult::Ok(state::get_roles_by_project(input.project_id))
 }
 
 #[ic_cdk_macros::update]
 pub fn assign_roles(input: AssignRolesInput) -> AssignRolesResult {
-    if !input
-        .role_ids
-        .iter()
-        .all(|role_id| state::get_role(role_id).is_some())
-    {
+    let roles: Vec<Role> = input.role_ids.iter().filter_map(state::get_role).collect();
+    if roles.len() != input.role_ids.len() {
         return AssignRolesResult::Err(AppError::EntityNotFound("Role not found".to_string()));
     }
 
-    for user_id in input.user_ids {
+    let user_ids = input.user_ids.clone();
+
+    for user_id in user_ids {
         state::insert_user_roles(user_id, RoleIdVec(input.role_ids.clone()));
     }
 
@@ -112,68 +93,6 @@ pub fn update_role_permissions(input: UpdateRolePermissionsInput) -> UpdateRoleP
     state::update_role(input.role_id, role);
 
     UpdateRolePermissionsResult::Ok
-}
-
-#[ic_cdk_macros::query]
-pub fn list_project_members_roles(
-    input: ListProjectMembersRolesInput,
-) -> ListProjectMembersRolesResult {
-    let project = match crate::projects::state::get_by_id(input.project_id) {
-        Some(p) => p,
-        None => {
-            return ListProjectMembersRolesResult::Err(AppError::EntityNotFound(
-                "Project not found".to_string(),
-            ))
-        }
-    };
-
-    let mut users_with_roles: Vec<UserWithRoles> = Vec::new();
-
-    for user_id in &project.members {
-        match crate::users::get_user_by_id(*user_id) {
-            GetUserResult::Ok(user) => match get_user_roles(UserIdInput { id: *user_id }) {
-                GetUserRolesResult::Ok(roles) => {
-                    let project_roles: Vec<Role> = roles
-                        .into_iter()
-                        .filter(|role| role.project_id == input.project_id)
-                        .collect();
-
-                    users_with_roles.push(UserWithRoles {
-                        user,
-                        roles: project_roles,
-                    });
-                }
-                GetUserRolesResult::Err(e) => {
-                    ic_cdk::api::print(format!(
-                        "Failed to get roles for user {}: {:?}",
-                        user_id, e
-                    ));
-                    continue;
-                }
-            },
-            GetUserResult::Err(e) => {
-                ic_cdk::api::print(format!("Failed to deserialize user {}: {:?}", user_id, e));
-                continue;
-            }
-        }
-    }
-
-    if users_with_roles.is_empty() {
-        return ListProjectMembersRolesResult::Err(AppError::EntityNotFound(
-            "No valid users found in project".to_string(),
-        ));
-    }
-
-    match paginate(
-        &users_with_roles,
-        input.pagination.page_size,
-        input.pagination.page_number,
-        input.pagination.filters,
-        input.pagination.sort,
-    ) {
-        Ok(result) => ListProjectMembersRolesResult::Ok(result),
-        Err(e) => ListProjectMembersRolesResult::Err(e),
-    }
 }
 
 pub fn init_default_roles() {

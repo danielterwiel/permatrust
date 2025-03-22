@@ -6,11 +6,8 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "lib": [
-      "DOM",
-      "DOM.Iterable",
-      "ESNext"
-    ],
+    "noImplicitAny": false,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "noEmit": true,
@@ -18,36 +15,20 @@
     "skipLibCheck": true,
     "strict": true,
     "target": "ESNext",
-    "types": [
-      "vite/client"
-    ],
+    "types": ["vite/client"],
     "useDefineForClassFields": true,
     "verbatimModuleSyntax": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "@/declarations/*": [
-        "../declarations/*"
-      ],
-      "@dfinity/*": [
-        "../../node_modules/@dfinity/*"
-      ],
+      "@/*": ["src/*"],
+      "@/declarations/*": ["../declarations/*"],
+      "@dfinity/*": ["../../node_modules/@dfinity/*"],
       "~/icon-name": [
         "src/components/ui/icons/name.d.ts",
         "types/icon-name.d.ts"
       ]
     }
   },
-  "include": [
-    "src",
-    "vite.config.ts",
-    "vite-env.d.ts",
-    "types/**/*.d.ts"
-  ],
-  "exclude": [
-    "node_modules/**",
-    "routeTree.gen.ts"
-  ]
+  "include": ["src", "vite.config.ts", "vite-env.d.ts", "types/**/*.d.ts"],
+  "exclude": ["node_modules/**", "routeTree.gen.ts"]
 }

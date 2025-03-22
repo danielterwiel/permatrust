@@ -35,7 +35,6 @@ pub struct CreateProjectInput {
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct ListProjectMembersInput {
-    pub project_id: ProjectId,
     pub pagination: PaginationInput,
 }
 

@@ -5,11 +5,8 @@ import { useState } from 'react';
 import { z } from 'zod';
 
 import { mutations } from '@/api/mutations';
-import {
-  getProjectRolesOptions,
-  listProjectMembersOptions,
-  listUserWithRolesByProjectIdOptions,
-} from '@/api/queries/access-control';
+import { getProjectRolesOptions } from '@/api/queries/access-control';
+import { listUsersByProjectIdOptions } from '@/api/queries/users';
 import { useToast } from '@/hooks/use-toast';
 import {
   projectIdSchema,
@@ -18,6 +15,7 @@ import {
 } from '@/schemas/entities';
 import { cn } from '@/utils/cn';
 
+import { RolesList } from '@/components/roles-list';
 import { Button } from '@/components/ui/button';
 import {
   Card,
@@ -41,8 +39,6 @@ import {
 } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-import { DEFAULT_PAGINATION } from '@/consts/pagination';
-
 import type { Role, User } from '@/declarations/pt_backend/pt_backend.did';
 
 const searchSchema = z.object({
@@ -63,25 +59,20 @@ export const Route = createFileRoute(
     );
 
     const [users] = await context.query.ensureQueryData(
-      listProjectMembersOptions(projectId, DEFAULT_PAGINATION),
+      listUsersByProjectIdOptions(projectId),
     );
 
-    let preselectedUser: undefined | User;
+    console.log('users', users);
+
+    let preselectedUser: User | undefined;
     let userRoles: Array<Role> = [];
 
-    if (!Number.isNaN(deps.userId)) {
+    if (deps.userId !== undefined && !Number.isNaN(deps.userId)) {
       const userId = deps.userId;
-      preselectedUser = users.find((user: User) => user.id === BigInt(userId));
+      preselectedUser = users.find((user) => user.id === BigInt(userId));
 
-      if (preselectedUser) {
-        const [assignedRoles] = await context.query.ensureQueryData(
-          listUserWithRolesByProjectIdOptions(projectId),
-        );
-
-        if (assignedRoles.length > 0) {
-          const userWithRoles = assignedRoles[0];
-          userRoles = userWithRoles.roles;
-        }
+      if (preselectedUser && Array.isArray(preselectedUser.roles)) {
+        userRoles = preselectedUser.roles;
       }
     }
 
@@ -256,8 +247,15 @@ function RolesAssign() {
             </PopoverContent>
           </Popover>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex flex-col gap-4 items-start">
           <Button onClick={onSubmit}>Assign Roles</Button>
+
+          {preselectedUser && userRoles.length > 0 && (
+            <div className="w-full mt-4">
+              <h3 className="text-lg font-medium mb-2">Current Roles</h3>
+              <RolesList roles={userRoles} />
+            </div>
+          )}
         </CardFooter>
       </Card>
     </div>

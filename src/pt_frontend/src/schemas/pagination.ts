@@ -18,11 +18,10 @@ import type {
   SortCriteria as ApiSortCriteria,
   SortOrder as ApiSortOrder,
   UserFilterField as ApiUserFilterField,
-  UserWithRolesFilterField as ApiUserWithRolesFilterField,
   WorkflowFilterField as ApiWorkflowFilterField,
 } from '@/declarations/pt_backend/pt_backend.did';
 import type { EntityName } from '@/types/entities';
-import type { FilterFieldName, SortOrderName } from '@/types/pagination';
+import type { PaginationConfig } from '@/types/pagination';
 
 // Document field schema
 const documentFieldSchema = z.union([
@@ -64,15 +63,8 @@ const userFieldSchema = z.union([
   z.object({ Id: z.null() }).strict(),
   z.object({ FirstName: z.null() }).strict(),
   z.object({ LastName: z.null() }).strict(),
-]) satisfies z.ZodType<ApiUserFilterField>;
-
-// UserWithRoles field schema
-const userWithRolesFieldSchema = z.union([
-  z.object({ Id: z.null() }).strict(),
   z.object({ ProjectId: z.null() }).strict(),
-  z.object({ FirstName: z.null() }).strict(),
-  z.object({ LastName: z.null() }).strict(),
-]) satisfies z.ZodType<ApiUserWithRolesFilterField>;
+]) satisfies z.ZodType<ApiUserFilterField>;
 
 // Role field schema
 const roleFieldSchema = z.union([
@@ -96,7 +88,6 @@ const entitySchema = z.union([
   z.object({ Project: z.null() }).strict(),
   z.object({ Revision: z.null() }).strict(),
   z.object({ User: z.null() }).strict(),
-  z.object({ UserWithRoles: z.null() }).strict(),
   z.object({ Workflow: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiEntity>;
 
@@ -108,7 +99,6 @@ export const filterFieldSchema = z.union([
   z.object({ Revision: revisionFieldSchema }).strict(),
   z.object({ Role: roleFieldSchema }).strict(),
   z.object({ User: userFieldSchema }).strict(),
-  z.object({ UserWithRoles: userWithRolesFieldSchema }).strict(),
   z.object({ Workflow: workflowFieldSchema }).strict(),
 ]) satisfies z.ZodType<ApiFilterField>;
 
@@ -182,18 +172,6 @@ export const paginationSearchSchema = z
 
 // Type for pagination search params
 export type PaginationSearchParams = z.infer<typeof paginationSearchSchema>;
-
-/**
- * Configuration for creating pagination defaults
- */
-interface PaginationConfig {
-  defaultFilterField: FilterFieldName;
-  defaultFilterOperator: 'Contains' | 'Equals' | 'GreaterThan' | 'LessThan';
-  defaultFilterValue: string;
-  defaultSortField: FilterFieldName;
-  defaultSortOrder: SortOrderName;
-  pageSize?: number;
-}
 
 /**
  * Creates default pagination input with entity-specific filters and sorting

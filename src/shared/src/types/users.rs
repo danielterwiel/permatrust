@@ -1,6 +1,7 @@
 use candid::{CandidType, Principal};
 use serde::Deserialize;
 
+use crate::types::access_control::Role;
 use crate::types::errors::AppError;
 use crate::types::organizations::OrganizationId;
 use crate::types::pagination::PaginationInput;
@@ -16,11 +17,12 @@ pub struct User {
     pub last_name: String,
     pub organizations: Vec<OrganizationId>,
     pub principals: Vec<Principal>,
+    pub roles: Vec<Role>,
 }
 
 // Inputs
 
-#[derive(candid::CandidType, serde::Deserialize)]
+#[derive(CandidType, serde::Deserialize)]
 pub struct UserIdInput {
     pub id: UserId,
 }

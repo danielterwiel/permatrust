@@ -8,7 +8,6 @@ export const ENTITY = {
   REVISION: 'Revision',
   ROLE: 'Role',
   USER: 'User',
-  USER_WITH_ROLES: 'UserWithRoles',
   WORKFLOW: 'Workflow',
 } as const;
 

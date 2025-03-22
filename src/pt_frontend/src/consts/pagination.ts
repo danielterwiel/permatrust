@@ -52,12 +52,6 @@ const USER_FIELD = {
   FIRST_NAME: 'FirstName',
   ID: 'Id',
   LAST_NAME: 'LastName',
-} as const;
-
-const USER_WITH_ROLES_FIELD = {
-  ID: 'Id',
-  FIRST_NAME: 'FirstName',
-  LAST_NAME: 'LastName',
   PROJECT_ID: 'ProjectId',
 } as const;
 
@@ -112,12 +106,7 @@ export const FIELDS = {
     FIRST_NAME: USER_FIELD.FIRST_NAME,
     ID: USER_FIELD.ID,
     LAST_NAME: USER_FIELD.LAST_NAME,
-  },
-  USER_WITH_ROLES: {
-    ID: USER_WITH_ROLES_FIELD.ID,
-    FIRST_NAME: USER_WITH_ROLES_FIELD.FIRST_NAME,
-    LAST_NAME: USER_WITH_ROLES_FIELD.LAST_NAME,
-    PROJECT_ID: USER_WITH_ROLES_FIELD.PROJECT_ID,
+    PROJECT_ID: USER_FIELD.PROJECT_ID,
   },
   WORKFLOW: {
     ID: WORKFLOW_FIELD.ID,
@@ -145,9 +134,6 @@ const organizationFields = createCandidVariant(
 const projectFields = createCandidVariant(Object.values(PROJECT_FIELD));
 const revisionFields = createCandidVariant(Object.values(REVISION_FIELD));
 const userFields = createCandidVariant(Object.values(USER_FIELD));
-const userWithRolesFields = createCandidVariant(
-  Object.values(USER_WITH_ROLES_FIELD),
-);
 const workflowFields = createCandidVariant(Object.values(WORKFLOW_FIELD));
 
 export const filterOperator = createCandidVariant(
@@ -165,6 +151,5 @@ export const filterField = {
   Revision: revisionFields,
   Role: roleFields,
   User: userFields,
-  UserWithRoles: userWithRolesFields,
   Workflow: workflowFields,
 } as const;

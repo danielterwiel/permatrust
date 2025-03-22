@@ -57,13 +57,6 @@ pub fn get_user() -> GetUserResult {
     get_user_by_principal(principal)
 }
 
-pub fn get_user_by_id(id: UserId) -> GetUserResult {
-    match state::get_by_id(id) {
-        Some(user) => GetUserResult::Ok(user),
-        None => GetUserResult::Err(AppError::EntityNotFound("User not found".to_string())),
-    }
-}
-
 pub fn get_user_by_principal(principal: Principal) -> GetUserResult {
     match state::get_by_principal(principal) {
         Some(user) => GetUserResult::Ok(user),

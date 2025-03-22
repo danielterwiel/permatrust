@@ -39,10 +39,6 @@ pub fn get_all() -> Vec<User> {
     })
 }
 
-pub fn get_by_id(id: UserId) -> Option<User> {
-    USERS.with(|users| users.borrow().get(&id))
-}
-
 pub fn get_by_principal(principal: Principal) -> Option<User> {
     USERS.with(|users| {
         users

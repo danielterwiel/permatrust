@@ -33,10 +33,6 @@ pub fn get_all() -> Vec<Project> {
     })
 }
 
-pub fn get_by_id(id: ProjectId) -> Option<Project> {
-    PROJECTS.with(|projects| projects.borrow().get(&id))
-}
-
 pub fn insert(id: ProjectId, project: Project) {
     PROJECTS.with(|projects| {
         projects.borrow_mut().insert(id, project);

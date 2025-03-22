@@ -65,9 +65,7 @@ export const Route = createFileRoute(
     const pagination = processPaginationInput(deps.pagination);
 
     const [projects] = await context.query.ensureQueryData(
-      listProjectsByOrganizationIdOptions({
-        organizationId: activeOrganizationId,
-      }),
+      listProjectsByOrganizationIdOptions(activeOrganizationId),
     );
 
     const projectId = projects[0].id;

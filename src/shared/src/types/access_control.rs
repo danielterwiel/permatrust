@@ -1,16 +1,15 @@
 use crate::types::errors::AppError;
 use crate::types::projects::ProjectId;
-use crate::types::users::User;
 use candid::CandidType;
 use serde::Deserialize;
 use strum_macros::EnumIter;
 
-use super::pagination::{PaginationInput, PaginationMetadata};
+use super::pagination::PaginationInput;
 use super::users::UserId;
 
 pub type RoleId = u64;
 
-#[derive(candid::CandidType, serde::Deserialize)]
+#[derive(CandidType, Deserialize)]
 pub struct RoleIdInput {
     pub id: RoleId,
 }
@@ -108,14 +107,9 @@ pub struct Role {
     pub created_at: u64,
     pub updated_at: Option<u64>,
 }
-#[derive(CandidType, Deserialize, Clone, Debug)]
-pub struct UserWithRoles {
-    pub user: User,
-    pub roles: Vec<Role>,
-}
 
 // Inputs
-#[derive(candid::CandidType, serde::Deserialize)]
+#[derive(CandidType, Deserialize)]
 pub struct ListProjectMembersRolesInput {
     pub project_id: ProjectId,
     pub pagination: PaginationInput,
@@ -193,12 +187,6 @@ pub enum UpdateRolePermissionsResult {
 #[derive(CandidType, Deserialize)]
 pub enum GetUserPermissionsResult {
     Ok(Vec<Permission>),
-    Err(AppError),
-}
-
-#[derive(CandidType, Deserialize)]
-pub enum ListProjectMembersRolesResult {
-    Ok((Vec<UserWithRoles>, PaginationMetadata)),
     Err(AppError),
 }
 

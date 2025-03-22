@@ -11,6 +11,11 @@ declare module '@tanstack/react-router' {
   }
 }
 
+console.log(
+  '%c🦦 PERMATRUST 🦦',
+  'font-size: 44px; text-decoration: underline;',
+);
+
 const rootElement = document.getElementById('root');
 if (rootElement) {
   ReactDOM.createRoot(rootElement).render(

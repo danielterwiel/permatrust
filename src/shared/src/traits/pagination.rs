@@ -1,6 +1,5 @@
 use std::cmp::Ordering;
 
-use crate::types::access_control::UserWithRoles;
 use crate::types::documents::{Document, DocumentId};
 use crate::types::organizations::{Organization, OrganizationId};
 use crate::types::pagination::{
@@ -94,32 +93,17 @@ impl Filterable for User {
                 FilterOperator::Contains => self.last_name.contains(&criteria.value),
                 _ => false,
             },
-            _ => false,
-        }
-    }
-}
-
-impl Filterable for UserWithRoles {
-    fn matches(&self, criteria: &FilterCriteria) -> bool {
-        match &criteria.field {
-            FilterField::User(UserFilterField::Id) => {
-                let parsed_value = criteria.value.parse::<UserId>().ok();
-                match (criteria.operator.clone(), parsed_value) {
-                    (FilterOperator::Equals, Some(value)) => self.user.id == value,
-                    (FilterOperator::Equals, None) => false,
-                    _ => self.user.id.to_string() != criteria.value,
+            FilterField::User(UserFilterField::ProjectId) => {
+                // Parse the project_id from the criteria value
+                let project_id = criteria.value.parse::<ProjectId>().unwrap_or(0);
+                match criteria.operator {
+                    FilterOperator::Equals => {
+                        // Check if any of the user's roles are for this project
+                        self.roles.iter().any(|role| role.project_id == project_id)
+                    }
+                    _ => false,
                 }
             }
-            FilterField::User(UserFilterField::FirstName) => match criteria.operator {
-                FilterOperator::Equals => self.user.first_name == criteria.value,
-                FilterOperator::Contains => self.user.first_name.contains(&criteria.value),
-                _ => false,
-            },
-            FilterField::User(UserFilterField::LastName) => match criteria.operator {
-                FilterOperator::Equals => self.user.last_name == criteria.value,
-                FilterOperator::Contains => self.user.last_name.contains(&criteria.value),
-                _ => false,
-            },
             _ => false,
         }
     }
@@ -302,24 +286,6 @@ impl Sortable for User {
         let ordering = match &criteria.field {
             FilterField::User(UserFilterField::FirstName) => self.first_name.cmp(&other.first_name),
             FilterField::User(UserFilterField::LastName) => self.last_name.cmp(&other.last_name),
-            _ => Ordering::Equal,
-        };
-        match criteria.order {
-            SortOrder::Asc => ordering,
-            SortOrder::Desc => ordering.reverse(),
-        }
-    }
-}
-
-impl Sortable for UserWithRoles {
-    fn compare(&self, other: &Self, criteria: &SortCriteria) -> Ordering {
-        let ordering = match &criteria.field {
-            FilterField::User(UserFilterField::FirstName) => {
-                self.user.first_name.cmp(&other.user.first_name)
-            }
-            FilterField::User(UserFilterField::LastName) => {
-                self.user.last_name.cmp(&other.user.last_name)
-            }
             _ => Ordering::Equal,
         };
         match criteria.order {

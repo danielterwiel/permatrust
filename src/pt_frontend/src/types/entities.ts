@@ -7,7 +7,6 @@ import type {
   Revision,
   Role,
   User,
-  UserWithRoles,
   Workflow,
 } from '@/declarations/pt_backend/pt_backend.did';
 
@@ -29,6 +28,5 @@ interface EntityTypeMap {
   Revision: Revision;
   Role: Role;
   User: User;
-  UserWithRoles: UserWithRoles;
   Workflow: Workflow;
 }
