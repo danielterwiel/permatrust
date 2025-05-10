@@ -5,14 +5,14 @@ set -eo pipefail
 corepack enable
 
 # Install nvm if needed
-if ! command -v nvm &> /dev/null; then
+if ! command -v nvm &>/dev/null; then
   echo "Installing nvm..."
   npm install -g nvm
 fi
 
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash completion
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash completion
 
 # Read Node.js version from .nvmrc
 if [ -f ".nvmrc" ]; then

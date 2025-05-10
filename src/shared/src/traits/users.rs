@@ -1,4 +1,3 @@
-use crate::types::organizations::OrganizationId;
 use crate::types::users::{User, UserId};
 use candid::{Decode, Encode, Principal};
 use ic_stable_structures::storable::Bound;
@@ -23,20 +22,12 @@ impl Storable for User {
 }
 
 impl User {
-    pub fn new(
-        id: UserId,
-        principal: Principal,
-        first_name: String,
-        last_name: String,
-        organizations: Option<Vec<OrganizationId>>,
-    ) -> Self {
+    pub fn new(id: UserId, principal: Principal, first_name: String, last_name: String) -> Self {
         let principals = vec![principal];
-        let organizations = organizations.unwrap_or_default();
         Self {
             id,
             first_name,
             last_name,
-            organizations,
             principals,
             roles: Vec::new(),
         }

@@ -1,41 +1,38 @@
 import { assign, createActor, fromPromise, log, setup } from 'xstate';
 
-import { listOrganizationsOptions } from '@/api/queries/organizations';
+import { getTenantCanisterIdsOptions } from '@/api/queries';
 import { getUserOptions } from '@/api/queries/users';
 import { queryClient } from '@/api/query-client';
-
-import { DEFAULT_PAGINATION } from '@/consts/pagination';
+import { isAppError, isIdentityNotFoundError } from '@/utils/is-app-error';
 
 import type {
   Organization,
   User,
-} from '@/declarations/pt_backend/pt_backend.did';
+} from '@/declarations/tenant_canister/tenant_canister.did';
+import type { Principal } from '@dfinity/principal';
 
-import { createAuthenticatedActorWrapper } from '@/api';
+import { createMainActorWrapper, createTenantActorWrapper } from '@/api';
 import { Auth } from '@/auth';
 import { router } from '@/router';
-
-const canisterIdPtBackend = process.env.CANISTER_ID_PT_BACKEND as string;
 
 type AuthMachineTypes = {
   context: {
     isAuthenticated: boolean;
-
-    organizations?: Array<Organization>;
-
+    tenantCanisterIds?: Array<Principal>;
+    organization?: Organization;
     user?: User;
   };
   events:
-    | {
-        type: 'LOGIN';
-      }
-    | {
-        type: 'LOGOUT';
-      }
-    | {
-        type: 'UPDATE_USER';
-        user: User;
-      };
+  | {
+    type: 'LOGIN';
+  }
+  | {
+    type: 'LOGOUT';
+  }
+  | {
+    type: 'UPDATE_USER';
+    user: User;
+  };
 };
 
 const authMachine = setup({
@@ -56,18 +53,38 @@ const authMachine = setup({
           }
         }
 
-        const actor = await createAuthenticatedActorWrapper(
-          canisterIdPtBackend,
-          client,
-        );
+        // Only create the main actor initially
+        const mainActor = await createMainActorWrapper(client);
 
-        return { actor, success: true };
+        return { actor: { main: mainActor }, success: true };
       } catch (error) {
         const errorMessage =
           error instanceof Error
             ? error.message
             : 'Unknown authentication error';
         throw new Error(errorMessage);
+      }
+    }),
+
+    get_tenant_canister_ids: fromPromise(async () => {
+      try {
+        const [tenantCanisterId] = await queryClient.ensureQueryData(
+          getTenantCanisterIdsOptions(),
+        );
+        const auth = Auth.getInstance();
+        const client = await auth.initializeClient();
+        await createTenantActorWrapper(client, tenantCanisterId.toString());
+
+        return {
+          tenantCanisterIds: [tenantCanisterId],
+        };
+      } catch (error) {
+        if (isAppError(error) && 'IdentityNotFound' in error) {
+          return {
+            tenantCanisterIds: [],
+          };
+        }
+        throw new Error('Unexpedted error while fetching canister IDs');
       }
     }),
 
@@ -93,36 +110,18 @@ const authMachine = setup({
 
         const isAuthenticated = await client.isAuthenticated();
 
-        const actor = isAuthenticated
-          ? await createAuthenticatedActorWrapper(canisterIdPtBackend, client)
-          : undefined;
-
-        return { actor, client, isAuthenticated };
-      } catch (_error) {
-        throw new Error('Auth initialization failed');
-      }
-    }),
-
-    list_organizations: fromPromise(async () => {
-      try {
-        const organizationsResult = await queryClient.ensureQueryData(
-          listOrganizationsOptions(DEFAULT_PAGINATION),
-        );
-        const [organizations] = organizationsResult;
-
-        if (!organizations.length) {
-          return {
-            onboardedOrganizations: false,
-          };
+        if (isAuthenticated) {
+          await createMainActorWrapper(client);
+          await queryClient.ensureQueryData(getTenantCanisterIdsOptions());
         }
-        return {
-          onboardedOrganizations: true,
-          organizations,
-        };
-      } catch (_error) {
-        return {
-          onboardedOrganizations: false,
-        };
+
+        return { isAuthenticated };
+      } catch (error) {
+        if (isIdentityNotFoundError(error)) {
+          return { isAuthenticated: true };
+        }
+
+        throw new Error('Auth initialization failed');
       }
     }),
   },
@@ -131,7 +130,7 @@ const authMachine = setup({
   context: {
     isAuthenticated: false,
 
-    organizations: undefined,
+    organization: undefined,
     user: undefined,
   },
   id: 'authMachine',
@@ -170,20 +169,20 @@ const authMachine = setup({
             },
 
             onboarding: {
-              initial: 'check_user',
+              initial: 'check_tenants',
               states: {
-                check_organizations: {
+                check_tenants: {
                   invoke: {
-                    id: 'check_organizations',
+                    id: 'get_tenant_canister_ids',
                     onDone: [
                       {
                         actions: assign({
-                          organizations: ({ event }) =>
-                            event.output.organizations,
+                          tenantCanisterIds: ({ event }) =>
+                            event.output.tenantCanisterIds,
                         }),
                         guard: ({ event }) =>
-                          event.output.onboardedOrganizations,
-                        target: 'onboarding_complete',
+                          !!event.output.tenantCanisterIds.length,
+                        target: 'check_user',
                       },
                       {
                         actions: async () => {
@@ -195,23 +194,25 @@ const authMachine = setup({
                       },
                     ],
                     onError: {
-                      entry: log('TODO: ONBOARDING_ERROR check_organizations'),
+                      entry: log(
+                        'TODO: ONBOARDING_ERROR get_tenant_canister_ids',
+                      ),
                       target: 'onboarding_error',
                     },
-                    src: 'list_organizations',
+                    src: 'get_tenant_canister_ids',
                   },
                 },
 
                 check_user: {
                   invoke: {
-                    id: 'check_user',
+                    id: 'get_user',
                     onDone: [
                       {
                         actions: assign({
                           user: ({ event }) => event.output.user,
                         }),
                         guard: ({ event }) => event.output.onboardedUser,
-                        target: 'check_organizations',
+                        target: 'onboarding_complete',
                       },
                       {
                         actions: async () => {
@@ -223,7 +224,7 @@ const authMachine = setup({
                       },
                     ],
                     onError: {
-                      entry: log('TODO: ONBOARDING_ERROR check_user'),
+                      entry: log('TODO: ONBOARDING_ERROR get_user'),
                       target: 'onboarding_error',
                     },
                     src: 'get_user',
@@ -253,7 +254,7 @@ const authMachine = setup({
                   always: '#authenticated_idle',
                   entry: [
                     async ({ context }) => {
-                      if (context.user) {
+                      if (!context.tenantCanisterIds?.length) {
                         await router.navigate({
                           to: '/onboarding/organization/create',
                         });

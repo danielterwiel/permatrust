@@ -1,0 +1,25 @@
+type AppError = variant {
+  InvalidPageSize : text;
+  InvalidStateTransition : text;
+  InvalidInput : text;
+  EntityNotFound : text;
+  InvalidPageNumber : text;
+  ValidationError : text;
+  Unauthorized;
+  UpdateFailed : text;
+  IdentityNotFound;
+  SpawnCanister : text;
+  InternalError : text;
+};
+type CreateTenantCanisterInput = record { company_name : text };
+type CreateTenantCanisterResult = variant { Ok : principal; Err : AppError };
+type GetTenantCanisterIdsResult = variant {
+  Ok : vec principal;
+  Err : AppError;
+};
+service : {
+  create_tenant_canister : (CreateTenantCanisterInput) -> (
+      CreateTenantCanisterResult,
+    );
+  get_tenant_canister_ids : () -> (GetTenantCanisterIdsResult) query;
+}

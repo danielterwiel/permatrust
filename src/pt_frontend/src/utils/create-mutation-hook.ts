@@ -7,7 +7,7 @@ import { isAppError } from '@/utils/is-app-error';
 
 import type { ToastProps } from '@/components/ui/toast';
 
-import type { AppError } from '@/declarations/pt_backend/pt_backend.did';
+import type { AppError } from '@/declarations/tenant_canister/tenant_canister.did';
 import type {
   InvalidateQueryFilters,
   MutationOptions,
@@ -81,11 +81,9 @@ export function createMutationHook<TVariables, TData>(
         } else if (
           'ValidationError' in appError &&
           typeof appError.ValidationError === 'object' &&
-          appError.ValidationError !== null &&
-          'message' in appError.ValidationError &&
-          typeof appError.ValidationError.message === 'string'
+          'message' in appError.ValidationError
         ) {
-          errorMessage = `Validation error: ${appError.ValidationError.message}`;
+          errorMessage = `Validation error: ${appError.ValidationError}`;
         } else {
           errorMessage = 'Application error occurred. Please try again.';
         }

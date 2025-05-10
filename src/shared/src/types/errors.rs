@@ -3,11 +3,15 @@ use serde::Deserialize;
 
 #[derive(CandidType, Deserialize, Debug)]
 pub enum AppError {
-    InvalidPageSize(String),
-    InvalidInput(String),
-    InvalidStateTransition(String),
     EntityNotFound(String),
-    InvalidPageNumber(String),
-    Unauthorized,
+    IdentityNotFound,
     InternalError(String),
+    InvalidInput(String),
+    InvalidPageNumber(String),
+    InvalidPageSize(String),
+    InvalidStateTransition(String),
+    SpawnCanister(String),
+    Unauthorized,
+    ValidationError(String),
+    UpdateFailed(String),
 }

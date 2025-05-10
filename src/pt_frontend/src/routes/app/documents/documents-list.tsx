@@ -3,10 +3,9 @@ import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 import { useState } from 'react';
 
 import { listDocumentsOptions } from '@/api/queries/documents';
-import { listProjectsByOrganizationIdOptions } from '@/api/queries/projects';
+import { listProjectsOptions } from '@/api/queries/projects';
 import { usePagination } from '@/hooks/use-pagination';
 import { createPagination, createPaginationSchema } from '@/schemas/pagination';
-import { getActiveOrganizationId } from '@/utils/get-active-organizationId';
 import { processPaginationInput } from '@/utils/pagination';
 
 import { FilterInput } from '@/components/filter-input';
@@ -31,12 +30,17 @@ import {
 } from '@/components/ui/select';
 
 import { ENTITY } from '@/consts/entities';
-import { FIELDS, FILTER_OPERATOR, SORT_ORDER } from '@/consts/pagination';
+import {
+  DEFAULT_PAGINATION,
+  FIELDS,
+  FILTER_OPERATOR,
+  SORT_ORDER,
+} from '@/consts/pagination';
 
 import type {
   Document,
   Project,
-} from '@/declarations/pt_backend/pt_backend.did';
+} from '@/declarations/tenant_canister/tenant_canister.did';
 import type { Row } from '@tanstack/react-table';
 
 const {
@@ -61,18 +65,14 @@ export const Route = createFileRoute(
     getTitle: () => 'Documents',
   }),
   loader: async ({ context, deps }) => {
-    const activeOrganizationId = getActiveOrganizationId();
     const pagination = processPaginationInput(deps.pagination);
 
     const [projects] = await context.query.ensureQueryData(
-      listProjectsByOrganizationIdOptions(activeOrganizationId),
+      listProjectsOptions({ pagination: DEFAULT_PAGINATION }),
     );
 
+    // TODO: handle project picker
     const projectId = projects[0].id;
-
-    if (!projectId) {
-      throw new Error('Not implemented');
-    }
 
     const defaultPagination = createPagination(ENTITY.DOCUMENT, {
       defaultFilterField: FIELDS.DOCUMENT.PROJECT_ID,

@@ -11,7 +11,7 @@ import {
   SORT_ORDER,
 } from '@/consts/pagination';
 
-import type { ListDocumentsInput } from '@/declarations/pt_backend/pt_backend.did';
+import type { ListDocumentsInput } from '@/declarations/tenant_canister/tenant_canister.did';
 import type { DocumentId, ProjectId } from '@/types/entities';
 
 import { api } from '@/api';
@@ -29,7 +29,7 @@ export const getDocumentOptions = (id: DocumentId) => {
   return createQueryOptions({
     queryFn: async () =>
       getSingleApiResult(
-        () => api.list_documents({ pagination }),
+        () => api.tenant.list_documents({ pagination }),
         'Document not found',
       ),
     queryKey: ['document', { id }],
@@ -38,7 +38,7 @@ export const getDocumentOptions = (id: DocumentId) => {
 
 export const listDocumentsOptions = (input: ListDocumentsInput) =>
   createQueryOptions({
-    queryFn: () => api.list_documents(input),
+    queryFn: () => api.tenant.list_documents(input),
     queryKey: ['documents', input],
   });
 
@@ -52,7 +52,7 @@ export const listDocumentsByProjectIdOptions = (projectId: ProjectId) => {
   });
 
   return createQueryOptions({
-    queryFn: () => api.list_documents({ pagination }),
+    queryFn: () => api.tenant.list_documents({ pagination }),
     queryKey: ['documents_by_project_id', { projectId, pagination }],
   });
 };

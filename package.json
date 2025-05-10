@@ -6,7 +6,6 @@
     "node": "=23.7.0"
   },
   "scripts": {
-    "preinstall": "./scripts/check-node-version.sh",
     "build": "pnpm --filter=pt_frontend run build",
     "build:icons": "pnpm --filter=pt_frontend build:icons",
     "add:icons": "pnpm --filter=pt_frontend add:icons",
@@ -20,8 +19,8 @@
     "lint:fix": "pnpm --filter=pt_frontend run lint --fix",
     "deploy": "./scripts/deploy.sh",
     "clean": "./scripts/clean.sh",
-    "generate": "./scripts/codegen/generate.sh",
-    "check-node": "./scripts/check-node-version.sh"
+    "generate": "./scripts/generate.sh",
+    "check": "./scripts/check.sh"
   },
   "type": "module"
 }

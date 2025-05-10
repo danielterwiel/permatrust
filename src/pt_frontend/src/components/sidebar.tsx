@@ -1,4 +1,3 @@
-
 import { Link } from '@tanstack/react-router';
 import type { FC } from 'react';
 
@@ -22,7 +21,7 @@ type SidebarProps = { authActor: typeof AuthActor };
 
 export const Sidebar: FC<SidebarProps> = ({ authActor }) => {
   const items = [
-    ['/organizations', 'Organizations', 'building-outline'],
+    ['/organization', 'Organization', 'building-outline'],
     ['/projects', 'Projects', 'briefcase-outline'],
     ['/documents', 'Documents', 'files-outline'],
     ['/users', 'Users', 'users-outline'],

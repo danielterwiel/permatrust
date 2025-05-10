@@ -1,6 +1,6 @@
-import { AppErrorSchema } from '@/schemas/error';
+import { AppErrorSchema, IdentityNotFoundSchema } from '@/schemas/error';
 
-import type { AppError } from '@/declarations/pt_backend/pt_backend.did';
+import type { AppError } from '@/declarations/tenant_canister/tenant_canister.did';
 
 export function isAppError(response: unknown): response is AppError {
   if (typeof response !== 'object' || response === null) {
@@ -13,5 +13,18 @@ export function isAppError(response: unknown): response is AppError {
     return false;
   }
 
+  return true;
+}
+
+export function isIdentityNotFoundError(
+  response: unknown,
+): response is AppError {
+  if (typeof response !== 'object' || response === null) {
+    return false;
+  }
+  const result = IdentityNotFoundSchema.safeParse(response);
+  if (!result.success) {
+    return false;
+  }
   return true;
 }

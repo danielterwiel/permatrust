@@ -3,7 +3,6 @@ use serde::Deserialize;
 
 use crate::types::documents::DocumentId;
 use crate::types::errors::AppError;
-use crate::types::organizations::OrganizationId;
 use crate::types::pagination::PaginationInput;
 use crate::types::pagination::PaginationMetadata;
 use crate::types::users::{User, UserId};
@@ -18,7 +17,6 @@ pub struct Project {
     pub name: String,
     pub created_at: u64,
     pub created_by: UserId,
-    pub organizations: Vec<OrganizationId>,
 }
 
 // Inputs
@@ -29,7 +27,6 @@ pub struct ProjectIdInput {
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct CreateProjectInput {
-    pub organization_id: OrganizationId,
     pub name: String,
 }
 

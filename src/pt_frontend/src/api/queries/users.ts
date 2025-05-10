@@ -4,20 +4,20 @@ import { createQueryOptions } from '@/utils/create-query-options';
 import { ENTITY } from '@/consts/entities';
 import { FIELDS, FILTER_OPERATOR, SORT_ORDER } from '@/consts/pagination';
 
-import type { ListUsersInput } from '@/declarations/pt_backend/pt_backend.did';
+import type { ListUsersInput } from '@/declarations/tenant_canister/tenant_canister.did';
 import type { ProjectId } from '@/types/entities';
 
 import { api } from '@/api';
 
 export const getUserOptions = () =>
   createQueryOptions({
-    queryFn: () => api.get_user(),
+    queryFn: api.tenant.get_user,
     queryKey: ['user'],
   });
 
 export const listUsersOptions = (input: ListUsersInput) =>
   createQueryOptions({
-    queryFn: () => api.list_users(input),
+    queryFn: () => api.tenant.list_users(input),
     queryKey: ['users', input],
   });
 
@@ -32,7 +32,7 @@ export const listUsersByProjectIdOptions = (projectId: ProjectId) => {
 
   return createQueryOptions({
     queryFn: () =>
-      api.list_project_members({
+      api.tenant.list_project_members({
         pagination,
       }),
     queryKey: ['users_by_project_id', { projectId, pagination }],

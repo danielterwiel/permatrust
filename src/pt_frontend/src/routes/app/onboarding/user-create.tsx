@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { mutations } from '@/api/mutations';
+import { tenantMutations as mutations } from '@/api/mutations';
 
 import { CreateUserForm } from '@/components/create-user-form';
 import type { createUserFormSchema } from '@/components/create-user-form';
@@ -34,7 +34,6 @@ function CreateUser() {
       {
         first_name: values.first_name,
         last_name: values.last_name,
-        organizations: [], // TODO: invite codes
       },
       {
         onSuccess: (user) => {
@@ -42,7 +41,7 @@ function CreateUser() {
             type: 'UPDATE_USER',
             user,
           });
-          navigate({ to: '/onboarding/organization/create' });
+          navigate({ to: '/projects/create' });
         },
       },
     );

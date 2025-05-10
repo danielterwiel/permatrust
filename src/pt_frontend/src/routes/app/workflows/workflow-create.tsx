@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import ReactFlow, { Background, Controls, ReactFlowProvider } from 'reactflow';
 import { z } from 'zod';
 
-import { mutations } from '@/api/mutations';
+import { tenantMutations as mutations } from '@/api/mutations';
 
 import { Input } from '@/components/input';
 import { Loading } from '@/components/loading';

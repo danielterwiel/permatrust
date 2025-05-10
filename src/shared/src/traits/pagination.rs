@@ -1,7 +1,7 @@
 use std::cmp::Ordering;
 
 use crate::types::documents::{Document, DocumentId};
-use crate::types::organizations::{Organization, OrganizationId};
+use crate::types::organization::Organization;
 use crate::types::pagination::{
     DocumentFilterField, OrganizationFilterField, ProjectFilterField, RevisionFilterField,
     UserFilterField, WorkflowFilterField,
@@ -166,13 +166,6 @@ impl Filterable for Revision {
 impl Filterable for Organization {
     fn matches(&self, criteria: &FilterCriteria) -> bool {
         match &criteria.field {
-            FilterField::Organization(OrganizationFilterField::Id) => {
-                let criteria_value = criteria.value.parse::<OrganizationId>().unwrap_or(0);
-                match criteria.operator {
-                    FilterOperator::Equals => self.id == criteria_value,
-                    _ => false,
-                }
-            }
             FilterField::Organization(OrganizationFilterField::CreatedAt) => {
                 let criteria_value = criteria.value.parse::<u64>().unwrap_or(0);
                 match criteria.operator {
@@ -203,7 +196,7 @@ impl Filterable for Project {
                 }
             }
             FilterField::Project(ProjectFilterField::Members) => {
-                let criteria_value = criteria.value.parse::<UserId>().unwrap_or(0);
+                let criteria_value = criteria.value.parse::<UserId>().expect("Invalid UserId");
                 match criteria.operator {
                     FilterOperator::Contains => self.members.contains(&criteria_value),
                     _ => false,
@@ -222,13 +215,6 @@ impl Filterable for Project {
                 FilterOperator::Contains => self.name.contains(&criteria.value),
                 _ => false,
             },
-            FilterField::Project(ProjectFilterField::OrganizationId) => {
-                let criteria_value = criteria.value.parse::<OrganizationId>().unwrap_or(0);
-                match criteria.operator {
-                    FilterOperator::Equals => self.organizations.contains(&criteria_value),
-                    _ => false,
-                }
-            }
 
             _ => false,
         }
@@ -340,9 +326,6 @@ impl Sortable for Project {
                 self.created_at.cmp(&other.created_at)
             }
             FilterField::Project(ProjectFilterField::Name) => self.name.cmp(&other.name),
-            FilterField::Project(ProjectFilterField::OrganizationId) => {
-                self.organizations.cmp(&other.organizations)
-            }
             _ => Ordering::Equal,
         };
         match criteria.order {

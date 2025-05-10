@@ -32,7 +32,6 @@ pub enum RevisionFilterField {
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub enum OrganizationFilterField {
-    Id,
     Name,
     CreatedAt,
 }
@@ -41,7 +40,6 @@ pub enum OrganizationFilterField {
 pub enum ProjectFilterField {
     Id,
     Members,
-    OrganizationId,
     Name,
     CreatedAt,
     CreatedBy,

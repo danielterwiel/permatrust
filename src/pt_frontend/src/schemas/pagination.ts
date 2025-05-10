@@ -19,9 +19,24 @@ import type {
   SortOrder as ApiSortOrder,
   UserFilterField as ApiUserFilterField,
   WorkflowFilterField as ApiWorkflowFilterField,
-} from '@/declarations/pt_backend/pt_backend.did';
+} from '@/declarations/tenant_canister/tenant_canister.did';
 import type { EntityName } from '@/types/entities';
 import type { PaginationConfig } from '@/types/pagination';
+
+// Organization field schema
+const organizationFieldSchema = z.union([
+  z.object({ Name: z.null() }).strict(),
+  z.object({ CreatedAt: z.null() }).strict(),
+]) satisfies z.ZodType<ApiOrganizationFilterField>;
+
+// Project field schema
+const projectFieldSchema = z.union([
+  z.object({ Id: z.null() }).strict(),
+  z.object({ Name: z.null() }).strict(),
+  z.object({ Members: z.null() }).strict(),
+  z.object({ CreatedAt: z.null() }).strict(),
+  z.object({ CreatedBy: z.null() }).strict(),
+]) satisfies z.ZodType<ApiProjectFilterField>;
 
 // Document field schema
 const documentFieldSchema = z.union([
@@ -31,23 +46,6 @@ const documentFieldSchema = z.union([
   z.object({ ProjectId: z.null() }).strict(),
   z.object({ CreatedAt: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiDocumentFilterField>;
-
-// Organization field schema
-const organizationFieldSchema = z.union([
-  z.object({ Id: z.null() }).strict(),
-  z.object({ Name: z.null() }).strict(),
-  z.object({ CreatedAt: z.null() }).strict(),
-]) satisfies z.ZodType<ApiOrganizationFilterField>;
-
-// Project field schema
-const projectFieldSchema = z.union([
-  z.object({ Id: z.null() }).strict(),
-  z.object({ Name: z.null() }).strict(),
-  z.object({ OrganizationId: z.null() }).strict(),
-  z.object({ Members: z.null() }).strict(),
-  z.object({ CreatedAt: z.null() }).strict(),
-  z.object({ CreatedBy: z.null() }).strict(),
-]) satisfies z.ZodType<ApiProjectFilterField>;
 
 // Revision field schema
 const revisionFieldSchema = z.union([

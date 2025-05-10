@@ -23,7 +23,7 @@ import { Route as layoutsOnboardedImport } from './routes/_layouts/_onboarded'
 import { Route as appWorkflowsWorkflowsIndexImport } from './routes/app/workflows/workflows-index'
 import { Route as appUsersUsersIndexImport } from './routes/app/users/users-index'
 import { Route as appProjectsProjectsIndexImport } from './routes/app/projects/projects-index'
-import { Route as appOrganizationsOrganizationsIndexImport } from './routes/app/organizations/organizations-index'
+import { Route as appOrganizationOrganizationIndexImport } from './routes/app/organization/organization-index'
 import { Route as appDocumentsDocumentsListImport } from './routes/app/documents/documents-list'
 import { Route as appWorkflowsWorkflowCreateImport } from './routes/app/workflows/workflow-create'
 import { Route as appWorkflowsWorkflowIndexImport } from './routes/app/workflows/workflow-index'
@@ -31,20 +31,17 @@ import { Route as appUsersUserCreateImport } from './routes/app/users/user-creat
 import { Route as appUsersUserDetailsImport } from './routes/app/users/user-details'
 import { Route as appProjectsProjectCreateImport } from './routes/app/projects/project-create'
 import { Route as appProjectsProjectIndexImport } from './routes/app/projects/project-index'
-import { Route as appOrganizationsOrganizationCreateImport } from './routes/app/organizations/organization-create'
-import { Route as appOrganizationsOrganizationIndexImport } from './routes/app/organizations/organization-index'
 import { Route as appOnboardingOnboardingIndexImport } from './routes/app/onboarding/onboarding-index'
 import { Route as appWorkflowsWorkflowsListImport } from './routes/app/workflows/workflows-list'
 import { Route as appUsersUsersListImport } from './routes/app/users/users-list'
 import { Route as appProjectsProjectsListImport } from './routes/app/projects/projects-list'
-import { Route as appOrganizationsOrganizationsListImport } from './routes/app/organizations/organizations-list'
+import { Route as appOrganizationOrganizationDetailsImport } from './routes/app/organization/organization-details'
 import { Route as appOnboardingUserCreateImport } from './routes/app/onboarding/user-create'
 import { Route as appOnboardingOrganizationCreateImport } from './routes/app/onboarding/organization-create'
 import { Route as appRolesRolesIndexImport } from './routes/app/roles/roles-index'
 import { Route as appDocumentsDocumentsIndexImport } from './routes/app/documents/documents-index'
 import { Route as appWorkflowsWorkflowDetailsImport } from './routes/app/workflows/workflow-details'
 import { Route as appProjectsProjectDetailsImport } from './routes/app/projects/project-details'
-import { Route as appOrganizationsOrganizationDetailsImport } from './routes/app/organizations/organization-details'
 import { Route as appRolesRolesListImport } from './routes/app/roles/roles-list'
 import { Route as appRolesRoleCreateImport } from './routes/app/roles/role-create'
 import { Route as appRolesRolesAssignedImport } from './routes/app/roles/roles-assigned'
@@ -131,10 +128,10 @@ const appProjectsProjectsIndexRoute = appProjectsProjectsIndexImport.update({
   getParentRoute: () => layoutsOnboardedRoute,
 } as any)
 
-const appOrganizationsOrganizationsIndexRoute =
-  appOrganizationsOrganizationsIndexImport.update({
-    id: '/organizations',
-    path: '/organizations',
+const appOrganizationOrganizationIndexRoute =
+  appOrganizationOrganizationIndexImport.update({
+    id: '/organization',
+    path: '/organization',
     getParentRoute: () => layoutsOnboardedRoute,
   } as any)
 
@@ -182,20 +179,6 @@ const appProjectsProjectIndexRoute = appProjectsProjectIndexImport.update({
   getParentRoute: () => appProjectsProjectsIndexRoute,
 } as any)
 
-const appOrganizationsOrganizationCreateRoute =
-  appOrganizationsOrganizationCreateImport.update({
-    id: '/create',
-    path: '/create',
-    getParentRoute: () => appOrganizationsOrganizationsIndexRoute,
-  } as any)
-
-const appOrganizationsOrganizationIndexRoute =
-  appOrganizationsOrganizationIndexImport.update({
-    id: '/$organizationId',
-    path: '/$organizationId',
-    getParentRoute: () => appOrganizationsOrganizationsIndexRoute,
-  } as any)
-
 const appOnboardingOnboardingIndexRoute =
   appOnboardingOnboardingIndexImport.update({
     id: '/',
@@ -221,11 +204,11 @@ const appProjectsProjectsListRoute = appProjectsProjectsListImport.update({
   getParentRoute: () => appProjectsProjectsIndexRoute,
 } as any)
 
-const appOrganizationsOrganizationsListRoute =
-  appOrganizationsOrganizationsListImport.update({
+const appOrganizationOrganizationDetailsRoute =
+  appOrganizationOrganizationDetailsImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => appOrganizationsOrganizationsIndexRoute,
+    getParentRoute: () => appOrganizationOrganizationIndexRoute,
   } as any)
 
 const appOnboardingUserCreateRoute = appOnboardingUserCreateImport.update({
@@ -267,13 +250,6 @@ const appProjectsProjectDetailsRoute = appProjectsProjectDetailsImport.update({
   path: '/',
   getParentRoute: () => appProjectsProjectIndexRoute,
 } as any)
-
-const appOrganizationsOrganizationDetailsRoute =
-  appOrganizationsOrganizationDetailsImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => appOrganizationsOrganizationIndexRoute,
-  } as any)
 
 const appRolesRolesListRoute = appRolesRolesListImport.update({
   id: '/list',
@@ -416,11 +392,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appDocumentsDocumentsListImport
       parentRoute: typeof layoutsOnboardedImport
     }
-    '/_initialized/_authenticated/_onboarded/organizations': {
-      id: '/_initialized/_authenticated/_onboarded/organizations'
-      path: '/organizations'
-      fullPath: '/organizations'
-      preLoaderRoute: typeof appOrganizationsOrganizationsIndexImport
+    '/_initialized/_authenticated/_onboarded/organization': {
+      id: '/_initialized/_authenticated/_onboarded/organization'
+      path: '/organization'
+      fullPath: '/organization'
+      preLoaderRoute: typeof appOrganizationOrganizationIndexImport
       parentRoute: typeof layoutsOnboardedImport
     }
     '/_initialized/_authenticated/_onboarded/projects': {
@@ -451,12 +427,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InitializedAuthenticatedOnboardingOnboardingImport
       parentRoute: typeof layoutsOnboardingImport
     }
-    '/_initialized/_authenticated/_onboarded/organizations/': {
-      id: '/_initialized/_authenticated/_onboarded/organizations/'
+    '/_initialized/_authenticated/_onboarded/organization/': {
+      id: '/_initialized/_authenticated/_onboarded/organization/'
       path: '/'
-      fullPath: '/organizations/'
-      preLoaderRoute: typeof appOrganizationsOrganizationsListImport
-      parentRoute: typeof appOrganizationsOrganizationsIndexImport
+      fullPath: '/organization/'
+      preLoaderRoute: typeof appOrganizationOrganizationDetailsImport
+      parentRoute: typeof appOrganizationOrganizationIndexImport
     }
     '/_initialized/_authenticated/_onboarded/projects/': {
       id: '/_initialized/_authenticated/_onboarded/projects/'
@@ -485,20 +461,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/onboarding/'
       preLoaderRoute: typeof appOnboardingOnboardingIndexImport
       parentRoute: typeof InitializedAuthenticatedOnboardingOnboardingImport
-    }
-    '/_initialized/_authenticated/_onboarded/organizations/$organizationId': {
-      id: '/_initialized/_authenticated/_onboarded/organizations/$organizationId'
-      path: '/$organizationId'
-      fullPath: '/organizations/$organizationId'
-      preLoaderRoute: typeof appOrganizationsOrganizationIndexImport
-      parentRoute: typeof appOrganizationsOrganizationsIndexImport
-    }
-    '/_initialized/_authenticated/_onboarded/organizations/create': {
-      id: '/_initialized/_authenticated/_onboarded/organizations/create'
-      path: '/create'
-      fullPath: '/organizations/create'
-      preLoaderRoute: typeof appOrganizationsOrganizationCreateImport
-      parentRoute: typeof appOrganizationsOrganizationsIndexImport
     }
     '/_initialized/_authenticated/_onboarded/projects/$projectId': {
       id: '/_initialized/_authenticated/_onboarded/projects/$projectId'
@@ -541,13 +503,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/workflows/create'
       preLoaderRoute: typeof appWorkflowsWorkflowCreateImport
       parentRoute: typeof appWorkflowsWorkflowsIndexImport
-    }
-    '/_initialized/_authenticated/_onboarded/organizations/$organizationId/': {
-      id: '/_initialized/_authenticated/_onboarded/organizations/$organizationId/'
-      path: '/'
-      fullPath: '/organizations/$organizationId/'
-      preLoaderRoute: typeof appOrganizationsOrganizationDetailsImport
-      parentRoute: typeof appOrganizationsOrganizationIndexImport
     }
     '/_initialized/_authenticated/_onboarded/projects/$projectId/': {
       id: '/_initialized/_authenticated/_onboarded/projects/$projectId/'
@@ -680,40 +635,19 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
-interface appOrganizationsOrganizationIndexRouteChildren {
-  appOrganizationsOrganizationDetailsRoute: typeof appOrganizationsOrganizationDetailsRoute
+interface appOrganizationOrganizationIndexRouteChildren {
+  appOrganizationOrganizationDetailsRoute: typeof appOrganizationOrganizationDetailsRoute
 }
 
-const appOrganizationsOrganizationIndexRouteChildren: appOrganizationsOrganizationIndexRouteChildren =
+const appOrganizationOrganizationIndexRouteChildren: appOrganizationOrganizationIndexRouteChildren =
   {
-    appOrganizationsOrganizationDetailsRoute:
-      appOrganizationsOrganizationDetailsRoute,
+    appOrganizationOrganizationDetailsRoute:
+      appOrganizationOrganizationDetailsRoute,
   }
 
-const appOrganizationsOrganizationIndexRouteWithChildren =
-  appOrganizationsOrganizationIndexRoute._addFileChildren(
-    appOrganizationsOrganizationIndexRouteChildren,
-  )
-
-interface appOrganizationsOrganizationsIndexRouteChildren {
-  appOrganizationsOrganizationsListRoute: typeof appOrganizationsOrganizationsListRoute
-  appOrganizationsOrganizationIndexRoute: typeof appOrganizationsOrganizationIndexRouteWithChildren
-  appOrganizationsOrganizationCreateRoute: typeof appOrganizationsOrganizationCreateRoute
-}
-
-const appOrganizationsOrganizationsIndexRouteChildren: appOrganizationsOrganizationsIndexRouteChildren =
-  {
-    appOrganizationsOrganizationsListRoute:
-      appOrganizationsOrganizationsListRoute,
-    appOrganizationsOrganizationIndexRoute:
-      appOrganizationsOrganizationIndexRouteWithChildren,
-    appOrganizationsOrganizationCreateRoute:
-      appOrganizationsOrganizationCreateRoute,
-  }
-
-const appOrganizationsOrganizationsIndexRouteWithChildren =
-  appOrganizationsOrganizationsIndexRoute._addFileChildren(
-    appOrganizationsOrganizationsIndexRouteChildren,
+const appOrganizationOrganizationIndexRouteWithChildren =
+  appOrganizationOrganizationIndexRoute._addFileChildren(
+    appOrganizationOrganizationIndexRouteChildren,
   )
 
 interface appRevisionsRevisionsIndexRouteChildren {
@@ -873,7 +807,7 @@ const appWorkflowsWorkflowsIndexRouteWithChildren =
 
 interface layoutsOnboardedRouteChildren {
   appDocumentsDocumentsListRoute: typeof appDocumentsDocumentsListRoute
-  appOrganizationsOrganizationsIndexRoute: typeof appOrganizationsOrganizationsIndexRouteWithChildren
+  appOrganizationOrganizationIndexRoute: typeof appOrganizationOrganizationIndexRouteWithChildren
   appProjectsProjectsIndexRoute: typeof appProjectsProjectsIndexRouteWithChildren
   appUsersUsersIndexRoute: typeof appUsersUsersIndexRouteWithChildren
   appWorkflowsWorkflowsIndexRoute: typeof appWorkflowsWorkflowsIndexRouteWithChildren
@@ -881,8 +815,8 @@ interface layoutsOnboardedRouteChildren {
 
 const layoutsOnboardedRouteChildren: layoutsOnboardedRouteChildren = {
   appDocumentsDocumentsListRoute: appDocumentsDocumentsListRoute,
-  appOrganizationsOrganizationsIndexRoute:
-    appOrganizationsOrganizationsIndexRouteWithChildren,
+  appOrganizationOrganizationIndexRoute:
+    appOrganizationOrganizationIndexRouteWithChildren,
   appProjectsProjectsIndexRoute: appProjectsProjectsIndexRouteWithChildren,
   appUsersUsersIndexRoute: appUsersUsersIndexRouteWithChildren,
   appWorkflowsWorkflowsIndexRoute: appWorkflowsWorkflowsIndexRouteWithChildren,
@@ -955,25 +889,22 @@ export interface FileRoutesByFullPath {
   '/login': typeof publicLoginRoute
   '/unauthorized': typeof publicUnauthorizedRoute
   '/documents': typeof appDocumentsDocumentsListRoute
-  '/organizations': typeof appOrganizationsOrganizationsIndexRouteWithChildren
+  '/organization': typeof appOrganizationOrganizationIndexRouteWithChildren
   '/projects': typeof appProjectsProjectsIndexRouteWithChildren
   '/users': typeof appUsersUsersIndexRouteWithChildren
   '/workflows': typeof appWorkflowsWorkflowsIndexRouteWithChildren
   '/onboarding': typeof InitializedAuthenticatedOnboardingOnboardingRouteWithChildren
-  '/organizations/': typeof appOrganizationsOrganizationsListRoute
+  '/organization/': typeof appOrganizationOrganizationDetailsRoute
   '/projects/': typeof appProjectsProjectsListRoute
   '/users/': typeof appUsersUsersListRoute
   '/workflows/': typeof appWorkflowsWorkflowsListRoute
   '/onboarding/': typeof appOnboardingOnboardingIndexRoute
-  '/organizations/$organizationId': typeof appOrganizationsOrganizationIndexRouteWithChildren
-  '/organizations/create': typeof appOrganizationsOrganizationCreateRoute
   '/projects/$projectId': typeof appProjectsProjectIndexRouteWithChildren
   '/projects/create': typeof appProjectsProjectCreateRoute
   '/users/$userId': typeof appUsersUserDetailsRoute
   '/users/create': typeof appUsersUserCreateRoute
   '/workflows/$workflowId': typeof appWorkflowsWorkflowIndexRouteWithChildren
   '/workflows/create': typeof appWorkflowsWorkflowCreateRoute
-  '/organizations/$organizationId/': typeof appOrganizationsOrganizationDetailsRoute
   '/projects/$projectId/': typeof appProjectsProjectDetailsRoute
   '/workflows/$workflowId/': typeof appWorkflowsWorkflowDetailsRoute
   '/projects/$projectId/documents': typeof appDocumentsDocumentsIndexRouteWithChildren
@@ -1000,17 +931,15 @@ export interface FileRoutesByTo {
   '/login': typeof publicLoginRoute
   '/unauthorized': typeof publicUnauthorizedRoute
   '/documents': typeof appDocumentsDocumentsListRoute
-  '/organizations': typeof appOrganizationsOrganizationsListRoute
+  '/organization': typeof appOrganizationOrganizationDetailsRoute
   '/projects': typeof appProjectsProjectsListRoute
   '/users': typeof appUsersUsersListRoute
   '/workflows': typeof appWorkflowsWorkflowsListRoute
   '/onboarding': typeof appOnboardingOnboardingIndexRoute
-  '/organizations/create': typeof appOrganizationsOrganizationCreateRoute
   '/projects/create': typeof appProjectsProjectCreateRoute
   '/users/$userId': typeof appUsersUserDetailsRoute
   '/users/create': typeof appUsersUserCreateRoute
   '/workflows/create': typeof appWorkflowsWorkflowCreateRoute
-  '/organizations/$organizationId': typeof appOrganizationsOrganizationDetailsRoute
   '/projects/$projectId': typeof appProjectsProjectDetailsRoute
   '/workflows/$workflowId': typeof appWorkflowsWorkflowDetailsRoute
   '/projects/$projectId/roles': typeof appRolesRolesIndexRouteWithChildren
@@ -1039,25 +968,22 @@ export interface FileRoutesById {
   '/_initialized/_authenticated/_onboarded': typeof layoutsOnboardedRouteWithChildren
   '/_initialized/_authenticated/_onboarding': typeof layoutsOnboardingRouteWithChildren
   '/_initialized/_authenticated/_onboarded/documents': typeof appDocumentsDocumentsListRoute
-  '/_initialized/_authenticated/_onboarded/organizations': typeof appOrganizationsOrganizationsIndexRouteWithChildren
+  '/_initialized/_authenticated/_onboarded/organization': typeof appOrganizationOrganizationIndexRouteWithChildren
   '/_initialized/_authenticated/_onboarded/projects': typeof appProjectsProjectsIndexRouteWithChildren
   '/_initialized/_authenticated/_onboarded/users': typeof appUsersUsersIndexRouteWithChildren
   '/_initialized/_authenticated/_onboarded/workflows': typeof appWorkflowsWorkflowsIndexRouteWithChildren
   '/_initialized/_authenticated/_onboarding/onboarding': typeof InitializedAuthenticatedOnboardingOnboardingRouteWithChildren
-  '/_initialized/_authenticated/_onboarded/organizations/': typeof appOrganizationsOrganizationsListRoute
+  '/_initialized/_authenticated/_onboarded/organization/': typeof appOrganizationOrganizationDetailsRoute
   '/_initialized/_authenticated/_onboarded/projects/': typeof appProjectsProjectsListRoute
   '/_initialized/_authenticated/_onboarded/users/': typeof appUsersUsersListRoute
   '/_initialized/_authenticated/_onboarded/workflows/': typeof appWorkflowsWorkflowsListRoute
   '/_initialized/_authenticated/_onboarding/onboarding/': typeof appOnboardingOnboardingIndexRoute
-  '/_initialized/_authenticated/_onboarded/organizations/$organizationId': typeof appOrganizationsOrganizationIndexRouteWithChildren
-  '/_initialized/_authenticated/_onboarded/organizations/create': typeof appOrganizationsOrganizationCreateRoute
   '/_initialized/_authenticated/_onboarded/projects/$projectId': typeof appProjectsProjectIndexRouteWithChildren
   '/_initialized/_authenticated/_onboarded/projects/create': typeof appProjectsProjectCreateRoute
   '/_initialized/_authenticated/_onboarded/users/$userId': typeof appUsersUserDetailsRoute
   '/_initialized/_authenticated/_onboarded/users/create': typeof appUsersUserCreateRoute
   '/_initialized/_authenticated/_onboarded/workflows/$workflowId': typeof appWorkflowsWorkflowIndexRouteWithChildren
   '/_initialized/_authenticated/_onboarded/workflows/create': typeof appWorkflowsWorkflowCreateRoute
-  '/_initialized/_authenticated/_onboarded/organizations/$organizationId/': typeof appOrganizationsOrganizationDetailsRoute
   '/_initialized/_authenticated/_onboarded/projects/$projectId/': typeof appProjectsProjectDetailsRoute
   '/_initialized/_authenticated/_onboarded/workflows/$workflowId/': typeof appWorkflowsWorkflowDetailsRoute
   '/_initialized/_authenticated/_onboarded/projects/$projectId/documents': typeof appDocumentsDocumentsIndexRouteWithChildren
@@ -1086,25 +1012,22 @@ export interface FileRouteTypes {
     | '/login'
     | '/unauthorized'
     | '/documents'
-    | '/organizations'
+    | '/organization'
     | '/projects'
     | '/users'
     | '/workflows'
     | '/onboarding'
-    | '/organizations/'
+    | '/organization/'
     | '/projects/'
     | '/users/'
     | '/workflows/'
     | '/onboarding/'
-    | '/organizations/$organizationId'
-    | '/organizations/create'
     | '/projects/$projectId'
     | '/projects/create'
     | '/users/$userId'
     | '/users/create'
     | '/workflows/$workflowId'
     | '/workflows/create'
-    | '/organizations/$organizationId/'
     | '/projects/$projectId/'
     | '/workflows/$workflowId/'
     | '/projects/$projectId/documents'
@@ -1130,17 +1053,15 @@ export interface FileRouteTypes {
     | '/login'
     | '/unauthorized'
     | '/documents'
-    | '/organizations'
+    | '/organization'
     | '/projects'
     | '/users'
     | '/workflows'
     | '/onboarding'
-    | '/organizations/create'
     | '/projects/create'
     | '/users/$userId'
     | '/users/create'
     | '/workflows/create'
-    | '/organizations/$organizationId'
     | '/projects/$projectId'
     | '/workflows/$workflowId'
     | '/projects/$projectId/roles'
@@ -1167,25 +1088,22 @@ export interface FileRouteTypes {
     | '/_initialized/_authenticated/_onboarded'
     | '/_initialized/_authenticated/_onboarding'
     | '/_initialized/_authenticated/_onboarded/documents'
-    | '/_initialized/_authenticated/_onboarded/organizations'
+    | '/_initialized/_authenticated/_onboarded/organization'
     | '/_initialized/_authenticated/_onboarded/projects'
     | '/_initialized/_authenticated/_onboarded/users'
     | '/_initialized/_authenticated/_onboarded/workflows'
     | '/_initialized/_authenticated/_onboarding/onboarding'
-    | '/_initialized/_authenticated/_onboarded/organizations/'
+    | '/_initialized/_authenticated/_onboarded/organization/'
     | '/_initialized/_authenticated/_onboarded/projects/'
     | '/_initialized/_authenticated/_onboarded/users/'
     | '/_initialized/_authenticated/_onboarded/workflows/'
     | '/_initialized/_authenticated/_onboarding/onboarding/'
-    | '/_initialized/_authenticated/_onboarded/organizations/$organizationId'
-    | '/_initialized/_authenticated/_onboarded/organizations/create'
     | '/_initialized/_authenticated/_onboarded/projects/$projectId'
     | '/_initialized/_authenticated/_onboarded/projects/create'
     | '/_initialized/_authenticated/_onboarded/users/$userId'
     | '/_initialized/_authenticated/_onboarded/users/create'
     | '/_initialized/_authenticated/_onboarded/workflows/$workflowId'
     | '/_initialized/_authenticated/_onboarded/workflows/create'
-    | '/_initialized/_authenticated/_onboarded/organizations/$organizationId/'
     | '/_initialized/_authenticated/_onboarded/projects/$projectId/'
     | '/_initialized/_authenticated/_onboarded/workflows/$workflowId/'
     | '/_initialized/_authenticated/_onboarded/projects/$projectId/documents'
@@ -1263,7 +1181,7 @@ export const routeTree = rootRoute
       "parent": "/_initialized/_authenticated",
       "children": [
         "/_initialized/_authenticated/_onboarded/documents",
-        "/_initialized/_authenticated/_onboarded/organizations",
+        "/_initialized/_authenticated/_onboarded/organization",
         "/_initialized/_authenticated/_onboarded/projects",
         "/_initialized/_authenticated/_onboarded/users",
         "/_initialized/_authenticated/_onboarded/workflows"
@@ -1280,13 +1198,11 @@ export const routeTree = rootRoute
       "filePath": "app/documents/documents-list.tsx",
       "parent": "/_initialized/_authenticated/_onboarded"
     },
-    "/_initialized/_authenticated/_onboarded/organizations": {
-      "filePath": "app/organizations/organizations-index.tsx",
+    "/_initialized/_authenticated/_onboarded/organization": {
+      "filePath": "app/organization/organization-index.tsx",
       "parent": "/_initialized/_authenticated/_onboarded",
       "children": [
-        "/_initialized/_authenticated/_onboarded/organizations/",
-        "/_initialized/_authenticated/_onboarded/organizations/$organizationId",
-        "/_initialized/_authenticated/_onboarded/organizations/create"
+        "/_initialized/_authenticated/_onboarded/organization/"
       ]
     },
     "/_initialized/_authenticated/_onboarded/projects": {
@@ -1325,9 +1241,9 @@ export const routeTree = rootRoute
         "/_initialized/_authenticated/_onboarding/onboarding/user/create"
       ]
     },
-    "/_initialized/_authenticated/_onboarded/organizations/": {
-      "filePath": "app/organizations/organizations-list.tsx",
-      "parent": "/_initialized/_authenticated/_onboarded/organizations"
+    "/_initialized/_authenticated/_onboarded/organization/": {
+      "filePath": "app/organization/organization-details.tsx",
+      "parent": "/_initialized/_authenticated/_onboarded/organization"
     },
     "/_initialized/_authenticated/_onboarded/projects/": {
       "filePath": "app/projects/projects-list.tsx",
@@ -1344,17 +1260,6 @@ export const routeTree = rootRoute
     "/_initialized/_authenticated/_onboarding/onboarding/": {
       "filePath": "app/onboarding/onboarding-index.tsx",
       "parent": "/_initialized/_authenticated/_onboarding/onboarding"
-    },
-    "/_initialized/_authenticated/_onboarded/organizations/$organizationId": {
-      "filePath": "app/organizations/organization-index.tsx",
-      "parent": "/_initialized/_authenticated/_onboarded/organizations",
-      "children": [
-        "/_initialized/_authenticated/_onboarded/organizations/$organizationId/"
-      ]
-    },
-    "/_initialized/_authenticated/_onboarded/organizations/create": {
-      "filePath": "app/organizations/organization-create.tsx",
-      "parent": "/_initialized/_authenticated/_onboarded/organizations"
     },
     "/_initialized/_authenticated/_onboarded/projects/$projectId": {
       "filePath": "app/projects/project-index.tsx",
@@ -1387,10 +1292,6 @@ export const routeTree = rootRoute
     "/_initialized/_authenticated/_onboarded/workflows/create": {
       "filePath": "app/workflows/workflow-create.tsx",
       "parent": "/_initialized/_authenticated/_onboarded/workflows"
-    },
-    "/_initialized/_authenticated/_onboarded/organizations/$organizationId/": {
-      "filePath": "app/organizations/organization-details.tsx",
-      "parent": "/_initialized/_authenticated/_onboarded/organizations/$organizationId"
     },
     "/_initialized/_authenticated/_onboarded/projects/$projectId/": {
       "filePath": "app/projects/project-details.tsx",

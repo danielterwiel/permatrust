@@ -1,7 +1,7 @@
 import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
 
-import { mutations } from '@/api/mutations';
+import { tenantMutations as mutations } from '@/api/mutations';
 import { projectIdSchema } from '@/schemas/entities';
 import { capitalizeFirstLetterValidator } from '@/schemas/form';
 import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
@@ -24,7 +24,7 @@ import { Textarea } from '@/components/ui/textarea';
 import type {
   Permission,
   Project,
-} from '@/declarations/pt_backend/pt_backend.did';
+} from '@/declarations/tenant_canister/tenant_canister.did';
 
 import { permissionsToItems } from '@/utils';
 

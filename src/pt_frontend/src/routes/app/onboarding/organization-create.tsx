@@ -1,12 +1,15 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
-import { mutations } from '@/api/mutations';
+import { mainMutations, tenantMutations } from '@/api/mutations';
 import { useLocalStorage } from '@/hooks/use-local-storage';
 
 import { CreateOrganizationForm } from '@/components/create-organization-form';
 import type { createOrganizationFormSchema } from '@/components/create-organization-form';
 
 import type { z } from 'zod';
+
+import { createTenantActorWrapper } from '@/api';
+import { Auth } from '@/auth';
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarding/onboarding/organization/create',
@@ -22,34 +25,39 @@ export const Route = createFileRoute(
 });
 
 function CreateOrganization() {
-  const { authActor } = Route.useLoaderData();
-  const [_activeOrganizationId, setActiveOrganizationId] = useLocalStorage(
-    'activeOrganizationId',
+  const [_tenantCanisterId, setTenantCanisterId] = useLocalStorage(
+    'tenantCanisterId',
     '',
   );
   const navigate = useNavigate();
 
   const {
-    error,
-    isPending: isSubmitting,
-    mutate: createOrganization,
-  } = mutations.useCreateOrganization();
+    error: createTenantCanisterError,
+    isPending: isCreatingTenantCanister,
+    mutate: createTenantCanister,
+  } = mainMutations.useCreateTenantCanister();
+  const isSubmitting = isCreatingTenantCanister;
 
   function onSubmit(values: z.infer<typeof createOrganizationFormSchema>) {
-    const { id: userId } = authActor.getSnapshot().context.user ?? {};
-
-    if (userId === undefined) {
-      throw new Error('User not found');
-    }
-
-    createOrganization(
+    createTenantCanister(
+      { company_name: values.name },
       {
-        name: values.name,
-      },
-      {
-        onSuccess: (organizationId) => {
-          setActiveOrganizationId(organizationId.toString());
-          navigate({ to: '/projects' });
+        onSuccess: async (tenantCanisterId) => {
+          const auth = Auth.getInstance();
+          const client = await auth.getClient();
+
+          const tenantCanisterIdStr = tenantCanisterId.toString();
+          await createTenantActorWrapper(client, tenantCanisterIdStr);
+          setTenantCanisterId(tenantCanisterIdStr.toString());
+
+          navigate({ to: '/onboarding/user/create' });
+        },
+        onError: (error) => {
+          console.error('Error creating tenant canister:', error);
+          // Log details for debugging
+          if (error.message) {
+            console.error('Error message:', error.message);
+          }
         },
       },
     );
@@ -57,7 +65,9 @@ function CreateOrganization() {
 
   return (
     <>
-      {error && <div>{error.message}</div>}
+      {createTenantCanisterError && (
+        <div>{createTenantCanisterError.message}</div>
+      )}
       <CreateOrganizationForm isSubmitting={isSubmitting} onSubmit={onSubmit} />
     </>
   );

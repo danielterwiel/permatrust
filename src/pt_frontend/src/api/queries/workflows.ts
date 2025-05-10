@@ -11,7 +11,7 @@ import {
   SORT_ORDER,
 } from '@/consts/pagination';
 
-import type { PaginationInput } from '@/declarations/pt_backend/pt_backend.did';
+import type { PaginationInput } from '@/declarations/tenant_canister/tenant_canister.did';
 import type { WorkflowId } from '@/types/entities';
 
 import { api } from '@/api';
@@ -29,7 +29,7 @@ export const getWorkflowOptions = (id: WorkflowId) => {
   return createQueryOptions({
     queryFn: async () =>
       getSingleApiResult(
-        () => api.list_workflows(pagination),
+        () => api.tenant.list_workflows(pagination),
         'Workflow not found',
       ),
     queryKey: ['workflow', { id, pagination }],
@@ -38,12 +38,12 @@ export const getWorkflowOptions = (id: WorkflowId) => {
 
 export const getWorkflowStateOptions = (id: WorkflowId) =>
   createQueryOptions({
-    queryFn: () => api.get_workflow_state({ id }),
+    queryFn: () => api.tenant.get_workflow_state({ id }),
     queryKey: ['workflow_state', id],
   });
 
 export const listWorkflowsOptions = (input: PaginationInput) =>
   createQueryOptions({
-    queryFn: () => api.list_workflows(input),
+    queryFn: () => api.tenant.list_workflows(input),
     queryKey: ['workflows', input],
   });

@@ -3,19 +3,17 @@ use serde::Deserialize;
 
 use crate::types::access_control::Role;
 use crate::types::errors::AppError;
-use crate::types::organizations::OrganizationId;
 use crate::types::pagination::PaginationInput;
 
 use super::pagination::PaginationMetadata;
 
-pub type UserId = u64;
+pub type UserId = u8;
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct User {
     pub id: UserId,
     pub first_name: String,
     pub last_name: String,
-    pub organizations: Vec<OrganizationId>,
     pub principals: Vec<Principal>,
     pub roles: Vec<Role>,
 }
@@ -31,7 +29,6 @@ pub struct UserIdInput {
 pub struct CreateUserInput {
     pub first_name: String,
     pub last_name: String,
-    pub organizations: Option<Vec<OrganizationId>>,
 }
 
 #[derive(CandidType, Deserialize)]

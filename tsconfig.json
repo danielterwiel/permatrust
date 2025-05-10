@@ -1,3 +1,7 @@
 {
-	"include": ["./src/pt_frontend/", "src/pt_backend/"]
+  "include": [
+    "./src/pt_frontend/",
+    "src/main_canister/",
+    "src/tenant_canister/"
+  ]
 }

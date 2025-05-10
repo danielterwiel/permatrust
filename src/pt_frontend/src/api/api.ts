@@ -1,61 +1,106 @@
 import { HttpAgent } from '@dfinity/agent';
 
-import { createMutations } from '@/api/mutations';
+import { createMainMutations, createTenantMutations } from '@/api/mutations';
 import { isAppError } from '@/utils/is-app-error';
 
-import { createActor } from '@/declarations/pt_backend/index';
+import { createActor as createMainActor } from '@/declarations/main_canister/index';
+import type { _SERVICE as MainService } from '@/declarations/main_canister/main_canister.did';
+import { createActor as createTenantActor } from '@/declarations/tenant_canister/index';
 import type {
-  AppError,
-  _SERVICE,
-} from '@/declarations/pt_backend/pt_backend.did';
+  AppError as TenantAppError,
+  _SERVICE as TenantService,
+} from '@/declarations/tenant_canister/tenant_canister.did';
 import type { CreateActorFn, Result, ResultHandler } from '@/types/api';
 import type { ActorSubclass } from '@dfinity/agent';
 import type { AuthClient } from '@dfinity/auth-client';
 
 const HOST = import.meta.env.PROD ? 'https://icp0.io' : 'http://localhost:8080';
 
-type ActorWithIndex = ActorSubclass<_SERVICE> & { [key: string]: unknown };
+const canisterIdMain = process.env.CANISTER_ID_MAIN_CANISTER as string;
 
-type WrappedActorWithIndex = {
-  [K in keyof ActorWithIndex]: ActorWithIndex[K] extends (
+type ActorWithIndex<T> = ActorSubclass<T> & { [key: string]: unknown };
+
+type WrappedActorWithIndex<T> = {
+  [K in keyof ActorWithIndex<T>]: ActorWithIndex<T>[K] extends (
     ...args: infer A
-  ) => Promise<Result<infer T>>
-    ? (...args: [...A, ResultHandler<T>?]) => Promise<T>
-    : ActorWithIndex[K];
+  ) => Promise<Result<infer U>>
+  ? (...args: [...A, ResultHandler<U>?]) => Promise<U>
+  : ActorWithIndex<T>[K];
 };
 
-export let api = {} as WrappedActorWithIndex;
+type TenantCanisterApi = WrappedActorWithIndex<TenantService>;
+type MainCanisterApi = WrappedActorWithIndex<MainService>;
 
-export async function createAuthenticatedActorWrapper(
-  canisterId: string,
-  authClient: AuthClient,
-): Promise<WrappedActorWithIndex> {
-  const actor = await createAuthenticatedActor(
-    canisterId,
-    createActor,
-    authClient,
-  );
-  const wrappedActor = wrapActor(wrapWithAuth(actor, authClient));
-  api = wrappedActor;
-  createMutations();
-  return wrappedActor;
+interface ApiInterface {
+  tenant: TenantCanisterApi;
+  main: MainCanisterApi;
 }
 
-async function createAuthenticatedActor(
+export let api = {} as ApiInterface;
+
+/**
+ * Creates an authenticated main canister actor
+ */
+export async function createMainActorWrapper(
+  authClient: AuthClient,
+): Promise<MainCanisterApi> {
+  const mainActor = await createAuthenticatedActor<MainService>(
+    canisterIdMain,
+    createMainActor,
+    authClient,
+  );
+  const wrappedMainActor = wrapActor<MainService>(
+    wrapWithAuth<MainService>(mainActor, authClient),
+  ) as MainCanisterApi;
+
+  api.main = wrappedMainActor;
+  createMainMutations();
+
+  return wrappedMainActor;
+}
+
+/**
+ * Creates an authenticated tenant canister actor with a specific canister ID
+ */
+export async function createTenantActorWrapper(
+  authClient: AuthClient,
+  tenantCanisterId: string,
+): Promise<TenantCanisterApi> {
+  if (!tenantCanisterId) {
+    throw new Error('Tenant canister ID is required');
+  }
+
+  const tenantActor = await createAuthenticatedActor<TenantService>(
+    tenantCanisterId,
+    createTenantActor,
+    authClient,
+  );
+  const wrappedTenantActor = wrapActor<TenantService>(
+    wrapWithAuth<TenantService>(tenantActor, authClient),
+  ) as TenantCanisterApi;
+
+  api.tenant = wrappedTenantActor;
+  createTenantMutations();
+
+  return wrappedTenantActor;
+}
+
+async function createAuthenticatedActor<T>(
   canisterId: string,
   createActorFn: CreateActorFn,
   authClient: AuthClient,
-): Promise<ActorWithIndex> {
+): Promise<ActorWithIndex<T>> {
   const agent = await HttpAgent.create({
     host: HOST,
     identity: authClient.getIdentity(),
   });
+
   if (!import.meta.env.PROD) {
     await agent.fetchRootKey().catch(() => {
       throw new Error('Failed to fetch root key');
     });
   }
-  return createActorFn(canisterId, { agent }) as ActorWithIndex;
+  return createActorFn(canisterId, { agent }) as unknown as ActorWithIndex<T>;
 }
 
 function handleResult<T>(
@@ -71,7 +116,7 @@ function handleResult<T>(
     handlers.onErr(result.Err);
   }
 
-  let error: AppError | Error;
+  let error: TenantAppError | Error;
   if (isAppError(result.Err)) {
     error = result.Err;
   } else {
@@ -81,39 +126,40 @@ function handleResult<T>(
   throw error;
 }
 
-function wrapActor<T extends ActorWithIndex>(actor: T): WrappedActorWithIndex {
-  const wrappedActor: Partial<WrappedActorWithIndex> = {};
+function wrapActor<T>(actor: ActorWithIndex<T>): WrappedActorWithIndex<T> {
+  const wrappedActor: Record<string, () => Promise<unknown>> = {};
+
   for (const key in actor) {
     const method = actor[key];
     if (typeof method === 'function') {
-      wrappedActor[key] = (async (...args: Array<T>) => {
+      wrappedActor[key] = async (...args: Array<unknown>) => {
         let handlers: ResultHandler<unknown> | undefined;
         const lastArg = args[args.length - 1];
         if (
           typeof lastArg === 'object' &&
+          lastArg !== null &&
           ('onOk' in lastArg || 'onErr' in lastArg)
         ) {
           handlers = args.pop() as ResultHandler<unknown>;
         }
         const result = await method.apply(actor, args);
         return handleResult(result, handlers);
-      }) as WrappedActorWithIndex[typeof key];
-    } else {
-      wrappedActor[key] = method;
+      };
     }
   }
-  return wrappedActor as WrappedActorWithIndex;
+
+  return wrappedActor as unknown as WrappedActorWithIndex<T>;
 }
 
-function wrapWithAuth<T extends ActorWithIndex>(
-  actor: T,
+function wrapWithAuth<T>(
+  actor: ActorWithIndex<T>,
   authClient: AuthClient,
-): T {
+): ActorWithIndex<T> {
   return new Proxy(actor, {
     get(target, prop, receiver) {
       const original = Reflect.get(target, prop, receiver);
       if (typeof original === 'function') {
-        return async (...args: Array<T>) => {
+        return async (...args: Array<unknown>) => {
           if (!(await authClient.isAuthenticated())) {
             throw new Error('User is not authenticated');
           }

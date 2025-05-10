@@ -5,7 +5,7 @@ import { isDefaultFilter, processPaginationInput } from '@/utils/pagination';
 import type {
   FilterCriteria,
   SortCriteria,
-} from '@/declarations/pt_backend/pt_backend.did';
+} from '@/declarations/tenant_canister/tenant_canister.did';
 import type { PaginationInput } from '@/types/pagination';
 
 /**

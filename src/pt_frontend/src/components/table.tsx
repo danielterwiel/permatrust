@@ -28,7 +28,7 @@ import { SORT_ORDER } from '@/consts/pagination';
 import type {
   PaginationMetadata,
   SortCriteria,
-} from '@/declarations/pt_backend/pt_backend.did';
+} from '@/declarations/tenant_canister/tenant_canister.did';
 import type { Entity, EntityName } from '@/types/entities';
 import type { FilterFieldName } from '@/types/pagination';
 import type { ColumnDef, Row, SortingState } from '@tanstack/react-table';

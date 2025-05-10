@@ -15,7 +15,7 @@ import { Icon } from '@/components/ui/icon';
 import { ENTITY } from '@/consts/entities';
 import { FIELDS, FILTER_OPERATOR, SORT_ORDER } from '@/consts/pagination';
 
-import type { User } from '@/declarations/pt_backend/pt_backend.did';
+import type { User } from '@/declarations/tenant_canister/tenant_canister.did';
 import type { Row } from '@tanstack/react-table';
 
 const { schema: usersSearchSchema, defaultPagination } = createPaginationSchema(

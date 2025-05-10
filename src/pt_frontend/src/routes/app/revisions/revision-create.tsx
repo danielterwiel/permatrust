@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { mutations } from '@/api/mutations';
+import { tenantMutations as mutations } from '@/api/mutations';
 import { listRevisionsByDocumentIdOptions } from '@/api/queries';
 import { documentIdSchema, projectIdSchema } from '@/schemas/entities';
 

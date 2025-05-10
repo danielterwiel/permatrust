@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/form';
 import { Icon } from '@/components/ui/icon';
 
-import type { Revision } from '@/declarations/pt_backend/pt_backend.did';
+import type { Revision } from '@/declarations/tenant_canister/tenant_canister.did';
 
 export const createRevisionFormSchema = z.object({
   content: z.string().min(1, {

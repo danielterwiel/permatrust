@@ -17,6 +17,10 @@ export class Auth {
     }
     return this.authClient;
   }
+  
+  public async getClient(): Promise<AuthClient> {
+    return this.authClient || this.initializeClient();
+  }
 
   public async isAuthenticated(): Promise<boolean> {
     const client = await this.initializeClient();

@@ -1,6 +1,6 @@
 import { createCandidVariant } from '@/utils/create-candid-variant';
 
-import type { PaginationInput } from '@/declarations/pt_backend/pt_backend.did';
+import type { PaginationInput } from '@/declarations/tenant_canister/tenant_canister.did';
 
 export const PAGE_SIZE = {
   SINGLE: 1,
@@ -25,7 +25,6 @@ const DOCUMENT_FIELD = {
 } as const;
 
 const ORGANIZATION_FIELD = {
-  ID: 'Id',
   CREATED_AT: 'CreatedAt',
   CREATED_BY: 'CreatedBy',
   NAME: 'Name',
@@ -37,7 +36,6 @@ const PROJECT_FIELD = {
   ID: 'Id',
   MEMBERS: 'Members',
   NAME: 'Name',
-  ORGANIZATION_ID: 'OrganizationId',
 } as const;
 
 const REVISION_FIELD = {
@@ -84,7 +82,6 @@ export const FIELDS = {
     CREATED_AT: ROLE_FIELD.CREATED_AT,
   },
   ORGANIZATION: {
-    ID: ORGANIZATION_FIELD.ID,
     CREATED_AT: ORGANIZATION_FIELD.CREATED_AT,
     NAME: ORGANIZATION_FIELD.NAME,
   },
@@ -93,7 +90,6 @@ export const FIELDS = {
     CREATED_BY: PROJECT_FIELD.CREATED_BY,
     ID: PROJECT_FIELD.ID,
     NAME: PROJECT_FIELD.NAME,
-    ORGANIZATION_ID: PROJECT_FIELD.ORGANIZATION_ID,
   },
   REVISION: {
     CREATED_AT: REVISION_FIELD.CREATED_AT,

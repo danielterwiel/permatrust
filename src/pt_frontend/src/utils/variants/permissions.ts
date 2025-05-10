@@ -1,6 +1,6 @@
 import { entityPermissionSchema } from '@/schemas/permissions';
 
-import type { Permission } from '@/declarations/pt_backend/pt_backend.did';
+import type { Permission } from '@/declarations/tenant_canister/tenant_canister.did';
 
 export function createPermissionVariant(
   entity: string,

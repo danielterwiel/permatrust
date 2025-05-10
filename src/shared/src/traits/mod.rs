@@ -1,6 +1,6 @@
 pub mod access_control;
 pub mod documents;
-pub mod organizations;
+pub mod organization;
 pub mod pagination;
 pub mod projects;
 pub mod revisions;

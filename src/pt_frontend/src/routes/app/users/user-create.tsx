@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { mutations } from '@/api/mutations';
+import { tenantMutations as mutations } from '@/api/mutations';
 
 import { CreateUserForm } from '@/components/create-user-form';
 import type { createUserFormSchema } from '@/components/create-user-form';
@@ -31,11 +31,10 @@ function CreateUser() {
         {
           first_name: values.first_name,
           last_name: values.last_name,
-          organizations: [],
         },
         {
           onSuccess: () => {
-            navigate({ to: '/organizations' });
+            navigate({ to: '/organization' });
           },
         },
       );

@@ -1,1 +1,2 @@
-export { createMutations, mutations } from './create-mutations';
+export { createMainMutations, mainMutations } from './main';
+export { createTenantMutations, tenantMutations } from './tenant';

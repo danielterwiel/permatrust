@@ -1,8 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
-import { mutations } from '@/api/mutations';
-import { useLocalStorage } from '@/hooks/use-local-storage';
-import { organizationIdSchema } from '@/schemas/entities';
+import { tenantMutations as mutations } from '@/api/mutations';
 
 import { CreateProjectForm } from '@/components/create-project-form';
 import type { createProjectFormSchema } from '@/components/create-project-form';
@@ -22,7 +20,6 @@ export const Route = createFileRoute(
 });
 
 function CreateProject() {
-  const [activeOrganizationId] = useLocalStorage('activeOrganizationId', '');
   const navigate = useNavigate();
 
   const { isPending: isSubmitting, mutate: createProject } =
@@ -30,13 +27,9 @@ function CreateProject() {
 
   function onSubmit(values: z.infer<typeof createProjectFormSchema>) {
     try {
-      const activeOrganizationIdNumber =
-        organizationIdSchema.parse(activeOrganizationId);
-
       createProject(
         {
           name: values.name,
-          organization_id: activeOrganizationIdNumber,
         },
         {
           onSuccess: (projectId: number) => {

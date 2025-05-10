@@ -17,7 +17,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 
-import type { Role } from '@/declarations/pt_backend/pt_backend.did';
+import type { Role } from '@/declarations/tenant_canister/tenant_canister.did';
 
 import { permissionsToItems } from '@/utils';
 
@@ -41,8 +41,7 @@ export const RolesList = ({ roles }: RoleListProps) => {
   ) => {
     return permissions.reduce(
       (acc, permission) => {
-        // Initialize the array for this group if it doesn't exist yet
-        if (!acc[permission.group]) {
+        if (!acc[permission.group].length) {
           acc[permission.group] = [];
         }
         acc[permission.group].push(permission);

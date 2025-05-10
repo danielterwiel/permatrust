@@ -10,7 +10,7 @@ import { filterField, filterOperator, sortOrder } from '@/consts/pagination';
 import type {
   FilterCriteria as ApiFilterCriteria,
   PaginationInput,
-} from '@/declarations/pt_backend/pt_backend.did';
+} from '@/declarations/tenant_canister/tenant_canister.did';
 import type { EntityName } from '@/types/entities';
 import type {
   FilterCriteria,

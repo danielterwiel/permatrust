@@ -11,7 +11,7 @@ import {
   SORT_ORDER,
 } from '@/consts/pagination';
 
-import type { DiffRevisionsInput } from '@/declarations/pt_backend/pt_backend.did';
+import type { DiffRevisionsInput } from '@/declarations/tenant_canister/tenant_canister.did';
 import type { DocumentId, RevisionId } from '@/types/entities';
 
 import { api } from '@/api';
@@ -29,7 +29,7 @@ export const getRevisionOptions = (id: RevisionId) => {
   return createQueryOptions({
     queryFn: async () =>
       getSingleApiResult(
-        () => api.list_revisions({ pagination }),
+        () => api.tenant.list_revisions({ pagination }),
         'Revision not found',
       ),
     queryKey: ['revision', { id }],
@@ -47,13 +47,13 @@ export const listRevisionsByDocumentIdOptions = (documentId: DocumentId) => {
   });
 
   return createQueryOptions({
-    queryFn: () => api.list_revisions({ pagination }),
+    queryFn: () => api.tenant.list_revisions({ pagination }),
     queryKey: ['revisions', { documentId, pagination }],
   });
 };
 
 export const getDiffRevisionsOptions = (input: DiffRevisionsInput) =>
   createQueryOptions({
-    queryFn: () => api.get_diff_revisions(input),
+    queryFn: () => api.tenant.get_diff_revisions(input),
     queryKey: ['diff_revisions', input],
   });

@@ -1,0 +1,28 @@
+[package]
+name = "main_canister"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[build-dependencies]
+candid = "0.10"
+
+[dev-dependencies]
+pocket-ic = "9.0.0"
+
+[dependencies]
+candid = "0.10.0"
+candid_parser = "0.1.4"
+fsm = "0.2.2"
+ic-cdk = "0.18.0"
+ic-cdk-macros = "0.18.0"
+ic-stable-structures = "0.6.5"
+# TODO: rm?
+ic-management-canister-types = "0.3.0"
+petgraph = "0.6.5"
+rust-fsm = "0.7.0"
+serde = "1.0.203"
+
+shared = { path = "../shared" }

@@ -4,7 +4,7 @@ import { Check, ChevronsUpDown } from 'lucide-react';
 import { useState } from 'react';
 import { z } from 'zod';
 
-import { mutations } from '@/api/mutations';
+import { tenantMutations as mutations } from '@/api/mutations';
 import { getProjectRolesOptions } from '@/api/queries/access-control';
 import { listUsersByProjectIdOptions } from '@/api/queries/users';
 import { useToast } from '@/hooks/use-toast';
@@ -39,7 +39,10 @@ import {
 } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
-import type { Role, User } from '@/declarations/pt_backend/pt_backend.did';
+import type {
+  Role,
+  User,
+} from '@/declarations/tenant_canister/tenant_canister.did';
 
 const searchSchema = z.object({
   userId: z.number().optional(),
@@ -62,14 +65,12 @@ export const Route = createFileRoute(
       listUsersByProjectIdOptions(projectId),
     );
 
-    console.log('users', users);
-
     let preselectedUser: User | undefined;
     let userRoles: Array<Role> = [];
 
     if (deps.userId !== undefined && !Number.isNaN(deps.userId)) {
       const userId = deps.userId;
-      preselectedUser = users.find((user) => user.id === BigInt(userId));
+      preselectedUser = users.find((user) => user.id === userId);
 
       if (preselectedUser && Array.isArray(preselectedUser.roles)) {
         userRoles = preselectedUser.roles;

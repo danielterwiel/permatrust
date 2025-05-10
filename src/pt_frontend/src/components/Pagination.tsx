@@ -13,7 +13,7 @@ import {
   PaginationItem,
 } from '@/components/ui/pagination';
 
-import type { PaginationMetadata } from '@/declarations/pt_backend/pt_backend.did';
+import type { PaginationMetadata } from '@/declarations/tenant_canister/tenant_canister.did';
 
 type PaginationProps = {
   getPageChangeParams?: (pageNumber: number) => Record<string, unknown>;

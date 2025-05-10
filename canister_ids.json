@@ -1,5 +1,5 @@
 {
-  "pt_backend": {
+  "main_canister": {
     "ic": "tnbos-jaaaa-aaaah-qdc4a-cai"
   },
   "pt_frontend": {

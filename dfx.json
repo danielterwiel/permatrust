@@ -1,44 +1,69 @@
 {
-	"canisters": {
-		"pt_backend": {
-			"type": "rust",
-			"package": "pt_backend",
-			"candid": "src/pt_backend/pt_backend.did",
-			"declarations": {
-				"output": "src/declarations/pt_backend",
-				"bindings": ["ts", "js", "did"]
-			}
-		},
-		"pt_frontend": {
-			"type": "assets",
-			"source": ["src/pt_frontend/dist"],
-			"dependencies": ["pt_backend"]
-		},
-		"internet_identity": {
-			"type": "custom",
-			"candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
-			"wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz",
-			"remote": {
-				"id": {
-					"ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
-				}
-			},
-			"frontend": {}
-		}
-	},
-	"networks": {
-		"local": {
-			"bind": "127.0.0.1:8080",
-			"type": "ephemeral",
-			"replica": {
-				"subnet_type": "system"
-			}
-		}
-	},
-	"http": {
-		"enabled": true,
-		"log_level": "error"
-	},
-	"output_env_file": ".env",
-	"version": 1
+  "canisters": {
+    "tenant_canister": {
+      "type": "rust",
+      "package": "tenant_canister",
+      "candid": "src/tenant_canister/tenant_canister.did",
+      "declarations": {
+        "output": "src/declarations/tenant_canister",
+        "bindings": [
+          "ts",
+          "js",
+          "did"
+        ]
+      }
+    },
+    "main_canister": {
+      "type": "rust",
+      "package": "main_canister",
+      "candid": "src/main_canister/main_canister.did",
+      "dependencies": [
+        "tenant_canister"
+      ],
+      "declarations": {
+        "output": "src/declarations/main_canister",
+        "bindings": [
+          "ts",
+          "js",
+          "did"
+        ]
+      }
+    },
+    "pt_frontend": {
+      "type": "assets",
+      "source": [
+        "src/pt_frontend/dist"
+      ],
+      "dependencies": [
+        "main_canister",
+        "tenant_canister"
+      ]
+    },
+    "internet_identity": {
+      "type": "custom",
+      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
+      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz",
+      "remote": {
+        "id": {
+          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+        }
+      },
+      "frontend": {}
+    }
+  },
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:8080",
+      "type": "ephemeral",
+      "replica": {
+        "subnet_type": "system"
+      }
+    }
+  },
+  "http": {
+    "enabled": true,
+    "log_level": "error"
+  },
+  "output_env_file": ".env",
+  "version": 1
 }

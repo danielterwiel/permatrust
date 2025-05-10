@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
-import { mutations } from '@/api/mutations';
+import { tenantMutations as mutations } from '@/api/mutations';
 import { projectIdSchema } from '@/schemas/entities';
 
 import { CreateDocumentForm } from '@/components/create-document-form';

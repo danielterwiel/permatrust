@@ -18,12 +18,12 @@ jobs:
       - name: Setup DFX
         uses: dfinity/setup-dfx@main
         with:
-          dfx-version: "0.24.3"
+          dfx-version: "0.26.0"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version-file: ".nvmrc"
 
       - name: Enable Corepack
         run: corepack enable

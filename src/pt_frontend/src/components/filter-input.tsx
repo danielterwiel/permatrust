@@ -14,7 +14,7 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 
-import type { FilterCriteria } from '@/declarations/pt_backend/pt_backend.did';
+import type { FilterCriteria } from '@/declarations/tenant_canister/tenant_canister.did';
 
 type FilterProps = Omit<ComponentProps<typeof Input>, 'onChange'> & {
   filterCriteria: FilterCriteria;

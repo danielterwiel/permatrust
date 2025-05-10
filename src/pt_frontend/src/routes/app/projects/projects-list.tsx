@@ -16,7 +16,7 @@ import { Icon } from '@/components/ui/icon';
 import { ENTITY } from '@/consts/entities';
 import { FIELDS, FILTER_OPERATOR, SORT_ORDER } from '@/consts/pagination';
 
-import type { Project } from '@/declarations/pt_backend/pt_backend.did';
+import type { Project } from '@/declarations/tenant_canister/tenant_canister.did';
 import type { Row } from '@tanstack/react-table';
 
 const { schema: projectsSearchSchema, defaultPagination } =

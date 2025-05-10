@@ -25,14 +25,8 @@ export const routes = rootRoute('root.tsx', [
           route('/create', 'app/users/user-create.tsx'),
         ]),
 
-        route('/organizations', 'app/organizations/organizations-index.tsx', [
-          index('app/organizations/organizations-list.tsx'),
-          route('/create', 'app/organizations/organization-create.tsx'),
-          route(
-            '/$organizationId',
-            'app/organizations/organization-index.tsx',
-            [index('app/organizations/organization-details.tsx')],
-          ),
+        route('/organization', 'app/organization/organization-index.tsx', [
+          index('app/organization/organization-details.tsx'),
         ]),
 
         route('/projects', 'app/projects/projects-index.tsx', [

@@ -6,7 +6,7 @@ import { z } from 'zod';
 import { Loading } from '@/components/loading';
 import { Button } from '@/components/ui/button';
 
-import type { _SERVICE } from '@/declarations/pt_backend/pt_backend.did';
+import type { _SERVICE } from '@/declarations/tenant_canister/tenant_canister.did';
 
 const loginSearchSchema = z
   .object({

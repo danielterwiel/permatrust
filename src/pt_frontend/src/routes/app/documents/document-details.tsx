@@ -20,7 +20,7 @@ import { Icon } from '@/components/ui/icon';
 import { ENTITY } from '@/consts/entities';
 import { FIELDS, FILTER_OPERATOR, SORT_ORDER } from '@/consts/pagination';
 
-import type { Revision } from '@/declarations/pt_backend/pt_backend.did';
+import type { Revision } from '@/declarations/tenant_canister/tenant_canister.did';
 import type { RevisionId } from '@/types/entities';
 import type { Row } from '@tanstack/react-table';
 
