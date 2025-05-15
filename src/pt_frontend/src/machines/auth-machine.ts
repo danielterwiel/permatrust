@@ -7,6 +7,7 @@ import { isAppError, isIdentityNotFoundError } from '@/utils/is-app-error';
 
 import type {
   Organization,
+  Project,
   User,
 } from '@/declarations/tenant_canister/tenant_canister.did';
 import type { Principal } from '@dfinity/principal';
@@ -19,8 +20,9 @@ type AuthMachineTypes = {
   context: {
     isAuthenticated: boolean;
     tenantCanisterIds?: Array<Principal>;
-    organization?: Organization;
-    user?: User;
+    project?: Pick<Project, 'name'>;
+    organization?: Pick<Organization, 'name'>;
+    user?: Pick<User, 'first_name' | 'last_name'>;
   };
   events:
   | {
@@ -31,7 +33,15 @@ type AuthMachineTypes = {
   }
   | {
     type: 'UPDATE_USER';
-    user: User;
+    user: Pick<User, 'first_name' | 'last_name'>;
+  }
+  | {
+    type: 'UPDATE_ORGANIZATION';
+    organization: Pick<Organization, 'name'>;
+  }
+  | {
+    type: 'UPDATE_PROJECT';
+    project: Pick<Project, 'name'>;
   };
 };
 
@@ -84,7 +94,7 @@ const authMachine = setup({
             tenantCanisterIds: [],
           };
         }
-        throw new Error('Unexpedted error while fetching canister IDs');
+        throw new Error('Unexpected error while fetching canister IDs');
       }
     }),
 
@@ -132,6 +142,7 @@ const authMachine = setup({
 
     organization: undefined,
     user: undefined,
+    project: undefined
   },
   id: 'authMachine',
   initial: 'initializing',
@@ -151,6 +162,8 @@ const authMachine = setup({
                 LOGIN: 'onboarding',
                 LOGOUT: 'logout',
                 UPDATE_USER: 'update_user',
+                UPDATE_ORGANIZATION: 'update_organization',
+                UPDATE_PROJECT: 'update_project',
               },
             },
 
@@ -187,14 +200,14 @@ const authMachine = setup({
                       {
                         actions: async () => {
                           await router.navigate({
-                            to: '/onboarding/organization/create',
+                            to: '/onboarding/user/create',
                           });
                         },
                         target: 'onboarding_incomplete',
                       },
                     ],
                     onError: {
-                      entry: log(
+                      actions: log(
                         'TODO: ONBOARDING_ERROR get_tenant_canister_ids',
                       ),
                       target: 'onboarding_error',
@@ -224,7 +237,9 @@ const authMachine = setup({
                       },
                     ],
                     onError: {
-                      entry: log('TODO: ONBOARDING_ERROR get_user'),
+                      actions: log(
+                        'TODO: ONBOARDING_ERROR check_user',
+                      ),
                       target: 'onboarding_error',
                     },
                     src: 'get_user',
@@ -240,7 +255,7 @@ const authMachine = setup({
                         to: search.get('redirect') as string,
                       });
                     } else if (window.location.pathname === '/login') {
-                      await router.navigate({ to: '/projects' });
+                      await router.navigate({ to: '/documents' });
                     }
                     // we're refreshing, no need to do anything
                   },
@@ -256,11 +271,19 @@ const authMachine = setup({
                     async ({ context }) => {
                       if (!context.tenantCanisterIds?.length) {
                         await router.navigate({
-                          to: '/onboarding/organization/create',
+                          to: '/onboarding/user/create',
                         });
-                      } else {
+                      } else if (!context.user) {
                         await router.navigate({
                           to: '/onboarding/user/create',
+                        });
+                      } else if (!context.organization) {
+                        await router.navigate({
+                          to: '/onboarding/organization/create',
+                        });
+                      } else if (!context.project) {
+                        await router.navigate({
+                          to: '/onboarding/project/create',
                         });
                       }
                     },
@@ -270,7 +293,6 @@ const authMachine = setup({
             },
 
             update_user: {
-              always: 'onboarding.check_user',
               entry: assign({
                 user: ({ event }) => {
                   if (event.type === 'UPDATE_USER') {
@@ -278,6 +300,29 @@ const authMachine = setup({
                   }
                 },
               }),
+              always: '#authenticated_idle'
+            },
+
+            update_organization: {
+              entry: assign({
+                organization: ({ event }) => {
+                  if (event.type === 'UPDATE_ORGANIZATION') {
+                    return event.organization;
+                  }
+                },
+              }),
+              always: '#authenticated_idle'
+            },
+
+            update_project: {
+              entry: assign({
+                project: ({ event }) => {
+                  if (event.type === 'UPDATE_PROJECT') {
+                    return event.project;
+                  }
+                },
+              }),
+              always: '#authenticated_idle'
             },
           },
         },

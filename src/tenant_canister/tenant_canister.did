@@ -13,6 +13,11 @@ type AppError = variant {
 };
 type AssignRolesInput = record { role_ids : vec nat64; user_ids : blob };
 type AssignRolesResult = variant { Ok; Err : AppError };
+type CreateCanisterTenantInput = record {
+  user : CreateUserInput;
+  organization : CreateProjectInput;
+  project : CreateProjectInput;
+};
 type CreateDocumentInput = record {
   title : text;
   content : blob;
@@ -223,7 +228,6 @@ type RoleInput = record {
 };
 type SortCriteria = record { field : FilterField; order : SortOrder };
 type SortOrder = variant { Asc; Desc };
-type TenantInitArgs = record { company_name : text };
 type UpdateRolePermissionsInput = record {
   permissions : vec Permission;
   role_id : nat64;
@@ -268,7 +272,7 @@ type WorkflowPermission = variant {
   Create;
   Update;
 };
-service : (TenantInitArgs) -> {
+service : (CreateCanisterTenantInput) -> {
   assign_roles : (AssignRolesInput) -> (AssignRolesResult);
   create_document : (CreateDocumentInput) -> (CreateDocumentResult);
   create_organization : (CreateOrganizationInput) -> (CreateOrganizationResult);

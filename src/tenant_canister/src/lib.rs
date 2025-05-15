@@ -10,6 +10,7 @@ use shared::types::organization::{
     CreateOrganizationInput, CreateOrganizationResult, GetOrganizationResult,
 };
 
+use shared::types::management::CreateCanisterTenantInput;
 use shared::types::management::{UpgradeCanisterInput, UpgradeCanisterResult};
 use shared::types::pagination::PaginationInput;
 use shared::types::projects::{
@@ -20,7 +21,6 @@ use shared::types::revisions::{
     CreateRevisionInput, CreateRevisionResult, DiffRevisionsInput, DiffRevisionsResult,
     ListRevisionsInput, ListRevisionsResult,
 };
-use shared::types::tenant::TenantInitArgs;
 use shared::types::users::{
     CreateUserInput, CreateUserResult, GetUserResult, ListUsersInput, ListUsersResult,
 };

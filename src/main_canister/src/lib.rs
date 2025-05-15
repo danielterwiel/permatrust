@@ -1,5 +1,5 @@
 use crate::management::types::{
-    CreateTenantCanisterInput, CreateTenantCanisterResult, GetTenantCanisterIdsResult,
+    CreateCanisterTenantInput, CreateTenantCanisterResult, GetTenantCanisterIdsResult,
 };
 
 mod management;

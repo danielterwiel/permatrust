@@ -15,6 +15,10 @@ export const routes = rootRoute('root.tsx', [
             '/organization/create',
             'app/onboarding/organization-create.tsx',
           ),
+          route(
+            '/project/create',
+            'app/onboarding/project-create.tsx',
+          ),
         ]),
       ]),
 

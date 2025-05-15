@@ -1,10 +1,15 @@
 use candid::{CandidType, Principal};
 use serde::Deserialize;
-use shared::types::errors::AppError;
+use shared::types::{
+    errors::AppError, organization::CreateOrganizationInput, projects::CreateProjectInput,
+    users::CreateUserInput,
+};
 
-#[derive(CandidType, Deserialize, Clone)]
-pub struct CreateTenantCanisterInput {
-    pub company_name: String,
+#[derive(CandidType, Deserialize)]
+pub struct CreateCanisterTenantInput {
+    organization: CreateOrganizationInput,
+    project: CreateProjectInput,
+    user: CreateUserInput,
 }
 
 #[derive(CandidType, Deserialize)]

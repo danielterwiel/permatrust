@@ -11,14 +11,20 @@ type AppError = variant {
   SpawnCanister : text;
   InternalError : text;
 };
-type CreateTenantCanisterInput = record { company_name : text };
+type CreateCanisterTenantInput = record {
+  user : CreateUserInput;
+  organization : CreateProjectInput;
+  project : CreateProjectInput;
+};
+type CreateProjectInput = record { name : text };
 type CreateTenantCanisterResult = variant { Ok : principal; Err : AppError };
+type CreateUserInput = record { first_name : text; last_name : text };
 type GetTenantCanisterIdsResult = variant {
   Ok : vec principal;
   Err : AppError;
 };
 service : {
-  create_tenant_canister : (CreateTenantCanisterInput) -> (
+  create_tenant_canister : (CreateCanisterTenantInput) -> (
       CreateTenantCanisterResult,
     );
   get_tenant_canister_ids : () -> (GetTenantCanisterIdsResult) query;

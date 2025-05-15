@@ -16,7 +16,7 @@ pub struct Organization {
 
 // Inputs
 
-#[derive(CandidType, Deserialize)]
+#[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct CreateOrganizationInput {
     pub name: String,
 }

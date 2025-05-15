@@ -1,7 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { tenantMutations as mutations } from '@/api/mutations';
-
 import { CreateUserForm } from '@/components/create-user-form';
 import type { createUserFormSchema } from '@/components/create-user-form';
 
@@ -23,34 +21,15 @@ function CreateUser() {
   const { authActor } = Route.useLoaderData();
   const navigate = Route.useNavigate();
 
-  const {
-    error,
-    isPending: isSubmitting,
-    mutate: createUser,
-  } = mutations.useCreateUser();
-
-  function onSubmit(values: z.infer<typeof createUserFormSchema>) {
-    createUser(
-      {
-        first_name: values.first_name,
-        last_name: values.last_name,
-      },
-      {
-        onSuccess: (user) => {
-          authActor.send({
-            type: 'UPDATE_USER',
-            user,
-          });
-          navigate({ to: '/projects/create' });
-        },
-      },
-    );
+  function onSubmit(user: z.infer<typeof createUserFormSchema>) {
+    authActor.send({
+      type: 'UPDATE_USER',
+      user,
+    });
+    return navigate({ to: '/onboarding/organization/create' });
   }
 
   return (
-    <>
-      {error && <div>{error.message}</div>}
-      <CreateUserForm isSubmitting={isSubmitting} onSubmit={onSubmit} />
-    </>
+    <CreateUserForm isSubmitting={false} onSubmit={onSubmit} />
   );
 }

@@ -7,6 +7,5 @@ pub mod organization;
 pub mod pagination;
 pub mod projects;
 pub mod revisions;
-pub mod tenant;
 pub mod users;
 pub mod workflows;

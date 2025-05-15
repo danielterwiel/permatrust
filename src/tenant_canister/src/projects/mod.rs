@@ -1,4 +1,4 @@
-mod methods;
+pub mod methods;
 pub(crate) mod state;
 
 use shared::types::errors::AppError;
