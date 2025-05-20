@@ -3,7 +3,7 @@ use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager, VirtualMemory},
     DefaultMemoryImpl, StableCell,
 };
-use shared::types::errors::AppError;
+use shared::{consts::memory_ids::ORGANIZATION_MEMORY_ID, types::errors::AppError};
 use std::cell::RefCell;
 
 type Memory = VirtualMemory<DefaultMemoryImpl>;
@@ -14,7 +14,7 @@ thread_local! {
 
     static ORGANIZATION: RefCell<StableCell<Option<Organization>, Memory>> = RefCell::new(
         StableCell::init(
-            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(0))),
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(ORGANIZATION_MEMORY_ID))),
             None,
         ).expect("Failed to initialize organization stable cell")
     );

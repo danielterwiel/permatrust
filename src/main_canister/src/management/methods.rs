@@ -7,7 +7,7 @@ use ic_cdk::management_canister::{
 };
 use ic_cdk_macros::{query, update};
 use shared::types::errors::AppError;
-use shared::types::management::CreateCanisterTenantInput;
+use shared::types::management::{CreateInitTenantCanisterInput, CreateTenantCanisterInput};
 use std::option::Option::Some;
 
 const TENANT_CANISTER_WASM: &[u8] =
@@ -25,7 +25,7 @@ pub fn get_tenant_canister_ids() -> GetTenantCanisterIdsResult {
 
 #[update]
 pub async fn create_tenant_canister(
-    input: CreateCanisterTenantInput,
+    input: CreateTenantCanisterInput,
 ) -> CreateTenantCanisterResult {
     let caller = msg_caller();
     let canister = canister_self();
@@ -47,8 +47,17 @@ pub async fn create_tenant_canister(
     match create_canister(&create_args).await {
         Ok(canister_id_record) => {
             let canister_id = canister_id_record.canister_id;
+            let principal = ic_cdk::api::msg_caller();
 
-            let init_arg = candid::encode_one(&input).expect("Failed to serialize init args");
+            let init_arg_args = CreateInitTenantCanisterInput {
+                user: input.user,
+                organization: input.organization,
+                project: input.project,
+                principal,
+            };
+
+            let init_arg =
+                candid::encode_one(&init_arg_args).expect("Failed to serialize init args");
 
             let install_args = InstallCodeArgs {
                 mode: CanisterInstallMode::Install,

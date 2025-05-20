@@ -1,6 +1,7 @@
 use super::*;
 use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
 use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
+use shared::consts::memory_ids::PROJECTS_MEMORY_ID;
 use std::cell::RefCell;
 use std::sync::atomic::{AtomicU32, Ordering};
 
@@ -12,7 +13,7 @@ thread_local! {
 
     static PROJECTS: RefCell<StableBTreeMap<ProjectId, Project, Memory>> = RefCell::new(
         StableBTreeMap::init(
-            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(1))),
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(PROJECTS_MEMORY_ID))),
         )
     );
 

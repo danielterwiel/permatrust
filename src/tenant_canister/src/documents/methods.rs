@@ -2,24 +2,22 @@ use super::state;
 use super::*;
 use crate::logger::{log_info, loggable_document};
 use crate::revisions::create_revision;
-use crate::users::state::get_by_principal;
+use crate::users::methods::get_user_by_principal;
 use shared::types::documents::{
     CreateDocumentInput, CreateDocumentResult, ListDocumentsInput, ListDocumentsResult,
 };
 use shared::types::revisions::{CreateRevisionInput, CreateRevisionResult};
+use shared::types::users::GetUserResult;
 use shared::utils::pagination::paginate;
 
 #[ic_cdk_macros::update]
 pub fn create_document(input: CreateDocumentInput) -> CreateDocumentResult {
     let document_id = state::get_next_id();
     let principal = ic_cdk::api::msg_caller();
-    let user = match get_by_principal(principal) {
-        Some(u) => u,
-        None => {
-            return CreateDocumentResult::Err(AppError::EntityNotFound(
-                "User not found".to_string(),
-            ))
-        }
+    ic_cdk::println!("principal {:?}", principal.to_string());
+    let user = match get_user_by_principal(principal) {
+        GetUserResult::Ok(u) => u,
+        GetUserResult::Err(error) => return CreateDocumentResult::Err(error),
     };
 
     let document = Document {

@@ -11,12 +11,12 @@ type AppError = variant {
   SpawnCanister : text;
   InternalError : text;
 };
-type CreateCanisterTenantInput = record {
+type CreateProjectInput = record { name : text };
+type CreateTenantCanisterInput = record {
   user : CreateUserInput;
   organization : CreateProjectInput;
   project : CreateProjectInput;
 };
-type CreateProjectInput = record { name : text };
 type CreateTenantCanisterResult = variant { Ok : principal; Err : AppError };
 type CreateUserInput = record { first_name : text; last_name : text };
 type GetTenantCanisterIdsResult = variant {
@@ -24,7 +24,7 @@ type GetTenantCanisterIdsResult = variant {
   Err : AppError;
 };
 service : {
-  create_tenant_canister : (CreateCanisterTenantInput) -> (
+  create_tenant_canister : (CreateTenantCanisterInput) -> (
       CreateTenantCanisterResult,
     );
   get_tenant_canister_ids : () -> (GetTenantCanisterIdsResult) query;

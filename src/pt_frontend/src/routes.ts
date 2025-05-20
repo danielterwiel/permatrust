@@ -5,6 +5,9 @@ export const routes = rootRoute('root.tsx', [
   layout('initialized', '_layouts/_initialized.tsx', [
     route('/login', 'public/login.tsx'),
     route('/unauthorized', 'public/unauthorized.tsx'),
+    route('/invites', 'public/invites/invite-index.tsx', [
+      route('/$inviteId', 'public/invites/invite-details.tsx'),
+    ]),
 
     layout('authenticated', '_layouts/_authenticated.tsx', [
       layout('onboarding', '_layouts/_onboarding.tsx', [
@@ -27,6 +30,11 @@ export const routes = rootRoute('root.tsx', [
           index('app/users/users-list.tsx'),
           route('/$userId', 'app/users/user-details.tsx'),
           route('/create', 'app/users/user-create.tsx'),
+        ]),
+
+        route('/invites', 'app/invites/invites-index.tsx', [
+          index('app/invites/invites-list.tsx'),
+          route('/create', 'app/invites/invite-create.tsx'),
         ]),
 
         route('/organization', 'app/organization/organization-index.tsx', [

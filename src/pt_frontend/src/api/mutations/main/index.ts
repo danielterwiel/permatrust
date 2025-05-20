@@ -1,12 +1,12 @@
-import { createTenantMutations } from './tenants';
+import { createManagementMutations } from './management';
 
-export type MainMutations = ReturnType<typeof createTenantMutations>;
+export type MainMutations = ReturnType<typeof createManagementMutations>;
 
 export const mainMutations: MainMutations = {} as MainMutations;
 
 export const createMainMutations = () => {
   Object.assign(mainMutations, {
-    ...createTenantMutations(),
+    ...createManagementMutations(),
   });
 
   return mainMutations;

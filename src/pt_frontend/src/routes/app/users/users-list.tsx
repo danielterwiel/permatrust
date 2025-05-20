@@ -91,7 +91,19 @@ function Users() {
             placeholder="Filter first name..."
           />
         ))}
+        <Link
+          className="h-7 gap-1 ml-auto"
+          size="sm"
+          to="/invites/create"
+          variant="default"
+        >
+          <Icon name="user-outline" size="sm" />
+          <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+            Invite user
+          </span>
+        </Link>
       </div>
+
       <Card>
         <CardHeader>
           <CardTitle>

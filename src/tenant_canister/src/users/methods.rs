@@ -1,13 +1,29 @@
 use super::state;
-use super::*;
 use crate::logger::{log_info, loggable_user};
+use candid::Principal;
 use shared::{
-    types::users::{CreateUserResult, GetUserResult, ListUsersInput, ListUsersResult},
+    types::{
+        errors::AppError,
+        users::{
+            CreateInitUserInput, CreateUserInput, CreateUserResult, GetUserResult, ListUsersInput,
+            ListUsersResult, User,
+        },
+    },
     utils::pagination::paginate,
 };
 
-#[ic_cdk_macros::update]
+#[ic_cdk_macros::query]
 pub fn create_user(input: CreateUserInput) -> CreateUserResult {
+    let principal = ic_cdk::api::msg_caller();
+    let user = CreateInitUserInput {
+        principal,
+        first_name: input.first_name,
+        last_name: input.last_name,
+    };
+    create_new_user(user)
+}
+
+pub fn create_new_user(input: CreateInitUserInput) -> CreateUserResult {
     if input.first_name.trim().is_empty() {
         return CreateUserResult::Err(AppError::InternalError(
             "First name cannot be empty".to_string(),
@@ -20,8 +36,8 @@ pub fn create_user(input: CreateUserInput) -> CreateUserResult {
     }
 
     let user_id = state::get_next_id();
-    let principal = ic_cdk::api::msg_caller();
-    let user = User::new(user_id, principal, input.first_name, input.last_name);
+    let principals = vec![input.principal];
+    let user = User::new(user_id, principals, input.first_name, input.last_name);
 
     state::insert(user.clone());
     log_info("create_user", loggable_user(&user));

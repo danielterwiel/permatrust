@@ -1,6 +1,7 @@
 use candid::Principal;
 use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
 use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
+use shared::consts::memory_ids::ORGANIZATION_MEMORY_ID;
 use std::cell::RefCell;
 
 type Memory = VirtualMemory<DefaultMemoryImpl>;
@@ -11,7 +12,7 @@ thread_local! {
 
     static IDENTITY_TENANT_MAP: RefCell<StableBTreeMap<Principal, Principal, Memory>> = RefCell::new(
         StableBTreeMap::init(
-            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(1))),
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(ORGANIZATION_MEMORY_ID))),
         )
     );
 }

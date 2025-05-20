@@ -1,3 +1,5 @@
+use shared::consts::memory_ids::DOCUMENTS_MEMORY_ID;
+
 use super::*;
 use std::cell::RefCell;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -10,7 +12,7 @@ thread_local! {
 
     static DOCUMENTS: RefCell<StableBTreeMap<DocumentId, Document, Memory>> = RefCell::new(
         StableBTreeMap::init(
-            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(3))),
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(DOCUMENTS_MEMORY_ID))),
         )
     );
 

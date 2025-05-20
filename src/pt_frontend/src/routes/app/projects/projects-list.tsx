@@ -90,7 +90,6 @@ function Projects() {
             placeholder="Filter project name..."
           />
         ))}
-
         <Link
           className="h-7 gap-1 ml-auto"
           size="sm"

@@ -31,6 +31,13 @@ pub struct CreateUserInput {
     pub last_name: String,
 }
 
+#[derive(CandidType, Deserialize, Clone, Debug)]
+pub struct CreateInitUserInput {
+    pub first_name: String,
+    pub last_name: String,
+    pub principal: Principal,
+}
+
 #[derive(CandidType, Deserialize)]
 pub struct ListUsersInput {
     pub pagination: PaginationInput,

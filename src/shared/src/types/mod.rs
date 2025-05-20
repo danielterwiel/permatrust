@@ -2,6 +2,7 @@ pub mod access_control;
 pub mod documents;
 pub mod entities;
 pub mod errors;
+pub mod invites;
 pub mod management;
 pub mod organization;
 pub mod pagination;

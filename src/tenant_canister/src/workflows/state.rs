@@ -1,3 +1,5 @@
+use shared::consts::memory_ids::WORKFLOWS_MEMORY_ID;
+
 use super::*;
 use std::cell::RefCell;
 use std::sync::atomic::{AtomicU32, Ordering};
@@ -10,7 +12,7 @@ thread_local! {
 
     static WORKFLOWS: RefCell<StableBTreeMap<WorkflowId, Workflow, Memory>> = RefCell::new(
         StableBTreeMap::init(
-            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(4))),
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(WORKFLOWS_MEMORY_ID))),
         )
     );
 

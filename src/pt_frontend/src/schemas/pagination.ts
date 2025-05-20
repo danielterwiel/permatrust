@@ -10,6 +10,7 @@ import type {
   FilterCriteria as ApiFilterCriteria,
   FilterField as ApiFilterField,
   FilterOperator as ApiFilterOperator,
+  InviteFilterField as ApiInviteFilterField,
   OrganizationFilterField as ApiOrganizationFilterField,
   PaginationInput as ApiPaginationInput,
   ProjectFilterField as ApiProjectFilterField,
@@ -23,13 +24,11 @@ import type {
 import type { EntityName } from '@/types/entities';
 import type { PaginationConfig } from '@/types/pagination';
 
-// Organization field schema
 const organizationFieldSchema = z.union([
   z.object({ Name: z.null() }).strict(),
   z.object({ CreatedAt: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiOrganizationFilterField>;
 
-// Project field schema
 const projectFieldSchema = z.union([
   z.object({ Id: z.null() }).strict(),
   z.object({ Name: z.null() }).strict(),
@@ -38,7 +37,6 @@ const projectFieldSchema = z.union([
   z.object({ CreatedBy: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiProjectFilterField>;
 
-// Document field schema
 const documentFieldSchema = z.union([
   z.object({ Id: z.null() }).strict(),
   z.object({ Title: z.null() }).strict(),
@@ -47,7 +45,6 @@ const documentFieldSchema = z.union([
   z.object({ CreatedAt: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiDocumentFilterField>;
 
-// Revision field schema
 const revisionFieldSchema = z.union([
   z.object({ Id: z.null() }).strict(),
   z.object({ Version: z.null() }).strict(),
@@ -56,7 +53,6 @@ const revisionFieldSchema = z.union([
   z.object({ CreatedAt: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiRevisionFilterField>;
 
-// User field schema
 const userFieldSchema = z.union([
   z.object({ Id: z.null() }).strict(),
   z.object({ FirstName: z.null() }).strict(),
@@ -64,7 +60,14 @@ const userFieldSchema = z.union([
   z.object({ ProjectId: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiUserFilterField>;
 
-// Role field schema
+const inviteFieldSchema = z.union([
+  z.object({ Id: z.null() }).strict(),
+  z.object({ CreatedBy: z.null() }).strict(),
+  z.object({ CreatedAt: z.null() }).strict(),
+  z.object({ AcceptedBy: z.null() }).strict(),
+  z.object({ AcceptedAt: z.null() }).strict(),
+]) satisfies z.ZodType<ApiInviteFilterField>;
+
 const roleFieldSchema = z.union([
   z.object({ Id: z.null() }).strict(),
   z.object({ Name: z.null() }).strict(),
@@ -72,35 +75,33 @@ const roleFieldSchema = z.union([
   z.object({ CreatedAt: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiRoleFilterField>;
 
-// Workflow field schema
 const workflowFieldSchema = z.union([
   z.object({ Id: z.null() }).strict(),
   z.object({ Name: z.null() }).strict(),
   z.object({ ProjectId: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiWorkflowFilterField>;
 
-// Entity schema
 const entitySchema = z.union([
   z.object({ Document: z.null() }).strict(),
   z.object({ Organization: z.null() }).strict(),
   z.object({ Project: z.null() }).strict(),
   z.object({ Revision: z.null() }).strict(),
+  z.object({ Invite: z.null() }).strict(),
   z.object({ User: z.null() }).strict(),
   z.object({ Workflow: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiEntity>;
 
-// Filter field schema
 export const filterFieldSchema = z.union([
   z.object({ Document: documentFieldSchema }).strict(),
   z.object({ Organization: organizationFieldSchema }).strict(),
   z.object({ Project: projectFieldSchema }).strict(),
   z.object({ Revision: revisionFieldSchema }).strict(),
+  z.object({ Invite: inviteFieldSchema }).strict(),
   z.object({ Role: roleFieldSchema }).strict(),
   z.object({ User: userFieldSchema }).strict(),
   z.object({ Workflow: workflowFieldSchema }).strict(),
 ]) satisfies z.ZodType<ApiFilterField>;
 
-// Filter operator schema
 export const filterOperatorSchema = z.union([
   z.object({ Contains: z.null() }).strict(),
   z.object({ Equals: z.null() }).strict(),
@@ -108,13 +109,11 @@ export const filterOperatorSchema = z.union([
   z.object({ LessThan: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiFilterOperator>;
 
-// Sort order schema
 const sortOrderSchema = z.union([
   z.object({ Asc: z.null() }).strict(),
   z.object({ Desc: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiSortOrder>;
 
-// Filter criteria schema
 export const filterCriteriaSchema = z
   .object({
     entity: entitySchema,
@@ -124,7 +123,6 @@ export const filterCriteriaSchema = z
   })
   .strict() satisfies z.ZodType<ApiFilterCriteria>;
 
-// Sort criteria schema
 export const sortCriteriaSchema = z
   .object({
     field: filterFieldSchema,
@@ -132,16 +130,13 @@ export const sortCriteriaSchema = z
   })
   .strict() satisfies z.ZodType<ApiSortCriteria>;
 
-// Sort schema (empty array or tuple with one sort criteria)
 const sortSchema = z.union([z.tuple([]), z.tuple([sortCriteriaSchema])]);
 
-// Filters schema (empty array or tuple with array of filter criteria)
 const filtersSchema = z.union([
   z.tuple([]),
   z.tuple([z.array(filterCriteriaSchema)]),
 ]);
 
-// Pagination input schema
 export const paginationInputSchema = z
   .object({
     filters: filtersSchema,
@@ -151,7 +146,6 @@ export const paginationInputSchema = z
   })
   .strict() satisfies z.ZodType<ApiPaginationInput>;
 
-// For URL search params, create a more lenient version where all fields in the pagination object are optional
 const paginationUrlSchema = z
   .object({
     filters: filtersSchema.optional(),

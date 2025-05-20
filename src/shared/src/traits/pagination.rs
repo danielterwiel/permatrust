@@ -1,10 +1,11 @@
 use std::cmp::Ordering;
 
 use crate::types::documents::{Document, DocumentId};
+use crate::types::invites::{Invite, InviteId};
 use crate::types::organization::Organization;
 use crate::types::pagination::{
-    DocumentFilterField, OrganizationFilterField, ProjectFilterField, RevisionFilterField,
-    UserFilterField, WorkflowFilterField,
+    DocumentFilterField, InviteFilterField, OrganizationFilterField, ProjectFilterField,
+    RevisionFilterField, UserFilterField, WorkflowFilterField,
 };
 use crate::types::pagination::{
     FilterCriteria, FilterField, FilterOperator, SortCriteria, SortOrder,
@@ -221,6 +222,58 @@ impl Filterable for Project {
     }
 }
 
+impl Filterable for Invite {
+    fn matches(&self, criteria: &FilterCriteria) -> bool {
+        match &criteria.field {
+            FilterField::Invite(InviteFilterField::Id) => {
+                let criteria_value = criteria.value.parse::<InviteId>().unwrap_or(0);
+                match criteria.operator {
+                    FilterOperator::Equals => self.id == criteria_value,
+                    _ => false,
+                }
+            }
+
+            FilterField::Invite(InviteFilterField::CreatedAt) => {
+                let criteria_value = criteria.value.parse::<u64>().unwrap_or(0);
+                match criteria.operator {
+                    FilterOperator::GreaterThan => self.created_at > criteria_value,
+                    FilterOperator::LessThan => self.created_at < criteria_value,
+                    FilterOperator::Equals => self.created_at == criteria_value,
+                    _ => false,
+                }
+            }
+
+            FilterField::Invite(InviteFilterField::CreatedBy) => {
+                let criteria_value = criteria.value.parse::<UserId>().unwrap_or(0);
+                match criteria.operator {
+                    FilterOperator::Equals => self.created_by == criteria_value,
+                    _ => false,
+                }
+            }
+
+            FilterField::Invite(InviteFilterField::AcceptedAt) => {
+                let criteria_value = criteria.value.parse::<u64>().unwrap_or(0);
+                match criteria.operator {
+                    FilterOperator::GreaterThan => self.accepted_at > Some(criteria_value),
+                    FilterOperator::LessThan => self.accepted_at < Some(criteria_value),
+                    FilterOperator::Equals => self.accepted_at == Some(criteria_value),
+                    _ => false,
+                }
+            }
+
+            FilterField::Invite(InviteFilterField::AcceptedBy) => {
+                let criteria_value = criteria.value.parse::<UserId>().unwrap_or(0);
+                match criteria.operator {
+                    FilterOperator::Equals => self.accepted_by == Some(criteria_value),
+                    _ => false,
+                }
+            }
+
+            _ => false,
+        }
+    }
+}
+
 impl Filterable for Workflow {
     fn matches(&self, criteria: &FilterCriteria) -> bool {
         match &criteria.field {
@@ -326,6 +379,22 @@ impl Sortable for Project {
                 self.created_at.cmp(&other.created_at)
             }
             FilterField::Project(ProjectFilterField::Name) => self.name.cmp(&other.name),
+            _ => Ordering::Equal,
+        };
+        match criteria.order {
+            SortOrder::Asc => ordering,
+            SortOrder::Desc => ordering.reverse(),
+        }
+    }
+}
+
+impl Sortable for Invite {
+    fn compare(&self, other: &Self, criteria: &SortCriteria) -> Ordering {
+        let ordering = match &criteria.field {
+            FilterField::Invite(InviteFilterField::Id) => self.id.cmp(&other.id),
+            FilterField::Invite(InviteFilterField::CreatedAt) => {
+                self.created_at.cmp(&other.created_at)
+            }
             _ => Ordering::Equal,
         };
         match criteria.order {

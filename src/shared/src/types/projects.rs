@@ -31,6 +31,13 @@ pub struct CreateProjectInput {
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
+pub struct CreateInitProjectInput {
+    pub name: String,
+    pub members: Vec<UserId>,
+    pub created_by: UserId,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct ListProjectMembersInput {
     pub pagination: PaginationInput,
 }

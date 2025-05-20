@@ -7,6 +7,7 @@ pub enum Entity {
     Document,
     Revision,
     Organization,
+    Invite,
     Project,
     Workflow,
 }

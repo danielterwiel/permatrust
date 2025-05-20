@@ -1,4 +1,5 @@
 import { createDocumentMutations } from './documents';
+import { createInviteMutations } from './invites';
 import { createOrganizationMutations } from './organizations';
 import { createProjectMutations } from './projects';
 import { createRevisionMutations } from './revisions';
@@ -8,6 +9,8 @@ import { createWorkflowMutations } from './workflows';
 
 // All mutations from the tenant canister
 export type TenantMutations = ReturnType<typeof createDocumentMutations> &
+  ReturnType<typeof createDocumentMutations> &
+  ReturnType<typeof createInviteMutations> &
   ReturnType<typeof createOrganizationMutations> &
   ReturnType<typeof createProjectMutations> &
   ReturnType<typeof createRevisionMutations> &
@@ -22,6 +25,7 @@ export const tenantMutations: TenantMutations = {} as TenantMutations;
 export const createTenantMutations = () => {
   Object.assign(tenantMutations, {
     ...createDocumentMutations(),
+    ...createInviteMutations(),
     ...createOrganizationMutations(),
     ...createProjectMutations(),
     ...createRevisionMutations(),

@@ -6,12 +6,12 @@ use shared::types::access_control::{
 use shared::types::documents::{
     CreateDocumentInput, CreateDocumentResult, ListDocumentsInput, ListDocumentsResult,
 };
+use shared::types::invites::{CreateInviteResult, GetInviteResult, ListInvitesResult};
+use shared::types::management::CreateInitTenantCanisterInput;
+use shared::types::management::{UpgradeCanisterInput, UpgradeCanisterResult};
 use shared::types::organization::{
     CreateOrganizationInput, CreateOrganizationResult, GetOrganizationResult,
 };
-
-use shared::types::management::CreateCanisterTenantInput;
-use shared::types::management::{UpgradeCanisterInput, UpgradeCanisterResult};
 use shared::types::pagination::PaginationInput;
 use shared::types::projects::{
     CreateProjectInput, CreateProjectResult, ListProjectMembersInput, ListProjectMembersResult,
@@ -38,6 +38,7 @@ mod logger;
 // entities
 mod access_control;
 mod documents;
+mod invites;
 mod management;
 mod organization;
 mod projects;

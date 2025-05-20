@@ -1,3 +1,5 @@
+use shared::consts::memory_ids::REVISIONS_MEMORY_ID;
+
 use super::*;
 use crate::documents;
 use std::cell::RefCell;
@@ -11,7 +13,7 @@ thread_local! {
 
     static REVISIONS: RefCell<StableBTreeMap<RevisionId, Revision, Memory>> = RefCell::new(
         StableBTreeMap::init(
-            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(5))),
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(REVISIONS_MEMORY_ID))),
         )
     );
 

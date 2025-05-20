@@ -2023,6 +2023,7 @@ dependencies = [
 name = "shared"
 version = "0.1.0"
 dependencies = [
+ "base64 0.22.1",
  "candid",
  "dotenv",
  "ic-cdk",
@@ -2031,6 +2032,7 @@ dependencies = [
  "serde",
  "serde_bytes",
  "serde_json",
+ "sha2",
  "strum",
  "strum_macros",
 ]

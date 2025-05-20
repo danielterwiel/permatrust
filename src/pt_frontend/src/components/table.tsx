@@ -317,7 +317,7 @@ export const Table = <T extends Entity = Entity>({
   }
 
   if (data.length === 0) {
-    return <p>No data available</p>;
+    return <p>No documents available</p>;
   }
 
   return (

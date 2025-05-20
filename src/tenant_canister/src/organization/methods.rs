@@ -1,6 +1,7 @@
 use super::state;
 use crate::logger::{log_info, loggable_organization};
 use crate::users::methods::get_user_by_principal;
+use shared::types::organization::CreateInitOrganizationInput;
 use shared::types::users::GetUserResult;
 use shared::types::{
     errors::AppError,
@@ -8,6 +9,26 @@ use shared::types::{
         CreateOrganizationInput, CreateOrganizationResult, GetOrganizationResult, Organization,
     },
 };
+
+pub fn create_init_organization(input: CreateInitOrganizationInput) -> CreateOrganizationResult {
+    let validate_result = state::validate_name(&input.name);
+    if let Err(e) = validate_result {
+        return CreateOrganizationResult::Err(e);
+    }
+    let organization = Organization {
+        name: input.name,
+        members: input.members,
+        projects: input.projects,
+        created_at: ic_cdk::api::time(),
+        created_by: 0, // Placeholder for created_by
+    };
+    state::insert(organization.clone());
+    log_info(
+        "create_init_organization",
+        loggable_organization(&organization),
+    );
+    CreateOrganizationResult::Ok(organization)
+}
 
 #[ic_cdk_macros::update]
 pub fn create_organization(input: CreateOrganizationInput) -> CreateOrganizationResult {

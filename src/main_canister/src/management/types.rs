@@ -6,7 +6,7 @@ use shared::types::{
 };
 
 #[derive(CandidType, Deserialize)]
-pub struct CreateCanisterTenantInput {
+pub struct CreateTenantCanisterInput {
     organization: CreateOrganizationInput,
     project: CreateProjectInput,
     user: CreateUserInput,

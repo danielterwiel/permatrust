@@ -1,3 +1,7 @@
+use shared::consts::memory_ids::{
+    ACCESS_CONTROL_ROLES_MEMORY_ID, ACCESS_CONTROL_USER_ROLES_MEMORY_ID,
+};
+
 use super::*;
 use std::cell::RefCell;
 use std::sync::atomic::{AtomicU64, Ordering};
@@ -10,13 +14,13 @@ thread_local! {
 
     static ROLES: RefCell<StableBTreeMap<RoleId, Role, Memory>> = RefCell::new(
         StableBTreeMap::init(
-            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(6))),
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(ACCESS_CONTROL_ROLES_MEMORY_ID)))
         )
     );
 
     static USER_ROLES: RefCell<StableBTreeMap<UserId, RoleIdVec, Memory>> = RefCell::new(
         StableBTreeMap::init(
-            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(7))),
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(ACCESS_CONTROL_USER_ROLES_MEMORY_ID)))
         )
     );
 

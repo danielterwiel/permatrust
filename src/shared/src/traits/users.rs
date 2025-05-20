@@ -22,8 +22,12 @@ impl Storable for User {
 }
 
 impl User {
-    pub fn new(id: UserId, principal: Principal, first_name: String, last_name: String) -> Self {
-        let principals = vec![principal];
+    pub fn new(
+        id: UserId,
+        principals: Vec<Principal>,
+        first_name: String,
+        last_name: String,
+    ) -> Self {
         Self {
             id,
             first_name,

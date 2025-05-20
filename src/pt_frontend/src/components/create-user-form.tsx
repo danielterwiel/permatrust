@@ -1,9 +1,11 @@
 
+import { Principal } from '@dfinity/principal';
 import { useForm } from '@tanstack/react-form';
 import type { FC } from 'react';
 import { z } from 'zod';
 
 import { capitalizeFirstLetterValidator } from '@/schemas/form';
+import { principalSchema } from '@/schemas/principal';
 import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
 
 import { Input } from '@/components/input';
@@ -26,6 +28,7 @@ export const createUserFormSchema = z.object({
   last_name: z.string().min(1, {
     message: 'Last name must be at least 1 character.',
   }),
+  principals: z.array(z.union([z.tuple([]), z.tuple([principalSchema])]))
 });
 
 type CreateUserFormProps = {
@@ -41,6 +44,7 @@ export const CreateUserForm: FC<CreateUserFormProps> = ({
     defaultValues: {
       first_name: '',
       last_name: '',
+      principals: [[]] as Array<[] | [Principal]>,
     },
     onSubmit: ({ value }) => {
       onSubmit(value);

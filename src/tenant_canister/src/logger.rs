@@ -6,18 +6,20 @@ use std::fmt::Debug;
 use ::candid::CandidType;
 
 use shared::types::documents::Document;
+use shared::types::invites::Invite;
 use shared::types::organization::Organization;
 use shared::types::projects::Project;
 use shared::types::revisions::Revision;
 use shared::types::users::User;
 use shared::types::workflows::Workflow;
 
-pub struct LoggableUser<'a>(&'a User);
-pub struct LoggableWorkflow<'a>(&'a Workflow);
+pub struct LoggableDocument<'a>(&'a Document);
+pub struct LoggableInvite<'a>(&'a Invite);
 pub struct LoggableOrganization<'a>(&'a Organization);
 pub struct LoggableProject<'a>(&'a Project);
-pub struct LoggableDocument<'a>(&'a Document);
 pub struct LoggableRevision<'a>(&'a Revision);
+pub struct LoggableUser<'a>(&'a User);
+pub struct LoggableWorkflow<'a>(&'a Workflow);
 
 impl std::fmt::Display for LoggableUser<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -65,6 +67,21 @@ impl std::fmt::Display for LoggableDocument<'_> {
     }
 }
 
+impl std::fmt::Display for LoggableInvite<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Invite {{ id: {}, random: {}, created_at: {}, created_by: {}, accepted_at: {},accepted_by: {},  }}",
+            self.0.id,
+            self.0.random,
+            self.0.created_at,
+            self.0.created_by,
+            self.0.accepted_at.unwrap_or(0),
+            self.0.accepted_by.unwrap_or(0),
+        )
+    }
+}
+
 impl std::fmt::Display for LoggableRevision<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
@@ -77,6 +94,10 @@ impl std::fmt::Display for LoggableRevision<'_> {
 
 pub fn loggable_user(user: &User) -> LoggableUser {
     LoggableUser(user)
+}
+
+pub fn loggable_invite(invite: &Invite) -> LoggableInvite {
+    LoggableInvite(invite)
 }
 
 pub fn loggable_workflow(workflow: &Workflow) -> LoggableWorkflow {

@@ -13,17 +13,19 @@ type AppError = variant {
 };
 type AssignRolesInput = record { role_ids : vec nat64; user_ids : blob };
 type AssignRolesResult = variant { Ok; Err : AppError };
-type CreateCanisterTenantInput = record {
-  user : CreateUserInput;
-  organization : CreateProjectInput;
-  project : CreateProjectInput;
-};
 type CreateDocumentInput = record {
   title : text;
   content : blob;
   project_id : nat32;
 };
 type CreateDocumentResult = variant { Ok : nat64; Err : AppError };
+type CreateInitTenantCanisterInput = record {
+  "principal" : principal;
+  user : CreateUserInput;
+  organization : CreateProjectInput;
+  project : CreateProjectInput;
+};
+type CreateInviteResult = variant { Ok : Invite; Err : AppError };
 type CreateOrganizationInput = record { name : text };
 type CreateOrganizationResult = variant { Ok : Organization; Err : AppError };
 type CreateProjectInput = record { name : text };
@@ -69,6 +71,7 @@ type Entity = variant {
   Organization;
   Revision;
   Project;
+  Invite;
   Workflow;
 };
 type ExecuteWorkflowInput = record { workflow_id : nat32; event_id : text };
@@ -86,9 +89,11 @@ type FilterField = variant {
   Organization : OrganizationFilterField;
   Revision : RevisionFilterField;
   Project : ProjectFilterField;
+  Invite : InviteFilterField;
   Workflow : WorkflowFilterField;
 };
 type FilterOperator = variant { Contains; GreaterThan; LessThan; Equals };
+type GetInviteResult = variant { Ok : Invite; Err : AppError };
 type GetOrganizationResult = variant { Ok : Organization; Err : AppError };
 type GetPermissionsResult = variant { Ok : vec Permission; Err : AppError };
 type GetProjectRolesInput = record { project_id : nat32 };
@@ -99,9 +104,28 @@ type GetWorkflowDefinitionResult = variant {
   Err : AppError;
 };
 type GetWorkflowStateResult = variant { Ok : text; Err : AppError };
+type Invite = record {
+  id : nat64;
+  accepted_at : opt nat64;
+  accepted_by : opt nat8;
+  created_at : nat64;
+  created_by : nat8;
+  random : text;
+};
+type InviteFilterField = variant {
+  Id;
+  AcceptedAt;
+  AcceptedBy;
+  CreatedAt;
+  CreatedBy;
+};
 type ListDocumentsInput = record { pagination : PaginationInput };
 type ListDocumentsResult = variant {
   Ok : record { vec Document; PaginationMetadata };
+  Err : AppError;
+};
+type ListInvitesResult = variant {
+  Ok : record { vec Invite; PaginationMetadata };
   Err : AppError;
 };
 type ListProjectMembersResult = variant {
@@ -272,17 +296,19 @@ type WorkflowPermission = variant {
   Create;
   Update;
 };
-service : (CreateCanisterTenantInput) -> {
+service : (CreateInitTenantCanisterInput) -> {
   assign_roles : (AssignRolesInput) -> (AssignRolesResult);
   create_document : (CreateDocumentInput) -> (CreateDocumentResult);
+  create_invite : () -> (CreateInviteResult);
   create_organization : (CreateOrganizationInput) -> (CreateOrganizationResult);
   create_project : (CreateProjectInput) -> (CreateProjectResult);
   create_revision : (CreateRevisionInput) -> (CreateDocumentResult);
   create_role : (RoleInput) -> (CreateDocumentResult);
-  create_user : (CreateUserInput) -> (CreateUserResult);
+  create_user : (CreateUserInput) -> (CreateUserResult) query;
   create_workflow : (CreateWorkflowInput) -> (CreateProjectResult);
   execute_workflow : (ExecuteWorkflowInput) -> (ExecuteWorkflowResult);
   get_diff_revisions : (DiffRevisionsInput) -> (DiffRevisionsResult) query;
+  get_invite : (text) -> (GetInviteResult) query;
   get_organization : () -> (GetOrganizationResult) query;
   get_permissions : () -> (GetPermissionsResult) query;
   get_project_roles : (GetProjectRolesInput) -> (GetProjectRolesResult) query;
@@ -292,6 +318,7 @@ service : (CreateCanisterTenantInput) -> {
     ) query;
   get_workflow_state : (WorkflowIdInput) -> (GetWorkflowStateResult) query;
   list_documents : (ListDocumentsInput) -> (ListDocumentsResult) query;
+  list_invites : (PaginationInput) -> (ListInvitesResult) query;
   list_project_members : (ListDocumentsInput) -> (
       ListProjectMembersResult,
     ) query;

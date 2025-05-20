@@ -1,5 +1,6 @@
 pub mod access_control;
 pub mod documents;
+pub mod invites;
 pub mod organization;
 pub mod pagination;
 pub mod projects;

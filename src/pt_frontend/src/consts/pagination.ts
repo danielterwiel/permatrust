@@ -38,6 +38,14 @@ const PROJECT_FIELD = {
   NAME: 'Name',
 } as const;
 
+const INVITE_FIELD = {
+  ID: 'Id',
+  CREATED_AT: 'CreatedAt',
+  CREATED_BY: 'CreatedBy',
+  ACCEPTED_AT: 'AcceptedAt',
+  ACCEPTED_BY: 'AcceptedBy',
+} as const;
+
 const REVISION_FIELD = {
   CREATED_AT: 'CreatedAt',
   DOCUMENT_ID: 'DocumentId',
@@ -91,6 +99,13 @@ export const FIELDS = {
     ID: PROJECT_FIELD.ID,
     NAME: PROJECT_FIELD.NAME,
   },
+  INVITE: {
+    ID: INVITE_FIELD.ID,
+    CREATED_AT: INVITE_FIELD.CREATED_AT,
+    CREATED_BY: INVITE_FIELD.CREATED_BY,
+    ACCEPTED_AT: INVITE_FIELD.ACCEPTED_AT,
+    ACCEPTED_BY: INVITE_FIELD.ACCEPTED_BY,
+  },
   REVISION: {
     CREATED_AT: REVISION_FIELD.CREATED_AT,
     DOCUMENT_ID: REVISION_FIELD.DOCUMENT_ID,
@@ -130,6 +145,7 @@ const organizationFields = createCandidVariant(
 const projectFields = createCandidVariant(Object.values(PROJECT_FIELD));
 const revisionFields = createCandidVariant(Object.values(REVISION_FIELD));
 const userFields = createCandidVariant(Object.values(USER_FIELD));
+const inviteFields = createCandidVariant(Object.values(INVITE_FIELD));
 const workflowFields = createCandidVariant(Object.values(WORKFLOW_FIELD));
 
 export const filterOperator = createCandidVariant(
@@ -147,5 +163,6 @@ export const filterField = {
   Revision: revisionFields,
   Role: roleFields,
   User: userFields,
+  Invite: inviteFields,
   Workflow: workflowFields,
 } as const;

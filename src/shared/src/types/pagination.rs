@@ -61,12 +61,22 @@ pub enum RoleFilterField {
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
+pub enum InviteFilterField {
+    Id,
+    CreatedAt,
+    CreatedBy,
+    AcceptedBy,
+    AcceptedAt,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug)]
 pub enum FilterField {
     User(UserFilterField),
     Document(DocumentFilterField),
     Revision(RevisionFilterField),
     Organization(OrganizationFilterField),
     Project(ProjectFilterField),
+    Invite(InviteFilterField),
     Workflow(WorkflowFilterField),
     Role(RoleFilterField),
 }

@@ -1,4 +1,4 @@
-use candid::CandidType;
+use candid::{CandidType, Principal};
 use serde::Deserialize;
 
 use crate::types::errors::AppError;
@@ -8,10 +8,18 @@ use super::{
 };
 
 #[derive(CandidType, Deserialize, Debug)]
-pub struct CreateCanisterTenantInput {
+pub struct CreateTenantCanisterInput {
+    pub user: CreateUserInput,
     pub organization: CreateOrganizationInput,
     pub project: CreateProjectInput,
+}
+
+#[derive(CandidType, Deserialize, Debug)]
+pub struct CreateInitTenantCanisterInput {
     pub user: CreateUserInput,
+    pub organization: CreateOrganizationInput,
+    pub project: CreateProjectInput,
+    pub principal: Principal,
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug)]

@@ -80,8 +80,8 @@
   "private": true,
   "scripts": {
     "build": "vite build",
-    "build:icons": "pnpm exec svg-icons-cli build -i src/components/icons -o src/components/ui/icons",
-    "add:icons": "pnpm exec @sly-cli/sly add --directory ./src/components/icons --overwrite --yes",
+    "build:icons": "npx svg-icons-cli build -i src/components/icons -o src/components/ui/icons",
+    "add:icons": "npx @sly-cli/sly add --directory ./src/components/icons --overwrite --yes",
     "add:components": "pnpm exec shadcn@latest add",
     "start": "vite --port 3000",
     "typecheck": "tsc --noEmit",

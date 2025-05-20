@@ -7,9 +7,9 @@ use crate::types::users::UserId;
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct Organization {
+    pub name: String,
     pub members: Vec<UserId>,
     pub projects: Vec<ProjectId>,
-    pub name: String,
     pub created_at: u64,
     pub created_by: UserId,
 }
@@ -19,6 +19,14 @@ pub struct Organization {
 #[derive(CandidType, Deserialize, Clone, Debug)]
 pub struct CreateOrganizationInput {
     pub name: String,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug)]
+pub struct CreateInitOrganizationInput {
+    pub name: String,
+    pub members: Vec<UserId>,
+    pub projects: Vec<ProjectId>,
+    pub created_by: UserId,
 }
 
 // Results

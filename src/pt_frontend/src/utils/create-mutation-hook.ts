@@ -85,6 +85,7 @@ export function createMutationHook<TVariables, TData>(
         ) {
           errorMessage = `Validation error: ${appError.ValidationError}`;
         } else {
+          console.log('error', error);
           errorMessage = 'Application error occurred. Please try again.';
         }
       } else if (error instanceof Error) {
