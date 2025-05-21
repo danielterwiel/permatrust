@@ -1,3 +1,4 @@
+import { Principal } from '@dfinity/principal';
 import { assign, createActor, fromPromise, log, setup } from 'xstate';
 
 import { getTenantCanisterIdsOptions } from '@/api/queries';
@@ -10,7 +11,6 @@ import type {
   Project,
   User,
 } from '@/declarations/tenant_canister/tenant_canister.did';
-import type { Principal } from '@dfinity/principal';
 
 import { createMainActorWrapper, createTenantActorWrapper } from '@/api';
 import { Auth } from '@/auth';
@@ -122,7 +122,10 @@ const authMachine = setup({
 
         if (isAuthenticated) {
           await createMainActorWrapper(client);
-          await queryClient.ensureQueryData(getTenantCanisterIdsOptions());
+          const [canisterPrincipal] =
+            await queryClient.ensureQueryData(getTenantCanisterIdsOptions());
+          const canisterId = Principal.from(canisterPrincipal);
+          await createTenantActorWrapper(client, canisterId.toString());
         }
 
         return { isAuthenticated };
