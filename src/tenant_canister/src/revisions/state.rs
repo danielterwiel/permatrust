@@ -1,4 +1,4 @@
-use shared::consts::memory_ids::REVISIONS_MEMORY_ID;
+use shared::consts::memory_ids::tenant_canister::REVISIONS_MEMORY_ID;
 
 use super::*;
 use crate::documents;

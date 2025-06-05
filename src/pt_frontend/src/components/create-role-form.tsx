@@ -1,7 +1,7 @@
 import { useForm } from '@tanstack/react-form';
 import { z } from 'zod';
 
-import { tenantMutations as mutations } from '@/api/mutations';
+import { mutations } from '@/api/mutations';
 import { projectIdSchema } from '@/schemas/entities';
 import { capitalizeFirstLetterValidator } from '@/schemas/form';
 import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
@@ -50,8 +50,8 @@ type FormValues = {
 };
 
 export function CreateRoleForm({ permissions, project }: CreateRoleFormProps) {
-  const { isPending: isSubmitting, mutateAsync: createRole } =
-    mutations.useCreateRole();
+  const { isPending: isSubmitting, mutate: createRole } =
+    mutations.tenant.useCreateRole();
   const availablePermissions = permissionsToItems(permissions);
 
   const form = useForm<FormValues>({

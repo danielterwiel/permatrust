@@ -6,3 +6,4 @@ export * from './revisions';
 export * from './users';
 export * from './workflows';
 export * from './tenants';
+export * from './management';

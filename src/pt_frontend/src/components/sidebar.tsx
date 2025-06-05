@@ -26,6 +26,8 @@ export const Sidebar: FC<SidebarProps> = ({ authActor }) => {
     ['/documents', 'Documents', 'files-outline'],
     ['/users', 'Users', 'users-outline'],
     ['/workflows', 'Workflows', 'file-orientation-outline'],
+    ['/settings', 'Settings', 'settings'],
+    ['/management', 'Management', 'cloud-computing'],
   ] as const;
 
   function logout() {

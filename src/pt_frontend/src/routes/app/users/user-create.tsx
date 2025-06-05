@@ -1,6 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { tenantMutations as mutations } from '@/api/mutations';
+import { mutations } from '@/api/mutations';
+import { tryCatch } from '@/utils/try-catch';
 
 import { CreateUserForm } from '@/components/create-user-form';
 import type { createUserFormSchema } from '@/components/create-user-form';
@@ -23,24 +24,23 @@ function CreateUser() {
   const navigate = Route.useNavigate();
 
   const { isPending: isSubmitting, mutate: createUser } =
-    mutations.useCreateUser();
+    mutations.tenant.useCreateUser();
 
-  function onSubmit(values: z.infer<typeof createUserFormSchema>) {
-    try {
-      createUser(
-        {
-          first_name: values.first_name,
-          last_name: values.last_name,
-        },
-        {
-          onSuccess: () => {
-            navigate({ to: '/organization' });
-          },
-        },
-      );
-    } catch (_error) {
+  async function onSubmit(values: z.infer<typeof createUserFormSchema>) {
+    const result = await tryCatch(
+      createUser({
+        first_name: values.first_name,
+        last_name: values.last_name,
+      })
+    );
+
+    if (result.error) {
       // TODO: handle error
+      console.error('Error creating user:', result.error);
+      return;
     }
+
+    navigate({ to: '/organization' });
   }
 
   return <CreateUserForm isSubmitting={isSubmitting} onSubmit={onSubmit} />;

@@ -4,7 +4,7 @@ import { Check, ChevronsUpDown } from 'lucide-react';
 import { useState } from 'react';
 import { z } from 'zod';
 
-import { tenantMutations as mutations } from '@/api/mutations';
+import { mutations } from '@/api/mutations';
 import { getProjectRolesOptions } from '@/api/queries/access-control';
 import { listUsersByProjectIdOptions } from '@/api/queries/users';
 import { useToast } from '@/hooks/use-toast';
@@ -14,6 +14,7 @@ import {
   userIdSchema,
 } from '@/schemas/entities';
 import { cn } from '@/utils/cn';
+import { tryCatch } from '@/utils/try-catch';
 
 import { RolesList } from '@/components/roles-list';
 import { Button } from '@/components/ui/button';
@@ -102,7 +103,7 @@ function RolesAssign() {
   const [openRoles, setOpenRoles] = useState(false);
   const { toast } = useToast();
 
-  const assignRolesMutation = mutations.useAssignRoles();
+  const assignRolesMutation = mutations.tenant.useAssignRoles();
 
   const onSubmit = async () => {
     if (selectedUsers.length === 0 || selectedRoles.length === 0) {
@@ -117,26 +118,29 @@ function RolesAssign() {
     const selectedUserIds = selectedUsers.map((u) => userIdSchema.parse(u.id));
     const selectedRoleIds = selectedRoles.map((r) => roleIdSchema.parse(r.id));
 
-    try {
-      await assignRolesMutation.mutateAsync({
+    const result = await tryCatch(
+      assignRolesMutation.mutate({
         role_ids: selectedRoleIds,
         user_ids: selectedUserIds,
-      });
+      })
+    );
 
+    if (result.error) {
       toast({
-        description: `Assigned ${selectedRoles.length} role(s) to ${selectedUsers.length} user(s).`,
-        title: 'Success',
-      });
-
-      setSelectedUsers([]);
-      setSelectedRoles([]);
-    } catch (error: unknown) {
-      toast({
-        description: `Failed to assign roles. Please try again. Error: ${error}`,
+        description: `Failed to assign roles. Please try again. Error: ${result.error}`,
         title: 'Error',
         variant: 'destructive',
       });
+      return;
     }
+
+    toast({
+      description: `Assigned ${selectedRoles.length} role(s) to ${selectedUsers.length} user(s).`,
+      title: 'Success',
+    });
+
+    setSelectedUsers([]);
+    setSelectedRoles([]);
   };
 
   return (

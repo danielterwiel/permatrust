@@ -1,8 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { tenantMutations as mutations } from '@/api/mutations';
+import { mutations } from '@/api/mutations';
 import { listRevisionsByDocumentIdOptions } from '@/api/queries';
 import { documentIdSchema, projectIdSchema } from '@/schemas/entities';
+import { tryCatch } from '@/utils/try-catch';
 
 import { CreateRevisionForm } from '@/components/create-revision-form';
 import type { createRevisionFormSchema } from '@/components/create-revision-form';
@@ -28,42 +29,41 @@ export const Route = createFileRoute(
 
 function RevisionsCreate() {
   const { isPending: isSubmitting, mutate: createRevision } =
-    mutations.useCreateRevision();
+    mutations.tenant.useCreateRevision();
   const params = Route.useParams();
   const navigate = Route.useNavigate();
   const { revisions: revisionData } = Route.useLoaderData();
 
   const revision = revisionData[0][0];
 
-  function onSubmit(values: z.infer<typeof createRevisionFormSchema>) {
-    try {
-      const encoder = new TextEncoder();
-      const content = encoder.encode(values.content);
+  async function onSubmit(values: z.infer<typeof createRevisionFormSchema>) {
+    const encoder = new TextEncoder();
+    const content = encoder.encode(values.content);
 
-      const projectId = projectIdSchema.parse(params.projectId);
-      const documentId = documentIdSchema.parse(params.documentId);
+    const projectId = projectIdSchema.parse(params.projectId);
+    const documentId = documentIdSchema.parse(params.documentId);
 
-      createRevision(
-        {
-          content,
-          document_id: documentId,
-          project_id: projectId,
-        },
-        {
-          onSuccess: () => {
-            navigate({
-              params: {
-                documentId: params.documentId,
-                projectId: params.projectId,
-              },
-              to: '/projects/$projectId/documents/$documentId',
-            });
-          },
-        },
-      );
-    } catch (_error) {
+    const result = await tryCatch(
+      createRevision({
+        content,
+        document_id: documentId,
+        project_id: projectId,
+      })
+    );
+
+    if (result.error) {
       // TODO: handle error
+      console.error('Error creating revision:', result.error);
+      return;
     }
+
+    navigate({
+      params: {
+        documentId: params.documentId,
+        projectId: params.projectId,
+      },
+      to: '/projects/$projectId/documents/$documentId',
+    });
   }
 
   return (

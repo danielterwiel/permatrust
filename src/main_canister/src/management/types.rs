@@ -23,3 +23,10 @@ pub enum GetTenantCanisterIdsResult {
     Ok(Vec<Principal>),
     Err(AppError),
 }
+
+// NOTE: admin only
+#[derive(CandidType, Deserialize)]
+pub enum GetAllTenantCanistersResult {
+    Ok(Vec<Principal>),
+    Err(AppError),
+}

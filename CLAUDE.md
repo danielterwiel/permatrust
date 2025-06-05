@@ -36,3 +36,4 @@
 - Zod for validation
 - Radix UI components + Shadcn/ui
 - Rust + DFX (Internet Computer) for backend
+- ic_cdk 0.18.2-alpha

@@ -1,0 +1,36 @@
+type AppError = variant {
+  InvalidPageSize : text;
+  InvalidStateTransition : text;
+  InvalidInput : text;
+  CanisterUpgradeFailed : text;
+  EntityNotFound : text;
+  InvalidPageNumber : text;
+  ValidationError : text;
+  Unauthorized;
+  StoreWasmModuleFailed : text;
+  UpdateFailed : text;
+  IdentityNotFound;
+  SpawnCanister : text;
+  GetAllWasmVersionsFailed : text;
+  InternalError : text;
+};
+type FinishWasmUploadResult = variant { Ok; Err : AppError };
+type GetAllWasmVersionsResult = variant { Ok : vec nat32; Err : AppError };
+type GetWasmByVersionResult = variant { Ok : opt blob; Err : AppError };
+type GetWasmChunkInput = record { chunk_id : nat32; version : nat32 };
+type GetWasmChunkResult = variant { Ok : opt WasmChunk; Err : AppError };
+type StoreWasmChunkInput = record { chunk : WasmChunk; version : nat32 };
+type StoreWasmChunkResult = variant { Ok; Err : AppError };
+type StoreWasmUpgradeCanisterInput = record {
+  wasm_bytes : blob;
+  version : nat32;
+};
+type WasmChunk = record { total_chunks : nat32; data : blob; chunk_id : nat32 };
+service : () -> {
+  finish_wasm_upload : (nat32) -> (FinishWasmUploadResult);
+  get_all_wasm_versions : () -> (GetAllWasmVersionsResult) query;
+  get_wasm_by_version : (nat32) -> (GetWasmByVersionResult) query;
+  get_wasm_chunk : (GetWasmChunkInput) -> (GetWasmChunkResult) query;
+  store_wasm_chunk : (StoreWasmChunkInput) -> (StoreWasmChunkResult);
+  store_wasm_module : (StoreWasmUpgradeCanisterInput) -> (StoreWasmChunkResult);
+}

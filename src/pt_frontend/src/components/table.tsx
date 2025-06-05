@@ -11,6 +11,7 @@ import { pascalCaseToSnakeCase } from '@/utils/pascal-case-to-snake-case';
 import { snakeToPascalCase } from '@/utils/snake-to-pascal-case';
 
 import { Checkbox } from '@/components/ui/checkbox';
+import type { IconName } from '@/components/ui/icon';
 import {
   Table as TableBase,
   TableBody,
@@ -20,6 +21,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 
+import { EmptyState } from './empty-state';
 import { Pagination } from './Pagination';
 import { DataTableColumnHeader } from './table-column-header';
 
@@ -32,6 +34,20 @@ import type {
 import type { Entity, EntityName } from '@/types/entities';
 import type { FilterFieldName } from '@/types/pagination';
 import type { ColumnDef, Row, SortingState } from '@tanstack/react-table';
+
+function getEntityIcon(entityName: EntityName): IconName {
+  const iconMap: Record<EntityName, IconName> = {
+    Document: 'files-outline',
+    Organization: 'building-outline',
+    Project: 'briefcase-outline',
+    Revision: 'git-compare-outline',
+    Role: 'user-check-outline',
+    User: 'user-outline',
+    Invite: 'user-outline',
+    Workflow: 'file-orientation-outline',
+  };
+  return iconMap[entityName];
+}
 
 interface ColumnConfigItem<T extends Entity = Entity> {
   cellPreprocess?: (entity: T) => React.ReactNode;
@@ -317,7 +333,12 @@ export const Table = <T extends Entity = Entity>({
   }
 
   if (data.length === 0) {
-    return <p>No documents available</p>;
+    return (
+      <EmptyState
+        icon={getEntityIcon(entityName)}
+        message={`No ${entityName.toLowerCase()}s available.`}
+      />
+    );
   }
 
   return (

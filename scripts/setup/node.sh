@@ -1,43 +1,36 @@
 #!/usr/bin/env bash
-set -eo pipefail
+
+# Source common utilities
+# shellcheck source=../lib/common.sh
+source "$(dirname "$0")/../lib/common.sh"
+load_env
 
 # Ensure corepack is enabled to enforce the correct pnpm version
+log_info "Enabling corepack..."
 corepack enable
 
-# Install nvm if needed
-if ! command -v nvm &>/dev/null; then
-  echo "Installing nvm..."
-  npm install -g nvm
-fi
-
+# Load nvm environment
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"                   # This loads nvm
-[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion" # This loads nvm bash completion
-
-# Read Node.js version from .nvmrc
-if [ -f ".nvmrc" ]; then
-  REQUIRED_VERSION=$(cat .nvmrc)
-  echo "Using Node.js version from .nvmrc: $REQUIRED_VERSION"
-else
-  echo "Error: .nvmrc file not found. Please create one with the desired Node.js version."
-  exit 1
+if [[ -s "$NVM_DIR/nvm.sh" ]]; then
+    # shellcheck source=/dev/null
+    source "$NVM_DIR/nvm.sh"
+fi
+if [[ -s "$NVM_DIR/bash_completion" ]]; then
+    # shellcheck source=/dev/null
+    source "$NVM_DIR/bash_completion"
 fi
 
-# Check Node.js version
-NODE_VERSION=$(node -v)
-
-if [[ "$NODE_VERSION" != "$REQUIRED_VERSION" ]]; then
-  echo "Incorrect Node.js version. Required: $REQUIRED_VERSION, Found: $NODE_VERSION"
-  echo "Attempting to use nvm to install and use the correct version."
-  nvm install "$REQUIRED_VERSION"
-  nvm use "$REQUIRED_VERSION"
-  NODE_VERSION=$(node -v) # Update NODE_VERSION after nvm use
-  if [[ "$NODE_VERSION" != "$REQUIRED_VERSION" ]]; then
-    echo "Error: Failed to switch to the correct Node.js version using nvm."
-    exit 1
-  fi
+# Install nvm if needed
+if ! command_exists nvm; then
+    log_warn "nvm not found - you may need to install it manually"
+    log_warn "Visit: https://github.com/nvm-sh/nvm#installing-and-updating"
 fi
+
+# Check and set Node.js version
+check_node_version
 
 # Install dependencies with pnpm
-echo "Installing dependencies with pnpm..."
+log_info "Installing dependencies with pnpm..."
 pnpm install --frozen-lockfile
+
+log_success "Node.js setup completed successfully!"

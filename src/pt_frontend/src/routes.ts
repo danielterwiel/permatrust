@@ -78,6 +78,9 @@ export const routes = rootRoute('root.tsx', [
             index('app/workflows/workflow-details.tsx'),
           ]),
         ]),
+
+        route('/settings', 'app/settings/settings-index.tsx'),
+        route('/management', 'app/management/management-index.tsx'),
       ]),
     ]),
   ]),

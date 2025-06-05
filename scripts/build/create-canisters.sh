@@ -1,16 +1,36 @@
 #!/usr/bin/env bash
-set -eo pipefail
 
-CANISTERS=("main_canister" "tenant_canister" "internet_identity" "pt_frontend")
-for CANISTER in "${CANISTERS[@]}"; do
-  for _i in {1..4}; do
-    dfx canister create "$CANISTER" && break || sleep 5
-  done
+# Source common utilities
+# shellcheck source=../lib/common.sh
+source "$(dirname "$0")/../lib/common.sh"
+load_env
+
+# Validate dfx.json and populate canister arrays
+validate_dfx_config
+populate_canister_arrays
+
+# Parse arguments
+CANISTER_ARG="${1:-}"
+
+if [[ -n "$CANISTER_ARG" ]]; then
+    # Build specific canister
+    CANISTERS=("$CANISTER_ARG")
+    log_info "Creating canister: $CANISTER_ARG"
+else
+    # Build all canisters
+    CANISTERS=("${ALL_CANISTERS[@]}")
+    log_info "Creating all canisters..."
+fi
+
+for canister in "${CANISTERS[@]}"; do
+    create_canister_with_retry "$canister"
 done
 
-# Create asset canister interface
-mkdir -p .dfx/local/canisters/pt_frontend
-cat >.dfx/local/canisters/pt_frontend/assetstorage.did <<EOL
+# Create asset canister interface only if pt_frontend is being built
+if [[ -z "$CANISTER_ARG" ]] || printf '%s\n' "${ASSET_CANISTERS[@]}" | grep -q "^${CANISTER_ARG}$"; then
+    log_info "Creating asset canister interface..."
+    ensure_directory ".dfx/local/canisters/pt_frontend"
+    cat >.dfx/local/canisters/pt_frontend/assetstorage.did <<EOL
 type BatchId = nat;
 type ChunkId = nat;
 type Key = text;
@@ -46,3 +66,4 @@ service : {
     } }) -> ();
 }
 EOL
+fi

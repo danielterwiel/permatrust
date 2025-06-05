@@ -6,11 +6,15 @@ const api = new Proxy(canisterApi, {
       return Reflect.get(target, prop, receiver);
     }
 
-    if (target.tenant && typeof prop === 'string' && prop in target.tenant) {
+    if (typeof prop === 'string' && prop in target.tenant) {
       return target.tenant[prop as keyof typeof target.tenant];
     }
 
-    if (target.main && typeof prop === 'string' && prop in target.main) {
+    if (typeof prop === 'string' && prop in target.upgrade) {
+      return target.upgrade[prop as keyof typeof target.upgrade];
+    }
+
+    if (typeof prop === 'string' && prop in target.main) {
       return target.main[prop as keyof typeof target.main];
     }
 
@@ -20,6 +24,7 @@ const api = new Proxy(canisterApi, {
 
 export {
   api,
+  createUpgradeActorWrapper,
   createMainActorWrapper,
   createTenantActorWrapper,
 } from './api';

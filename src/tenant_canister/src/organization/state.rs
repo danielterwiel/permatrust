@@ -3,7 +3,9 @@ use ic_stable_structures::{
     memory_manager::{MemoryId, MemoryManager, VirtualMemory},
     DefaultMemoryImpl, StableCell,
 };
-use shared::{consts::memory_ids::ORGANIZATION_MEMORY_ID, types::errors::AppError};
+use shared::{
+    consts::memory_ids::tenant_canister::ORGANIZATION_MEMORY_ID, types::errors::AppError,
+};
 use std::cell::RefCell;
 
 type Memory = VirtualMemory<DefaultMemoryImpl>;

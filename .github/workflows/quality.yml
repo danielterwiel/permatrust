@@ -6,6 +6,12 @@ on:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    env:
+      DFX_NETWORK: local
+      APP_ENV: integration
+      DEBUG: "true"
+      CI: "true"
+
     steps:
       - uses: actions/checkout@v4
 
@@ -34,7 +40,7 @@ jobs:
           version: 8.15.5
           run_install: false
 
-      - name: Configure environment
+      - name: Configure DFX environment
         run: |
           echo "$HOME/.local/share/dfx/bin" >> $GITHUB_PATH
           dfx cache install
@@ -46,7 +52,7 @@ jobs:
           echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
       - name: Cache Dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ${{ steps.pnpm-cache.outputs.STORE_PATH }}

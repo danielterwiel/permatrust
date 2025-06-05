@@ -1,3 +1,8 @@
 [workspace]
-members = ["src/shared", "src/tenant_canister", "src/main_canister"]
+members = [
+  "src/shared",
+  "src/tenant_canister",
+  "src/main_canister",
+  "src/upgrade_canister",
+]
 resolver = "2"

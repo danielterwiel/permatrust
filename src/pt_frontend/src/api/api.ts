@@ -1,6 +1,6 @@
 import { HttpAgent } from '@dfinity/agent';
 
-import { createMainMutations, createTenantMutations } from '@/api/mutations';
+import { createMainMutations, createTenantMutations, createUpgradeMutations } from '@/api/mutations';
 import { isAppError } from '@/utils/is-app-error';
 
 import { createActor as createMainActor } from '@/declarations/main_canister/index';
@@ -10,6 +10,8 @@ import type {
   AppError as TenantAppError,
   _SERVICE as TenantService,
 } from '@/declarations/tenant_canister/tenant_canister.did';
+import { createActor as createUpgradeActor } from '@/declarations/upgrade_canister/index';
+import type { _SERVICE as UpgradeService } from '@/declarations/upgrade_canister/upgrade_canister.did';
 import type { CreateActorFn, Result, ResultHandler } from '@/types/api';
 import type { ActorSubclass } from '@dfinity/agent';
 import type { AuthClient } from '@dfinity/auth-client';
@@ -17,6 +19,7 @@ import type { AuthClient } from '@dfinity/auth-client';
 const HOST = import.meta.env.PROD ? 'https://icp0.io' : 'http://localhost:8080';
 
 const canisterIdMain = process.env.CANISTER_ID_MAIN_CANISTER as string;
+const canisterIdUpgrade = process.env.CANISTER_ID_UPGRADE_CANISTER as string;
 
 type ActorWithIndex<T> = ActorSubclass<T> & { [key: string]: unknown };
 
@@ -28,12 +31,14 @@ type WrappedActorWithIndex<T> = {
   : ActorWithIndex<T>[K];
 };
 
-type TenantCanisterApi = WrappedActorWithIndex<TenantService>;
 type MainCanisterApi = WrappedActorWithIndex<MainService>;
+type UpgradeCanisterApi = WrappedActorWithIndex<UpgradeService>;
+type TenantCanisterApi = WrappedActorWithIndex<TenantService>;
 
 interface ApiInterface {
   tenant: TenantCanisterApi;
   main: MainCanisterApi;
+  upgrade: UpgradeCanisterApi;
 }
 
 export let api = {} as ApiInterface;
@@ -57,6 +62,27 @@ export async function createMainActorWrapper(
   createMainMutations();
 
   return wrappedMainActor;
+}
+
+/**
+ * Creates an authenticated upgrade canister actor
+ */
+export async function createUpgradeActorWrapper(
+  authClient: AuthClient,
+): Promise<UpgradeCanisterApi> {
+  const upgradeActor  = await createAuthenticatedActor<UpgradeService>(
+    canisterIdUpgrade,
+    createUpgradeActor,
+    authClient,
+  );
+  const wrappedUpgradeActor = wrapActor<UpgradeService>(
+    wrapWithAuth<UpgradeService>(upgradeActor , authClient),
+  ) as UpgradeCanisterApi;
+
+  api.upgrade = wrappedUpgradeActor;
+  createUpgradeMutations();
+
+  return wrappedUpgradeActor;
 }
 
 /**

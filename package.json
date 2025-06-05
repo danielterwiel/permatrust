@@ -3,7 +3,7 @@
   "packageManager": "pnpm@8.15.5",
   "private": true,
   "engines": {
-    "node": "=23.7.0"
+    "node": "=23.11.0"
   },
   "scripts": {
     "build": "pnpm --filter=pt_frontend run build",

@@ -1,4 +1,4 @@
-use shared::consts::memory_ids::WORKFLOWS_MEMORY_ID;
+use shared::consts::memory_ids::tenant_canister::WORKFLOWS_MEMORY_ID;
 
 use super::*;
 use std::cell::RefCell;

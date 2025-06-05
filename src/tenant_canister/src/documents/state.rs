@@ -1,4 +1,4 @@
-use shared::consts::memory_ids::DOCUMENTS_MEMORY_ID;
+use shared::consts::memory_ids::tenant_canister::DOCUMENTS_MEMORY_ID;
 
 use super::*;
 use std::cell::RefCell;

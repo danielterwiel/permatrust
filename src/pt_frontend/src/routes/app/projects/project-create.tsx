@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 
-import { tenantMutations as mutations } from '@/api/mutations';
+import { mutations } from '@/api/mutations';
+import { tryCatch } from '@/utils/try-catch';
 
 import { CreateProjectForm } from '@/components/create-project-form';
 import type { createProjectFormSchema } from '@/components/create-project-form';
@@ -23,28 +24,27 @@ function CreateProject() {
   const navigate = useNavigate();
 
   const { isPending: isSubmitting, mutate: createProject } =
-    mutations.useCreateProject();
+    mutations.tenant.useCreateProject();
 
-  function onSubmit(values: z.infer<typeof createProjectFormSchema>) {
-    try {
-      createProject(
-        {
-          name: values.name,
-        },
-        {
-          onSuccess: (projectId: number) => {
-            navigate({
-              params: {
-                projectId,
-              },
-              to: '/projects/$projectId',
-            });
-          },
-        },
-      );
-    } catch (_error) {
+  async function onSubmit(values: z.infer<typeof createProjectFormSchema>) {
+    const result = await tryCatch(
+      createProject({
+        name: values.name,
+      })
+    );
+
+    if (result.error) {
       // TODO: handle error
+      console.error('Error creating project:', result.error);
+      return;
     }
+
+    navigate({
+      params: {
+        projectId: result.data,
+      },
+      to: '/projects/$projectId',
+    });
   }
 
   return <CreateProjectForm isSubmitting={isSubmitting} onSubmit={onSubmit} />;

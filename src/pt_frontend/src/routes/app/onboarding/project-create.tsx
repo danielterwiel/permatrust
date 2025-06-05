@@ -1,14 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { mainMutations } from '@/api/mutations';
+import { mutations } from '@/api/mutations';
 import { useLocalStorage } from '@/hooks/use-local-storage';
+import { tryCatch } from '@/utils/try-catch';
 
 import { CreateProjectForm } from '@/components/create-project-form';
 import type { createProjectFormSchema } from '@/components/create-project-form';
 
 import type { z } from 'zod';
 
-import { createTenantActorWrapper } from '@/api';
+import { createTenantActorWrapper, createUpgradeActorWrapper } from '@/api';
 import { Auth } from '@/auth';
 
 export const Route = createFileRoute(
@@ -29,7 +30,7 @@ function CreateProject() {
     error: createTenantCanisterError,
     isPending,
     mutate: createTenantCanister,
-  } = mainMutations.useCreateTenantCanister();
+  } = mutations.main.useCreateTenantCanister();
   const navigate = Route.useNavigate();
 
   const [_tenantCanisterId, setTenantCanisterId] = useLocalStorage(
@@ -40,33 +41,55 @@ function CreateProject() {
   const user = authActor.getSnapshot().context.user;
   const organization = authActor.getSnapshot().context.organization;
 
-  function onSubmit(project: z.infer<typeof createProjectFormSchema>) {
+  async function onSubmit(project: z.infer<typeof createProjectFormSchema>) {
     if (!user || !organization) {
       console.error('User or organization is not defined');
       return navigate({ to: '/onboarding/user/create' });
     }
-    createTenantCanister(
-      { user, organization, project },
-      {
-        onSuccess: async (tenantCanisterId) => {
-          const auth = Auth.getInstance();
-          const client = await auth.getClient();
 
-          const tenantCanisterIdStr = tenantCanisterId.toString();
-          await createTenantActorWrapper(client, tenantCanisterIdStr);
-          setTenantCanisterId(tenantCanisterIdStr.toString());
-
-          navigate({ to: '/documents' });
-        },
-        onError: (error) => {
-          console.error('Error creating tenant canister:', error);
-          if (error.message) {
-            console.error('Error message:', error.message);
-          }
-        },
-      },
+    const tenantCanisterResult = await tryCatch(
+      createTenantCanister({
+        user,
+        organization,
+        project,
+      })
     );
 
+    if (tenantCanisterResult .error) {
+      console.error('Error creating tenant canister:', tenantCanisterResult.error);
+      if (tenantCanisterResult.error instanceof Error && tenantCanisterResult.error.message) {
+        console.error('Error message:', tenantCanisterResult.error.message);
+      }
+      return;
+    }
+
+    const auth = Auth.getInstance();
+    const clientResult = await tryCatch(auth.getClient());
+
+    if (clientResult.error) {
+      console.error('Error getting auth client:', clientResult.error);
+      return;
+    }
+
+    const tenantCanisterIdStr = tenantCanisterResult.data.toString();
+
+    const [tenantActorResult, upgradeActorResult] = await Promise.all([
+      tryCatch(createTenantActorWrapper(clientResult.data, tenantCanisterIdStr)),
+      tryCatch(createUpgradeActorWrapper(clientResult.data))
+    ]);
+
+    if (tenantActorResult.error) {
+      console.error('Error creating tenant actor:', tenantActorResult.error);
+      return;
+    }
+
+    if (upgradeActorResult.error) {
+      console.error('Error creating tenant actor:', upgradeActorResult.error);
+      return;
+    }
+
+    setTenantCanisterId(tenantCanisterIdStr.toString());
+    navigate({ to: '/documents' });
   }
 
   return (

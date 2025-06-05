@@ -1,21 +1,38 @@
 #!/usr/bin/env bash
-set -eo pipefail
 
-# Define WASM file paths
-MAIN_WASM="target/wasm32-unknown-unknown/release/main_canister.wasm"
-TENANT_WASM="target/wasm32-unknown-unknown/release/tenant_canister.wasm"
+# Source common utilities
+# shellcheck source=../lib/common.sh
+source "$(dirname "$0")/../lib/common.sh"
+load_env
+
+# Validate dfx.json and populate canister arrays
+validate_dfx_config
+populate_canister_arrays
 
 # Ensure directories exist
-mkdir -p src/declarations/tenant_canister
-mkdir -p src/declarations/main_canister
-mkdir -p src/declarations/shared
+log_info "Creating declaration directories..."
+for canister in "${RUST_CANISTERS[@]}"; do
+    ensure_directory "src/declarations/$canister"
+    ensure_directory "src/$canister"
+done
+ensure_directory "src/declarations/shared"
 
 # Generate Candid from Rust WASMs
-echo "Generating Candid interface from WASM files..."
-mkdir -p src/main_canister
-mkdir -p src/tenant_canister
+log_info "Generating Candid interfaces from WASM files..."
 
-candid-extractor "$TENANT_WASM" >src/tenant_canister/tenant_canister.did
-candid-extractor "$MAIN_WASM" >src/main_canister/main_canister.did
+for canister in "${RUST_CANISTERS[@]}"; do
+    wasm_file=$(get_wasm_path "$canister")
+    did_file="src/$canister/$canister.did"
+    
+    if [[ -f "$wasm_file" ]]; then
+        log_info "Extracting Candid for $canister..."
+        candid-extractor "$wasm_file" > "$did_file"
+    else
+        log_warn "WASM file not found: $wasm_file (skipping Candid extraction)"
+    fi
+done
 
+log_info "Running dfx generate..."
 dfx generate
+
+log_success "Candid generation completed!"

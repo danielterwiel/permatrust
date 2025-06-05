@@ -1,0 +1,23 @@
+[package]
+name = "upgrade_canister"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[build-dependencies]
+candid = "0.10.14"
+
+[dev-dependencies]
+pocket-ic = "9.0.0"
+
+[dependencies]
+candid = "0.10.0"
+candid_parser = "0.1.4"
+ic-cdk = "0.18.2-alpha.1"
+ic-cdk-macros = "0.18.1"
+ic-stable-structures = "0.6.8"
+serde = "1.0.203"
+
+shared = { path = "../shared" }

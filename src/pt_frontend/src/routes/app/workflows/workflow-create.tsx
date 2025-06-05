@@ -4,7 +4,8 @@ import { useCallback, useEffect, useState } from 'react';
 import ReactFlow, { Background, Controls, ReactFlowProvider } from 'reactflow';
 import { z } from 'zod';
 
-import { tenantMutations as mutations } from '@/api/mutations';
+import { mutations } from '@/api/mutations';
+import { tryCatch } from '@/utils/try-catch';
 
 import { Input } from '@/components/input';
 import { Loading } from '@/components/loading';
@@ -124,7 +125,7 @@ const defaultGraphJson: MachineConfig = {
 
 function CreateWorkflow() {
   const { isPending: isSubmitting, mutate: createWorkflow } =
-    mutations.useCreateWorkflow();
+    mutations.tenant.useCreateWorkflow();
   const [nodes, setNodes] = useState<Array<Node>>([]);
   const [edges, setEdges] = useState<Array<Edge>>([]);
   const navigate = useNavigate();
@@ -207,31 +208,37 @@ function CreateWorkflow() {
       graph_json: JSON.stringify(defaultGraphJson, null, 2),
       name: '',
     },
-    onSubmit: ({ value }) => {
+    onSubmit: async ({ value }) => {
+      let machineConfig: MachineConfig;
       try {
-        const machineConfig: MachineConfig = JSON.parse(value.graph_json);
-        const graphJsonObject = generateWorkflowGraph(machineConfig);
-        const graph_json = JSON.stringify(graphJsonObject);
-
-        createWorkflow(
-          {
-            graph_json,
-            initial_state: machineConfig.initial,
-            name: value.name,
-            project_id: 0, // TODO: project_id
-          },
-          {
-            onSuccess: (workflowId) => {
-              navigate({
-                params: { workflowId: workflowId.toString() },
-                to: '/workflows/$workflowId',
-              });
-            },
-          },
-        );
-      } catch (_error) {
-        // TODO: handle error
+        machineConfig = JSON.parse(value.graph_json);
+      } catch (error) {
+        console.error('Error parsing graph JSON:', error);
+        return;
       }
+
+      const graphJsonObject = generateWorkflowGraph(machineConfig);
+      const graph_json = JSON.stringify(graphJsonObject);
+
+      const result = await tryCatch(
+        createWorkflow({
+          graph_json,
+          initial_state: machineConfig.initial,
+          name: value.name,
+          project_id: 0, // TODO: project_id
+        })
+      );
+
+      if (result.error) {
+        // TODO: handle error
+        console.error('Error creating workflow:', result.error);
+        return;
+      }
+
+      navigate({
+        params: { workflowId: result.data.toString() },
+        to: '/workflows/$workflowId',
+      });
     },
   });
 

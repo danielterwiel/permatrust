@@ -24,9 +24,10 @@ npm start
 
 - brew
 - Rust
-- npm
+- pnpm
 - dfx
 - candid-extractor
+- didc
 
 ```sh
 dfx extension install nns

@@ -2,13 +2,16 @@ type AppError = variant {
   InvalidPageSize : text;
   InvalidStateTransition : text;
   InvalidInput : text;
+  CanisterUpgradeFailed : text;
   EntityNotFound : text;
   InvalidPageNumber : text;
   ValidationError : text;
   Unauthorized;
+  StoreWasmModuleFailed : text;
   UpdateFailed : text;
   IdentityNotFound;
   SpawnCanister : text;
+  GetAllWasmVersionsFailed : text;
   InternalError : text;
 };
 type CreateProjectInput = record { name : text };
@@ -19,6 +22,10 @@ type CreateTenantCanisterInput = record {
 };
 type CreateTenantCanisterResult = variant { Ok : principal; Err : AppError };
 type CreateUserInput = record { first_name : text; last_name : text };
+type GetAllTenantCanistersResult = variant {
+  Ok : vec principal;
+  Err : AppError;
+};
 type GetTenantCanisterIdsResult = variant {
   Ok : vec principal;
   Err : AppError;
@@ -27,5 +34,6 @@ service : {
   create_tenant_canister : (CreateTenantCanisterInput) -> (
       CreateTenantCanisterResult,
     );
+  get_all_tenant_canister_ids : () -> (GetAllTenantCanistersResult) query;
   get_tenant_canister_ids : () -> (GetTenantCanisterIdsResult) query;
 }

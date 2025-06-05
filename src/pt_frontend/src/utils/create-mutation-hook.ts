@@ -99,6 +99,8 @@ export function createMutationHook<TVariables, TData>(
       if (options?.errorToast === false) return;
 
       if (options?.errorToast) {
+        // TODO: move to some part of @tanstack/react-router where there's some
+        // feature to handle errors globally (forgot the name)
         toast({
           ...options.errorToast,
           variant: options.errorToast.variant || 'destructive',
@@ -115,7 +117,7 @@ export function createMutationHook<TVariables, TData>(
 
     const { errorToast, successToast, ...standardOptions } = options || {};
 
-    const result = useMutation({
+    const mutation = useMutation({
       mutationFn,
       onError: (error, variables, context) => {
         // First call custom error handler if provided
@@ -152,6 +154,22 @@ export function createMutationHook<TVariables, TData>(
       ...standardOptions,
     });
 
-    return result;
+    const mutate = async (variables: TVariables): Promise<TData> => {
+      return new Promise((resolve, reject) => {
+        mutation.mutate(variables, {
+          onSuccess: (data) => {
+            resolve(data);
+          },
+          onError: (error) => {
+            reject(error);
+          },
+        });
+      });
+    };
+
+    return {
+      ...mutation,
+      mutate,
+    };
   };
 }

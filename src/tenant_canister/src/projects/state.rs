@@ -1,7 +1,7 @@
 use super::*;
 use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
 use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
-use shared::consts::memory_ids::PROJECTS_MEMORY_ID;
+use shared::consts::memory_ids::tenant_canister::PROJECTS_MEMORY_ID;
 use std::cell::RefCell;
 use std::sync::atomic::{AtomicU32, Ordering};
 

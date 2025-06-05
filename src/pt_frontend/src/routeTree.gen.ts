@@ -24,8 +24,10 @@ import { Route as layoutsOnboardingImport } from './routes/_layouts/_onboarding'
 import { Route as layoutsOnboardedImport } from './routes/_layouts/_onboarded'
 import { Route as appWorkflowsWorkflowsIndexImport } from './routes/app/workflows/workflows-index'
 import { Route as appUsersUsersIndexImport } from './routes/app/users/users-index'
+import { Route as appSettingsSettingsIndexImport } from './routes/app/settings/settings-index'
 import { Route as appProjectsProjectsIndexImport } from './routes/app/projects/projects-index'
 import { Route as appOrganizationOrganizationIndexImport } from './routes/app/organization/organization-index'
+import { Route as appManagementManagementIndexImport } from './routes/app/management/management-index'
 import { Route as appInvitesInvitesIndexImport } from './routes/app/invites/invites-index'
 import { Route as appDocumentsDocumentsListImport } from './routes/app/documents/documents-list'
 import { Route as appWorkflowsWorkflowCreateImport } from './routes/app/workflows/workflow-create'
@@ -142,6 +144,12 @@ const appUsersUsersIndexRoute = appUsersUsersIndexImport.update({
   getParentRoute: () => layoutsOnboardedRoute,
 } as any)
 
+const appSettingsSettingsIndexRoute = appSettingsSettingsIndexImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => layoutsOnboardedRoute,
+} as any)
+
 const appProjectsProjectsIndexRoute = appProjectsProjectsIndexImport.update({
   id: '/projects',
   path: '/projects',
@@ -152,6 +160,13 @@ const appOrganizationOrganizationIndexRoute =
   appOrganizationOrganizationIndexImport.update({
     id: '/organization',
     path: '/organization',
+    getParentRoute: () => layoutsOnboardedRoute,
+  } as any)
+
+const appManagementManagementIndexRoute =
+  appManagementManagementIndexImport.update({
+    id: '/management',
+    path: '/management',
     getParentRoute: () => layoutsOnboardedRoute,
   } as any)
 
@@ -459,6 +474,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof appInvitesInvitesIndexImport
       parentRoute: typeof layoutsOnboardedImport
     }
+    '/_initialized/_authenticated/_onboarded/management': {
+      id: '/_initialized/_authenticated/_onboarded/management'
+      path: '/management'
+      fullPath: '/management'
+      preLoaderRoute: typeof appManagementManagementIndexImport
+      parentRoute: typeof layoutsOnboardedImport
+    }
     '/_initialized/_authenticated/_onboarded/organization': {
       id: '/_initialized/_authenticated/_onboarded/organization'
       path: '/organization'
@@ -471,6 +493,13 @@ declare module '@tanstack/react-router' {
       path: '/projects'
       fullPath: '/projects'
       preLoaderRoute: typeof appProjectsProjectsIndexImport
+      parentRoute: typeof layoutsOnboardedImport
+    }
+    '/_initialized/_authenticated/_onboarded/settings': {
+      id: '/_initialized/_authenticated/_onboarded/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof appSettingsSettingsIndexImport
       parentRoute: typeof layoutsOnboardedImport
     }
     '/_initialized/_authenticated/_onboarded/users': {
@@ -912,8 +941,10 @@ const appWorkflowsWorkflowsIndexRouteWithChildren =
 interface layoutsOnboardedRouteChildren {
   appDocumentsDocumentsListRoute: typeof appDocumentsDocumentsListRoute
   appInvitesInvitesIndexRoute: typeof appInvitesInvitesIndexRouteWithChildren
+  appManagementManagementIndexRoute: typeof appManagementManagementIndexRoute
   appOrganizationOrganizationIndexRoute: typeof appOrganizationOrganizationIndexRouteWithChildren
   appProjectsProjectsIndexRoute: typeof appProjectsProjectsIndexRouteWithChildren
+  appSettingsSettingsIndexRoute: typeof appSettingsSettingsIndexRoute
   appUsersUsersIndexRoute: typeof appUsersUsersIndexRouteWithChildren
   appWorkflowsWorkflowsIndexRoute: typeof appWorkflowsWorkflowsIndexRouteWithChildren
 }
@@ -921,9 +952,11 @@ interface layoutsOnboardedRouteChildren {
 const layoutsOnboardedRouteChildren: layoutsOnboardedRouteChildren = {
   appDocumentsDocumentsListRoute: appDocumentsDocumentsListRoute,
   appInvitesInvitesIndexRoute: appInvitesInvitesIndexRouteWithChildren,
+  appManagementManagementIndexRoute: appManagementManagementIndexRoute,
   appOrganizationOrganizationIndexRoute:
     appOrganizationOrganizationIndexRouteWithChildren,
   appProjectsProjectsIndexRoute: appProjectsProjectsIndexRouteWithChildren,
+  appSettingsSettingsIndexRoute: appSettingsSettingsIndexRoute,
   appUsersUsersIndexRoute: appUsersUsersIndexRouteWithChildren,
   appWorkflowsWorkflowsIndexRoute: appWorkflowsWorkflowsIndexRouteWithChildren,
 }
@@ -1015,8 +1048,10 @@ export interface FileRoutesByFullPath {
   '/unauthorized': typeof publicUnauthorizedRoute
   '/invites/$inviteId': typeof publicInvitesInviteDetailsRoute
   '/documents': typeof appDocumentsDocumentsListRoute
+  '/management': typeof appManagementManagementIndexRoute
   '/organization': typeof appOrganizationOrganizationIndexRouteWithChildren
   '/projects': typeof appProjectsProjectsIndexRouteWithChildren
+  '/settings': typeof appSettingsSettingsIndexRoute
   '/users': typeof appUsersUsersIndexRouteWithChildren
   '/workflows': typeof appWorkflowsWorkflowsIndexRouteWithChildren
   '/onboarding': typeof InitializedAuthenticatedOnboardingOnboardingRouteWithChildren
@@ -1062,6 +1097,8 @@ export interface FileRoutesByTo {
   '/unauthorized': typeof publicUnauthorizedRoute
   '/invites/$inviteId': typeof publicInvitesInviteDetailsRoute
   '/documents': typeof appDocumentsDocumentsListRoute
+  '/management': typeof appManagementManagementIndexRoute
+  '/settings': typeof appSettingsSettingsIndexRoute
   '/organization': typeof appOrganizationOrganizationDetailsRoute
   '/projects': typeof appProjectsProjectsListRoute
   '/users': typeof appUsersUsersListRoute
@@ -1104,8 +1141,10 @@ export interface FileRoutesById {
   '/_initialized/invites/$inviteId': typeof publicInvitesInviteDetailsRoute
   '/_initialized/_authenticated/_onboarded/documents': typeof appDocumentsDocumentsListRoute
   '/_initialized/_authenticated/_onboarded/invites': typeof appInvitesInvitesIndexRouteWithChildren
+  '/_initialized/_authenticated/_onboarded/management': typeof appManagementManagementIndexRoute
   '/_initialized/_authenticated/_onboarded/organization': typeof appOrganizationOrganizationIndexRouteWithChildren
   '/_initialized/_authenticated/_onboarded/projects': typeof appProjectsProjectsIndexRouteWithChildren
+  '/_initialized/_authenticated/_onboarded/settings': typeof appSettingsSettingsIndexRoute
   '/_initialized/_authenticated/_onboarded/users': typeof appUsersUsersIndexRouteWithChildren
   '/_initialized/_authenticated/_onboarded/workflows': typeof appWorkflowsWorkflowsIndexRouteWithChildren
   '/_initialized/_authenticated/_onboarding/onboarding': typeof InitializedAuthenticatedOnboardingOnboardingRouteWithChildren
@@ -1153,8 +1192,10 @@ export interface FileRouteTypes {
     | '/unauthorized'
     | '/invites/$inviteId'
     | '/documents'
+    | '/management'
     | '/organization'
     | '/projects'
+    | '/settings'
     | '/users'
     | '/workflows'
     | '/onboarding'
@@ -1199,6 +1240,8 @@ export interface FileRouteTypes {
     | '/unauthorized'
     | '/invites/$inviteId'
     | '/documents'
+    | '/management'
+    | '/settings'
     | '/organization'
     | '/projects'
     | '/users'
@@ -1239,8 +1282,10 @@ export interface FileRouteTypes {
     | '/_initialized/invites/$inviteId'
     | '/_initialized/_authenticated/_onboarded/documents'
     | '/_initialized/_authenticated/_onboarded/invites'
+    | '/_initialized/_authenticated/_onboarded/management'
     | '/_initialized/_authenticated/_onboarded/organization'
     | '/_initialized/_authenticated/_onboarded/projects'
+    | '/_initialized/_authenticated/_onboarded/settings'
     | '/_initialized/_authenticated/_onboarded/users'
     | '/_initialized/_authenticated/_onboarded/workflows'
     | '/_initialized/_authenticated/_onboarding/onboarding'
@@ -1344,8 +1389,10 @@ export const routeTree = rootRoute
       "children": [
         "/_initialized/_authenticated/_onboarded/documents",
         "/_initialized/_authenticated/_onboarded/invites",
+        "/_initialized/_authenticated/_onboarded/management",
         "/_initialized/_authenticated/_onboarded/organization",
         "/_initialized/_authenticated/_onboarded/projects",
+        "/_initialized/_authenticated/_onboarded/settings",
         "/_initialized/_authenticated/_onboarded/users",
         "/_initialized/_authenticated/_onboarded/workflows"
       ]
@@ -1373,6 +1420,10 @@ export const routeTree = rootRoute
         "/_initialized/_authenticated/_onboarded/invites/create"
       ]
     },
+    "/_initialized/_authenticated/_onboarded/management": {
+      "filePath": "app/management/management-index.tsx",
+      "parent": "/_initialized/_authenticated/_onboarded"
+    },
     "/_initialized/_authenticated/_onboarded/organization": {
       "filePath": "app/organization/organization-index.tsx",
       "parent": "/_initialized/_authenticated/_onboarded",
@@ -1388,6 +1439,10 @@ export const routeTree = rootRoute
         "/_initialized/_authenticated/_onboarded/projects/$projectId",
         "/_initialized/_authenticated/_onboarded/projects/create"
       ]
+    },
+    "/_initialized/_authenticated/_onboarded/settings": {
+      "filePath": "app/settings/settings-index.tsx",
+      "parent": "/_initialized/_authenticated/_onboarded"
     },
     "/_initialized/_authenticated/_onboarded/users": {
       "filePath": "app/users/users-index.tsx",

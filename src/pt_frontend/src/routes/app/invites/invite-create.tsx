@@ -1,7 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 
-import { tenantMutations as mutations } from '@/api/mutations';
+import { mutations } from '@/api/mutations';
+import { tryCatch } from '@/utils/try-catch';
 
 import { Loading } from '@/components/loading';
 import { Button } from '@/components/ui/button';
@@ -28,31 +29,27 @@ export const Route = createFileRoute(
 
 function CreateInvite() {
   const { isPending: isSubmitting, mutate: createInvite } =
-    mutations.useCreateInvite();
+    mutations.tenant.useCreateInvite();
   const [inviteLink, setInviteLink] = useState('');
   const [copied, setCopied] = useState(false);
 
-  function onSubmit() {
-    try {
-      setInviteLink('');
-      setCopied(false);
+  async function onSubmit() {
+    setInviteLink('');
+    setCopied(false);
 
-      createInvite(undefined, {
-        onSuccess: (response) => {
-          const domain = import.meta.env.NODE_ENV ? 'permatrust.net' : 'localhost:3000';
-          const protocol = import.meta.env.NODE_ENV ? 'https' : 'http';
-          if (typeof response.random === 'string') {
-            setInviteLink(`${protocol}://${domain}/invites/${response.random}`);
-          } else {
-            console.error('Invalid response format:', response);
-          }
-        },
-        onError: (_error) => {
-          console.error('Failed to create invite:', _error);
-        },
-      });
-    } catch (_error) {
-      console.error('Error in onSubmit handler:', _error);
+    const result = await tryCatch(createInvite(undefined));
+
+    if (result.error) {
+      console.error('Failed to create invite:', result.error);
+      return;
+    }
+
+    const domain = import.meta.env.NODE_ENV ? 'permatrust.net' : 'localhost:3000';
+    const protocol = import.meta.env.NODE_ENV ? 'https' : 'http';
+    if (typeof result.data.random === 'string') {
+      setInviteLink(`${protocol}://${domain}/invites/${result.data.random}`);
+    } else {
+      console.error('Invalid response format:', result.data);
     }
   }
 

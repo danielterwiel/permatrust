@@ -1,15 +1,24 @@
 #!/usr/bin/env bash
-set -eo pipefail
+
+# Source common utilities
+# shellcheck source=lib/common.sh
+source "$(dirname "$0")/lib/common.sh"
+load_env
+
+log_info "Cleaning build artifacts..."
 
 # Stop dfx if running
-if pgrep -x "dfx" >/dev/null; then
-  dfx stop
-fi
+stop_dfx_if_running
 
 # Clean build artifacts
+log_info "Cleaning Rust artifacts..."
 cargo clean
+
+log_info "Cleaning DFX artifacts..."
 rm -rf .dfx
+
+log_info "Cleaning generated files..."
 rm -rf src/declarations
 rm -rf src/pt_frontend/dist
-rm -f src/main_canister/src/main_canister.did
-rm -f src/tenant_canister/src/tenant_canister.did
+
+log_success "Clean completed successfully!"

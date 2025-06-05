@@ -7,11 +7,16 @@ import type {
   AppError,
   _SERVICE as TenantService,
 } from '@/declarations/tenant_canister/tenant_canister.did.d';
+import type { createActor as createUpgradeActor } from '@/declarations/upgrade_canister';
+import type {
+  _SERVICE as UpgradeService,
+} from '@/declarations/upgrade_canister/upgrade_canister.did.d';
 
-export type CreateActorFn = typeof createCompanyActor | typeof createMainActor;
+export type CreateActorFn = typeof createCompanyActor | typeof createMainActor | typeof createUpgradeActor;
 
 export type CompanyCanisterActor = TenantService;
 export type MainCanisterActor = MainService;
+export type UpgradeCanisterActor = UpgradeService;
 
 export type Result<T> = { Err: AppError } | { Ok: T };
 

@@ -4,6 +4,7 @@
       "type": "rust",
       "package": "tenant_canister",
       "candid": "src/tenant_canister/tenant_canister.did",
+      "deploy": "false",
       "declarations": {
         "output": "src/declarations/tenant_canister",
         "bindings": [
@@ -17,11 +18,21 @@
       "type": "rust",
       "package": "main_canister",
       "candid": "src/main_canister/main_canister.did",
-      "dependencies": [
-        "tenant_canister"
-      ],
       "declarations": {
         "output": "src/declarations/main_canister",
+        "bindings": [
+          "ts",
+          "js",
+          "did"
+        ]
+      }
+    },
+    "upgrade_canister": {
+      "type": "rust",
+      "package": "upgrade_canister",
+      "candid": "src/upgrade_canister/upgrade_canister.did",
+      "declarations": {
+        "output": "src/declarations/upgrade_canister",
         "bindings": [
           "ts",
           "js",
@@ -33,10 +44,6 @@
       "type": "assets",
       "source": [
         "src/pt_frontend/dist"
-      ],
-      "dependencies": [
-        "main_canister",
-        "tenant_canister"
       ]
     },
     "internet_identity": {

@@ -12,7 +12,7 @@ import type {
   User,
 } from '@/declarations/tenant_canister/tenant_canister.did';
 
-import { createMainActorWrapper, createTenantActorWrapper } from '@/api';
+import { createMainActorWrapper, createTenantActorWrapper, createUpgradeActorWrapper } from '@/api';
 import { Auth } from '@/auth';
 import { router } from '@/router';
 
@@ -83,6 +83,7 @@ const authMachine = setup({
         );
         const auth = Auth.getInstance();
         const client = await auth.initializeClient();
+        await createUpgradeActorWrapper(client);
         await createTenantActorWrapper(client, tenantCanisterId.toString());
 
         return {
@@ -122,6 +123,7 @@ const authMachine = setup({
 
         if (isAuthenticated) {
           await createMainActorWrapper(client);
+          await createUpgradeActorWrapper(client);
           const [canisterPrincipal] =
             await queryClient.ensureQueryData(getTenantCanisterIdsOptions());
           const canisterId = Principal.from(canisterPrincipal);

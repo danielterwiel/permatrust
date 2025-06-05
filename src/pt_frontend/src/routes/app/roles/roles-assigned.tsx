@@ -7,6 +7,7 @@ import { createPaginationSchema } from '@/schemas/pagination';
 import { toNumberSchema } from '@/schemas/primitives';
 import { processPaginationInput } from '@/utils/pagination';
 
+import { EmptyState } from '@/components/empty-state';
 import { FilterInput } from '@/components/filter-input';
 import { Link } from '@/components/link';
 import { Table } from '@/components/table';
@@ -113,9 +114,10 @@ function RolesAssigned() {
         </CardHeader>
         <CardContent>
           {users.length === 0 ? (
-            <div className="text-center text-muted-foreground">
-              No roles assigned yet.
-            </div>
+            <EmptyState 
+              icon="user-check-outline"
+              message="No roles assigned yet."
+            />
           ) : (
             <Table<User>
               actions={RowActions}

@@ -2,13 +2,16 @@ type AppError = variant {
   InvalidPageSize : text;
   InvalidStateTransition : text;
   InvalidInput : text;
+  CanisterUpgradeFailed : text;
   EntityNotFound : text;
   InvalidPageNumber : text;
   ValidationError : text;
   Unauthorized;
+  StoreWasmModuleFailed : text;
   UpdateFailed : text;
   IdentityNotFound;
   SpawnCanister : text;
+  GetAllWasmVersionsFailed : text;
   InternalError : text;
 };
 type AssignRolesInput = record { role_ids : vec nat64; user_ids : blob };
@@ -23,6 +26,7 @@ type CreateInitTenantCanisterInput = record {
   "principal" : principal;
   user : CreateUserInput;
   organization : CreateProjectInput;
+  main_canister_id : principal;
   project : CreateProjectInput;
 };
 type CreateInviteResult = variant { Ok : Invite; Err : AppError };
@@ -256,7 +260,6 @@ type UpdateRolePermissionsInput = record {
   permissions : vec Permission;
   role_id : nat64;
 };
-type UpgradeCanisterInput = record { wasm_module : blob };
 type User = record {
   id : nat8;
   first_name : text;
@@ -326,8 +329,8 @@ service : (CreateInitTenantCanisterInput) -> {
   list_revisions : (ListDocumentsInput) -> (ListRevisionsResult) query;
   list_users : (ListUsersInput) -> (ListUsersResult) query;
   list_workflows : (PaginationInput) -> (ListWorkflowsResult) query;
+  self_upgrade : () -> (ExecuteWorkflowResult);
   update_role_permissions : (UpdateRolePermissionsInput) -> (
       ExecuteWorkflowResult,
     );
-  upgrade_canister : (UpgradeCanisterInput) -> (ExecuteWorkflowResult);
 }

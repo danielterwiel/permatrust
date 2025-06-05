@@ -1,6 +1,4 @@
-use shared::consts::memory_ids::{
-    ACCESS_CONTROL_ROLES_MEMORY_ID, ACCESS_CONTROL_USER_ROLES_MEMORY_ID,
-};
+use shared::consts::memory_ids::tenant_canister::{ROLES_MEMORY_ID, USER_ROLES_MEMORY_ID};
 
 use super::*;
 use std::cell::RefCell;
@@ -14,13 +12,13 @@ thread_local! {
 
     static ROLES: RefCell<StableBTreeMap<RoleId, Role, Memory>> = RefCell::new(
         StableBTreeMap::init(
-            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(ACCESS_CONTROL_ROLES_MEMORY_ID)))
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(ROLES_MEMORY_ID)))
         )
     );
 
     static USER_ROLES: RefCell<StableBTreeMap<UserId, RoleIdVec, Memory>> = RefCell::new(
         StableBTreeMap::init(
-            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(ACCESS_CONTROL_USER_ROLES_MEMORY_ID)))
+            MEMORY_MANAGER.with(|m| m.borrow().get(MemoryId::new(USER_ROLES_MEMORY_ID)))
         )
     );
 
