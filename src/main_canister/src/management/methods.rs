@@ -11,6 +11,7 @@ use ic_cdk::management_canister::{
 use ic_cdk_macros::{query, update};
 use shared::types::errors::AppError;
 use shared::types::management::{CreateInitTenantCanisterInput, CreateTenantCanisterInput};
+use shared::{log_error, log_info};
 use std::option::Option::Some;
 
 const TENANT_CANISTER_WASM: &[u8] =
@@ -85,12 +86,12 @@ pub async fn create_tenant_canister(
                     "Failed to update settings for {} to add self as controller: {:?}",
                     canister_id, err
                 );
-                ic_cdk::eprintln!("{}", error_msg);
+                log_error!("{}", error_msg);
                 // Optionally, delete the canister if setup fails critically
                 // delete_canister(CanisterIdRecord { canister_id: new_canister_id }).await.ok();
                 return CreateTenantCanisterResult::Err(AppError::SpawnCanister(error_msg));
             }
-            ic_cdk::println!("Successfully set {} as its own controller.", canister_id);
+            log_info!("Successfully set {} as its own controller.", canister_id);
 
             let init_arg_args = CreateInitTenantCanisterInput {
                 user: input.user,
@@ -112,13 +113,13 @@ pub async fn create_tenant_canister(
 
             match install_code(&install_args).await {
                 Ok(()) => {
-                    ic_cdk::println!(
+                    log_info!(
                         "Successfully created and installed business logic on canister ID: {}",
                         canister_id
                     );
 
                     crate::management::state::insert(caller, canister_id);
-                    ic_cdk::println!(
+                    log_info!(
                         "Mapped caller {} to tenant canister {}",
                         caller,
                         canister_id
@@ -127,7 +128,7 @@ pub async fn create_tenant_canister(
                     CreateTenantCanisterResult::Ok(canister_id)
                 }
                 Err(error) => {
-                    ic_cdk::eprintln!("Error installing code on {} - {:?}", canister_id, error);
+                    log_error!("Error installing code on {} - {:?}", canister_id, error);
                     // TODO: Consider calling delete_canister for cleanup
                     CreateTenantCanisterResult::Err(AppError::SpawnCanister(format!(
                         "Failed to install code on {} - {:?}",
@@ -137,7 +138,7 @@ pub async fn create_tenant_canister(
             }
         }
         Err(error) => {
-            ic_cdk::eprintln!("Error creating canister: {:?}", error);
+            log_error!("Error creating canister: {:?}", error);
             CreateTenantCanisterResult::Err(AppError::SpawnCanister(format!(
                 "Failed to create canister: {:?}",
                 error

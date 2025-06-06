@@ -20,6 +20,7 @@ export type IconName =
   | 'files-outline'
   | 'git-compare-outline'
   | 'infinity-outline'
+  | 'logs'
   | 'permatrust-logo'
   | 'tabler/check'
   | 'tabler/copy'

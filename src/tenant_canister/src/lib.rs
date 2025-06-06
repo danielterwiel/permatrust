@@ -7,6 +7,7 @@ use shared::types::documents::{
     CreateDocumentInput, CreateDocumentResult, ListDocumentsInput, ListDocumentsResult,
 };
 use shared::types::invites::{CreateInviteResult, GetInviteResult, ListInvitesResult};
+use shared::types::logs::{ListLogsInput, ListLogsResult};
 use shared::types::management::{CreateInitTenantCanisterInput, UpgradeCanisterResult};
 use shared::types::organization::{
     CreateOrganizationInput, CreateOrganizationResult, GetOrganizationResult,
@@ -34,13 +35,13 @@ mod env;
 // init
 mod init;
 
-// utils
-mod logger;
+// utils - using shared logging system
 
 // entities
 mod access_control;
 mod documents;
 mod invites;
+mod logs;
 mod management;
 mod organization;
 mod projects;

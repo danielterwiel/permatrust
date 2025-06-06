@@ -1,4 +1,4 @@
-import type { authActor } from '@/machines/auth-machine';
+import type { authActor } from '@/machines/auth';
 
 import type { User } from '@/declarations/tenant_canister/tenant_canister.did';
 import type { QueryClient } from '@tanstack/react-query';

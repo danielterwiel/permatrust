@@ -1,6 +1,5 @@
 use super::state;
 use super::*;
-use crate::logger::{log_info, loggable_document};
 use crate::revisions::create_revision;
 use crate::users::methods::get_user_by_principal;
 use shared::types::documents::{
@@ -9,15 +8,58 @@ use shared::types::documents::{
 use shared::types::revisions::{CreateRevisionInput, CreateRevisionResult};
 use shared::types::users::GetUserResult;
 use shared::utils::pagination::paginate;
+use shared::{log_debug, log_error, log_info, log_warn};
 
 #[ic_cdk_macros::update]
 pub fn create_document(input: CreateDocumentInput) -> CreateDocumentResult {
     let document_id = state::get_next_id();
     let principal = ic_cdk::api::msg_caller();
-    ic_cdk::println!("principal {:?}", principal.to_string());
+
+    log_debug!(
+        "auth_check: Document creation attempt [principal={}, title='{}', project_id={}]",
+        principal,
+        input.title,
+        input.project_id
+    );
+
+    // TODO: Add permission validation here when authorization system is implemented
+    // log_debug!("access_control: Checking document creation permissions [principal={}, project_id={}]",
+    //           principal, input.project_id);
+
+    log_info!(
+        "document_creation: Starting creation [title='{}', project_id={}, principal={}]",
+        input.title,
+        input.project_id,
+        principal
+    );
+
+    log_debug!(
+        "auth_check: Validating user for document creation [principal={}]",
+        principal
+    );
     let user = match get_user_by_principal(principal) {
-        GetUserResult::Ok(u) => u,
-        GetUserResult::Err(error) => return CreateDocumentResult::Err(error),
+        GetUserResult::Ok(u) => {
+            log_info!("auth_check: Authentication successful for document creation [user_id={}, principal={}]", u.id, principal);
+            log_debug!(
+                "document_creation: User validated [user_id={}, principal={}]",
+                u.id,
+                principal
+            );
+            u
+        }
+        GetUserResult::Err(error) => {
+            log_warn!(
+                "auth_check: Authentication failed for document creation [principal={}] - {:?}",
+                principal,
+                error
+            );
+            log_error!(
+                "document_creation: User validation failed [principal={}] - {:?}",
+                principal,
+                error
+            );
+            return CreateDocumentResult::Err(error);
+        }
     };
 
     let document = Document {
@@ -31,18 +73,33 @@ pub fn create_document(input: CreateDocumentInput) -> CreateDocumentResult {
     };
 
     state::insert(document_id, document.clone());
+    log_debug!(
+        "document_creation: Document entity created [id={}, title='{}']",
+        document_id,
+        document.title
+    );
 
     match create_revision(CreateRevisionInput {
         project_id: input.project_id,
         document_id,
         content: input.content,
     }) {
-        CreateRevisionResult::Ok(_revision_id) => {
-            log_info("create_document", loggable_document(&document));
+        CreateRevisionResult::Ok(revision_id) => {
+            log_info!("document_creation: Successfully created document [id={}, title='{}', revision_id={}, user_id={}, principal={}, project_id={}, timestamp={}]", 
+                     document_id, document.title, revision_id, user.id, principal, input.project_id, document.created_at);
             CreateDocumentResult::Ok(document_id)
         }
         CreateRevisionResult::Err(e) => {
+            log_error!(
+                "document_creation: Revision creation failed [document_id={}] - {:?}",
+                document_id,
+                e
+            );
             state::remove(document_id);
+            log_debug!(
+                "document_creation: Rolled back document [id={}]",
+                document_id
+            );
             CreateDocumentResult::Err(e)
         }
     }
@@ -50,8 +107,35 @@ pub fn create_document(input: CreateDocumentInput) -> CreateDocumentResult {
 
 #[ic_cdk_macros::query]
 pub fn list_documents(input: ListDocumentsInput) -> ListDocumentsResult {
+    let principal = ic_cdk::api::msg_caller();
+    log_debug!(
+        "auth_check: Document listing attempt [principal={}, page={}, size={}]",
+        principal,
+        input.pagination.page_number,
+        input.pagination.page_size
+    );
+
+    // TODO: Add permission validation here when authorization system is implemented
+    // log_debug!("access_control: Checking document listing permissions [principal={}]", principal);
+
+    log_debug!(
+        "document_listing: Processing request [principal={}, page={}, size={}]",
+        principal,
+        input.pagination.page_number,
+        input.pagination.page_size
+    );
+
     let documents = state::get_all();
-    ic_cdk::println!("Total documents: {}", documents.len());
+    log_debug!(
+        "document_access: Retrieved documents [principal={}, total_count={}]",
+        principal,
+        documents.len()
+    );
+    log_debug!(
+        "document_listing: Retrieved documents [total_count={}]",
+        documents.len()
+    );
+
     match paginate(
         &documents,
         input.pagination.page_size,
@@ -60,9 +144,31 @@ pub fn list_documents(input: ListDocumentsInput) -> ListDocumentsResult {
         input.pagination.sort,
     ) {
         Ok(result) => {
-            ic_cdk::println!("Filtered documents: {}", result.0.len());
+            log_info!(
+                "document_listing: Listed documents [principal={}, page_items={}, total={}]",
+                principal,
+                result.0.len(),
+                documents.len()
+            );
+            log_debug!(
+                "document_listing: Paginated results [page_items={}, total={}]",
+                result.0.len(),
+                documents.len()
+            );
             ListDocumentsResult::Ok(result)
         }
-        Err(e) => ListDocumentsResult::Err(e),
+        Err(e) => {
+            log_error!(
+                "document_access: Document listing failed [principal={}] - {:?}",
+                principal,
+                e
+            );
+            log_warn!(
+                "document_listing: Pagination failed [principal={}] - {:?}",
+                principal,
+                e
+            );
+            ListDocumentsResult::Err(e)
+        }
     }
 }

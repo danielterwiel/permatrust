@@ -21,7 +21,8 @@
 - **Imports**: Use path aliases (`@/*` for src/, `~/icon-name` for icons)
 - **Import Order**: builtin → external → internal → parent → sibling
 - **Components**: React 19 functional components with TypeScript
-- **State Management**: XState for complex flows (camelCase states), React Query for API data
+- **State Management**: XState for complex flows (camelCase states), React
+  Query for API data
 - **Error Handling**: Use Result/Option patterns from API
 - **Naming**: PascalCase for components/types, camelCase for variables/functions
 - **CSS**: TailwindCSS with class-variance-authority for variants

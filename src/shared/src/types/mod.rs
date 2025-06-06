@@ -3,6 +3,7 @@ pub mod documents;
 pub mod entities;
 pub mod errors;
 pub mod invites;
+pub mod logs;
 pub mod management;
 pub mod organization;
 pub mod pagination;

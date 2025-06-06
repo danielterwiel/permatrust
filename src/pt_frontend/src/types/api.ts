@@ -11,8 +11,11 @@ import type { createActor as createUpgradeActor } from '@/declarations/upgrade_c
 import type {
   _SERVICE as UpgradeService,
 } from '@/declarations/upgrade_canister/upgrade_canister.did.d';
+import type { ActorSubclass } from '@dfinity/agent/lib/cjs';
 
-export type CreateActorFn = typeof createCompanyActor | typeof createMainActor | typeof createUpgradeActor;
+export type CreateActorFn = typeof createCompanyActor
+  | typeof createMainActor
+  | typeof createUpgradeActor;
 
 export type CompanyCanisterActor = TenantService;
 export type MainCanisterActor = MainService;
@@ -25,4 +28,24 @@ export type ResultHandler<T> = {
   onOk?: (value: T) => void;
 };
 
-type ErrorHandler<TAppError> = (error: TAppError) => void;
+export type ErrorHandler<TAppError> = (error: TAppError) => void;
+
+export type ActorWithIndex<T> = ActorSubclass<T> & { [key: string]: unknown };
+
+export type WrappedActorWithIndex<T> = {
+  [K in keyof ActorWithIndex<T>]: ActorWithIndex<T>[K] extends (
+    ...args: infer A
+  ) => Promise<Result<infer U>>
+  ? (...args: [...A, ResultHandler<U>?]) => Promise<U>
+  : ActorWithIndex<T>[K];
+};
+
+export type MainCanisterApi = WrappedActorWithIndex<MainService>;
+export type UpgradeCanisterApi = WrappedActorWithIndex<UpgradeService>;
+export type TenantCanisterApi = WrappedActorWithIndex<TenantService>;
+
+export interface ApiInterface {
+  tenant: TenantCanisterApi;
+  main: MainCanisterApi;
+  upgrade: UpgradeCanisterApi;
+}

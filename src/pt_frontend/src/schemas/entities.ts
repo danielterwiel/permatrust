@@ -2,6 +2,7 @@ import { toBigIntSchema, toNumberSchema } from './primitives';
 
 import type {
   DocumentId,
+  LogId,
   ProjectId,
   RevisionId,
   RoleId,
@@ -22,6 +23,7 @@ export const roleIdSchema = toBigIntSchema.transform((val): RoleId => val);
 export const inviteIdSchema = toBigIntSchema.transform(
   (val): RevisionId => val,
 );
+export const logIdSchema = toBigIntSchema.transform((val): LogId => val);
 export const userIdSchema = toNumberSchema.transform(
   (val): number => val,
 );

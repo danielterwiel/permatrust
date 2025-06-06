@@ -1,3 +1,4 @@
+use ::shared::types::logs::{ListLogsInput, ListLogsResult};
 use ::shared::types::management::{
     FinishWasmUploadResult, GetAllWasmVersionsResult, GetWasmByVersionResult, GetWasmChunkInput,
     GetWasmChunkResult, StoreWasmChunkInput, StoreWasmChunkResult, StoreWasmModuleResult,
@@ -7,6 +8,8 @@ use ::shared::types::management::{
 mod env;
 
 mod init;
+
+mod logs;
 
 mod management;
 

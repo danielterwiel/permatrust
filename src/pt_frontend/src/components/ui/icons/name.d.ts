@@ -21,6 +21,7 @@
 	| "files-outline"
 	| "git-compare-outline"
 	| "infinity-outline"
+	| "logs"
 	| "permatrust-logo"
 	| "settings"
 	| "sprite"

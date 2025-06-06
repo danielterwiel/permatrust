@@ -3,114 +3,99 @@ import { HttpAgent } from '@dfinity/agent';
 import { createMainMutations, createTenantMutations, createUpgradeMutations } from '@/api/mutations';
 import { isAppError } from '@/utils/is-app-error';
 
+import { canisterIdMain, canisterIdUpgrade } from '@/consts/canisters';
+
 import { createActor as createMainActor } from '@/declarations/main_canister/index';
-import type { _SERVICE as MainService } from '@/declarations/main_canister/main_canister.did';
 import { createActor as createTenantActor } from '@/declarations/tenant_canister/index';
-import type {
-  AppError as TenantAppError,
-  _SERVICE as TenantService,
-} from '@/declarations/tenant_canister/tenant_canister.did';
+import type { AppError as TenantAppError } from '@/declarations/tenant_canister/tenant_canister.did';
 import { createActor as createUpgradeActor } from '@/declarations/upgrade_canister/index';
-import type { _SERVICE as UpgradeService } from '@/declarations/upgrade_canister/upgrade_canister.did';
-import type { CreateActorFn, Result, ResultHandler } from '@/types/api';
-import type { ActorSubclass } from '@dfinity/agent';
+import type {
+  ActorWithIndex,
+  ApiInterface,
+  CreateActorFn,
+  MainCanisterApi,
+  Result,
+  ResultHandler,
+  TenantCanisterApi,
+  UpgradeCanisterApi,
+  WrappedActorWithIndex,
+} from '@/types/api';
 import type { AuthClient } from '@dfinity/auth-client';
 
 const HOST = import.meta.env.PROD ? 'https://icp0.io' : 'http://localhost:8080';
+const ROOT_KEY_ERROR = 'Failed to fetch root key';
+const AUTH_ERROR = 'User is not authenticated';
+const TENANT_ID_ERROR = 'Tenant canister ID is required';
+const UNKNOWN_ERROR = 'Unknown error occurred';
 
-const canisterIdMain = process.env.CANISTER_ID_MAIN_CANISTER as string;
-const canisterIdUpgrade = process.env.CANISTER_ID_UPGRADE_CANISTER as string;
+export const api = {} as ApiInterface;
 
-type ActorWithIndex<T> = ActorSubclass<T> & { [key: string]: unknown };
+// Actor creation utilities
+async function createActorWrapper<T, TApiKey extends keyof ApiInterface>(
+  canisterId: string,
+  createActorFn: CreateActorFn,
+  authClient: AuthClient,
+  apiKey: TApiKey,
+  createMutationsFn: () => void,
+): Promise<T> {
+  const actor = await createAuthenticatedActor<T>(
+    canisterId,
+    createActorFn,
+    authClient,
+  );
+  const wrappedActor = wrapActor<T>(
+    wrapWithAuth<T>(actor, authClient),
+  ) as T;
 
-type WrappedActorWithIndex<T> = {
-  [K in keyof ActorWithIndex<T>]: ActorWithIndex<T>[K] extends (
-    ...args: infer A
-  ) => Promise<Result<infer U>>
-  ? (...args: [...A, ResultHandler<U>?]) => Promise<U>
-  : ActorWithIndex<T>[K];
-};
+  (api as unknown as Record<TApiKey, T>)[apiKey] = wrappedActor;
+  createMutationsFn();
 
-type MainCanisterApi = WrappedActorWithIndex<MainService>;
-type UpgradeCanisterApi = WrappedActorWithIndex<UpgradeService>;
-type TenantCanisterApi = WrappedActorWithIndex<TenantService>;
-
-interface ApiInterface {
-  tenant: TenantCanisterApi;
-  main: MainCanisterApi;
-  upgrade: UpgradeCanisterApi;
+  return wrappedActor;
 }
 
-export let api = {} as ApiInterface;
-
-/**
- * Creates an authenticated main canister actor
- */
+// Public API functions
 export async function createMainActorWrapper(
   authClient: AuthClient,
 ): Promise<MainCanisterApi> {
-  const mainActor = await createAuthenticatedActor<MainService>(
+  return createActorWrapper<MainCanisterApi, 'main'>(
     canisterIdMain,
     createMainActor,
     authClient,
+    'main',
+    createMainMutations,
   );
-  const wrappedMainActor = wrapActor<MainService>(
-    wrapWithAuth<MainService>(mainActor, authClient),
-  ) as MainCanisterApi;
-
-  api.main = wrappedMainActor;
-  createMainMutations();
-
-  return wrappedMainActor;
 }
 
-/**
- * Creates an authenticated upgrade canister actor
- */
 export async function createUpgradeActorWrapper(
   authClient: AuthClient,
 ): Promise<UpgradeCanisterApi> {
-  const upgradeActor  = await createAuthenticatedActor<UpgradeService>(
+  return createActorWrapper<UpgradeCanisterApi, 'upgrade'>(
     canisterIdUpgrade,
     createUpgradeActor,
     authClient,
+    'upgrade',
+    createUpgradeMutations,
   );
-  const wrappedUpgradeActor = wrapActor<UpgradeService>(
-    wrapWithAuth<UpgradeService>(upgradeActor , authClient),
-  ) as UpgradeCanisterApi;
-
-  api.upgrade = wrappedUpgradeActor;
-  createUpgradeMutations();
-
-  return wrappedUpgradeActor;
 }
 
-/**
- * Creates an authenticated tenant canister actor with a specific canister ID
- */
 export async function createTenantActorWrapper(
   authClient: AuthClient,
   tenantCanisterId: string,
 ): Promise<TenantCanisterApi> {
   if (!tenantCanisterId) {
-    throw new Error('Tenant canister ID is required');
+    throw new Error(TENANT_ID_ERROR);
   }
 
-  const tenantActor = await createAuthenticatedActor<TenantService>(
+  return createActorWrapper<TenantCanisterApi, 'tenant'>(
     tenantCanisterId,
     createTenantActor,
     authClient,
+    'tenant',
+    createTenantMutations,
   );
-  const wrappedTenantActor = wrapActor<TenantService>(
-    wrapWithAuth<TenantService>(tenantActor, authClient),
-  ) as TenantCanisterApi;
-
-  api.tenant = wrappedTenantActor;
-  createTenantMutations();
-
-  return wrappedTenantActor;
 }
 
+// Helper functions
 async function createAuthenticatedActor<T>(
   canisterId: string,
   createActorFn: CreateActorFn,
@@ -123,9 +108,10 @@ async function createAuthenticatedActor<T>(
 
   if (!import.meta.env.PROD) {
     await agent.fetchRootKey().catch(() => {
-      throw new Error('Failed to fetch root key');
+      throw new Error(ROOT_KEY_ERROR);
     });
   }
+
   return createActorFn(canisterId, { agent }) as unknown as ActorWithIndex<T>;
 }
 
@@ -138,38 +124,35 @@ function handleResult<T>(
     return result.Ok;
   }
 
-  if (handlers.onErr) {
-    handlers.onErr(result.Err);
-  }
+  handlers.onErr?.(result.Err);
 
-  let error: TenantAppError | Error;
-  if (isAppError(result.Err)) {
-    error = result.Err;
-  } else {
-    error = new Error('Unknown error occurred');
-  }
+  const error: TenantAppError | Error = isAppError(result.Err)
+    ? result.Err
+    : new Error(UNKNOWN_ERROR);
 
   throw error;
 }
 
+function isResultHandler(value: unknown): value is ResultHandler<unknown> {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    ('onOk' in value || 'onErr' in value)
+  );
+}
+
 function wrapActor<T>(actor: ActorWithIndex<T>): WrappedActorWithIndex<T> {
-  const wrappedActor: Record<string, () => Promise<unknown>> = {};
+  const wrappedActor: Record<string, (...args: Array<unknown>) => Promise<unknown>> = {};
 
   for (const key in actor) {
     const method = actor[key];
     if (typeof method === 'function') {
       wrappedActor[key] = async (...args: Array<unknown>) => {
-        let handlers: ResultHandler<unknown> | undefined;
         const lastArg = args[args.length - 1];
-        if (
-          typeof lastArg === 'object' &&
-          lastArg !== null &&
-          ('onOk' in lastArg || 'onErr' in lastArg)
-        ) {
-          handlers = args.pop() as ResultHandler<unknown>;
-        }
+        const handlers = isResultHandler(lastArg) ? args.pop() : undefined;
+
         const result = await method.apply(actor, args);
-        return handleResult(result, handlers);
+        return handleResult(result, handlers as ResultHandler<unknown>);
       };
     }
   }
@@ -187,7 +170,7 @@ function wrapWithAuth<T>(
       if (typeof original === 'function') {
         return async (...args: Array<unknown>) => {
           if (!(await authClient.isAuthenticated())) {
-            throw new Error('User is not authenticated');
+            throw new Error(AUTH_ERROR);
           }
           return original.apply(target, args);
         };

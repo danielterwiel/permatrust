@@ -28,6 +28,7 @@ import { Route as appSettingsSettingsIndexImport } from './routes/app/settings/s
 import { Route as appProjectsProjectsIndexImport } from './routes/app/projects/projects-index'
 import { Route as appOrganizationOrganizationIndexImport } from './routes/app/organization/organization-index'
 import { Route as appManagementManagementIndexImport } from './routes/app/management/management-index'
+import { Route as appLogsLogsListImport } from './routes/app/logs/logs-list'
 import { Route as appInvitesInvitesIndexImport } from './routes/app/invites/invites-index'
 import { Route as appDocumentsDocumentsListImport } from './routes/app/documents/documents-list'
 import { Route as appWorkflowsWorkflowCreateImport } from './routes/app/workflows/workflow-create'
@@ -169,6 +170,12 @@ const appManagementManagementIndexRoute =
     path: '/management',
     getParentRoute: () => layoutsOnboardedRoute,
   } as any)
+
+const appLogsLogsListRoute = appLogsLogsListImport.update({
+  id: '/logs',
+  path: '/logs',
+  getParentRoute: () => layoutsOnboardedRoute,
+} as any)
 
 const appInvitesInvitesIndexRoute = appInvitesInvitesIndexImport.update({
   id: '/invites',
@@ -472,6 +479,13 @@ declare module '@tanstack/react-router' {
       path: '/invites'
       fullPath: '/invites'
       preLoaderRoute: typeof appInvitesInvitesIndexImport
+      parentRoute: typeof layoutsOnboardedImport
+    }
+    '/_initialized/_authenticated/_onboarded/logs': {
+      id: '/_initialized/_authenticated/_onboarded/logs'
+      path: '/logs'
+      fullPath: '/logs'
+      preLoaderRoute: typeof appLogsLogsListImport
       parentRoute: typeof layoutsOnboardedImport
     }
     '/_initialized/_authenticated/_onboarded/management': {
@@ -941,6 +955,7 @@ const appWorkflowsWorkflowsIndexRouteWithChildren =
 interface layoutsOnboardedRouteChildren {
   appDocumentsDocumentsListRoute: typeof appDocumentsDocumentsListRoute
   appInvitesInvitesIndexRoute: typeof appInvitesInvitesIndexRouteWithChildren
+  appLogsLogsListRoute: typeof appLogsLogsListRoute
   appManagementManagementIndexRoute: typeof appManagementManagementIndexRoute
   appOrganizationOrganizationIndexRoute: typeof appOrganizationOrganizationIndexRouteWithChildren
   appProjectsProjectsIndexRoute: typeof appProjectsProjectsIndexRouteWithChildren
@@ -952,6 +967,7 @@ interface layoutsOnboardedRouteChildren {
 const layoutsOnboardedRouteChildren: layoutsOnboardedRouteChildren = {
   appDocumentsDocumentsListRoute: appDocumentsDocumentsListRoute,
   appInvitesInvitesIndexRoute: appInvitesInvitesIndexRouteWithChildren,
+  appLogsLogsListRoute: appLogsLogsListRoute,
   appManagementManagementIndexRoute: appManagementManagementIndexRoute,
   appOrganizationOrganizationIndexRoute:
     appOrganizationOrganizationIndexRouteWithChildren,
@@ -1048,6 +1064,7 @@ export interface FileRoutesByFullPath {
   '/unauthorized': typeof publicUnauthorizedRoute
   '/invites/$inviteId': typeof publicInvitesInviteDetailsRoute
   '/documents': typeof appDocumentsDocumentsListRoute
+  '/logs': typeof appLogsLogsListRoute
   '/management': typeof appManagementManagementIndexRoute
   '/organization': typeof appOrganizationOrganizationIndexRouteWithChildren
   '/projects': typeof appProjectsProjectsIndexRouteWithChildren
@@ -1097,6 +1114,7 @@ export interface FileRoutesByTo {
   '/unauthorized': typeof publicUnauthorizedRoute
   '/invites/$inviteId': typeof publicInvitesInviteDetailsRoute
   '/documents': typeof appDocumentsDocumentsListRoute
+  '/logs': typeof appLogsLogsListRoute
   '/management': typeof appManagementManagementIndexRoute
   '/settings': typeof appSettingsSettingsIndexRoute
   '/organization': typeof appOrganizationOrganizationDetailsRoute
@@ -1141,6 +1159,7 @@ export interface FileRoutesById {
   '/_initialized/invites/$inviteId': typeof publicInvitesInviteDetailsRoute
   '/_initialized/_authenticated/_onboarded/documents': typeof appDocumentsDocumentsListRoute
   '/_initialized/_authenticated/_onboarded/invites': typeof appInvitesInvitesIndexRouteWithChildren
+  '/_initialized/_authenticated/_onboarded/logs': typeof appLogsLogsListRoute
   '/_initialized/_authenticated/_onboarded/management': typeof appManagementManagementIndexRoute
   '/_initialized/_authenticated/_onboarded/organization': typeof appOrganizationOrganizationIndexRouteWithChildren
   '/_initialized/_authenticated/_onboarded/projects': typeof appProjectsProjectsIndexRouteWithChildren
@@ -1192,6 +1211,7 @@ export interface FileRouteTypes {
     | '/unauthorized'
     | '/invites/$inviteId'
     | '/documents'
+    | '/logs'
     | '/management'
     | '/organization'
     | '/projects'
@@ -1240,6 +1260,7 @@ export interface FileRouteTypes {
     | '/unauthorized'
     | '/invites/$inviteId'
     | '/documents'
+    | '/logs'
     | '/management'
     | '/settings'
     | '/organization'
@@ -1282,6 +1303,7 @@ export interface FileRouteTypes {
     | '/_initialized/invites/$inviteId'
     | '/_initialized/_authenticated/_onboarded/documents'
     | '/_initialized/_authenticated/_onboarded/invites'
+    | '/_initialized/_authenticated/_onboarded/logs'
     | '/_initialized/_authenticated/_onboarded/management'
     | '/_initialized/_authenticated/_onboarded/organization'
     | '/_initialized/_authenticated/_onboarded/projects'
@@ -1389,6 +1411,7 @@ export const routeTree = rootRoute
       "children": [
         "/_initialized/_authenticated/_onboarded/documents",
         "/_initialized/_authenticated/_onboarded/invites",
+        "/_initialized/_authenticated/_onboarded/logs",
         "/_initialized/_authenticated/_onboarded/management",
         "/_initialized/_authenticated/_onboarded/organization",
         "/_initialized/_authenticated/_onboarded/projects",
@@ -1419,6 +1442,10 @@ export const routeTree = rootRoute
         "/_initialized/_authenticated/_onboarded/invites/",
         "/_initialized/_authenticated/_onboarded/invites/create"
       ]
+    },
+    "/_initialized/_authenticated/_onboarded/logs": {
+      "filePath": "app/logs/logs-list.tsx",
+      "parent": "/_initialized/_authenticated/_onboarded"
     },
     "/_initialized/_authenticated/_onboarded/management": {
       "filePath": "app/management/management-index.tsx",

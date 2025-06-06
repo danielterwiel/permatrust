@@ -45,6 +45,7 @@ function getEntityIcon(entityName: EntityName): IconName {
     User: 'user-outline',
     Invite: 'user-outline',
     Workflow: 'file-orientation-outline',
+    Log: 'logs',
   };
   return iconMap[entityName];
 }
@@ -368,9 +369,11 @@ export const Table = <T extends Entity = Entity>({
                     </TableHead>
                   ),
                 )}
-                <TableHead>
-                  <div className="flex justify-end pr-4">Actions</div>
-                </TableHead>
+                {actions && (
+                  <TableHead>
+                    <div className="flex justify-end pr-4">Actions</div>
+                  </TableHead>
+                )}
               </TableRow>
             ))}
           </TableHeader>

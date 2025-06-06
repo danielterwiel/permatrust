@@ -1,6 +1,6 @@
 import { Outlet, createFileRoute } from '@tanstack/react-router';
 
-import { authActor } from '@/machines/auth-machine';
+import { authActor } from '@/machines/auth';
 
 export const Route = createFileRoute('/_initialized')({
   beforeLoad: ({ context }) => {

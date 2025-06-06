@@ -1,5 +1,7 @@
 import { AuthClient } from '@dfinity/auth-client';
 
+import { canisterIdInternetIdentitiy } from './consts/canisters';
+
 export class Auth {
   private static instance: Auth | undefined = undefined;
   private authClient: AuthClient | undefined = undefined;
@@ -17,7 +19,7 @@ export class Auth {
     }
     return this.authClient;
   }
-  
+
   public async getClient(): Promise<AuthClient> {
     return this.authClient || this.initializeClient();
   }
@@ -31,7 +33,7 @@ export class Auth {
     const authClient = await this.initializeClient();
 
     const identityProvider = import.meta.env.DEV
-      ? `http://${process.env.CANISTER_ID_INTERNET_IDENTITY}.localhost:8080`
+      ? `http://${canisterIdInternetIdentitiy}.localhost:8080`
       : 'https://identity.ic0.app';
 
     return new Promise<boolean>((resolve, reject) => {

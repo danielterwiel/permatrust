@@ -1,6 +1,7 @@
 use super::state::{self, GenericStateMachine};
 use super::*;
-use crate::logger::{log_info, loggable_workflow};
+use shared::log_info;
+use shared::logging::loggable_workflow;
 use shared::types::workflows::{
     CreateWorkflowResult, ExecuteWorkflowInput, ExecuteWorkflowResult, GetWorkflowDefinitionResult,
     GetWorkflowStateResult, ListWorkflowsResult, WorkflowIdInput,
@@ -24,7 +25,10 @@ pub fn create_workflow(workflow: CreateWorkflowInput) -> CreateWorkflowResult {
         current_state: state_machine.current_state().clone(),
     };
 
-    log_info("create_workflow", loggable_workflow(&workflow));
+    log_info!(
+        "workflow_creation: Created {}",
+        loggable_workflow(&workflow)
+    );
     state::insert(id, workflow.clone());
 
     CreateWorkflowResult::Ok(id)

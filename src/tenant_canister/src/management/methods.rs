@@ -9,6 +9,7 @@ use shared::types::management::{
     GetAllWasmVersionsResult, GetWasmByVersionResult, GetWasmChunkInput, GetWasmChunkResult,
     UpgradeCanisterResult,
 };
+use shared::{log_debug, log_error, log_info, log_warn};
 
 use crate::env;
 
@@ -20,7 +21,7 @@ async fn download_wasm_chunks(
     upgrade_canister_id: Principal,
     version: u32,
 ) -> Result<Vec<u8>, String> {
-    ic_cdk::println!(
+    log_debug!(
         "Tenant canister: Starting chunked download for version {}",
         version
     );
@@ -44,7 +45,7 @@ async fn download_wasm_chunks(
         GetWasmChunkResult::Ok(Some(chunk)) => chunk,
         GetWasmChunkResult::Ok(None) => {
             // Fallback to old API if chunked version doesn't exist
-            ic_cdk::println!("Tenant canister: No chunks found, trying legacy get_wasm_by_version");
+            log_debug!("Tenant canister: No chunks found, trying legacy get_wasm_by_version");
             return download_wasm_legacy(upgrade_canister_id, version).await;
         }
         GetWasmChunkResult::Err(e) => {
@@ -53,7 +54,7 @@ async fn download_wasm_chunks(
     };
 
     let total_chunks = first_chunk.total_chunks;
-    ic_cdk::println!(
+    log_debug!(
         "Tenant canister: Total chunks to download: {}",
         total_chunks
     );
@@ -86,7 +87,7 @@ async fn download_wasm_chunks(
         match chunk_result {
             GetWasmChunkResult::Ok(Some(chunk)) => {
                 chunks[chunk_id as usize] = Some(chunk.data);
-                ic_cdk::println!(
+                log_debug!(
                     "Tenant canister: Downloaded chunk {}/{}",
                     chunk_id + 1,
                     total_chunks
@@ -109,7 +110,7 @@ async fn download_wasm_chunks(
         }
     }
 
-    ic_cdk::println!(
+    log_debug!(
         "Tenant canister: Successfully downloaded {} bytes in {} chunks",
         wasm_bytes.len(),
         total_chunks
@@ -121,7 +122,7 @@ async fn download_wasm_legacy(
     upgrade_canister_id: Principal,
     version: u32,
 ) -> Result<Vec<u8>, String> {
-    ic_cdk::println!(
+    log_debug!(
         "Tenant canister: Using legacy download for version {}",
         version
     );
@@ -144,9 +145,16 @@ async fn download_wasm_legacy(
 
 #[update]
 async fn self_upgrade() -> UpgradeCanisterResult {
+    let principal = ic_cdk::api::msg_caller();
     let upgrade_canister_id = get_upgrade_canister_principal();
 
-    ic_cdk::println!(
+    log_warn!("security_alert: Canister upgrade initiated [principal={}, upgrade_canister={}, timestamp={}]",
+             principal, upgrade_canister_id, ic_cdk::api::time());
+
+    // TODO: Add permission validation here when authorization system is implemented
+    // log_debug!("access_control: Checking upgrade permissions [principal={}]", principal);
+
+    log_info!(
         "Tenant canister: Attempting self-upgrade. Fetching Wasm from upgrade canister: {}",
         upgrade_canister_id
     );
@@ -159,13 +167,23 @@ async fn self_upgrade() -> UpgradeCanisterResult {
 
     let versions_result: GetAllWasmVersionsResult = match versions_response_result {
         Ok(result) => match result.candid() {
-            Ok(decoded) => decoded,
+            Ok(decoded) => {
+                log_debug!(
+                    "upgrade_security: Successfully fetched version data [principal={}]",
+                    principal
+                );
+                decoded
+            }
             Err(e) => {
                 let err_msg = format!(
                     "Tenant canister: Failed to decode versions response: {:?}",
                     e
                 );
-                ic_cdk::eprintln!("{}", &err_msg);
+                log_error!(
+                    "upgrade_security: Version decoding failed [principal={}] - {}",
+                    principal,
+                    &err_msg
+                );
                 return UpgradeCanisterResult::Err(AppError::CanisterUpgradeFailed(err_msg));
             }
         },
@@ -174,57 +192,101 @@ async fn self_upgrade() -> UpgradeCanisterResult {
                 "Tenant canister: Failed to call upgrade canister for versions: {:?}",
                 e
             );
-            ic_cdk::eprintln!("{}", &err_msg);
+            log_error!(
+                "upgrade_security: Version fetch failed [principal={}] - {}",
+                principal,
+                &err_msg
+            );
             return UpgradeCanisterResult::Err(AppError::CanisterUpgradeFailed(err_msg));
         }
     };
 
     let versions = match versions_result {
-        GetAllWasmVersionsResult::Ok(versions) => versions,
+        GetAllWasmVersionsResult::Ok(versions) => {
+            log_info!(
+                "upgrade_security: Retrieved available versions [principal={}, version_count={}]",
+                principal,
+                versions.len()
+            );
+            versions
+        }
         GetAllWasmVersionsResult::Err(e) => {
             let err_msg = format!(
                 "Tenant canister: Error getting versions from upgrade canister: {:?}",
                 e
             );
-            ic_cdk::eprintln!("{}", &err_msg);
+            log_error!(
+                "upgrade_security: Version retrieval error [principal={}] - {}",
+                principal,
+                &err_msg
+            );
             return UpgradeCanisterResult::Err(AppError::CanisterUpgradeFailed(err_msg));
         }
     };
 
     // Get the latest version (highest number)
     let latest_version = match versions.iter().max() {
-        Some(version) => *version,
+        Some(version) => {
+            log_info!(
+                "upgrade_security: Selected latest version [principal={}, version={}]",
+                principal,
+                version
+            );
+            *version
+        }
         None => {
             let err_msg = "Tenant canister: No WASM versions available for upgrade".to_string();
-            ic_cdk::eprintln!("{}", &err_msg);
+            log_error!(
+                "upgrade_security: No versions available [principal={}] - {}",
+                principal,
+                &err_msg
+            );
             return UpgradeCanisterResult::Err(AppError::CanisterUpgradeFailed(err_msg));
         }
     };
 
-    ic_cdk::println!(
-        "Tenant canister: Latest WASM version available: {}",
-        latest_version
+    log_warn!(
+        "upgrade_security: Proceeding with version [principal={}, version={}, upgrade_canister={}]",
+        principal,
+        latest_version,
+        upgrade_canister_id
     );
 
     // 2. Fetch the WASM bytes for the latest version, try legacy first then chunked
+    log_debug!(
+        "upgrade_security: Initiating WASM download [principal={}, version={}]",
+        principal,
+        latest_version
+    );
+
     let wasm_module = match download_wasm_legacy(upgrade_canister_id, latest_version).await {
         Ok(wasm_bytes) => {
-            ic_cdk::println!("Tenant canister: Successfully downloaded WASM using legacy method");
+            log_info!("upgrade_security: WASM downloaded successfully via legacy method [principal={}, size={}]",
+                     principal, wasm_bytes.len());
             wasm_bytes
         }
         Err(legacy_error) => {
-            ic_cdk::println!(
-                "Tenant canister: Legacy download failed: {}, trying chunked download",
+            log_warn!(
+                "upgrade_security: Legacy download failed, trying chunked [principal={}] - {}",
+                principal,
                 legacy_error
             );
             match download_wasm_chunks(upgrade_canister_id, latest_version).await {
-                Ok(wasm_bytes) => wasm_bytes,
+                Ok(wasm_bytes) => {
+                    log_info!("upgrade_security: WASM downloaded successfully via chunked method [principal={}, size={}]",
+                             principal, wasm_bytes.len());
+                    wasm_bytes
+                }
                 Err(chunk_error) => {
                     let err_msg = format!(
                         "Tenant canister: Both download methods failed. Legacy: {}, Chunked: {}",
                         legacy_error, chunk_error
                     );
-                    ic_cdk::eprintln!("{}", &err_msg);
+                    log_error!(
+                        "upgrade_security: All download methods failed [principal={}] - {}",
+                        principal,
+                        &err_msg
+                    );
                     return UpgradeCanisterResult::Err(AppError::CanisterUpgradeFailed(err_msg));
                 }
             }
@@ -232,7 +294,7 @@ async fn self_upgrade() -> UpgradeCanisterResult {
     };
 
     // Validate the WASM module (basic check)
-    ic_cdk::println!(
+    log_debug!(
         "Tenant canister: WASM module length: {}, first 8 bytes: {:?}",
         wasm_module.len(),
         if wasm_module.len() >= 8 {
@@ -249,13 +311,12 @@ async fn self_upgrade() -> UpgradeCanisterResult {
             wasm_module.len(),
             if wasm_module.len() >= 4 { &wasm_module[0..4] } else { &wasm_module[..] }
         );
-        ic_cdk::eprintln!("{}", &err_msg);
+        log_error!("upgrade_security: WASM validation failed - invalid format [principal={}, size={}] - {}",
+                  principal, wasm_module.len(), &err_msg);
         return UpgradeCanisterResult::Err(AppError::CanisterUpgradeFailed(err_msg));
     }
-    ic_cdk::println!(
-        "Tenant canister: Successfully fetched and validated WASM ({} bytes).",
-        wasm_module.len()
-    );
+    log_warn!("upgrade_security: WASM validation successful, proceeding with upgrade [principal={}, size={}, version={}]",
+             principal, wasm_module.len(), latest_version);
 
     // Get current canister ID for upgrade
     let current_canister_id = canister_self();
@@ -267,27 +328,34 @@ async fn self_upgrade() -> UpgradeCanisterResult {
         arg: vec![], // Passed to #[post_upgrade]
     };
 
-    ic_cdk::println!(
+    log_info!(
         "Tenant canister: Preparing to install code in Upgrade mode on self ({}).",
         current_canister_id
     );
 
     // Use spawn to execute the upgrade asynchronously without waiting for callback
-    ic_cdk::println!("Tenant canister: Initiating self-upgrade...");
+    log_warn!("upgrade_security: CRITICAL - Initiating canister upgrade [principal={}, canister_id={}, version={}]",
+             principal, current_canister_id, latest_version);
 
     // Spawn the install_code call to execute it in background
     spawn(async move {
         match install_code(&install_code_args).await {
             Ok(()) => {
-                ic_cdk::println!("Tenant canister: Self-upgrade completed successfully");
+                log_warn!("upgrade_security: Canister upgrade completed successfully [principal={}, version={}]",
+                         principal, latest_version);
             }
             Err(e) => {
-                ic_cdk::println!("Tenant canister: Self-upgrade failed: {:?}", e);
+                log_error!(
+                    "upgrade_security: Canister upgrade failed [principal={}, version={}] - {:?}",
+                    principal,
+                    latest_version,
+                    e
+                );
             }
         }
     });
 
     // Return immediately - the upgrade will happen in the background
-    ic_cdk::println!("Tenant canister: Self-upgrade call initiated successfully");
+    log_warn!("upgrade_security: Canister upgrade initiated successfully [principal={}, returning_immediately=true]", principal);
     UpgradeCanisterResult::Ok(())
 }

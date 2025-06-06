@@ -1,8 +1,8 @@
 use super::state;
 use super::*;
 use crate::documents;
-use crate::logger::{log_info, loggable_revision};
 use crate::users::methods::get_user_by_principal;
+use shared::log_info;
 use shared::types::revisions::{
     CreateRevisionInput, CreateRevisionResult, DiffRevisionsInput, DiffRevisionsResult,
     ListRevisionsInput, ListRevisionsResult,
@@ -34,7 +34,12 @@ pub fn create_revision(input: CreateRevisionInput) -> CreateRevisionResult {
 
             state::insert(new_revision_id, new_revision.clone());
             documents::update_revision(input.document_id, version, new_revision_id);
-            log_info("create_revision", loggable_revision(&new_revision));
+            log_info!(
+                "create_revision: Created revision with ID {} for document {} (version {})",
+                new_revision.id,
+                new_revision.document_id,
+                new_revision.version
+            );
 
             CreateRevisionResult::Ok(new_revision_id)
         }

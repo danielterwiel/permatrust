@@ -9,6 +9,9 @@
 pub mod main_canister {
     /// IDENTITY_TENANT_MAP static (MemoryId = 0)
     pub const IDENTITY_TENANT_MAP_MEMORY_ID: u8 = 0;
+
+    /// LOGS static (MemoryId = 1)
+    pub const LOGS_STORAGE_MEMORY_ID: u8 = 1;
 }
 
 /// Tenant Canister Memory IDs
@@ -40,6 +43,9 @@ pub mod tenant_canister {
 
     /// INVITES static (MemoryId = 8)
     pub const INVITES_MEMORY_ID: u8 = 8;
+
+    /// LOGS static (MemoryId = 9)
+    pub const LOGS_STORAGE_MEMORY_ID: u8 = 9;
 }
 
 /// Upgrade Canister Memory IDs
@@ -53,6 +59,9 @@ pub mod upgrade_canister {
 
     /// METADATA_STORAGE static (MemoryId = 2)
     pub const METADATA_STORAGE_MEMORY_ID: u8 = 2;
+
+    /// LOGS static (MemoryId = 3)
+    pub const LOGS_STORAGE_MEMORY_ID: u8 = 3;
 }
 
 // Legacy constants for backward compatibility - DEPRECATED

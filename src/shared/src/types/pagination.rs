@@ -70,6 +70,15 @@ pub enum InviteFilterField {
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug)]
+pub enum LogFilterField {
+    Id,
+    Timestamp,
+    Level,
+    Origin,
+    Message,
+}
+
+#[derive(CandidType, Deserialize, Clone, Debug)]
 pub enum FilterField {
     User(UserFilterField),
     Document(DocumentFilterField),
@@ -79,6 +88,7 @@ pub enum FilterField {
     Invite(InviteFilterField),
     Workflow(WorkflowFilterField),
     Role(RoleFilterField),
+    Log(LogFilterField),
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug)]

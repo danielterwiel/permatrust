@@ -3,6 +3,7 @@ use shared::consts::memory_ids::upgrade_canister::{
     CHUNK_STORAGE_MEMORY_ID, METADATA_STORAGE_MEMORY_ID, WASM_STORAGE_MEMORY_ID,
 };
 use shared::types::management::{WasmChunk, WasmMetadata};
+use shared::{log_debug, log_error, log_info};
 use std::cell::RefCell;
 
 use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
@@ -46,7 +47,7 @@ pub fn store_wasm_module(version: u32, wasm_bytes: Vec<u8>) -> Result<(), String
         storage.borrow_mut().insert(version, wasm_bytes);
     });
 
-    println!("Stored wasm module version: {}", version);
+    log_info!("Stored wasm module version: {}", version);
     Ok(())
 }
 
@@ -75,7 +76,7 @@ pub fn store_wasm_chunk(version: u32, chunk: WasmChunk) -> Result<(), String> {
     }
 
     // Debug: log what we received
-    ic_cdk::println!(
+    log_debug!(
         "Received chunk {} for version {}, length: {}, first 8 bytes: {:?}",
         chunk.chunk_id,
         version,
@@ -106,7 +107,7 @@ pub fn store_wasm_chunk(version: u32, chunk: WasmChunk) -> Result<(), String> {
         storage.borrow_mut().insert(version, metadata);
     });
 
-    ic_cdk::println!(
+    log_info!(
         "Stored chunk {} of {} for version {}",
         chunk.chunk_id,
         chunk.total_chunks,
@@ -195,7 +196,7 @@ pub fn finish_wasm_upload(version: u32) -> Result<(), String> {
     }
 
     // Validate WASM format before storing
-    ic_cdk::println!(
+    log_debug!(
         "Assembled WASM for version {}, total size: {} bytes, first 8 bytes: {:?}",
         version,
         wasm_bytes.len(),
@@ -215,7 +216,7 @@ pub fn finish_wasm_upload(version: u32) -> Result<(), String> {
                 &wasm_bytes[..]
             }
         );
-        ic_cdk::eprintln!("{}", &error_msg);
+        log_error!("{}", &error_msg);
         return Err(error_msg);
     }
 
@@ -244,7 +245,7 @@ pub fn finish_wasm_upload(version: u32) -> Result<(), String> {
         });
     }
 
-    ic_cdk::println!(
+    log_info!(
         "Completed WASM upload for version {}, total size: {} bytes",
         version,
         wasm_bytes.len()

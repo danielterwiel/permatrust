@@ -11,6 +11,7 @@ import type {
   FilterField as ApiFilterField,
   FilterOperator as ApiFilterOperator,
   InviteFilterField as ApiInviteFilterField,
+  LogFilterField as ApiLogFilterField,
   OrganizationFilterField as ApiOrganizationFilterField,
   PaginationInput as ApiPaginationInput,
   ProjectFilterField as ApiProjectFilterField,
@@ -81,6 +82,14 @@ const workflowFieldSchema = z.union([
   z.object({ ProjectId: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiWorkflowFilterField>;
 
+const logFieldSchema = z.union([
+  z.object({ Id: z.null() }).strict(),
+  z.object({ Level: z.null() }).strict(),
+  z.object({ Timestamp: z.null() }).strict(),
+  z.object({ Message: z.null() }).strict(),
+  z.object({ Origin: z.null() }).strict(),
+]) satisfies z.ZodType<ApiLogFilterField>;
+
 const entitySchema = z.union([
   z.object({ Document: z.null() }).strict(),
   z.object({ Organization: z.null() }).strict(),
@@ -89,6 +98,7 @@ const entitySchema = z.union([
   z.object({ Invite: z.null() }).strict(),
   z.object({ User: z.null() }).strict(),
   z.object({ Workflow: z.null() }).strict(),
+  z.object({ Log: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiEntity>;
 
 export const filterFieldSchema = z.union([
@@ -100,6 +110,7 @@ export const filterFieldSchema = z.union([
   z.object({ Role: roleFieldSchema }).strict(),
   z.object({ User: userFieldSchema }).strict(),
   z.object({ Workflow: workflowFieldSchema }).strict(),
+  z.object({ Log: logFieldSchema }).strict(),
 ]) satisfies z.ZodType<ApiFilterField>;
 
 export const filterOperatorSchema = z.union([

@@ -14,6 +14,7 @@ type AppError = variant {
   GetAllWasmVersionsFailed : text;
   InternalError : text;
 };
+type CanisterOrigin = variant { Tenant; Upgrade; Main };
 type CreateProjectInput = record { name : text };
 type CreateTenantCanisterInput = record {
   user : CreateUserInput;
@@ -22,6 +23,35 @@ type CreateTenantCanisterInput = record {
 };
 type CreateTenantCanisterResult = variant { Ok : principal; Err : AppError };
 type CreateUserInput = record { first_name : text; last_name : text };
+type DocumentFilterField = variant { Id; ProjectId; Version; Title; CreatedAt };
+type Entity = variant {
+  Log;
+  User;
+  Document;
+  Organization;
+  Revision;
+  Project;
+  Invite;
+  Workflow;
+};
+type FilterCriteria = record {
+  field : FilterField;
+  entity : Entity;
+  value : text;
+  operator : FilterOperator;
+};
+type FilterField = variant {
+  Log : LogFilterField;
+  Role : RoleFilterField;
+  User : UserFilterField;
+  Document : DocumentFilterField;
+  Organization : OrganizationFilterField;
+  Revision : RevisionFilterField;
+  Project : ProjectFilterField;
+  Invite : InviteFilterField;
+  Workflow : WorkflowFilterField;
+};
+type FilterOperator = variant { Contains; GreaterThan; LessThan; Equals };
 type GetAllTenantCanistersResult = variant {
   Ok : vec principal;
   Err : AppError;
@@ -30,10 +60,64 @@ type GetTenantCanisterIdsResult = variant {
   Ok : vec principal;
   Err : AppError;
 };
-service : {
+type InviteFilterField = variant {
+  Id;
+  AcceptedAt;
+  AcceptedBy;
+  CreatedAt;
+  CreatedBy;
+};
+type ListLogsInput = record {
+  pagination : PaginationInput;
+  level_filter : opt LogLevel;
+  origin_filter : opt CanisterOrigin;
+};
+type Log = record {
+  id : nat64;
+  origin : CanisterOrigin;
+  level : LogLevel;
+  message : text;
+  timestamp : nat64;
+};
+type LogFilterField = variant { Id; Level; Timestamp; Message; Origin };
+type LogLevel = variant { Error; Info; Warn; Debug };
+type OrganizationFilterField = variant { Name; CreatedAt };
+type PaginationInput = record {
+  filters : opt vec FilterCriteria;
+  page_size : nat8;
+  sort : opt SortCriteria;
+  page_number : nat8;
+};
+type PaginationMetadata = record {
+  page_size : nat8;
+  total_pages : nat8;
+  total_items : nat8;
+  has_previous_page : bool;
+  has_next_page : bool;
+  page_number : nat8;
+};
+type ProjectFilterField = variant { Id; Name; Members; CreatedAt; CreatedBy };
+type Result = variant {
+  Ok : record { vec Log; PaginationMetadata };
+  Err : AppError;
+};
+type RevisionFilterField = variant {
+  Id;
+  ProjectId;
+  Version;
+  DocumentId;
+  CreatedAt;
+};
+type RoleFilterField = variant { Id; Name; ProjectId; CreatedAt };
+type SortCriteria = record { field : FilterField; order : SortOrder };
+type SortOrder = variant { Asc; Desc };
+type UserFilterField = variant { Id; ProjectId; FirstName; LastName };
+type WorkflowFilterField = variant { Id; Name; ProjectId };
+service : () -> {
   create_tenant_canister : (CreateTenantCanisterInput) -> (
       CreateTenantCanisterResult,
     );
   get_all_tenant_canister_ids : () -> (GetAllTenantCanistersResult) query;
   get_tenant_canister_ids : () -> (GetTenantCanisterIdsResult) query;
+  list_logs : (ListLogsInput) -> (Result) query;
 }

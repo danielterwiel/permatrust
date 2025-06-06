@@ -3,6 +3,7 @@ import type { entity } from '@/consts/entities';
 import type {
   Document,
   Invite,
+  Log,
   Organization,
   Project,
   Revision,
@@ -15,6 +16,7 @@ export type DocumentId = Document['id'];
 export type Entity = EntityTypeMap[EntityName];
 export type ProjectId = Project['id'];
 export type InviteId = Invite['id'];
+export type LogId = Log['id'];
 export type RevisionId = Revision['id'];
 export type RoleId = Role['id'];
 export type UserId = User['id'];
@@ -32,4 +34,6 @@ interface EntityTypeMap {
   Invite: Invite;
   User: User;
   Workflow: Workflow;
+  Log: Log;
 }
+

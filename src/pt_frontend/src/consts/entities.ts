@@ -9,6 +9,7 @@ export const ENTITY = {
   USER: 'User',
   INVITE: 'Invite',
   WORKFLOW: 'Workflow',
+  LOG: 'Log',
 } as const;
 
 const entityNames = Object.values(ENTITY);

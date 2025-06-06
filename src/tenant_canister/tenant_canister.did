@@ -16,6 +16,7 @@ type AppError = variant {
 };
 type AssignRolesInput = record { role_ids : vec nat64; user_ids : blob };
 type AssignRolesResult = variant { Ok; Err : AppError };
+type CanisterOrigin = variant { Tenant; Upgrade; Main };
 type CreateDocumentInput = record {
   title : text;
   content : blob;
@@ -70,6 +71,7 @@ type DocumentPermission = variant {
   Export;
 };
 type Entity = variant {
+  Log;
   User;
   Document;
   Organization;
@@ -87,6 +89,7 @@ type FilterCriteria = record {
   operator : FilterOperator;
 };
 type FilterField = variant {
+  Log : LogFilterField;
   Role : RoleFilterField;
   User : UserFilterField;
   Document : DocumentFilterField;
@@ -132,6 +135,11 @@ type ListInvitesResult = variant {
   Ok : record { vec Invite; PaginationMetadata };
   Err : AppError;
 };
+type ListLogsInput = record {
+  pagination : PaginationInput;
+  level_filter : opt LogLevel;
+  origin_filter : opt CanisterOrigin;
+};
 type ListProjectMembersResult = variant {
   Ok : record { vec User; PaginationMetadata };
   Err : AppError;
@@ -153,6 +161,15 @@ type ListWorkflowsResult = variant {
   Ok : record { vec Workflow; PaginationMetadata };
   Err : AppError;
 };
+type Log = record {
+  id : nat64;
+  origin : CanisterOrigin;
+  level : LogLevel;
+  message : text;
+  timestamp : nat64;
+};
+type LogFilterField = variant { Id; Level; Timestamp; Message; Origin };
+type LogLevel = variant { Error; Info; Warn; Debug };
 type Organization = record {
   members : blob;
   projects : vec nat32;
@@ -213,6 +230,10 @@ type ProjectPermission = variant {
   Create;
   Update;
   ViewMetrics;
+};
+type Result = variant {
+  Ok : record { vec Log; PaginationMetadata };
+  Err : AppError;
 };
 type Revision = record {
   id : nat64;
@@ -322,6 +343,7 @@ service : (CreateInitTenantCanisterInput) -> {
   get_workflow_state : (WorkflowIdInput) -> (GetWorkflowStateResult) query;
   list_documents : (ListDocumentsInput) -> (ListDocumentsResult) query;
   list_invites : (PaginationInput) -> (ListInvitesResult) query;
+  list_logs : (ListLogsInput) -> (Result) query;
   list_project_members : (ListDocumentsInput) -> (
       ListProjectMembersResult,
     ) query;

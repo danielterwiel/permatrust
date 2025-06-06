@@ -81,6 +81,7 @@ export const routes = rootRoute('root.tsx', [
 
         route('/settings', 'app/settings/settings-index.tsx'),
         route('/management', 'app/management/management-index.tsx'),
+        route('/logs', 'app/logs/logs-list.tsx'),
       ]),
     ]),
   ]),

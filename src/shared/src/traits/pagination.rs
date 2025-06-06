@@ -1,11 +1,12 @@
 use std::cmp::Ordering;
 
+use crate::logging::{CanisterOrigin, Log, LogLevel};
 use crate::types::documents::{Document, DocumentId};
 use crate::types::invites::{Invite, InviteId};
 use crate::types::organization::Organization;
 use crate::types::pagination::{
-    DocumentFilterField, InviteFilterField, OrganizationFilterField, ProjectFilterField,
-    RevisionFilterField, UserFilterField, WorkflowFilterField,
+    DocumentFilterField, InviteFilterField, LogFilterField, OrganizationFilterField,
+    ProjectFilterField, RevisionFilterField, UserFilterField, WorkflowFilterField,
 };
 use crate::types::pagination::{
     FilterCriteria, FilterField, FilterOperator, SortCriteria, SortOrder,
@@ -411,6 +412,77 @@ impl Sortable for Workflow {
             FilterField::Workflow(WorkflowFilterField::ProjectId) => {
                 self.project_id.cmp(&other.project_id)
             }
+            _ => Ordering::Equal,
+        };
+        match criteria.order {
+            SortOrder::Asc => ordering,
+            SortOrder::Desc => ordering.reverse(),
+        }
+    }
+}
+
+impl Filterable for Log {
+    fn matches(&self, criteria: &FilterCriteria) -> bool {
+        match &criteria.field {
+            FilterField::Log(LogFilterField::Id) => {
+                let criteria_value = criteria.value.parse::<u64>().unwrap_or(0);
+                match criteria.operator {
+                    FilterOperator::Equals => self.id == criteria_value,
+                    _ => false,
+                }
+            }
+            FilterField::Log(LogFilterField::Timestamp) => {
+                let criteria_value = criteria.value.parse::<u64>().unwrap_or(0);
+                match criteria.operator {
+                    FilterOperator::GreaterThan => self.timestamp > criteria_value,
+                    FilterOperator::LessThan => self.timestamp < criteria_value,
+                    FilterOperator::Equals => self.timestamp == criteria_value,
+                    _ => false,
+                }
+            }
+            FilterField::Log(LogFilterField::Level) => {
+                let criteria_level = match criteria.value.to_lowercase().as_str() {
+                    "error" => Some(LogLevel::Error),
+                    "warn" | "warning" => Some(LogLevel::Warn),
+                    "info" => Some(LogLevel::Info),
+                    "debug" => Some(LogLevel::Debug),
+                    _ => None,
+                };
+                match (criteria.operator.clone(), criteria_level) {
+                    (FilterOperator::Equals, Some(level)) => self.level == level,
+                    _ => false,
+                }
+            }
+            FilterField::Log(LogFilterField::Origin) => {
+                let criteria_origin = match criteria.value.to_lowercase().as_str() {
+                    "main" => Some(CanisterOrigin::Main),
+                    "upgrade" => Some(CanisterOrigin::Upgrade),
+                    "tenant" => Some(CanisterOrigin::Tenant),
+                    _ => None,
+                };
+                match (criteria.operator.clone(), criteria_origin) {
+                    (FilterOperator::Equals, Some(origin)) => self.origin == origin,
+                    _ => false,
+                }
+            }
+            FilterField::Log(LogFilterField::Message) => match criteria.operator {
+                FilterOperator::Equals => self.message == criteria.value,
+                FilterOperator::Contains => self.message.contains(&criteria.value),
+                _ => false,
+            },
+            _ => false,
+        }
+    }
+}
+
+impl Sortable for Log {
+    fn compare(&self, other: &Self, criteria: &SortCriteria) -> Ordering {
+        let ordering = match &criteria.field {
+            FilterField::Log(LogFilterField::Id) => self.id.cmp(&other.id),
+            FilterField::Log(LogFilterField::Timestamp) => self.timestamp.cmp(&other.timestamp),
+            FilterField::Log(LogFilterField::Level) => self.level.cmp(&other.level),
+            FilterField::Log(LogFilterField::Origin) => self.origin.cmp(&other.origin),
+            FilterField::Log(LogFilterField::Message) => self.message.cmp(&other.message),
             _ => Ordering::Equal,
         };
         match criteria.order {

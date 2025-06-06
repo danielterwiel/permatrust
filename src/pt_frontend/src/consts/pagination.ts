@@ -74,6 +74,14 @@ const WORKFLOW_FIELD = {
   PROJECT_ID: 'ProjectId',
 } as const;
 
+const LOG_FIELD = {
+  ID: 'Id',
+  TIMESTAMP: 'Timestamp',
+  LEVEL: 'Level',
+  ORIGIN: 'Origin',
+  MESSAGE: 'Message',
+} as const;
+
 export const FIELDS = {
   CREATED_AT: DOCUMENT_FIELD.CREATED_AT,
   DOCUMENT: {
@@ -124,6 +132,13 @@ export const FIELDS = {
     NAME: WORKFLOW_FIELD.NAME,
     PROJECT_ID: WORKFLOW_FIELD.PROJECT_ID,
   },
+  LOG: {
+    ID: LOG_FIELD.ID,
+    TIMESTAMP: LOG_FIELD.TIMESTAMP,
+    LEVEL: LOG_FIELD.LEVEL,
+    ORIGIN: LOG_FIELD.ORIGIN,
+    MESSAGE: LOG_FIELD.MESSAGE,
+  },
 } as const;
 
 export const FILTER_OPERATOR = {
@@ -147,6 +162,7 @@ const revisionFields = createCandidVariant(Object.values(REVISION_FIELD));
 const userFields = createCandidVariant(Object.values(USER_FIELD));
 const inviteFields = createCandidVariant(Object.values(INVITE_FIELD));
 const workflowFields = createCandidVariant(Object.values(WORKFLOW_FIELD));
+const logFields = createCandidVariant(Object.values(LOG_FIELD));
 
 export const filterOperator = createCandidVariant(
   Object.values(FILTER_OPERATOR),
@@ -165,4 +181,5 @@ export const filterField = {
   User: userFields,
   Invite: inviteFields,
   Workflow: workflowFields,
+  Log: logFields,
 } as const;
