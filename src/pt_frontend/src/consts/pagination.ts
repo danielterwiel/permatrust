@@ -132,7 +132,7 @@ export const FIELDS = {
     NAME: WORKFLOW_FIELD.NAME,
     PROJECT_ID: WORKFLOW_FIELD.PROJECT_ID,
   },
-  LOG: {
+  LOG_ENTRY: {
     ID: LOG_FIELD.ID,
     TIMESTAMP: LOG_FIELD.TIMESTAMP,
     LEVEL: LOG_FIELD.LEVEL,
@@ -181,5 +181,5 @@ export const filterField = {
   User: userFields,
   Invite: inviteFields,
   Workflow: workflowFields,
-  Log: logFields,
+  LogEntry: logFields,
 } as const;

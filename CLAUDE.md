@@ -3,6 +3,7 @@
 ## Build/Test/Lint Commands
 
 - Build: `pnpm run build`
+- Deploy: `pnpm run deploy`
 - Start dev server: `pnpm run start`
 - Generate types: `pnpm run generate`
 - Lint: `pnpm run lint`

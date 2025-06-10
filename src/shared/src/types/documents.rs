@@ -27,7 +27,6 @@ pub struct Document {
 pub struct CreateDocumentInput {
     pub project_id: ProjectId,
     pub title: String,
-    pub content: serde_bytes::ByteBuf,
 }
 
 #[derive(CandidType, Deserialize)]

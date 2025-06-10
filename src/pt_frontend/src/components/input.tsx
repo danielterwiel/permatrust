@@ -33,7 +33,7 @@ const InputComponent = forwardRef(function Input(
     onBlur,
     onFocus,
     ...inputProps
-  }: InputProps, 
+  }: InputProps,
   ref: ForwardedRef<HTMLInputElement>
 ) {
   const [isFocused, setIsFocused] = useState(false);
@@ -42,7 +42,7 @@ const InputComponent = forwardRef(function Input(
   const [isButtonFocused, setIsButtonFocused] = useState(false);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const internalRef = useRef<HTMLInputElement>(null);
-  
+
   // Use the forwarded ref if available, otherwise fall back to internal ref
   const inputRef = (ref || internalRef) as MutableRefObject<HTMLInputElement | null>;
 
@@ -60,17 +60,17 @@ const InputComponent = forwardRef(function Input(
   const handleClearInput = useCallback(() => {
     setInputValue('');
     onChangeImmediate?.('');
-    
+
     // Cancel any pending debounce
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-    
+
     // Immediately call onChange without debounce
     onChange('');
     onClear?.();
 
-    // Focus the input element 
+    // Focus the input element
     if (inputRef.current) {
       inputRef.current.focus();
     }
@@ -79,16 +79,16 @@ const InputComponent = forwardRef(function Input(
   const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setInputValue(newValue);
-    
+
     // Always call onChangeImmediate if provided
     onChangeImmediate?.(newValue);
-    
+
     // If we should debounce, set up the timer
     if (shouldDebounce) {
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
-      
+
       timeoutRef.current = setTimeout(() => {
         onChange(newValue);
       }, debounceDelay);
@@ -129,7 +129,7 @@ const InputComponent = forwardRef(function Input(
     : '';
 
   return (
-    <div 
+    <div
       className="relative"
       onMouseEnter={withClearButton ? () => setIsHovered(true) : undefined}
       onMouseLeave={withClearButton ? () => setIsHovered(false) : undefined}

@@ -173,15 +173,16 @@ function DocumentDetails() {
               },
               {
                 cellPreprocess: (revision) => {
+                  const contentCount = revision.contents.length;
+                  
                   return (
-                    <div className="truncate max-w-md">
-                      {new TextDecoder().decode(
-                        new Uint8Array(
-                          // revision.content !== undefined ?
-                          Object.values(revision.content),
-                          // : [],
-                        ),
-                      )}
+                    <div className="truncate max-w-md space-y-1">
+                      <div className="text-sm text-muted-foreground">
+                        {contentCount} content item{contentCount !== 1 ? 's' : ''}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Click to view details
+                      </div>
                     </div>
                   );
                 },

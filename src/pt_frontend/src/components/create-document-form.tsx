@@ -1,26 +1,11 @@
-
-import {
-  BlockTypeSelect,
-  BoldItalicUnderlineToggles,
-  DiffSourceToggleWrapper,
-  ListsToggle,
-  MDXEditor,
-  UndoRedo,
-  diffSourcePlugin,
-  headingsPlugin,
-  toolbarPlugin,
-} from '@mdxeditor/editor';
 import { useForm } from '@tanstack/react-form';
 import type { FC } from 'react';
 import { z } from 'zod';
 
-import { projectIdSchema } from '@/schemas/entities';
-import { capitalizeFirstLetterValidator } from '@/schemas/form';
 import { createZodFieldValidator } from '@/utils/create-zod-field-validator';
 
+import { ContentForm } from '@/components/content-form';
 import { Input } from '@/components/input';
-import { Loading } from '@/components/loading';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   FormControl,
@@ -31,13 +16,11 @@ import {
 } from '@/components/ui/form';
 import { Icon } from '@/components/ui/icon';
 
-import '@mdxeditor/editor/style.css';
+import type {
+  RevisionContent,
+} from '@/declarations/tenant_canister/tenant_canister.did';
 
 export const createDocumentFormSchema = z.object({
-  content: z.string().min(1, {
-    message: 'Content must be at least 1 character.',
-  }),
-  projects: z.array(z.number()),
   title: z.string().min(2, {
     message: 'Document title must be at least 2 characters.',
   }),
@@ -45,27 +28,42 @@ export const createDocumentFormSchema = z.object({
 
 type CreateDocumentFormProps = {
   isSubmitting: boolean;
-  onSubmit: (values: z.infer<typeof createDocumentFormSchema>) => void;
+  onSubmit: (
+    title: string,
+    smallContents: Array<RevisionContent>,
+    largeContents: Array<RevisionContent>
+  ) => Promise<{ revisionId: bigint } | null>;
+  onSubmitComplete: () => Promise<void>;
   projectId: string;
 };
 
 export const CreateDocumentForm: FC<CreateDocumentFormProps> = ({
   isSubmitting,
   onSubmit,
+  onSubmitComplete,
   projectId,
 }) => {
-  const projectIdNumber = projectIdSchema.parse(projectId);
-
-  const form = useForm({
+  const titleForm = useForm({
     defaultValues: {
-      content: '# Hello world',
-      projects: [projectIdNumber],
       title: '',
     },
-    onSubmit: ({ value }) => {
-      onSubmit(value);
-    },
   });
+
+  const handleContentSubmit = async (
+    smallContents: Array<RevisionContent>,
+    largeContents: Array<RevisionContent>
+  ) => {
+    const title = titleForm.state.values.title;
+    
+    // Validate title
+    const titleValidation = createDocumentFormSchema.safeParse({ title });
+    if (!titleValidation.success) {
+      console.error('Title validation failed:', titleValidation.error);
+      return null;
+    }
+
+    return await onSubmit(title, smallContents, largeContents);
+  };
 
   return (
     <>
@@ -83,95 +81,43 @@ export const CreateDocumentForm: FC<CreateDocumentFormProps> = ({
             Details
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <form
-            className="space-y-8"
-            onSubmit={(e) => {
-              e.preventDefault();
-              form.handleSubmit();
+        <CardContent className="space-y-8">
+          <titleForm.Field
+            name="title"
+            validators={{
+              onSubmit: createZodFieldValidator(
+                createDocumentFormSchema,
+                'title',
+              ),
             }}
           >
-            <form.Field
-              name="title"
-              validators={{
-                onChange: capitalizeFirstLetterValidator,
-                onSubmit: createZodFieldValidator(
-                  createDocumentFormSchema,
-                  'title',
-                ),
-              }}
-            >
-              {(field) => (
-                <FormItem>
-                  <FormLabel field={field}>Title</FormLabel>
-                  <FormControl field={field}>
-                    <Input
-                      onBlur={field.handleBlur}
-                      onChange={(value) => field.handleChange(value)}
-                      placeholder="e.g. Leaflet"
-                      value={field.state.value}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    This is your document title.
-                  </FormDescription>
-                  <FormMessage field={field} />
-                </FormItem>
-              )}
-            </form.Field>
+            {(field) => (
+              <FormItem>
+                <FormLabel field={field}>Title</FormLabel>
+                <FormControl field={field}>
+                  <Input
+                    onBlur={field.handleBlur}
+                    onChange={(value) => field.handleChange(value)}
+                    placeholder="e.g. Project Documentation"
+                    value={field.state.value}
+                  />
+                </FormControl>
+                <FormDescription>
+                  This is your document title.
+                </FormDescription>
+                <FormMessage field={field} />
+              </FormItem>
+            )}
+          </titleForm.Field>
 
-            <form.Field
-              name="content"
-              validators={{
-                onSubmit: createZodFieldValidator(
-                  createDocumentFormSchema,
-                  'content',
-                ),
-              }}
-            >
-              {(field) => (
-                <FormItem>
-                  <FormLabel field={field}>Content</FormLabel>
-                  <FormControl field={field}>
-                    <div className="rounded-lg border border-input">
-                      <MDXEditor
-                        className="rounded-md bg-background p-2 text-sm placeholder:text-muted-foreground focus:border-2 focus:border-accent-foreground focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-accent-foreground disabled:cursor-not-allowed disabled:opacity-50"
-                        contentEditableClassName="prose"
-                        markdown={field.state.value}
-                        onChange={(value) => field.handleChange(value)}
-                        plugins={[
-                          headingsPlugin(),
-                          diffSourcePlugin(),
-                          toolbarPlugin({
-                            toolbarContents: () => (
-                              <DiffSourceToggleWrapper>
-                                <UndoRedo />
-                                <BoldItalicUnderlineToggles />
-                                <BlockTypeSelect />
-                                <ListsToggle />
-                              </DiffSourceToggleWrapper>
-                            ),
-                          }),
-                        ]}
-                      />
-                    </div>
-                  </FormControl>
-                  <FormDescription>This is your document.</FormDescription>
-                  <FormMessage field={field} />
-                </FormItem>
-              )}
-            </form.Field>
-
-            <div className="flex justify-end">
-              {isSubmitting ? (
-                <Button disabled={true}>
-                  <Loading className="place-items-start" text="Creating..." />
-                </Button>
-              ) : (
-                <Button type="submit">Create document</Button>
-              )}
-            </div>
-          </form>
+          <ContentForm
+            isSubmitting={isSubmitting}
+            onSubmit={handleContentSubmit}
+            onSubmitComplete={onSubmitComplete}
+            submitButtonText="Create document"
+            contentDescription="Write your document content here."
+            uploadDescription="Upload additional files to include with this document."
+          />
         </CardContent>
       </Card>
     </>

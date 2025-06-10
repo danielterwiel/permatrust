@@ -10,5 +10,5 @@ pub enum Entity {
     Invite,
     Project,
     Workflow,
-    Log,
+    LogEntry,
 }

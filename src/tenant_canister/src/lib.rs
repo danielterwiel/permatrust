@@ -19,7 +19,11 @@ use shared::types::projects::{
 };
 use shared::types::revisions::{
     CreateRevisionInput, CreateRevisionResult, DiffRevisionsInput, DiffRevisionsResult,
-    ListRevisionsInput, ListRevisionsResult,
+    DownloadRevisionContentInput, DownloadRevisionContentResult, FinishRevisionContentUploadInput,
+    FinishRevisionContentUploadResult, GetRevisionContentChunkInput, GetRevisionContentChunkResult,
+    GetRevisionContentInput, GetRevisionContentResult, ListRevisionContentsInput,
+    ListRevisionContentsResult, ListRevisionsInput, ListRevisionsResult,
+    StoreRevisionContentChunkInput, StoreRevisionContentChunkResult,
 };
 use shared::types::users::{
     CreateUserInput, CreateUserResult, GetUserResult, ListUsersInput, ListUsersResult,
@@ -34,8 +38,6 @@ mod env;
 
 // init
 mod init;
-
-// utils - using shared logging system
 
 // entities
 mod access_control;

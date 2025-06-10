@@ -10,13 +10,14 @@ export const listLogsOptions = (input: ListLogsInput) =>
     queryKey: ['logs', input],
   });
 
-// Additional options for main and upgrade canisters if needed
+// TODO: implement on logs page for admins
 export const listMainLogsOptions = (input: ListLogsInput) =>
   createQueryOptions({
     queryFn: () => api.main.list_logs(input),
     queryKey: ['main_logs', input],
   });
 
+// TODO: implement on logs page for admins
 export const listUpgradeLogsOptions = (input: ListLogsInput) =>
   createQueryOptions({
     queryFn: () => api.upgrade.list_logs(input),

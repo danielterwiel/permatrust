@@ -98,7 +98,7 @@ const entitySchema = z.union([
   z.object({ Invite: z.null() }).strict(),
   z.object({ User: z.null() }).strict(),
   z.object({ Workflow: z.null() }).strict(),
-  z.object({ Log: z.null() }).strict(),
+  z.object({ LogEntry: z.null() }).strict(),
 ]) satisfies z.ZodType<ApiEntity>;
 
 export const filterFieldSchema = z.union([
@@ -110,7 +110,7 @@ export const filterFieldSchema = z.union([
   z.object({ Role: roleFieldSchema }).strict(),
   z.object({ User: userFieldSchema }).strict(),
   z.object({ Workflow: workflowFieldSchema }).strict(),
-  z.object({ Log: logFieldSchema }).strict(),
+  z.object({ LogEntry: logFieldSchema }).strict(),
 ]) satisfies z.ZodType<ApiFilterField>;
 
 export const filterOperatorSchema = z.union([

@@ -17,7 +17,7 @@ type AppError = variant {
 type CanisterOrigin = variant { Tenant; Upgrade; Main };
 type DocumentFilterField = variant { Id; ProjectId; Version; Title; CreatedAt };
 type Entity = variant {
-  Log;
+  LogEntry;
   User;
   Document;
   Organization;
@@ -33,7 +33,7 @@ type FilterCriteria = record {
   operator : FilterOperator;
 };
 type FilterField = variant {
-  Log : LogFilterField;
+  LogEntry : LogFilterField;
   Role : RoleFilterField;
   User : UserFilterField;
   Document : DocumentFilterField;
@@ -61,7 +61,7 @@ type ListLogsInput = record {
   level_filter : opt LogLevel;
   origin_filter : opt CanisterOrigin;
 };
-type Log = record {
+type LogEntry = record {
   id : nat64;
   origin : CanisterOrigin;
   level : LogLevel;
@@ -87,7 +87,7 @@ type PaginationMetadata = record {
 };
 type ProjectFilterField = variant { Id; Name; Members; CreatedAt; CreatedBy };
 type Result = variant {
-  Ok : record { vec Log; PaginationMetadata };
+  Ok : record { vec LogEntry; PaginationMetadata };
   Err : AppError;
 };
 type RevisionFilterField = variant {

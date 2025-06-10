@@ -146,6 +146,16 @@ export function createMutationHook<TVariables, TData>(
           }
         }
 
+        // Show success toast if configured
+        if (successToast !== false) {
+          if (successToast) {
+            toast({
+              ...successToast,
+              variant: successToast.variant || 'default',
+            });
+          }
+        }
+
         // Call custom onSuccess if provided in options
         if (standardOptions.onSuccess) {
           standardOptions.onSuccess(data, variables, context);

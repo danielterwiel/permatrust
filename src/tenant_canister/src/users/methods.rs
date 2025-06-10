@@ -1,6 +1,6 @@
 use super::state;
 use candid::Principal;
-use shared::logging::loggable_user;
+use shared::utils::logs::loggable_user;
 use shared::{log_debug, log_error, log_info, log_warn};
 use shared::{
     types::{

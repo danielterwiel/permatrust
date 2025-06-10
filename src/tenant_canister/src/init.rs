@@ -3,13 +3,12 @@ use crate::organization::methods::create_init_organization;
 use crate::projects::methods::create_init_project;
 use crate::{access_control::init_default_roles, users::methods::create_new_user};
 use ic_cdk_macros::{init, post_upgrade, pre_upgrade};
-use shared::logging::{
-    init_logger, loggable_organization, loggable_user, set_log_storage, CanisterOrigin,
-};
+use shared::types::logs::CanisterOrigin;
 use shared::types::management::CreateInitTenantCanisterInput;
 use shared::types::organization::{CreateInitOrganizationInput, CreateOrganizationResult};
 use shared::types::projects::{CreateInitProjectInput, CreateProjectResult};
 use shared::types::users::{CreateInitUserInput, CreateUserResult};
+use shared::utils::logs::{init_logger, loggable_organization, loggable_user, set_log_storage};
 use shared::{log_error, log_info};
 
 fn create_initial_entities(input: CreateInitTenantCanisterInput) -> Result<(), String> {

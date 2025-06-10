@@ -77,7 +77,7 @@ export const FilterInput = ({
         }}
       >
         {(field) => (
-          <FormItem className="relative">
+          <FormItem className="relative space-y-0">
             <FormLabel className="sr-only" field={field}>
               {placeholder}
             </FormLabel>

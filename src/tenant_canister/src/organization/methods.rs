@@ -1,6 +1,5 @@
 use super::state;
 use crate::users::methods::get_user_by_principal;
-use shared::logging::loggable_organization;
 use shared::types::organization::CreateInitOrganizationInput;
 use shared::types::users::GetUserResult;
 use shared::types::{
@@ -9,6 +8,7 @@ use shared::types::{
         CreateOrganizationInput, CreateOrganizationResult, GetOrganizationResult, Organization,
     },
 };
+use shared::utils::logs::loggable_organization;
 use shared::{log_debug, log_info, log_warn};
 
 pub fn create_init_organization(input: CreateInitOrganizationInput) -> CreateOrganizationResult {

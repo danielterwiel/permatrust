@@ -6,5 +6,3 @@ use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
 use shared::types::documents::DocumentId;
 use shared::types::errors::AppError;
 use shared::types::revisions::{Revision, RevisionId};
-
-pub use methods::*;

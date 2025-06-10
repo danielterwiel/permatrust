@@ -22,9 +22,7 @@ export const createRevisionMutations = () => {
       ],
     }),
     {
-      successToast: {
-        title: 'Revision created',
-      },
+      successToast: false, // Disable automatic toast - will be shown manually after all uploads complete
     },
   );
 

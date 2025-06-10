@@ -1,11 +1,11 @@
 use super::state::{self, GenericStateMachine};
 use super::*;
 use shared::log_info;
-use shared::logging::loggable_workflow;
 use shared::types::workflows::{
     CreateWorkflowResult, ExecuteWorkflowInput, ExecuteWorkflowResult, GetWorkflowDefinitionResult,
     GetWorkflowStateResult, ListWorkflowsResult, WorkflowIdInput,
 };
+use shared::utils::logs::loggable_workflow;
 use shared::utils::pagination::paginate;
 
 #[ic_cdk_macros::update]

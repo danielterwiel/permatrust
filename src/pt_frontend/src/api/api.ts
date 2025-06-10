@@ -30,7 +30,6 @@ const UNKNOWN_ERROR = 'Unknown error occurred';
 
 export const api = {} as ApiInterface;
 
-// Actor creation utilities
 async function createActorWrapper<T, TApiKey extends keyof ApiInterface>(
   canisterId: string,
   createActorFn: CreateActorFn,
@@ -95,7 +94,6 @@ export async function createTenantActorWrapper(
   );
 }
 
-// Helper functions
 async function createAuthenticatedActor<T>(
   canisterId: string,
   createActorFn: CreateActorFn,

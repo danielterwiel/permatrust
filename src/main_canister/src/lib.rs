@@ -5,8 +5,9 @@ use crate::management::types::{
 };
 use ic_cdk_macros::init;
 use shared::log_info;
-use shared::logging::{init_logger, set_log_storage, CanisterOrigin};
+use shared::types::logs::CanisterOrigin;
 use shared::types::logs::{ListLogsInput, ListLogsResult};
+use shared::utils::logs::{init_logger, set_log_storage};
 
 mod env;
 mod logs;

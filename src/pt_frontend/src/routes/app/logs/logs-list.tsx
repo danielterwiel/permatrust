@@ -16,15 +16,15 @@ import { Icon } from '@/components/ui/icon';
 import { ENTITY } from '@/consts/entities';
 import { FIELDS, FILTER_OPERATOR, SORT_ORDER } from '@/consts/pagination';
 
-import type { Log } from '@/declarations/tenant_canister/tenant_canister.did';
+import type { LogEntry } from '@/declarations/tenant_canister/tenant_canister.did';
 
 const { schema: logsSearchSchema, defaultPagination } = createPaginationSchema(
   ENTITY.LOG,
   {
-    defaultFilterField: FIELDS.LOG.MESSAGE,
+    defaultFilterField: FIELDS.LOG_ENTRY.MESSAGE,
     defaultFilterOperator: FILTER_OPERATOR.CONTAINS,
     defaultFilterValue: '',
-    defaultSortField: FIELDS.LOG.TIMESTAMP,
+    defaultSortField: FIELDS.LOG_ENTRY.TIMESTAMP,
     defaultSortOrder: SORT_ORDER.DESC,
   },
 );
@@ -58,7 +58,7 @@ export const Route = createFileRoute(
   },
 });
 
-function getLogLevelBadgeVariant(level: Log['level']) {
+function getLogLevelBadgeVariant(level: LogEntry['level']) {
   if ('Error' in level) return 'destructive';
   if ('Warn' in level) return 'secondary';
   if ('Info' in level) return 'default';
@@ -66,7 +66,7 @@ function getLogLevelBadgeVariant(level: Log['level']) {
   return 'default';
 }
 
-function getLogLevelText(level: Log['level']) {
+function getLogLevelText(level: LogEntry['level']) {
   if ('Error' in level) return 'Error';
   if ('Warn' in level) return 'Warn';
   if ('Info' in level) return 'Info';
@@ -74,7 +74,7 @@ function getLogLevelText(level: Log['level']) {
   return 'Unknown';
 }
 
-function getOriginText(origin: Log['origin']) {
+function getOriginText(origin: LogEntry['origin']) {
   if ('Main' in origin) return 'Main';
   if ('Tenant' in origin) return 'Tenant';
   if ('Upgrade' in origin) return 'Upgrade';
@@ -118,7 +118,7 @@ function Logs() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <Table<Log>
+          <Table<LogEntry>
             columnConfig={[
               {
                 cellPreprocess: (log) => formatDateTime(log.timestamp),

@@ -6,10 +6,11 @@ use ic_stable_structures::{
     DefaultMemoryImpl, StableBTreeMap,
 };
 use shared::consts::memory_ids::upgrade_canister::LOGS_STORAGE_MEMORY_ID;
-use shared::logging::{Log, LogStorage};
+use shared::traits::logs::LogStorage;
+use shared::types::logs::LogEntry;
 
 type Memory = VirtualMemory<DefaultMemoryImpl>;
-type LogsStore = StableBTreeMap<u64, Log, Memory>;
+type LogsStore = StableBTreeMap<u64, LogEntry, Memory>;
 
 const MAX_IN_MEMORY_LOGS: usize = 1000; // Keep recent logs in memory for fast access
 
@@ -24,13 +25,13 @@ thread_local! {
     );
 
     // In-memory cache for recent logs (faster access)
-    static RECENT_LOGS: RefCell<VecDeque<Log>> = const { RefCell::new(VecDeque::new()) };
+    static RECENT_LOGS: RefCell<VecDeque<LogEntry>> = const { RefCell::new(VecDeque::new()) };
 }
 
 pub struct UpgradeLogStorage;
 
 impl LogStorage for UpgradeLogStorage {
-    fn store_log(&self, entry: Log) {
+    fn store_log(&self, entry: LogEntry) {
         // Store in stable storage
         LOGS_STORAGE.with(|storage| {
             storage.borrow_mut().insert(entry.id, entry.clone());
@@ -49,7 +50,7 @@ impl LogStorage for UpgradeLogStorage {
     }
 }
 
-pub fn get_all_logs() -> Vec<Log> {
+pub fn get_all_logs() -> Vec<LogEntry> {
     LOGS_STORAGE.with(|storage| storage.borrow().iter().map(|(_, entry)| entry).collect())
 }
 

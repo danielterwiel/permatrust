@@ -4,6 +4,7 @@ import type {
   DocumentId,
   LogId,
   ProjectId,
+  RevisionContentId,
   RevisionId,
   RoleId,
   WorkflowId,
@@ -26,6 +27,9 @@ export const inviteIdSchema = toBigIntSchema.transform(
 export const logIdSchema = toBigIntSchema.transform((val): LogId => val);
 export const userIdSchema = toNumberSchema.transform(
   (val): number => val,
+);
+export const revisionContentIdSchema = toBigIntSchema.transform(
+  (val): RevisionContentId => val,
 );
 export const workflowIdSchema = toNumberSchema.transform(
   (val): WorkflowId => val,

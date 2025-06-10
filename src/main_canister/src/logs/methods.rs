@@ -7,7 +7,6 @@ use shared::utils::pagination::paginate;
 pub fn list_logs(input: ListLogsInput) -> ListLogsResult {
     let principal = ic_cdk::api::msg_caller();
 
-    // Get all logs
     let mut logs = state::get_all_logs();
 
     // Apply filters
@@ -22,7 +21,6 @@ pub fn list_logs(input: ListLogsInput) -> ListLogsResult {
     // Sort by timestamp (newest first)
     logs.sort_by(|a, b| b.timestamp.cmp(&a.timestamp));
 
-    // Apply pagination
     match paginate(
         &logs,
         input.pagination.page_size,

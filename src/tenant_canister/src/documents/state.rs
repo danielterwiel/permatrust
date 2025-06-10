@@ -39,12 +39,6 @@ pub fn insert(document_id: DocumentId, document: Document) {
     });
 }
 
-pub fn remove(document_id: DocumentId) {
-    DOCUMENTS.with(|documents| {
-        documents.borrow_mut().remove(&document_id);
-    });
-}
-
 pub fn update_revision(document_id: DocumentId, version: u8, revision_id: RevisionId) {
     DOCUMENTS.with(|documents| {
         let mut documents_ref = documents.borrow_mut();

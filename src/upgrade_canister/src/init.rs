@@ -1,7 +1,8 @@
 use crate::logs::state::init_log_storage;
 use ic_cdk_macros::{init, post_upgrade, pre_upgrade};
 use shared::log_info;
-use shared::logging::{init_logger, set_log_storage, CanisterOrigin};
+use shared::types::logs::CanisterOrigin;
+use shared::utils::logs::{init_logger, set_log_storage};
 
 #[init]
 fn init() {

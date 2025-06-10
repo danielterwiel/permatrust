@@ -88,7 +88,7 @@ pub enum FilterField {
     Invite(InviteFilterField),
     Workflow(WorkflowFilterField),
     Role(RoleFilterField),
-    Log(LogFilterField),
+    LogEntry(LogFilterField),
 }
 
 #[derive(CandidType, Deserialize, Clone, Debug)]

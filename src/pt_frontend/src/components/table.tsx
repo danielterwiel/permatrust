@@ -45,7 +45,7 @@ function getEntityIcon(entityName: EntityName): IconName {
     User: 'user-outline',
     Invite: 'user-outline',
     Workflow: 'file-orientation-outline',
-    Log: 'logs',
+    LogEntry: 'logs',
   };
   return iconMap[entityName];
 }
@@ -396,15 +396,15 @@ export const Table = <T extends Entity = Entity>({
             ))}
           </TableBody>
         </TableBase>
-        {paginationMetaData && (
-          <div className="pt-16">
-            <Pagination
-              paginationMetaData={paginationMetaData}
-              getPageChangeParams={getPageChangeParams}
-            />
-          </div>
-        )}
       </div>
+      {paginationMetaData && (
+        <div className="pt-4">
+          <Pagination
+            paginationMetaData={paginationMetaData}
+            getPageChangeParams={getPageChangeParams}
+          />
+        </div>
+      )}
     </div>
   );
 };

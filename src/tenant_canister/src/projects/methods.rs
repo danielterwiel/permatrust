@@ -9,7 +9,7 @@ use shared::types::users::GetUserResult;
 use shared::utils::pagination::paginate;
 
 use crate::users::methods::get_user_by_principal;
-use shared::logging::loggable_project;
+use shared::utils::logs::loggable_project;
 use shared::{log_debug, log_error, log_info, log_warn};
 
 pub fn create_init_project(input: CreateInitProjectInput) -> CreateProjectResult {

@@ -27,13 +27,13 @@ function OnboardedLayout() {
     <>
       <SidebarProvider>
         <Sidebar authActor={authActor} />
-        <div className="grid grid-cols-1 grid-rows-[auto_1fr] h-screen p-4 w-full">
-          <main className="grid grid-cols-[auto_1fr] gap-4">
+        <div className="grid grid-cols-1 grid-rows-[auto_1fr] min-h-screen p-4 w-full">
+          <header className="grid grid-cols-[auto_1fr] gap-4 pb-4">
             <SidebarTrigger />
             <Breadcrumbs />
-            <div className="col-span-2">
-              <Outlet />
-            </div>
+          </header>
+          <main className="flex flex-col grow min-h-0">
+            <Outlet />
           </main>
         </div>
       </SidebarProvider>

@@ -17,11 +17,7 @@ type AppError = variant {
 type AssignRolesInput = record { role_ids : vec nat64; user_ids : blob };
 type AssignRolesResult = variant { Ok; Err : AppError };
 type CanisterOrigin = variant { Tenant; Upgrade; Main };
-type CreateDocumentInput = record {
-  title : text;
-  content : blob;
-  project_id : nat32;
-};
+type CreateDocumentInput = record { title : text; project_id : nat32 };
 type CreateDocumentResult = variant { Ok : nat64; Err : AppError };
 type CreateInitTenantCanisterInput = record {
   "principal" : principal;
@@ -36,8 +32,8 @@ type CreateOrganizationResult = variant { Ok : Organization; Err : AppError };
 type CreateProjectInput = record { name : text };
 type CreateProjectResult = variant { Ok : nat32; Err : AppError };
 type CreateRevisionInput = record {
-  content : blob;
   document_id : nat64;
+  contents : vec RevisionContent;
   project_id : nat32;
 };
 type CreateUserInput = record { first_name : text; last_name : text };
@@ -70,8 +66,13 @@ type DocumentPermission = variant {
   Update;
   Export;
 };
+type DownloadRevisionContentInput = record {
+  content_id : nat64;
+  chunk_id : opt nat32;
+};
+type DownloadRevisionContentResult = variant { Ok : blob; Err : AppError };
 type Entity = variant {
-  Log;
+  LogEntry;
   User;
   Document;
   Organization;
@@ -89,7 +90,7 @@ type FilterCriteria = record {
   operator : FilterOperator;
 };
 type FilterField = variant {
-  Log : LogFilterField;
+  LogEntry : LogFilterField;
   Role : RoleFilterField;
   User : UserFilterField;
   Document : DocumentFilterField;
@@ -100,11 +101,29 @@ type FilterField = variant {
   Workflow : WorkflowFilterField;
 };
 type FilterOperator = variant { Contains; GreaterThan; LessThan; Equals };
+type FinishRevisionContentUploadInput = record {
+  content_index : nat32;
+  revision_id : nat64;
+};
 type GetInviteResult = variant { Ok : Invite; Err : AppError };
 type GetOrganizationResult = variant { Ok : Organization; Err : AppError };
 type GetPermissionsResult = variant { Ok : vec Permission; Err : AppError };
 type GetProjectRolesInput = record { project_id : nat32 };
 type GetProjectRolesResult = variant { Ok : vec Role; Err : AppError };
+type GetRevisionContentChunkInput = record {
+  content_index : nat32;
+  chunk_id : nat32;
+  revision_id : nat64;
+};
+type GetRevisionContentChunkResult = variant {
+  Ok : opt RevisionContentChunk;
+  Err : AppError;
+};
+type GetRevisionContentInput = record { content_id : nat64 };
+type GetRevisionContentResult = variant {
+  Ok : RevisionContent;
+  Err : AppError;
+};
 type GetUserResult = variant { Ok : User; Err : AppError };
 type GetWorkflowDefinitionResult = variant {
   Ok : WorkflowGraph;
@@ -148,6 +167,11 @@ type ListProjectsResult = variant {
   Ok : record { vec Project; PaginationMetadata };
   Err : AppError;
 };
+type ListRevisionContentsInput = record { revision_id : nat64 };
+type ListRevisionContentsResult = variant {
+  Ok : vec RevisionContent;
+  Err : AppError;
+};
 type ListRevisionsResult = variant {
   Ok : record { vec Revision; PaginationMetadata };
   Err : AppError;
@@ -161,7 +185,7 @@ type ListWorkflowsResult = variant {
   Ok : record { vec Workflow; PaginationMetadata };
   Err : AppError;
 };
-type Log = record {
+type LogEntry = record {
   id : nat64;
   origin : CanisterOrigin;
   level : LogLevel;
@@ -232,18 +256,40 @@ type ProjectPermission = variant {
   ViewMetrics;
 };
 type Result = variant {
-  Ok : record { vec Log; PaginationMetadata };
+  Ok : record { vec LogEntry; PaginationMetadata };
   Err : AppError;
 };
 type Revision = record {
   id : nat64;
-  content : blob;
   document_id : nat64;
+  contents : vec nat64;
   created_at : nat64;
   created_by : nat8;
   version : nat8;
   project_id : nat32;
 };
+type RevisionContent = record {
+  id : nat64;
+  content_data : opt RevisionContentData;
+  content_type : RevisionContentType;
+  file_name : opt text;
+};
+type RevisionContentChunk = record {
+  total_chunks : nat32;
+  data : blob;
+  chunk_id : nat32;
+  checksum : opt text;
+};
+type RevisionContentData = variant {
+  Chunked : record {
+    total_chunks : nat32;
+    content_index : nat32;
+    total_size : nat64;
+    revision_id : nat64;
+  };
+  Direct : record { bytes : blob };
+};
+type RevisionContentType = variant { Markdown; Upload };
 type RevisionFilterField = variant {
   Id;
   ProjectId;
@@ -277,6 +323,13 @@ type RoleInput = record {
 };
 type SortCriteria = record { field : FilterField; order : SortOrder };
 type SortOrder = variant { Asc; Desc };
+type StoreRevisionContentChunkInput = record {
+  chunk : RevisionContentChunk;
+  content_type : RevisionContentType;
+  content_index : nat32;
+  file_name : opt text;
+  revision_id : nat64;
+};
 type UpdateRolePermissionsInput = record {
   permissions : vec Permission;
   role_id : nat64;
@@ -330,12 +383,24 @@ service : (CreateInitTenantCanisterInput) -> {
   create_role : (RoleInput) -> (CreateDocumentResult);
   create_user : (CreateUserInput) -> (CreateUserResult) query;
   create_workflow : (CreateWorkflowInput) -> (CreateProjectResult);
+  download_revision_content : (DownloadRevisionContentInput) -> (
+      DownloadRevisionContentResult,
+    ) query;
   execute_workflow : (ExecuteWorkflowInput) -> (ExecuteWorkflowResult);
+  finish_revision_content_upload : (FinishRevisionContentUploadInput) -> (
+      ExecuteWorkflowResult,
+    );
   get_diff_revisions : (DiffRevisionsInput) -> (DiffRevisionsResult) query;
   get_invite : (text) -> (GetInviteResult) query;
   get_organization : () -> (GetOrganizationResult) query;
   get_permissions : () -> (GetPermissionsResult) query;
   get_project_roles : (GetProjectRolesInput) -> (GetProjectRolesResult) query;
+  get_revision_content : (GetRevisionContentInput) -> (
+      GetRevisionContentResult,
+    ) query;
+  get_revision_content_chunk : (GetRevisionContentChunkInput) -> (
+      GetRevisionContentChunkResult,
+    ) query;
   get_user : () -> (GetUserResult) query;
   get_workflow_definition : (WorkflowIdInput) -> (
       GetWorkflowDefinitionResult,
@@ -348,10 +413,16 @@ service : (CreateInitTenantCanisterInput) -> {
       ListProjectMembersResult,
     ) query;
   list_projects : (PaginationInput) -> (ListProjectsResult) query;
+  list_revision_contents : (ListRevisionContentsInput) -> (
+      ListRevisionContentsResult,
+    ) query;
   list_revisions : (ListDocumentsInput) -> (ListRevisionsResult) query;
   list_users : (ListUsersInput) -> (ListUsersResult) query;
   list_workflows : (PaginationInput) -> (ListWorkflowsResult) query;
   self_upgrade : () -> (ExecuteWorkflowResult);
+  store_revision_content_chunk : (StoreRevisionContentChunkInput) -> (
+      ExecuteWorkflowResult,
+    );
   update_role_permissions : (UpdateRolePermissionsInput) -> (
       ExecuteWorkflowResult,
     );

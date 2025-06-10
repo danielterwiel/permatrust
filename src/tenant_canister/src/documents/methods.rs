@@ -1,11 +1,9 @@
 use super::state;
 use super::*;
-use crate::revisions::create_revision;
 use crate::users::methods::get_user_by_principal;
 use shared::types::documents::{
     CreateDocumentInput, CreateDocumentResult, ListDocumentsInput, ListDocumentsResult,
 };
-use shared::types::revisions::{CreateRevisionInput, CreateRevisionResult};
 use shared::types::users::GetUserResult;
 use shared::utils::pagination::paginate;
 use shared::{log_debug, log_error, log_info, log_warn};
@@ -37,6 +35,7 @@ pub fn create_document(input: CreateDocumentInput) -> CreateDocumentResult {
         "auth_check: Validating user for document creation [principal={}]",
         principal
     );
+
     let user = match get_user_by_principal(principal) {
         GetUserResult::Ok(u) => {
             log_info!("auth_check: Authentication successful for document creation [user_id={}, principal={}]", u.id, principal);
@@ -79,30 +78,11 @@ pub fn create_document(input: CreateDocumentInput) -> CreateDocumentResult {
         document.title
     );
 
-    match create_revision(CreateRevisionInput {
-        project_id: input.project_id,
-        document_id,
-        content: input.content,
-    }) {
-        CreateRevisionResult::Ok(revision_id) => {
-            log_info!("document_creation: Successfully created document [id={}, title='{}', revision_id={}, user_id={}, principal={}, project_id={}, timestamp={}]", 
-                     document_id, document.title, revision_id, user.id, principal, input.project_id, document.created_at);
-            CreateDocumentResult::Ok(document_id)
-        }
-        CreateRevisionResult::Err(e) => {
-            log_error!(
-                "document_creation: Revision creation failed [document_id={}] - {:?}",
-                document_id,
-                e
-            );
-            state::remove(document_id);
-            log_debug!(
-                "document_creation: Rolled back document [id={}]",
-                document_id
-            );
-            CreateDocumentResult::Err(e)
-        }
-    }
+    log_info!(
+        "document_creation: Successfully created document [id={}, title='{}', user_id={}, principal={}, project_id={}, timestamp={}]",
+        document_id, document.title, user.id, principal, input.project_id, document.created_at
+    );
+    CreateDocumentResult::Ok(document_id)
 }
 
 #[ic_cdk_macros::query]

@@ -1,10 +1,8 @@
 use std::cell::RefCell;
 use std::env;
 
-use candid::CandidType;
-use ic_stable_structures::Storable;
-use serde::Deserialize;
-use std::borrow::Cow;
+use crate::traits::logs::LogStorage;
+use crate::types::logs::{CanisterOrigin, LogEntry, LogLevel};
 
 // Import entity types for loggable wrappers
 use crate::types::documents::Document;
@@ -15,11 +13,6 @@ use crate::types::revisions::Revision;
 use crate::types::users::User;
 use crate::types::workflows::Workflow;
 
-// Trait for log storage - implemented by each canister
-pub trait LogStorage {
-    fn store_log(&self, entry: Log);
-}
-
 // Global log storage instance - set by each canister
 thread_local! {
     static LOG_LEVEL: RefCell<LogLevel> = const { RefCell::new(LogLevel::Info) };
@@ -28,67 +21,7 @@ thread_local! {
     static LOG_COUNTER: RefCell<u64> = const { RefCell::new(0) };
 }
 
-#[derive(Clone, Copy, Debug, CandidType, Deserialize, PartialEq, Ord, PartialOrd, Eq)]
-pub enum LogLevel {
-    Error,
-    Warn,
-    Info,
-    Debug,
-}
-
-#[derive(Clone, Debug, CandidType, Deserialize)]
-pub struct Log {
-    pub id: u64,
-    pub timestamp: u64,
-    pub level: LogLevel,
-    pub origin: CanisterOrigin,
-    pub message: String,
-}
-
-impl Storable for Log {
-    fn to_bytes(&self) -> Cow<[u8]> {
-        let encoded = candid::encode_one(self).expect("Failed to encode Log");
-        Cow::Owned(encoded)
-    }
-
-    fn from_bytes(bytes: Cow<[u8]>) -> Self {
-        candid::decode_one(&bytes).expect("Failed to decode Log")
-    }
-
-    const BOUND: ic_stable_structures::storable::Bound =
-        ic_stable_structures::storable::Bound::Unbounded;
-}
-
-pub type LogId = u64;
-
-#[derive(Clone, Debug, CandidType, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
-pub enum CanisterOrigin {
-    Main,
-    Upgrade,
-    Tenant,
-}
-
-impl std::fmt::Display for CanisterOrigin {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            CanisterOrigin::Main => write!(f, "MAIN"),
-            CanisterOrigin::Upgrade => write!(f, "UPGRADE"),
-            CanisterOrigin::Tenant => write!(f, "TENANT"),
-        }
-    }
-}
-
-impl std::fmt::Display for LogLevel {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            LogLevel::Error => write!(f, "ERROR"),
-            LogLevel::Warn => write!(f, "WARN"),
-            LogLevel::Info => write!(f, "INFO"),
-            LogLevel::Debug => write!(f, "DEBUG"),
-        }
-    }
-}
-
+// Core logging functions
 fn should_log(level: LogLevel) -> bool {
     LOG_LEVEL.with(|current_level| level <= *current_level.borrow())
 }
@@ -110,7 +43,7 @@ fn log_message(level: LogLevel, message: &str) {
                 *c
             });
 
-            let log_entry = Log {
+            let log_entry = LogEntry {
                 id: log_id,
                 timestamp: ic_cdk::api::time(),
                 level,
@@ -128,6 +61,7 @@ fn log_message(level: LogLevel, message: &str) {
     }
 }
 
+// Public logging functions
 pub fn log_error(message: &str) {
     log_message(LogLevel::Error, message);
 }
@@ -144,6 +78,7 @@ pub fn log_debug(message: &str) {
     log_message(LogLevel::Debug, message);
 }
 
+// Logger initialization and configuration
 pub fn init_logger(origin: CanisterOrigin) {
     // Set the canister origin
     CANISTER_ORIGIN.with(|o| *o.borrow_mut() = Some(origin.clone()));
@@ -172,6 +107,7 @@ pub fn set_log_storage<T: LogStorage + 'static>(storage: T) {
     });
 }
 
+// Helper functions
 fn parse_log_level(level_str: &str) -> LogLevel {
     match level_str.to_lowercase().as_str() {
         "error" => LogLevel::Error,
@@ -191,28 +127,6 @@ fn is_production_environment() -> bool {
         || env::var("IC_ENV")
             .map(|env| env == "production" || env == "staging")
             .unwrap_or(false)
-}
-
-// Convenience macros for easier usage
-#[macro_export]
-macro_rules! log_error {
-    ($($arg:tt)*) => {
-        $crate::logging::log_error(&format!($($arg)*))
-    };
-}
-
-#[macro_export]
-macro_rules! log_warn {
-    ($($arg:tt)*) => {
-        $crate::logging::log_warn(&format!($($arg)*))
-    };
-}
-
-#[macro_export]
-macro_rules! log_info {
-    ($($arg:tt)*) => {
-        $crate::logging::log_info(&format!($($arg)*))
-    };
 }
 
 // Loggable entity wrappers for consistent entity formatting
@@ -332,9 +246,31 @@ pub fn loggable_workflow(workflow: &Workflow) -> LoggableWorkflow {
     LoggableWorkflow(workflow)
 }
 
+// Convenience macros for easier usage
+#[macro_export]
+macro_rules! log_error {
+    ($($arg:tt)*) => {
+        $crate::utils::logs::log_error(&format!($($arg)*))
+    };
+}
+
+#[macro_export]
+macro_rules! log_warn {
+    ($($arg:tt)*) => {
+        $crate::utils::logs::log_warn(&format!($($arg)*))
+    };
+}
+
+#[macro_export]
+macro_rules! log_info {
+    ($($arg:tt)*) => {
+        $crate::utils::logs::log_info(&format!($($arg)*))
+    };
+}
+
 #[macro_export]
 macro_rules! log_debug {
     ($($arg:tt)*) => {
-        $crate::logging::log_debug(&format!($($arg)*))
+        $crate::utils::logs::log_debug(&format!($($arg)*))
     };
 }
