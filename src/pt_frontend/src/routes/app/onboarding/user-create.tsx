@@ -29,7 +29,5 @@ function CreateUser() {
     return navigate({ to: '/onboarding/organization/create' });
   }
 
-  return (
-    <CreateUserForm isSubmitting={false} onSubmit={onSubmit} />
-  );
+  return <CreateUserForm isSubmitting={false} onSubmit={onSubmit} />;
 }

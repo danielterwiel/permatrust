@@ -1,44 +1,41 @@
-import * as React from "react"
-import * as ProgressPrimitive from "@radix-ui/react-progress"
-import { cva, type VariantProps } from "class-variance-authority"
+import * as ProgressPrimitive from '@radix-ui/react-progress'
+import { type VariantProps, cva } from 'class-variance-authority'
+import * as React from 'react'
 
-import { cn } from "@/utils/cn"
+import { cn } from '@/utils/cn'
 
 const progressVariants = cva(
-  "relative w-full overflow-hidden rounded-full bg-secondary",
+  'relative w-full overflow-hidden rounded-full bg-secondary',
   {
     variants: {
       size: {
-        default: "h-4",
-        sm: "h-2",
-        lg: "h-6",
+        default: 'h-4',
+        sm: 'h-2',
+        lg: 'h-6',
       },
       variant: {
-        default: "",
-        secondary: "",
+        default: '',
+        secondary: '',
       },
     },
     defaultVariants: {
-      size: "default",
-      variant: "default",
+      size: 'default',
+      variant: 'default',
     },
-  }
+  },
 )
 
-const progressIndicatorVariants = cva(
-  "h-full w-full flex-1 transition-all",
-  {
-    variants: {
-      variant: {
-        default: "bg-primary",
-        secondary: "bg-muted-foreground",
-      },
+const progressIndicatorVariants = cva('h-full w-full flex-1 transition-all', {
+  variants: {
+    variant: {
+      default: 'bg-primary',
+      secondary: 'bg-muted-foreground',
     },
-    defaultVariants: {
-      variant: "default",
-    },
-  }
-)
+  },
+  defaultVariants: {
+    variant: 'default',
+  },
+})
 
 export interface ProgressProps
   extends React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root>,

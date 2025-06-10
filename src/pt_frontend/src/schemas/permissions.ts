@@ -8,7 +8,7 @@ const documentPermissionSchema = z.union([
   z.object({ Delete: z.null() }),
   z.object({ Create: z.null() }),
   z.object({ Update: z.null() }),
-  z.object({ Export: z.null() })
+  z.object({ Export: z.null() }),
 ]);
 
 const userPermissionSchema = z.union([
@@ -17,7 +17,7 @@ const userPermissionSchema = z.union([
   z.object({ Read: z.null() }),
   z.object({ Delete: z.null() }),
   z.object({ Update: z.null() }),
-  z.object({ Invite: z.null() })
+  z.object({ Invite: z.null() }),
 ]);
 
 const organizationPermissionSchema = z.union([
@@ -28,7 +28,7 @@ const organizationPermissionSchema = z.union([
   z.object({ Delete: z.null() }),
   z.object({ Create: z.null() }),
   z.object({ ManageBilling: z.null() }),
-  z.object({ Update: z.null() })
+  z.object({ Update: z.null() }),
 ]);
 
 const revisionPermissionSchema = z.union([
@@ -37,7 +37,7 @@ const revisionPermissionSchema = z.union([
   z.object({ Reject: z.null() }),
   z.object({ Compare: z.null() }),
   z.object({ Create: z.null() }),
-  z.object({ Rollback: z.null() })
+  z.object({ Rollback: z.null() }),
 ]);
 
 const projectPermissionSchema = z.union([
@@ -50,7 +50,7 @@ const projectPermissionSchema = z.union([
   z.object({ Delete: z.null() }),
   z.object({ Create: z.null() }),
   z.object({ Update: z.null() }),
-  z.object({ ViewMetrics: z.null() })
+  z.object({ ViewMetrics: z.null() }),
 ]);
 
 const workflowPermissionSchema = z.union([
@@ -61,7 +61,7 @@ const workflowPermissionSchema = z.union([
   z.object({ Execute: z.null() }),
   z.object({ Delete: z.null() }),
   z.object({ Create: z.null() }),
-  z.object({ Update: z.null() })
+  z.object({ Update: z.null() }),
 ]);
 
 export const entityPermissionSchema = z.union([
@@ -70,5 +70,5 @@ export const entityPermissionSchema = z.union([
   z.object({ Organization: organizationPermissionSchema }),
   z.object({ Revision: revisionPermissionSchema }),
   z.object({ Project: projectPermissionSchema }),
-  z.object({ Workflow: workflowPermissionSchema })
+  z.object({ Workflow: workflowPermissionSchema }),
 ]);

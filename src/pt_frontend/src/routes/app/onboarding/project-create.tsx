@@ -52,12 +52,18 @@ function CreateProject() {
         user,
         organization,
         project,
-      })
+      }),
     );
 
-    if (tenantCanisterResult .error) {
-      console.error('Error creating tenant canister:', tenantCanisterResult.error);
-      if (tenantCanisterResult.error instanceof Error && tenantCanisterResult.error.message) {
+    if (tenantCanisterResult.error) {
+      console.error(
+        'Error creating tenant canister:',
+        tenantCanisterResult.error,
+      );
+      if (
+        tenantCanisterResult.error instanceof Error &&
+        tenantCanisterResult.error.message
+      ) {
         console.error('Error message:', tenantCanisterResult.error.message);
       }
       return;
@@ -74,8 +80,10 @@ function CreateProject() {
     const tenantCanisterIdStr = tenantCanisterResult.data.toString();
 
     const [tenantActorResult, upgradeActorResult] = await Promise.all([
-      tryCatch(createTenantActorWrapper(clientResult.data, tenantCanisterIdStr)),
-      tryCatch(createUpgradeActorWrapper(clientResult.data))
+      tryCatch(
+        createTenantActorWrapper(clientResult.data, tenantCanisterIdStr),
+      ),
+      tryCatch(createUpgradeActorWrapper(clientResult.data)),
     ]);
 
     if (tenantActorResult.error) {
@@ -94,7 +102,9 @@ function CreateProject() {
 
   return (
     <>
-      {createTenantCanisterError && <div>{createTenantCanisterError.message}</div>}
+      {createTenantCanisterError && (
+        <div>{createTenantCanisterError.message}</div>
+      )}
       <CreateProjectForm isSubmitting={isPending} onSubmit={onSubmit} />
     </>
   );

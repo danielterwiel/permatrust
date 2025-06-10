@@ -128,7 +128,7 @@ pub struct AssignRolesInput {
 }
 
 #[derive(CandidType, Deserialize)]
-pub struct RoleInput {
+pub struct CreateRoleInput {
     pub name: String,
     pub description: Option<String>,
     pub permissions: Vec<Permission>,

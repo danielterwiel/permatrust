@@ -1,11 +1,56 @@
 {
-	"formatter": {
-		"enabled": true
-	},
-	"overrides": [
-		{
-			"include": ["src/pt_frontend/**/*.{ts,tsx,js,jsx,json,md}"],
-			"ignore": ["src/pt_frontend/src/routeTree.gen.ts", "package-lock.json"]
-		}
-	]
+  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "vcs": {
+    "enabled": true,
+    "clientKind": "git",
+    "useIgnoreFile": true,
+    "defaultBranch": "main"
+  },
+  "files": {
+    "ignore": [
+      "**/node_modules/**",
+      "**/target/**",
+      "**/dist/**",
+      "**/.dfx/**",
+      "**/declarations/**",
+      "**/.git/**",
+      "**/*.gen.ts",
+      "**/*.generated.ts",
+      "**/routeTree.gen.ts",
+      "package-lock.json",
+      "pnpm-lock.yaml",
+      "Cargo.lock",
+      "**/src/components/ui/**"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "formatWithErrors": false,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 80,
+    "lineEnding": "lf"
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "jsxQuoteStyle": "double",
+      "trailingCommas": "all",
+      "semicolons": "always",
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "lineWidth": 80,
+      "arrowParentheses": "always",
+      "bracketSpacing": true
+    }
+  },
+  "organizeImports": {
+    "enabled": false
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true
+    }
+  }
 }

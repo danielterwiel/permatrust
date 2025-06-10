@@ -13,7 +13,11 @@ import type {
   UserOutput,
 } from './types';
 
-import { createMainActorWrapper, createTenantActorWrapper, createUpgradeActorWrapper } from '@/api';
+import {
+  createMainActorWrapper,
+  createTenantActorWrapper,
+  createUpgradeActorWrapper,
+} from '@/api';
 import { Auth } from '@/auth';
 
 export const authActors = {
@@ -38,35 +42,35 @@ export const authActors = {
       return { actor: { main: mainActor }, success: true };
     } catch (error) {
       const errorMessage =
-        error instanceof Error
-          ? error.message
-          : 'Unknown authentication error';
+        error instanceof Error ? error.message : 'Unknown authentication error';
       throw new Error(errorMessage);
     }
   }),
 
-  getTenantCanisterIds: fromPromise(async (): Promise<TenantCanisterIdsOutput> => {
-    try {
-      const [tenantCanisterId] = await queryClient.ensureQueryData(
-        getTenantCanisterIdsOptions(),
-      );
-      const auth = Auth.getInstance();
-      const client = await auth.initializeClient();
-      await createUpgradeActorWrapper(client);
-      await createTenantActorWrapper(client, tenantCanisterId.toString());
+  getTenantCanisterIds: fromPromise(
+    async (): Promise<TenantCanisterIdsOutput> => {
+      try {
+        const [tenantCanisterId] = await queryClient.ensureQueryData(
+          getTenantCanisterIdsOptions(),
+        );
+        const auth = Auth.getInstance();
+        const client = await auth.initializeClient();
+        await createUpgradeActorWrapper(client);
+        await createTenantActorWrapper(client, tenantCanisterId.toString());
 
-      return {
-        tenantCanisterIds: [tenantCanisterId],
-      };
-    } catch (error) {
-      if (isAppError(error) && 'IdentityNotFound' in error) {
         return {
-          tenantCanisterIds: [],
+          tenantCanisterIds: [tenantCanisterId],
         };
+      } catch (error) {
+        if (isAppError(error) && 'IdentityNotFound' in error) {
+          return {
+            tenantCanisterIds: [],
+          };
+        }
+        throw new Error('Unexpected error while fetching canister IDs');
       }
-      throw new Error('Unexpected error while fetching canister IDs');
-    }
-  }),
+    },
+  ),
 
   getUser: fromPromise(async (): Promise<UserOutput> => {
     try {
@@ -93,8 +97,9 @@ export const authActors = {
       if (isAuthenticated) {
         await createMainActorWrapper(client);
         await createUpgradeActorWrapper(client);
-        const [canisterPrincipal] =
-          await queryClient.ensureQueryData(getTenantCanisterIdsOptions());
+        const [canisterPrincipal] = await queryClient.ensureQueryData(
+          getTenantCanisterIdsOptions(),
+        );
         const canisterId = Principal.from(canisterPrincipal);
         await createTenantActorWrapper(client, canisterId.toString());
       }

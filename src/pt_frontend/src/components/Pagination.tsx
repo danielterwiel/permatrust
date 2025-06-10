@@ -89,11 +89,11 @@ export function Pagination({
                   getPageChangeParams
                     ? getPageChangeParams(currentPage - 1)
                     : {
-                      pagination: {
-                        ...currentPagination,
-                        page_number: currentPage - 1,
-                      },
-                    }
+                        pagination: {
+                          ...currentPagination,
+                          page_number: currentPage - 1,
+                        },
+                      }
                 }
                 to=""
               >
@@ -106,9 +106,7 @@ export function Pagination({
           {pageNumbers.map((pageNumber, index) =>
             pageNumber === 'ellipsis' ? (
               <PaginationItem
-                key={`ellipsis-${pageNumbers[index - 1]}-${
-                  pageNumbers[index + 1]
-                }`}
+                key={`ellipsis-${pageNumbers[index - 1]}-${pageNumbers[index + 1]}`}
               >
                 <PaginationEllipsis />
               </PaginationItem>
@@ -120,11 +118,11 @@ export function Pagination({
                     getPageChangeParams
                       ? getPageChangeParams(pageNumber)
                       : {
-                        pagination: {
-                          ...currentPagination,
-                          page_number: pageNumber,
-                        },
-                      }
+                          pagination: {
+                            ...currentPagination,
+                            page_number: pageNumber,
+                          },
+                        }
                   }
                   to=""
                 >
@@ -142,11 +140,11 @@ export function Pagination({
                   getPageChangeParams
                     ? getPageChangeParams(currentPage + 1)
                     : {
-                      pagination: {
-                        ...currentPagination,
-                        page_number: currentPage + 1,
-                      },
-                    }
+                        pagination: {
+                          ...currentPagination,
+                          page_number: currentPage + 1,
+                        },
+                      }
                 }
                 to=""
               >

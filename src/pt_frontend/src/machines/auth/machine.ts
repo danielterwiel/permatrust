@@ -101,7 +101,9 @@ const authMachine = setup({
       });
     },
     logOnboardingError: log('TODO: ONBOARDING_ERROR'),
-    logTenantCanisterError: log('TODO: ONBOARDING_ERROR get_tenant_canister_ids'),
+    logTenantCanisterError: log(
+      'TODO: ONBOARDING_ERROR get_tenant_canister_ids',
+    ),
     logUserError: log('TODO: ONBOARDING_ERROR check_user'),
   },
   guards: {

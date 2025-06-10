@@ -6,12 +6,7 @@ import { tryCatch } from '@/utils/try-catch';
 
 import { Loading } from '@/components/loading';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 import { Input } from '@/components/ui/input';
 
@@ -44,7 +39,9 @@ function CreateInvite() {
       return;
     }
 
-    const domain = import.meta.env.NODE_ENV ? 'permatrust.net' : 'localhost:3000';
+    const domain = import.meta.env.NODE_ENV
+      ? 'permatrust.net'
+      : 'localhost:3000';
     const protocol = import.meta.env.NODE_ENV ? 'https' : 'http';
     if (typeof result.data.random === 'string') {
       setInviteLink(`${protocol}://${domain}/invites/${result.data.random}`);
@@ -81,11 +78,7 @@ function CreateInvite() {
 
       <CardContent className="space-y-4">
         <Button onClick={onSubmit} disabled={isSubmitting}>
-          {isSubmitting ? (
-            <Loading text="Creating..." />
-          ) : (
-            'Create invite'
-          )}
+          {isSubmitting ? <Loading text="Creating..." /> : 'Create invite'}
         </Button>
 
         {isSubmitting && (
@@ -99,7 +92,12 @@ function CreateInvite() {
             <p className="text-sm font-medium">Invite link created:</p>
             <div className="flex w-full items-center space-x-2">
               <Input type="text" value={inviteLink} readOnly />
-              <Button variant="outline" size="icon" onClick={handleCopy} className="text-primary">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={handleCopy}
+                className="text-primary"
+              >
                 <Icon name={copied ? 'check' : 'copy'} size="md" />
                 <span className="sr-only">
                   {copied ? 'Copied!' : 'Copy link'}
@@ -107,12 +105,14 @@ function CreateInvite() {
               </Button>
             </div>
             {copied && (
-              <p className="text-sm text-card-foreground">Copied to clipboard!</p>
+              <p className="text-sm text-card-foreground">
+                Copied to clipboard!
+              </p>
             )}
           </div>
         )}
       </CardContent>
-    </Card >
+    </Card>
   );
 }
 

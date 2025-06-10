@@ -1,5 +1,3 @@
-
-import { Principal } from '@dfinity/principal';
 import { useForm } from '@tanstack/react-form';
 import type { FC } from 'react';
 import { z } from 'zod';
@@ -21,6 +19,8 @@ import {
 } from '@/components/ui/form';
 import { Icon } from '@/components/ui/icon';
 
+import type { Principal } from '@dfinity/principal';
+
 export const createUserFormSchema = z.object({
   first_name: z.string().min(1, {
     message: 'First name must be at least 1 character.',
@@ -28,7 +28,7 @@ export const createUserFormSchema = z.object({
   last_name: z.string().min(1, {
     message: 'Last name must be at least 1 character.',
   }),
-  principals: z.array(z.union([z.tuple([]), z.tuple([principalSchema])]))
+  principals: z.array(z.union([z.tuple([]), z.tuple([principalSchema])])),
 });
 
 type CreateUserFormProps = {

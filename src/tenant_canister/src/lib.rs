@@ -1,6 +1,6 @@
 use shared::types::access_control::{
-    AssignRolesInput, AssignRolesResult, CreateRoleResult, GetPermissionsResult,
-    GetProjectRolesInput, GetProjectRolesResult, RoleInput, UpdateRolePermissionsInput,
+    AssignRolesInput, AssignRolesResult, CreateRoleInput, CreateRoleResult, GetPermissionsResult,
+    GetProjectRolesInput, GetProjectRolesResult, UpdateRolePermissionsInput,
     UpdateRolePermissionsResult,
 };
 use shared::types::documents::{

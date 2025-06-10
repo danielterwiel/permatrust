@@ -31,7 +31,7 @@ function CreateUser() {
       createUser({
         first_name: values.first_name,
         last_name: values.last_name,
-      })
+      }),
     );
 
     if (result.error) {

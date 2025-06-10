@@ -18,16 +18,14 @@ import { FIELDS, FILTER_OPERATOR, SORT_ORDER } from '@/consts/pagination';
 
 import type { Invite } from '@/declarations/tenant_canister/tenant_canister.did';
 
-const { schema: invitesSearchSchema, defaultPagination } = createPaginationSchema(
-  ENTITY.INVITE,
-  {
+const { schema: invitesSearchSchema, defaultPagination } =
+  createPaginationSchema(ENTITY.INVITE, {
     defaultFilterField: FIELDS.INVITE.ID,
     defaultFilterOperator: FILTER_OPERATOR.CONTAINS,
     defaultFilterValue: '',
     defaultSortField: FIELDS.INVITE.CREATED_AT,
     defaultSortOrder: SORT_ORDER.ASC,
-  },
-);
+  });
 
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarded/invites/',

@@ -1,7 +1,10 @@
 import { useCallback, useState } from 'react';
 
 import { uploadRevisionContentInChunks } from '@/utils/chunked-revision-upload';
-import type { ChunkedRevisionUploadOptions, ChunkedUploadProgress } from '@/utils/chunked-revision-upload';
+import type {
+  ChunkedRevisionUploadOptions,
+  ChunkedUploadProgress,
+} from '@/utils/chunked-revision-upload';
 
 export type FileUploadProgress = {
   fileName: string;
@@ -32,8 +35,12 @@ export function useChunkedUpload() {
   });
 
   const uploadWithProgress = useCallback(
-    async (options: Omit<ChunkedRevisionUploadOptions, 'onProgress'> & { fileMapping?: Array<{fileName: string, fileSize: number}> }) => {
-      setState(prev => ({
+    async (
+      options: Omit<ChunkedRevisionUploadOptions, 'onProgress'> & {
+        fileMapping?: Array<{ fileName: string; fileSize: number }>;
+      },
+    ) => {
+      setState((prev) => ({
         isUploading: true,
         progress: null,
         percentComplete: 0,
@@ -46,29 +53,42 @@ export function useChunkedUpload() {
           ...options,
           onProgress: (progress) => {
             const percentComplete = Math.round(
-              (progress.uploadedBytes / progress.totalContentSize) * 100
+              (progress.uploadedBytes / progress.totalContentSize) * 100,
             );
-            setState(prev => {
+            setState((prev) => {
               const newFileProgress = new Map(prev.fileProgress);
-              
+
               // Update individual file progress based on content index
-              if (options.fileMapping && options.fileMapping[progress.contentIndex - (options.startingContentIndex || 0)]) {
-                const fileInfo = options.fileMapping[progress.contentIndex - (options.startingContentIndex || 0)];
+              if (
+                options.fileMapping?.[
+                  progress.contentIndex - (options.startingContentIndex || 0)
+                ]
+              ) {
+                const fileInfo =
+                  options.fileMapping[
+                    progress.contentIndex - (options.startingContentIndex || 0)
+                  ];
                 const fileKey = `${fileInfo.fileName}-${fileInfo.fileSize}`;
                 const currentFileProgress = newFileProgress.get(fileKey);
-                
+
                 if (currentFileProgress) {
-                  const filePercentComplete = Math.round(((progress.chunkId + 1) / progress.totalChunks) * 100);
+                  const filePercentComplete = Math.round(
+                    ((progress.chunkId + 1) / progress.totalChunks) * 100,
+                  );
                   newFileProgress.set(fileKey, {
                     ...currentFileProgress,
                     percentComplete: filePercentComplete,
                     currentChunk: progress.chunkId + 1,
-                    uploadedBytes: Math.round((filePercentComplete / 100) * currentFileProgress.fileSize),
-                    status: filePercentComplete === 100 ? 'completed' : 'uploading',
+                    uploadedBytes: Math.round(
+                      (filePercentComplete / 100) *
+                        currentFileProgress.fileSize,
+                    ),
+                    status:
+                      filePercentComplete === 100 ? 'completed' : 'uploading',
                   });
                 }
               }
-              
+
               return {
                 isUploading: true,
                 progress,
@@ -80,7 +100,7 @@ export function useChunkedUpload() {
           },
         });
 
-        setState(prev => ({
+        setState((prev) => ({
           isUploading: false,
           progress: null,
           percentComplete: 100,
@@ -88,7 +108,7 @@ export function useChunkedUpload() {
           fileProgress: prev.fileProgress,
         }));
       } catch (error) {
-        setState(prev => ({
+        setState((prev) => ({
           isUploading: false,
           progress: null,
           percentComplete: 0,
@@ -98,7 +118,7 @@ export function useChunkedUpload() {
         throw error;
       }
     },
-    []
+    [],
   );
 
   const resetProgress = useCallback(() => {
@@ -110,11 +130,11 @@ export function useChunkedUpload() {
       fileProgress: new Map(),
     });
   }, []);
-  
+
   const initializeFileProgress = useCallback((files: Array<File>) => {
-    setState(prev => {
+    setState((prev) => {
       const newFileProgress = new Map<string, FileUploadProgress>();
-      files.forEach((file) => {
+      for (const file of files) {
         const fileKey = `${file.name}-${file.size}`;
         const isChunked = file.size > 512 * 1024; // MAX_DIRECT_UPLOAD_SIZE
         newFileProgress.set(fileKey, {
@@ -122,28 +142,10 @@ export function useChunkedUpload() {
           fileSize: file.size,
           uploadedBytes: 0,
           percentComplete: 0,
-          totalChunks: isChunked ? Math.ceil(file.size / (1048576)) : 1, // 1MB chunks or single upload
+          totalChunks: isChunked ? Math.ceil(file.size / 1048576) : 1, // 1MB chunks or single upload
           currentChunk: 0,
           status: 'waiting',
           isChunked,
-        });
-      });
-      return {
-        ...prev,
-        fileProgress: newFileProgress,
-      };
-    });
-  }, []);
-  
-  const updateFileProgress = useCallback((fileName: string, fileSize: number, update: Partial<FileUploadProgress>) => {
-    setState(prev => {
-      const fileKey = `${fileName}-${fileSize}`;
-      const newFileProgress = new Map(prev.fileProgress);
-      const currentProgress = newFileProgress.get(fileKey);
-      if (currentProgress) {
-        newFileProgress.set(fileKey, {
-          ...currentProgress,
-          ...update,
         });
       }
       return {
@@ -152,6 +154,31 @@ export function useChunkedUpload() {
       };
     });
   }, []);
+
+  const updateFileProgress = useCallback(
+    (
+      fileName: string,
+      fileSize: number,
+      update: Partial<FileUploadProgress>,
+    ) => {
+      setState((prev) => {
+        const fileKey = `${fileName}-${fileSize}`;
+        const newFileProgress = new Map(prev.fileProgress);
+        const currentProgress = newFileProgress.get(fileKey);
+        if (currentProgress) {
+          newFileProgress.set(fileKey, {
+            ...currentProgress,
+            ...update,
+          });
+        }
+        return {
+          ...prev,
+          fileProgress: newFileProgress,
+        };
+      });
+    },
+    [],
+  );
 
   return {
     ...state,

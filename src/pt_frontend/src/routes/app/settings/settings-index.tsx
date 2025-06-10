@@ -8,7 +8,13 @@ import { EmptyState } from '@/components/empty-state';
 import { Loading } from '@/components/loading';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 import { Separator } from '@/components/ui/separator';
 
@@ -19,7 +25,9 @@ export const Route = createFileRoute(
     getTitle: () => 'Settings',
   }),
   loader: async ({ context }) => {
-    const wasmVersions = await context.query.ensureQueryData(getAllWasmVersionsOptions());
+    const wasmVersions = await context.query.ensureQueryData(
+      getAllWasmVersionsOptions(),
+    );
     return { wasmVersions };
   },
   component: Settings,
@@ -58,14 +66,19 @@ function Settings() {
             Canister Management
           </CardTitle>
           <CardDescription>
-            Manage your tenant canister settings and perform maintenance operations.
+            Manage your tenant canister settings and perform maintenance
+            operations.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Canister Upgrade Section */}
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <Icon name="infinity-outline" size="sm" className="text-muted-foreground" />
+              <Icon
+                name="infinity-outline"
+                size="sm"
+                className="text-muted-foreground"
+              />
               <h3 className="text-lg font-medium">Canister Upgrade</h3>
             </div>
             <div className="pl-6 space-y-4">
@@ -73,20 +86,22 @@ function Settings() {
                 <div className="space-y-1">
                   <p className="font-medium">Self-Upgrade Canister</p>
                   <p className="text-sm text-muted-foreground">
-                    Upgrade this canister to the latest version with new features and bug fixes.
+                    Upgrade this canister to the latest version with new
+                    features and bug fixes.
                   </p>
                 </div>
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center space-x-3 pl-2">
                   {isSubmitting ? (
                     <Button disabled={true} variant="outline">
                       <Loading text="Upgrading..." />
                     </Button>
                   ) : (
-                    <Button
-                      onClick={requestUpgrade}
-                      variant="outline"
-                    >
-                      <Icon name="infinity-outline" size="sm" className="mr-2" />
+                    <Button onClick={requestUpgrade} variant="outline">
+                      <Icon
+                        name="infinity-outline"
+                        size="sm"
+                        className="mr-2"
+                      />
                       Upgrade
                     </Button>
                   )}
@@ -99,7 +114,11 @@ function Settings() {
 
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <Icon name="assembly" size="sm" className="text-muted-foreground" />
+              <Icon
+                name="assembly"
+                size="sm"
+                className="text-muted-foreground"
+              />
               <h3 className="text-lg font-medium">Available WASM Versions</h3>
             </div>
             <div className="pl-6">
@@ -111,7 +130,11 @@ function Settings() {
                       className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                     >
                       <div className="flex items-center space-x-3">
-                        <Icon name="file-outline" size="sm" className="text-muted-foreground" />
+                        <Icon
+                          name="file-outline"
+                          size="sm"
+                          className="text-muted-foreground"
+                        />
                         <span className="font-medium">Version {version}</span>
                       </div>
                       <Badge variant="secondary">{version}</Badge>
@@ -131,7 +154,11 @@ function Settings() {
 
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <Icon name="file-outline" size="sm" className="text-muted-foreground" />
+              <Icon
+                name="file-outline"
+                size="sm"
+                className="text-muted-foreground"
+              />
               <h3 className="text-lg font-medium">System Information</h3>
             </div>
             <div className="pl-6 space-y-3">

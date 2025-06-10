@@ -42,29 +42,28 @@ export async function uploadRevisionContentInChunks({
     const contentData = content.content_data[0];
     if ('Direct' in contentData) {
       return sum + contentData.Direct.bytes.length;
-    } else {
-      return sum + Number(contentData.Chunked.total_size);
     }
+    return sum + Number(contentData.Chunked.total_size);
   }, 0);
   let uploadedBytes = 0;
 
   for (let i = 0; i < contents.length; i++) {
     const contentIndex = startingContentIndex + i;
     const content = contents[i];
-    
+
     // Skip content that's a reference to existing content
     if (content.content_data.length === 0) {
       continue;
     }
-    
+
     const contentData = content.content_data[0];
     // Only process Direct content for chunking (Chunked content is already processed)
     if (!('Direct' in contentData)) {
       continue; // Skip already chunked content
     }
-    
+
     const contentBytes = new Uint8Array(contentData.Direct.bytes);
-    
+
     // Skip small content that can be uploaded directly
     if (contentBytes.length <= MAX_DIRECT_UPLOAD_SIZE) {
       uploadedBytes += contentBytes.length;
@@ -80,19 +79,19 @@ export async function uploadRevisionContentInChunks({
 
     // Calculate total chunks for this content
     const totalChunks = Math.ceil(contentBytes.length / CHUNK_SIZE);
-    
+
     for (let chunkId = 0; chunkId < totalChunks; chunkId++) {
       const start = chunkId * CHUNK_SIZE;
       const end = Math.min(start + CHUNK_SIZE, contentBytes.length);
       const chunkData = contentBytes.slice(start, end);
-      
+
       const chunk: RevisionContentChunk = {
         chunk_id: chunkId,
         total_chunks: totalChunks,
         data: Array.from(chunkData),
         checksum: [], // TODO: Implement checksum calculation
       };
-      
+
       // Upload chunk using the same pattern as WASM upload
       // The API wrapper will throw an error if the result is Err, so we can just await
       await api.tenant.store_revision_content_chunk({
@@ -100,9 +99,10 @@ export async function uploadRevisionContentInChunks({
         content_index: contentIndex,
         chunk,
         content_type: content.content_type,
-        file_name: content.file_name.length > 0 ? [content.file_name[0]!] : [],
+        file_name:
+          content.file_name.length > 0 ? [content.file_name[0] ?? ''] : [],
       });
-      
+
       uploadedBytes += chunkData.length;
       onProgress?.({
         contentIndex,
@@ -112,7 +112,7 @@ export async function uploadRevisionContentInChunks({
         uploadedBytes,
       });
     }
-    
+
     // Finish upload for this content (assembles chunks)
     // The API wrapper will throw an error if the result is Err, so we can just await
     await api.tenant.finish_revision_content_upload({
@@ -131,14 +131,14 @@ export function separateContentBySize(contents: Array<RevisionContent>): {
 } {
   const smallContent: Array<RevisionContent> = [];
   const largeContent: Array<RevisionContent> = [];
-  
-  contents.forEach(content => {
+
+  for (const content of contents) {
     if (content.content_data.length === 0) {
       // Reference to existing content, consider as small (no upload needed)
       smallContent.push(content);
-      return;
+      continue;
     }
-    
+
     const contentData = content.content_data[0];
     if ('Direct' in contentData) {
       if (contentData.Direct.bytes.length <= MAX_DIRECT_UPLOAD_SIZE) {
@@ -150,8 +150,8 @@ export function separateContentBySize(contents: Array<RevisionContent>): {
       // Chunked content is considered large
       largeContent.push(content);
     }
-  });
-  
+  }
+
   return { smallContent, largeContent };
 }
 
@@ -166,13 +166,13 @@ export function calculateUploadMetrics(contents: Array<RevisionContent>): {
   let totalSize = 0;
   let totalChunks = 0;
   let largeContentCount = 0;
-  
-  contents.forEach(content => {
+
+  for (const content of contents) {
     if (content.content_data.length === 0) {
       // Reference to existing content, no size or chunks to add
-      return;
+      continue;
     }
-    
+
     const contentData = content.content_data[0];
     if ('Direct' in contentData) {
       const size = contentData.Direct.bytes.length;
@@ -189,7 +189,7 @@ export function calculateUploadMetrics(contents: Array<RevisionContent>): {
       largeContentCount += 1;
       totalChunks += contentData.Chunked.total_chunks;
     }
-  });
-  
+  }
+
   return { totalSize, totalChunks, largeContentCount };
 }

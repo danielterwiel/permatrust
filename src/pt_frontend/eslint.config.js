@@ -1,7 +1,7 @@
 import { tanstackConfig } from '@tanstack/config/eslint';
 import pluginRouter from '@tanstack/eslint-plugin-router';
-import pluginReact from 'eslint-plugin-react';
 import pluginBiome from 'eslint-config-biome';
+import pluginReact from 'eslint-plugin-react';
 import pluginXState from 'eslint-plugin-xstate';
 
 /** @type {import('eslint').Linter.Config[]} */
@@ -97,8 +97,7 @@ export default [
   // ESLint formatting rules
   {
     rules: {
-      // Indentation
-      indent: ['warn', 2, { SwitchCase: 1 }],
+      indent: 'off',
       // Semicolons
       semi: ['warn', 'always'],
       // Quotes - warn instead of error to auto-fix without blocking
@@ -126,7 +125,7 @@ export default [
       'max-len': [
         'warn',
         {
-          code: 100,
+          code: 80,
           ignoreUrls: true,
           ignoreStrings: true,
           ignoreTemplateLiterals: true,

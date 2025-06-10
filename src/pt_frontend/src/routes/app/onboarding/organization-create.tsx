@@ -21,7 +21,9 @@ function CreateOrganization() {
   const { authActor } = Route.useLoaderData();
   const navigate = Route.useNavigate();
 
-  function onSubmit(organization: z.infer<typeof createOrganizationFormSchema>) {
+  function onSubmit(
+    organization: z.infer<typeof createOrganizationFormSchema>,
+  ) {
     authActor.send({
       type: 'UPDATE_ORGANIZATION',
       organization,
@@ -29,7 +31,5 @@ function CreateOrganization() {
     navigate({ to: '/onboarding/project/create' });
   }
 
-  return (
-    <CreateOrganizationForm isSubmitting={false} onSubmit={onSubmit} />
-  );
+  return <CreateOrganizationForm isSubmitting={false} onSubmit={onSubmit} />;
 }

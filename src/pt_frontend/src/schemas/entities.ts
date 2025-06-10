@@ -25,9 +25,7 @@ export const inviteIdSchema = toBigIntSchema.transform(
   (val): RevisionId => val,
 );
 export const logIdSchema = toBigIntSchema.transform((val): LogId => val);
-export const userIdSchema = toNumberSchema.transform(
-  (val): number => val,
-);
+export const userIdSchema = toNumberSchema.transform((val): number => val);
 export const revisionContentIdSchema = toBigIntSchema.transform(
   (val): RevisionContentId => val,
 );

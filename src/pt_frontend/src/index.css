@@ -32,21 +32,39 @@
 
 /* Animation keyframes */
 @keyframes gradient {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 @keyframes float {
-  0% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
-  100% { transform: translateY(0px); }
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
 }
 
 @keyframes pulse-slow {
-  0% { opacity: 0.7; }
-  50% { opacity: 0.5; }
-  100% { opacity: 0.7; }
+  0% {
+    opacity: 0.7;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0.7;
+  }
 }
 
 @layer utilities {
@@ -62,79 +80,82 @@
   .animate-pulse-slow {
     animation: pulse-slow 4s ease-in-out infinite;
   }
-  
+
   .animate-path-draw {
     stroke-dasharray: 1500;
     stroke-dashoffset: 1500;
-    animation: path-draw 3s ease-in-out forwards, path-pulse 8s ease-in-out 3s infinite;
+    animation: path-draw 3s ease-in-out forwards, path-pulse 8s ease-in-out 3s
+      infinite;
   }
-  
+
   .animate-path-slide {
     animation: path-slide 30s linear infinite;
   }
-  
+
   .animate-path-fade {
     opacity: 0;
     animation: path-fade 8s ease-in-out infinite;
   }
-  
+
   .animate-path-fade-delayed {
     opacity: 0;
     animation: path-fade 8s ease-in-out 2s infinite;
   }
-  
+
   .animate-wave-1 {
     animation: wave-move-1 15s ease-in-out infinite;
   }
-  
+
   .animate-wave-2 {
     animation: wave-move-2 18s ease-in-out infinite;
   }
-  
+
   .animate-wave-3 {
     animation: wave-move-3 20s ease-in-out infinite;
   }
-  
+
   .animate-wave-4 {
     animation: wave-move-4 18s ease-in-out 1s infinite;
   }
-  
+
   .animate-wave-5 {
     animation: wave-move-5 25s ease-in-out infinite;
   }
-  
+
   .animate-path-slide-alt {
     animation: path-slide-alt 25s linear infinite;
   }
-  
+
   .animate-pulse-alternate {
     animation: pulse-alternate 5s ease-in-out infinite;
   }
-  
+
   .animate-node-pulse-1 {
     animation: node-pulse 3s ease-in-out 0s infinite;
   }
-  
+
   .animate-node-pulse-2 {
     animation: node-pulse 3s ease-in-out 1s infinite;
   }
-  
+
   .animate-node-pulse-3 {
     animation: node-pulse 3s ease-in-out 2s infinite;
   }
-  
+
   .animate-circuit-fade {
     stroke-dasharray: 300;
     stroke-dashoffset: 300;
-    animation: circuit-draw 3s ease-in-out forwards, circuit-pulse 6s ease-in-out 3s infinite;
+    animation: circuit-draw 3s ease-in-out forwards, circuit-pulse 6s
+      ease-in-out 3s infinite;
   }
-  
+
   .animate-circuit-fade-delayed {
     stroke-dasharray: 300;
     stroke-dashoffset: 300;
-    animation: circuit-draw 3s ease-in-out 1.5s forwards, circuit-pulse 6s ease-in-out 4.5s infinite;
+    animation: circuit-draw 3s ease-in-out 1.5s forwards, circuit-pulse 6s
+      ease-in-out 4.5s infinite;
   }
-  
+
   .transform-gpu {
     transform: translateZ(0);
     will-change: transform;
@@ -148,7 +169,8 @@
 }
 
 @keyframes path-pulse {
-  0%, 100% {
+  0%,
+  100% {
     stroke-opacity: 0.8;
   }
   50% {
@@ -166,7 +188,8 @@
 }
 
 @keyframes path-fade {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.1;
   }
   50% {
@@ -175,47 +198,72 @@
 }
 
 @keyframes wave-move-1 {
-  0%, 100% {
-    d: path("M0,500 C120,470 240,530 360,500 C480,470 600,530 720,500 C840,470 960,530 1080,500 C1200,470 1320,530 1440,500");
+  0%,
+  100% {
+    d: path(
+      "M0,500 C120,470 240,530 360,500 C480,470 600,530 720,500 C840,470 960,530 1080,500 C1200,470 1320,530 1440,500"
+    );
   }
   50% {
-    d: path("M0,470 C120,530 240,470 360,530 C480,470 600,530 720,470 C840,530 960,470 1080,530 C1200,470 1320,530 1440,470");
+    d: path(
+      "M0,470 C120,530 240,470 360,530 C480,470 600,530 720,470 C840,530 960,470 1080,530 C1200,470 1320,530 1440,470"
+    );
   }
 }
 
 @keyframes wave-move-2 {
-  0%, 100% {
-    d: path("M0,300 C120,330 240,270 360,300 C480,330 600,270 720,300 C840,330 960,270 1080,300 C1200,330 1320,270 1440,300");
+  0%,
+  100% {
+    d: path(
+      "M0,300 C120,330 240,270 360,300 C480,330 600,270 720,300 C840,330 960,270 1080,300 C1200,330 1320,270 1440,300"
+    );
   }
   50% {
-    d: path("M0,330 C120,270 240,330 360,270 C480,330 600,270 720,330 C840,270 960,330 1080,270 C1200,330 1320,270 1440,330");
+    d: path(
+      "M0,330 C120,270 240,330 360,270 C480,330 600,270 720,330 C840,270 960,330 1080,270 C1200,330 1320,270 1440,330"
+    );
   }
 }
 
 @keyframes wave-move-3 {
-  0%, 100% {
-    d: path("M0,600 C160,550 320,650 480,600 C640,550 800,650 960,600 C1120,550 1280,650 1440,600");
+  0%,
+  100% {
+    d: path(
+      "M0,600 C160,550 320,650 480,600 C640,550 800,650 960,600 C1120,550 1280,650 1440,600"
+    );
   }
   50% {
-    d: path("M0,550 C160,650 320,550 480,650 C640,550 800,650 960,550 C1120,650 1280,550 1440,650");
+    d: path(
+      "M0,550 C160,650 320,550 480,650 C640,550 800,650 960,550 C1120,650 1280,550 1440,650"
+    );
   }
 }
 
 @keyframes wave-move-4 {
-  0%, 100% {
-    d: path("M0,200 C90,220 180,180 270,200 C360,220 450,180 540,200 C630,220 720,180 810,200 C900,220 990,180 1080,200 C1170,220 1260,180 1350,200 C1440,220");
+  0%,
+  100% {
+    d: path(
+      "M0,200 C90,220 180,180 270,200 C360,220 450,180 540,200 C630,220 720,180 810,200 C900,220 990,180 1080,200 C1170,220 1260,180 1350,200 C1440,220"
+    );
   }
   50% {
-    d: path("M0,220 C90,180 180,220 270,180 C360,220 450,180 540,220 C630,180 720,220 810,180 C900,220 990,180 1080,220 C1170,180 1260,220 1350,180 C1440,220");
+    d: path(
+      "M0,220 C90,180 180,220 270,180 C360,220 450,180 540,220 C630,180 720,220 810,180 C900,220 990,180 1080,220 C1170,180 1260,220 1350,180 C1440,220"
+    );
   }
 }
 
 @keyframes wave-move-5 {
-  0%, 100% {
-    d: path("M0,400 C160,380 320,420 480,400 C640,380 800,420 960,400 C1120,380 1280,420 1440,400");
+  0%,
+  100% {
+    d: path(
+      "M0,400 C160,380 320,420 480,400 C640,380 800,420 960,400 C1120,380 1280,420 1440,400"
+    );
   }
   50% {
-    d: path("M0,380 C160,420 320,380 480,420 C640,380 800,420 960,380 C1120,420 1280,380 1440,420");
+    d: path(
+      "M0,380 C160,420 320,380 480,420 C640,380 800,420 960,380 C1120,420 1280,380 1440,420"
+    );
   }
 }
 
@@ -229,7 +277,8 @@
 }
 
 @keyframes pulse-alternate {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.2;
     r: 2;
   }
@@ -240,7 +289,8 @@
 }
 
 @keyframes node-pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 0.2;
     r: 3;
     filter: blur(0);
@@ -259,7 +309,8 @@
 }
 
 @keyframes circuit-pulse {
-  0%, 100% {
+  0%,
+  100% {
     stroke-opacity: 0.1;
   }
   50% {

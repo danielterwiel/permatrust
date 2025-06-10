@@ -31,7 +31,7 @@ const bottomItems = [
   ['/management', 'Management', 'cloud-computing'],
 ] as const;
 
-type MenuItemsProps = { items: typeof mainItems | typeof bottomItems }
+type MenuItemsProps = { items: typeof mainItems | typeof bottomItems };
 
 const MenuItems: FC<MenuItemsProps> = ({ items }) => (
   <SidebarMenu>
@@ -69,7 +69,6 @@ const MenuItems: FC<MenuItemsProps> = ({ items }) => (
 type SidebarProps = { authActor: typeof AuthActor };
 
 export const Sidebar: FC<SidebarProps> = ({ authActor }) => {
-
   function logout() {
     authActor.send({ type: 'LOGOUT' });
   }

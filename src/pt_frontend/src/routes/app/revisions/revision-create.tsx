@@ -23,16 +23,16 @@ export const Route = createFileRoute(
     const revisions = await context.query.ensureQueryData(
       listRevisionsByDocumentIdOptions(documentId),
     );
-    
+
     // Get the latest revision's contents to prefill the form
     let revisionContents: Array<RevisionContent> | undefined = undefined;
-    if (revisions[0] && revisions[0].length > 0) {
+    if (revisions[0].length > 0) {
       const latestRevision = revisions[0][0]; // Most recent revision
       revisionContents = await context.query.ensureQueryData(
         listRevisionContentsOptions(latestRevision.id),
       );
     }
-    
+
     return { revisions, revisionContents };
   },
   component: RevisionsCreate,
@@ -49,7 +49,7 @@ function RevisionsCreate() {
 
   async function onSubmit(
     smallContents: Array<RevisionContent>,
-    largeContents: Array<RevisionContent>
+    largeContents: Array<RevisionContent>,
   ) {
     const projectId = projectIdSchema.parse(params.projectId);
     const documentId = documentIdSchema.parse(params.documentId);
@@ -60,7 +60,7 @@ function RevisionsCreate() {
         contents: smallContents,
         document_id: documentId,
         project_id: projectId,
-      })
+      }),
     );
 
     if (result.error) {
@@ -74,11 +74,12 @@ function RevisionsCreate() {
     return { revisionId };
   }
 
-  async function onSubmitComplete() {
+  function onSubmitComplete() {
     // Show success toast after all uploads are complete
     toast({
       title: 'Revision created',
-      description: 'Your revision has been successfully created with all files uploaded.',
+      description:
+        'Your revision has been successfully created with all files uploaded.',
     });
 
     // Navigate after all uploads are complete

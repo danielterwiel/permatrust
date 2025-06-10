@@ -1,8 +1,6 @@
 import { Outlet, createFileRoute } from '@tanstack/react-router';
 
-export const Route = createFileRoute(
-  '/_initialized/invites',
-)({
+export const Route = createFileRoute('/_initialized/invites')({
   beforeLoad: () => ({
     getTitle: () => 'Accept invite',
   }),

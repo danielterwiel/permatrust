@@ -1,6 +1,10 @@
-import { createMainMutations, mainMutations } from './main';
-import { createTenantMutations, tenantMutations } from './tenant';
-import { createUpgradeMutations, upgradeMutations } from './upgrade';
+import { mainMutations } from './main';
+import { tenantMutations } from './tenant';
+import { upgradeMutations } from './upgrade';
+
+import type { createMainMutations } from './main';
+import type { createTenantMutations } from './tenant';
+import type { createUpgradeMutations } from './upgrade';
 
 export { createMainMutations, mainMutations } from './main';
 export { createTenantMutations, tenantMutations } from './tenant';

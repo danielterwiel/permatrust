@@ -2,9 +2,15 @@ import { MDXEditor, headingsPlugin } from '@mdxeditor/editor';
 import { createFileRoute } from '@tanstack/react-router';
 import { useState } from 'react';
 
-import { getRevisionOptions, listRevisionContentsOptions } from '@/api/queries/revisions';
+import {
+  getRevisionOptions,
+  listRevisionContentsOptions,
+} from '@/api/queries/revisions';
 import { revisionIdSchema } from '@/schemas/entities';
-import { downloadChunkedContent, triggerDownload } from '@/utils/chunked-revision-download';
+import {
+  downloadChunkedContent,
+  triggerDownload,
+} from '@/utils/chunked-revision-download';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -49,7 +55,7 @@ function ChunkedMarkdownDisplay({ content }: { content: RevisionContent }) {
 
   const loadMarkdown = async () => {
     if (content.content_data.length === 0) return;
-    
+
     const contentData = content.content_data[0];
     if (!('Chunked' in contentData)) return;
 
@@ -119,12 +125,16 @@ function ChunkedMarkdownDisplay({ content }: { content: RevisionContent }) {
 
 function RevisionDetails() {
   const { revision, revisionContents } = Route.useLoaderData();
-  const [downloadProgress, setDownloadProgress] = useState<{[contentId: string]: number}>({});
-  const [isDownloading, setIsDownloading] = useState<{[contentId: string]: boolean}>({});
+  const [downloadProgress, setDownloadProgress] = useState<{
+    [contentId: string]: number;
+  }>({});
+  const [isDownloading, setIsDownloading] = useState<{
+    [contentId: string]: boolean;
+  }>({});
 
   const getFileName = (content: RevisionContent, index: number): string => {
-    if (content.file_name.length > 0) {
-      return content.file_name[0]!; // Safe because we checked length > 0
+    if (content.file_name[0] && content.file_name.length > 0) {
+      return content.file_name[0];
     }
     if ('Upload' in content.content_type) {
       return `upload-${index + 1}`;
@@ -138,7 +148,9 @@ function RevisionDetails() {
 
     if (content.content_data.length === 0) {
       // Reference to existing content, cannot download
-      alert('This content is a reference to existing content and cannot be downloaded directly.');
+      alert(
+        'This content is a reference to existing content and cannot be downloaded directly.',
+      );
       return;
     }
 
@@ -152,17 +164,17 @@ function RevisionDetails() {
       const { total_chunks, total_size } = contentData.Chunked;
 
       try {
-        setIsDownloading(prev => ({ ...prev, [contentIdStr]: true }));
-        setDownloadProgress(prev => ({ ...prev, [contentIdStr]: 0 }));
+        setIsDownloading((prev) => ({ ...prev, [contentIdStr]: true }));
+        setDownloadProgress((prev) => ({ ...prev, [contentIdStr]: 0 }));
 
         const assembledData = await downloadChunkedContent({
           contentId: content.id,
           totalChunks: total_chunks,
           totalSize: Number(total_size),
           onProgress: (progress) => {
-            setDownloadProgress(prev => ({
+            setDownloadProgress((prev) => ({
               ...prev,
-              [contentIdStr]: progress.percentComplete
+              [contentIdStr]: progress.percentComplete,
             }));
           },
         });
@@ -172,8 +184,8 @@ function RevisionDetails() {
         console.error('Download failed:', error);
         alert(`Download failed: ${error}`);
       } finally {
-        setIsDownloading(prev => ({ ...prev, [contentIdStr]: false }));
-        setDownloadProgress(prev => ({ ...prev, [contentIdStr]: 0 }));
+        setIsDownloading((prev) => ({ ...prev, [contentIdStr]: false }));
+        setDownloadProgress((prev) => ({ ...prev, [contentIdStr]: 0 }));
       }
     }
   };
@@ -183,7 +195,7 @@ function RevisionDetails() {
     const k = 1024;
     const sizes = ['Bytes', 'KB', 'MB', 'GB'];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
   };
 
   return (
@@ -213,10 +225,21 @@ function RevisionDetails() {
                 return (
                   <div key={content.id}>
                     <div className="flex items-center gap-2 mb-4 w-full min-w-0">
-                      <Icon name="file-orientation-outline" size="sm" className="flex-shrink-0" />
-                      <Badge variant="secondary" className="flex-shrink-0">Markdown</Badge>
+                      <Icon
+                        name="file-orientation-outline"
+                        size="sm"
+                        className="flex-shrink-0"
+                      />
+                      <Badge variant="secondary" className="flex-shrink-0">
+                        Markdown
+                      </Badge>
                       {fileName && (
-                        <span className="text-sm text-muted-foreground truncate" title={fileName}>{fileName}</span>
+                        <span
+                          className="text-sm text-muted-foreground truncate"
+                          title={fileName}
+                        >
+                          {fileName}
+                        </span>
                       )}
                     </div>
                     {content.content_data.length === 0 ? (
@@ -226,7 +249,9 @@ function RevisionDetails() {
                         </CardHeader>
                         <CardContent>
                           <div className="text-center py-4 text-muted-foreground">
-                            <p>This content is a reference to existing content.</p>
+                            <p>
+                              This content is a reference to existing content.
+                            </p>
                           </div>
                         </CardContent>
                       </Card>
@@ -238,7 +263,11 @@ function RevisionDetails() {
                         <CardContent>
                           <MDXEditor
                             contentEditableClassName="prose"
-                            markdown={new TextDecoder().decode(new Uint8Array(content.content_data[0].Direct.bytes))}
+                            markdown={new TextDecoder().decode(
+                              new Uint8Array(
+                                content.content_data[0].Direct.bytes,
+                              ),
+                            )}
                             onError={(_error) => {
                               // TODO: handle error
                             }}
@@ -256,19 +285,38 @@ function RevisionDetails() {
 
               if ('Upload' in content.content_type) {
                 return (
-                  <div key={content.id} className="border rounded-lg p-4 w-full min-w-0">
+                  <div
+                    key={content.id}
+                    className="border rounded-lg p-4 w-full min-w-0"
+                  >
                     <div className="flex items-center justify-between w-full min-w-0">
                       <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <Icon name="file-outline" size="sm" className="flex-shrink-0" />
-                        <Badge variant="outline" className="flex-shrink-0">Upload</Badge>
-                        <span className="text-sm font-medium truncate w-full" title={fileName}>{fileName}</span>
+                        <Icon
+                          name="file-outline"
+                          size="sm"
+                          className="flex-shrink-0"
+                        />
+                        <Badge variant="outline" className="flex-shrink-0">
+                          Upload
+                        </Badge>
+                        <span
+                          className="text-sm font-medium truncate w-full"
+                          title={fileName}
+                        >
+                          {fileName}
+                        </span>
                         <span className="text-sm text-muted-foreground flex-shrink-0">
                           {content.content_data.length === 0
                             ? 'Reference'
                             : 'Direct' in content.content_data[0]
-                              ? formatFileSize(content.content_data[0].Direct.bytes.length)
-                              : formatFileSize(Number(content.content_data[0].Chunked.total_size))
-                          }
+                              ? formatFileSize(
+                                  content.content_data[0].Direct.bytes.length,
+                                )
+                              : formatFileSize(
+                                  Number(
+                                    content.content_data[0].Chunked.total_size,
+                                  ),
+                                )}
                         </span>
                       </div>
                       {content.content_data.length === 0 ? (
@@ -278,7 +326,11 @@ function RevisionDetails() {
                           className="flex-shrink-0 ml-4"
                           disabled
                         >
-                          <Icon name="cloud-computing" size="sm" className="mr-2" />
+                          <Icon
+                            name="cloud-computing"
+                            size="sm"
+                            className="mr-2"
+                          />
                           Reference
                         </Button>
                       ) : isDownloading[content.id.toString()] ? (
@@ -286,7 +338,9 @@ function RevisionDetails() {
                           <div className="w-20 bg-gray-200 rounded-full h-2">
                             <div
                               className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                              style={{ width: `${downloadProgress[content.id.toString()] || 0}%` }}
+                              style={{
+                                width: `${downloadProgress[content.id.toString()] || 0}%`,
+                              }}
                             />
                           </div>
                           <span className="text-sm text-muted-foreground">
@@ -300,7 +354,11 @@ function RevisionDetails() {
                           className="flex-shrink-0 ml-4"
                           onClick={() => handleDownload(content, index)}
                         >
-                          <Icon name="cloud-computing" size="sm" className="mr-2" />
+                          <Icon
+                            name="cloud-computing"
+                            size="sm"
+                            className="mr-2"
+                          />
                           Download
                         </Button>
                       )}

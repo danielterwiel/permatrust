@@ -36,6 +36,12 @@ type CreateRevisionInput = record {
   contents : vec RevisionContent;
   project_id : nat32;
 };
+type CreateRoleInput = record {
+  permissions : vec Permission;
+  name : text;
+  description : opt text;
+  project_id : nat32;
+};
 type CreateUserInput = record { first_name : text; last_name : text };
 type CreateUserResult = variant { Ok : User; Err : AppError };
 type CreateWorkflowInput = record {
@@ -315,12 +321,6 @@ type Role = record {
   project_id : nat32;
 };
 type RoleFilterField = variant { Id; Name; ProjectId; CreatedAt };
-type RoleInput = record {
-  permissions : vec Permission;
-  name : text;
-  description : opt text;
-  project_id : nat32;
-};
 type SortCriteria = record { field : FilterField; order : SortOrder };
 type SortOrder = variant { Asc; Desc };
 type StoreRevisionContentChunkInput = record {
@@ -380,7 +380,7 @@ service : (CreateInitTenantCanisterInput) -> {
   create_organization : (CreateOrganizationInput) -> (CreateOrganizationResult);
   create_project : (CreateProjectInput) -> (CreateProjectResult);
   create_revision : (CreateRevisionInput) -> (CreateDocumentResult);
-  create_role : (RoleInput) -> (CreateDocumentResult);
+  create_role : (CreateRoleInput) -> (CreateDocumentResult);
   create_user : (CreateUserInput) -> (CreateUserResult) query;
   create_workflow : (CreateWorkflowInput) -> (CreateProjectResult);
   download_revision_content : (DownloadRevisionContentInput) -> (

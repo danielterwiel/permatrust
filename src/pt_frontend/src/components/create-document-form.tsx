@@ -16,9 +16,7 @@ import {
 } from '@/components/ui/form';
 import { Icon } from '@/components/ui/icon';
 
-import type {
-  RevisionContent,
-} from '@/declarations/tenant_canister/tenant_canister.did';
+import type { RevisionContent } from '@/declarations/tenant_canister/tenant_canister.did';
 
 export const createDocumentFormSchema = z.object({
   title: z.string().min(2, {
@@ -31,9 +29,9 @@ type CreateDocumentFormProps = {
   onSubmit: (
     title: string,
     smallContents: Array<RevisionContent>,
-    largeContents: Array<RevisionContent>
+    largeContents: Array<RevisionContent>,
   ) => Promise<{ revisionId: bigint } | null>;
-  onSubmitComplete: () => Promise<void>;
+  onSubmitComplete: () => void;
   projectId: string;
 };
 
@@ -51,10 +49,10 @@ export const CreateDocumentForm: FC<CreateDocumentFormProps> = ({
 
   const handleContentSubmit = async (
     smallContents: Array<RevisionContent>,
-    largeContents: Array<RevisionContent>
+    largeContents: Array<RevisionContent>,
   ) => {
     const title = titleForm.state.values.title;
-    
+
     // Validate title
     const titleValidation = createDocumentFormSchema.safeParse({ title });
     if (!titleValidation.success) {
@@ -102,9 +100,7 @@ export const CreateDocumentForm: FC<CreateDocumentFormProps> = ({
                     value={field.state.value}
                   />
                 </FormControl>
-                <FormDescription>
-                  This is your document title.
-                </FormDescription>
+                <FormDescription>This is your document title.</FormDescription>
                 <FormMessage field={field} />
               </FormItem>
             )}

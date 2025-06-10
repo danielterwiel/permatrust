@@ -3,7 +3,10 @@ import { useCallback, useState } from 'react';
 import { uploadContentInChunks } from '@/utils/chunked-content-upload';
 import type { ChunkedUploadProgress } from '@/utils/chunked-content-upload';
 
-import type { RevisionContent, RevisionContentChunk } from '@/declarations/tenant_canister/tenant_canister.did';
+import type {
+  RevisionContent,
+  RevisionContentChunk,
+} from '@/declarations/tenant_canister/tenant_canister.did';
 
 export type FileUploadProgress = {
   fileName: string;
@@ -28,7 +31,7 @@ export type ContentUploadOptions<T> = {
   entityId: T;
   contents: Array<RevisionContent>;
   startingContentIndex?: number;
-  fileMapping?: Array<{fileName: string, fileSize: number}>;
+  fileMapping?: Array<{ fileName: string; fileSize: number }>;
   uploadChunk: (params: {
     entityId: T;
     contentIndex: number;
@@ -53,7 +56,7 @@ export function useContentUpload<T>() {
 
   const uploadWithProgress = useCallback(
     async (options: ContentUploadOptions<T>) => {
-      setState(prev => ({
+      setState((prev) => ({
         isUploading: true,
         progress: null,
         percentComplete: 0,
@@ -66,25 +69,33 @@ export function useContentUpload<T>() {
           ...options,
           onProgress: (progress) => {
             const percentComplete = Math.round(
-              (progress.uploadedBytes / progress.totalContentSize) * 100
+              (progress.uploadedBytes / progress.totalContentSize) * 100,
             );
-            setState(prev => {
+            setState((prev) => {
               const newFileProgress = new Map(prev.fileProgress);
+              const { fileMapping } = options;
+              const fileContentIndex =
+                progress.contentIndex - (options.startingContentIndex || 0);
 
               // Update individual file progress based on content index
-              if (options.fileMapping && options.fileMapping[progress.contentIndex - (options.startingContentIndex || 0)]) {
-                const fileInfo = options.fileMapping[progress.contentIndex - (options.startingContentIndex || 0)];
+              if (fileMapping?.[fileContentIndex]) {
+                const fileInfo = fileMapping[fileContentIndex];
                 const fileKey = `${fileInfo.fileName}-${fileInfo.fileSize}`;
                 const currentFileProgress = newFileProgress.get(fileKey);
 
                 if (currentFileProgress) {
-                  const filePercentComplete = Math.round(((progress.chunkId + 1) / progress.totalChunks) * 100);
+                  const chunkDiff =
+                    (progress.chunkId + 1) / progress.totalChunks;
+                  const filePercentComplete = Math.round(chunkDiff * 100);
+                  const uploadedBytes =
+                    (filePercentComplete / 100) * currentFileProgress.fileSize;
                   newFileProgress.set(fileKey, {
                     ...currentFileProgress,
                     percentComplete: filePercentComplete,
                     currentChunk: progress.chunkId + 1,
-                    uploadedBytes: Math.round((filePercentComplete / 100) * currentFileProgress.fileSize),
-                    status: filePercentComplete === 100 ? 'completed' : 'uploading',
+                    uploadedBytes: Math.round(uploadedBytes),
+                    status:
+                      filePercentComplete === 100 ? 'completed' : 'uploading',
                   });
                 }
               }
@@ -100,7 +111,7 @@ export function useContentUpload<T>() {
           },
         });
 
-        setState(prev => ({
+        setState((prev) => ({
           isUploading: false,
           progress: null,
           percentComplete: 100,
@@ -108,7 +119,7 @@ export function useContentUpload<T>() {
           fileProgress: prev.fileProgress,
         }));
       } catch (error) {
-        setState(prev => ({
+        setState((prev) => ({
           isUploading: false,
           progress: null,
           percentComplete: 0,
@@ -118,7 +129,7 @@ export function useContentUpload<T>() {
         throw error;
       }
     },
-    []
+    [],
   );
 
   const resetProgress = useCallback(() => {
@@ -132,7 +143,7 @@ export function useContentUpload<T>() {
   }, []);
 
   const initializeFileProgress = useCallback((files: Array<File>) => {
-    setState(prev => {
+    setState((prev) => {
       const newFileProgress = new Map<string, FileUploadProgress>();
       for (const file of files) {
         const fileKey = `${file.name}-${file.size}`;
@@ -142,12 +153,12 @@ export function useContentUpload<T>() {
           fileSize: file.size,
           uploadedBytes: 0,
           percentComplete: 0,
-          totalChunks: isChunked ? Math.ceil(file.size / (1048576)) : 1, // 1MB chunks or single upload
+          totalChunks: isChunked ? Math.ceil(file.size / 1048576) : 1, // 1MB chunks or single upload
           currentChunk: 0,
           status: 'waiting',
           isChunked,
         });
-      };
+      }
       return {
         ...prev,
         fileProgress: newFileProgress,
@@ -156,8 +167,12 @@ export function useContentUpload<T>() {
   }, []);
 
   const updateFileProgress = useCallback(
-    (fileName: string, fileSize: number, update: Partial<FileUploadProgress>) => {
-      setState(prev => {
+    (
+      fileName: string,
+      fileSize: number,
+      update: Partial<FileUploadProgress>,
+    ) => {
+      setState((prev) => {
         const fileKey = `${fileName}-${fileSize}`;
         const newFileProgress = new Map(prev.fileProgress);
         const currentProgress = newFileProgress.get(fileKey);
@@ -172,7 +187,9 @@ export function useContentUpload<T>() {
           fileProgress: newFileProgress,
         };
       });
-    }, []);
+    },
+    [],
+  );
 
   return {
     ...state,

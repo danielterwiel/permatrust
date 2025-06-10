@@ -27,7 +27,7 @@ function CreateDocument() {
     mutations.tenant.useCreateRevision();
   const navigate = useNavigate();
   const params = Route.useParams();
-  
+
   let createdDocumentId: bigint | null = null;
 
   const isSubmitting = isDocumentSubmitting || isRevisionSubmitting;
@@ -35,7 +35,7 @@ function CreateDocument() {
   async function onSubmit(
     title: string,
     smallContents: Array<RevisionContent>,
-    largeContents: Array<RevisionContent>
+    largeContents: Array<RevisionContent>,
   ): Promise<{ revisionId: bigint } | null> {
     const projectId = projectIdSchema.parse(params.projectId);
 
@@ -44,7 +44,7 @@ function CreateDocument() {
       createDocument({
         project_id: projectId,
         title,
-      })
+      }),
     );
 
     if (documentResult.error) {
@@ -60,7 +60,7 @@ function CreateDocument() {
         project_id: projectId,
         document_id: createdDocumentId,
         contents: smallContents,
-      })
+      }),
     );
 
     if (revisionResult.error) {
@@ -72,7 +72,7 @@ function CreateDocument() {
     return { revisionId: revisionResult.data };
   }
 
-  async function onSubmitComplete(): Promise<void> {
+  function onSubmitComplete() {
     // Navigate to the created document
     if (createdDocumentId) {
       navigate({

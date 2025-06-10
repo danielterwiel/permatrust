@@ -81,19 +81,69 @@ function Home() {
             xmlns="http://www.w3.org/2000/svg"
           >
             <defs>
-              <linearGradient id="graph-gradient" x1="0%" x2="100%" y1="0%" y2="100%">
-                <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.1" />
-                <stop offset="50%" stopColor="var(--primary)" stopOpacity="0.2" />
-                <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.1" />
+              <linearGradient
+                id="graph-gradient"
+                x1="0%"
+                x2="100%"
+                y1="0%"
+                y2="100%"
+              >
+                <stop
+                  offset="0%"
+                  stopColor="var(--primary)"
+                  stopOpacity="0.1"
+                />
+                <stop
+                  offset="50%"
+                  stopColor="var(--primary)"
+                  stopOpacity="0.2"
+                />
+                <stop
+                  offset="100%"
+                  stopColor="var(--primary)"
+                  stopOpacity="0.1"
+                />
               </linearGradient>
-              <linearGradient id="wave-gradient" x1="0%" x2="100%" y1="0%" y2="0%">
-                <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.05" />
-                <stop offset="50%" stopColor="var(--primary)" stopOpacity="0.2" />
-                <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.05" />
+              <linearGradient
+                id="wave-gradient"
+                x1="0%"
+                x2="100%"
+                y1="0%"
+                y2="0%"
+              >
+                <stop
+                  offset="0%"
+                  stopColor="var(--primary)"
+                  stopOpacity="0.05"
+                />
+                <stop
+                  offset="50%"
+                  stopColor="var(--primary)"
+                  stopOpacity="0.2"
+                />
+                <stop
+                  offset="100%"
+                  stopColor="var(--primary)"
+                  stopOpacity="0.05"
+                />
               </linearGradient>
-              <linearGradient id="pulse-gradient" x1="0%" x2="100%" y1="0%" y2="100%">
-                <stop offset="0%" stopColor="var(--primary)" stopOpacity="0.3" />
-                <stop offset="100%" stopColor="var(--primary)" stopOpacity="0.1" />
+              <linearGradient
+                id="pulse-gradient"
+                x1="0%"
+                x2="100%"
+                y1="0%"
+                y2="100%"
+              >
+                <stop
+                  offset="0%"
+                  stopColor="var(--primary)"
+                  stopOpacity="0.3"
+                />
+                <stop
+                  offset="100%"
+                  stopColor="var(--primary)"
+                  stopOpacity="0.1"
+                />
               </linearGradient>
               <filter height="140%" id="glow" width="140%" x="-20%" y="-20%">
                 <feGaussianBlur result="blur" stdDeviation="8" />
@@ -105,7 +155,11 @@ function Home() {
             </defs>
 
             {/* Dense grid lines - horizontal */}
-            <g mask="url(#graph-mask)" stroke="currentColor" strokeOpacity="0.03">
+            <g
+              mask="url(#graph-mask)"
+              stroke="currentColor"
+              strokeOpacity="0.03"
+            >
               <line x1="0" x2="1440" y1="50" y2="50" />
               <line x1="0" x2="1440" y1="100" y2="100" />
               <line x1="0" x2="1440" y1="150" y2="150" />
@@ -124,7 +178,11 @@ function Home() {
             </g>
 
             {/* Dense grid lines - vertical */}
-            <g mask="url(#graph-mask)" stroke="currentColor" strokeOpacity="0.03">
+            <g
+              mask="url(#graph-mask)"
+              stroke="currentColor"
+              strokeOpacity="0.03"
+            >
               <line x1="80" x2="80" y1="0" y2="800" />
               <line x1="160" x2="160" y1="0" y2="800" />
               <line x1="240" x2="240" y1="0" y2="800" />
@@ -145,7 +203,11 @@ function Home() {
             </g>
 
             {/* Main grid lines - highlighted */}
-            <g mask="url(#graph-mask)" stroke="currentColor" strokeOpacity="0.07">
+            <g
+              mask="url(#graph-mask)"
+              stroke="currentColor"
+              strokeOpacity="0.07"
+            >
               <line x1="0" x2="1440" y1="200" y2="200" />
               <line x1="0" x2="1440" y1="400" y2="400" />
               <line x1="0" x2="1440" y1="600" y2="600" />
@@ -228,7 +290,11 @@ function Home() {
             />
 
             {/* Data points - Primary with glow effect */}
-            <g className="transform-gpu animate-pulse-slow" fill="url(#pulse-gradient)" filter="url(#glow)">
+            <g
+              className="transform-gpu animate-pulse-slow"
+              fill="url(#pulse-gradient)"
+              filter="url(#glow)"
+            >
               <circle cx="0" cy="650" opacity="0.7" r="4" />
               <circle cx="480" cy="510" opacity="0.8" r="5" />
               <circle cx="960" cy="410" opacity="0.8" r="5" />
@@ -241,7 +307,10 @@ function Home() {
             </g>
 
             {/* Wave data points */}
-            <g className="transform-gpu animate-pulse-alternate" fill="var(--primary)">
+            <g
+              className="transform-gpu animate-pulse-alternate"
+              fill="var(--primary)"
+            >
               <circle cx="360" cy="500" opacity="0.5" r="2.5" />
               <circle cx="720" cy="500" opacity="0.5" r="2.5" />
               <circle cx="1080" cy="500" opacity="0.5" r="2.5" />
@@ -272,43 +341,176 @@ function Home() {
 
             {/* Additional effect nodes with pulse animations */}
             <g className="transform-gpu" filter="url(#glow)">
-              <circle className="animate-node-pulse-1" cx="480" cy="510" fill="var(--primary)" opacity="0.7" r="6" />
-              <circle className="animate-node-pulse-2" cx="960" cy="410" fill="var(--primary)" opacity="0.7" r="6" />
-              <circle className="animate-node-pulse-3" cx="720" cy="300" fill="var(--primary)" opacity="0.6" r="4" />
-              <circle className="animate-node-pulse-2" cx="1080" cy="500" fill="var(--primary)" opacity="0.6" r="4" />
-              <circle className="animate-node-pulse-3" cx="240" cy="300" fill="var(--primary)" opacity="0.6" r="4" />
+              <circle
+                className="animate-node-pulse-1"
+                cx="480"
+                cy="510"
+                fill="var(--primary)"
+                opacity="0.7"
+                r="6"
+              />
+              <circle
+                className="animate-node-pulse-2"
+                cx="960"
+                cy="410"
+                fill="var(--primary)"
+                opacity="0.7"
+                r="6"
+              />
+              <circle
+                className="animate-node-pulse-3"
+                cx="720"
+                cy="300"
+                fill="var(--primary)"
+                opacity="0.6"
+                r="4"
+              />
+              <circle
+                className="animate-node-pulse-2"
+                cx="1080"
+                cy="500"
+                fill="var(--primary)"
+                opacity="0.6"
+                r="4"
+              />
+              <circle
+                className="animate-node-pulse-3"
+                cx="240"
+                cy="300"
+                fill="var(--primary)"
+                opacity="0.6"
+                r="4"
+              />
             </g>
 
             {/* Mathematical-looking patterns with enhanced visibility */}
-            <g fill="none" stroke="var(--primary)" strokeOpacity="0.15" strokeWidth="1.5">
-              <path className="transform-gpu animate-path-fade" d="M100,350 Q150,300 200,350 T300,350" />
-              <path className="transform-gpu animate-path-fade" d="M700,200 Q750,150 800,200 T900,200" />
-              <path className="transform-gpu animate-path-fade" d="M1100,450 Q1150,400 1200,450 T1300,450" />
-              <path className="transform-gpu animate-path-fade-delayed" d="M400,250 Q450,200 500,250 T600,250" />
-              <path className="transform-gpu animate-path-fade-delayed" d="M900,400 Q950,350 1000,400 T1100,400" />
+            <g
+              fill="none"
+              stroke="var(--primary)"
+              strokeOpacity="0.15"
+              strokeWidth="1.5"
+            >
+              <path
+                className="transform-gpu animate-path-fade"
+                d="M100,350 Q150,300 200,350 T300,350"
+              />
+              <path
+                className="transform-gpu animate-path-fade"
+                d="M700,200 Q750,150 800,200 T900,200"
+              />
+              <path
+                className="transform-gpu animate-path-fade"
+                d="M1100,450 Q1150,400 1200,450 T1300,450"
+              />
+              <path
+                className="transform-gpu animate-path-fade-delayed"
+                d="M400,250 Q450,200 500,250 T600,250"
+              />
+              <path
+                className="transform-gpu animate-path-fade-delayed"
+                d="M900,400 Q950,350 1000,400 T1100,400"
+              />
             </g>
 
             {/* Digital circuit-like pattern */}
-            <g fill="none" stroke="var(--primary)" strokeLinecap="square" strokeOpacity="0.2" strokeWidth="1.5">
-              <path className="transform-gpu animate-circuit-fade" d="M100,150 L180,150 L180,250 L280,250" />
-              <path className="transform-gpu animate-circuit-fade" d="M500,100 L500,200 L600,200 L600,300" />
-              <path className="transform-gpu animate-circuit-fade" d="M900,120 L1000,120 L1000,300 L1100,300" />
-              <path className="transform-gpu animate-circuit-fade-delayed" d="M300,450 L300,550 L400,550 L400,650" />
-              <path className="transform-gpu animate-circuit-fade-delayed" d="M700,500 L800,500 L800,600 L900,600" />
-              <path className="transform-gpu animate-circuit-fade-delayed" d="M1200,350 L1200,450 L1300,450" />
+            <g
+              fill="none"
+              stroke="var(--primary)"
+              strokeLinecap="square"
+              strokeOpacity="0.2"
+              strokeWidth="1.5"
+            >
+              <path
+                className="transform-gpu animate-circuit-fade"
+                d="M100,150 L180,150 L180,250 L280,250"
+              />
+              <path
+                className="transform-gpu animate-circuit-fade"
+                d="M500,100 L500,200 L600,200 L600,300"
+              />
+              <path
+                className="transform-gpu animate-circuit-fade"
+                d="M900,120 L1000,120 L1000,300 L1100,300"
+              />
+              <path
+                className="transform-gpu animate-circuit-fade-delayed"
+                d="M300,450 L300,550 L400,550 L400,650"
+              />
+              <path
+                className="transform-gpu animate-circuit-fade-delayed"
+                d="M700,500 L800,500 L800,600 L900,600"
+              />
+              <path
+                className="transform-gpu animate-circuit-fade-delayed"
+                d="M1200,350 L1200,450 L1300,450"
+              />
             </g>
 
             {/* Connection nodes for circuit patterns */}
             <g className="transform-gpu" fill="var(--primary)">
-              <circle className="animate-node-pulse-1" cx="180" cy="150" opacity="0.3" r="3" />
-              <circle className="animate-node-pulse-2" cx="180" cy="250" opacity="0.3" r="3" />
-              <circle className="animate-node-pulse-3" cx="500" cy="200" opacity="0.3" r="3" />
-              <circle className="animate-node-pulse-1" cx="1000" cy="120" opacity="0.3" r="3" />
-              <circle className="animate-node-pulse-2" cx="1000" cy="300" opacity="0.3" r="3" />
-              <circle className="animate-node-pulse-3" cx="300" cy="550" opacity="0.3" r="3" />
-              <circle className="animate-node-pulse-1" cx="800" cy="500" opacity="0.3" r="3" />
-              <circle className="animate-node-pulse-2" cx="800" cy="600" opacity="0.3" r="3" />
-              <circle className="animate-node-pulse-3" cx="1200" cy="450" opacity="0.3" r="3" />
+              <circle
+                className="animate-node-pulse-1"
+                cx="180"
+                cy="150"
+                opacity="0.3"
+                r="3"
+              />
+              <circle
+                className="animate-node-pulse-2"
+                cx="180"
+                cy="250"
+                opacity="0.3"
+                r="3"
+              />
+              <circle
+                className="animate-node-pulse-3"
+                cx="500"
+                cy="200"
+                opacity="0.3"
+                r="3"
+              />
+              <circle
+                className="animate-node-pulse-1"
+                cx="1000"
+                cy="120"
+                opacity="0.3"
+                r="3"
+              />
+              <circle
+                className="animate-node-pulse-2"
+                cx="1000"
+                cy="300"
+                opacity="0.3"
+                r="3"
+              />
+              <circle
+                className="animate-node-pulse-3"
+                cx="300"
+                cy="550"
+                opacity="0.3"
+                r="3"
+              />
+              <circle
+                className="animate-node-pulse-1"
+                cx="800"
+                cy="500"
+                opacity="0.3"
+                r="3"
+              />
+              <circle
+                className="animate-node-pulse-2"
+                cx="800"
+                cy="600"
+                opacity="0.3"
+                r="3"
+              />
+              <circle
+                className="animate-node-pulse-3"
+                cx="1200"
+                cy="450"
+                opacity="0.3"
+                r="3"
+              />
             </g>
           </svg>
 

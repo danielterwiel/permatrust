@@ -1,6 +1,18 @@
-
-import type { ChangeEvent, ComponentProps, FocusEvent, ForwardedRef, MutableRefObject } from 'react';
-import { forwardRef, memo, useCallback, useEffect, useRef, useState } from 'react';
+import type {
+  ChangeEvent,
+  ComponentProps,
+  FocusEvent,
+  ForwardedRef,
+  MutableRefObject,
+} from 'react';
+import {
+  forwardRef,
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 
 import { Icon } from '@/components/ui/icon';
 import { Input as InputBase } from '@/components/ui/input';
@@ -34,7 +46,7 @@ const InputComponent = forwardRef(function Input(
     onFocus,
     ...inputProps
   }: InputProps,
-  ref: ForwardedRef<HTMLInputElement>
+  ref: ForwardedRef<HTMLInputElement>,
 ) {
   const [isFocused, setIsFocused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -44,7 +56,8 @@ const InputComponent = forwardRef(function Input(
   const internalRef = useRef<HTMLInputElement>(null);
 
   // Use the forwarded ref if available, otherwise fall back to internal ref
-  const inputRef = (ref || internalRef) as MutableRefObject<HTMLInputElement | null>;
+  const inputRef = (ref ||
+    internalRef) as MutableRefObject<HTMLInputElement | null>;
 
   // Sync input value with external value prop when it changes
   useEffect(() => {
@@ -76,37 +89,46 @@ const InputComponent = forwardRef(function Input(
     }
   }, [onChange, onChangeImmediate, onClear, inputRef]);
 
-  const handleChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setInputValue(newValue);
+  const handleChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const newValue = e.target.value;
+      setInputValue(newValue);
 
-    // Always call onChangeImmediate if provided
-    onChangeImmediate?.(newValue);
+      // Always call onChangeImmediate if provided
+      onChangeImmediate?.(newValue);
 
-    // If we should debounce, set up the timer
-    if (shouldDebounce) {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
+      // If we should debounce, set up the timer
+      if (shouldDebounce) {
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
 
-      timeoutRef.current = setTimeout(() => {
+        timeoutRef.current = setTimeout(() => {
+          onChange(newValue);
+        }, debounceDelay);
+      } else {
+        // Otherwise call onChange immediately
         onChange(newValue);
-      }, debounceDelay);
-    } else {
-      // Otherwise call onChange immediately
-      onChange(newValue);
-    }
-  }, [onChange, onChangeImmediate, shouldDebounce, debounceDelay]);
+      }
+    },
+    [onChange, onChangeImmediate, shouldDebounce, debounceDelay],
+  );
 
-  const handleBlur = useCallback((e: FocusEvent<HTMLInputElement>) => {
-    setIsFocused(false);
-    onBlur?.(e);
-  }, [onBlur]);
+  const handleBlur = useCallback(
+    (e: FocusEvent<HTMLInputElement>) => {
+      setIsFocused(false);
+      onBlur?.(e);
+    },
+    [onBlur],
+  );
 
-  const handleFocus = useCallback((e: FocusEvent<HTMLInputElement>) => {
-    setIsFocused(true);
-    onFocus?.(e);
-  }, [onFocus]);
+  const handleFocus = useCallback(
+    (e: FocusEvent<HTMLInputElement>) => {
+      setIsFocused(true);
+      onFocus?.(e);
+    },
+    [onFocus],
+  );
 
   // Cancel any pending debounce on unmount
   useEffect(() => {
@@ -123,9 +145,9 @@ const InputComponent = forwardRef(function Input(
 
   // Only calculate visibility class if we're showing the clear button
   const clearButtonVisibilityClass = shouldRenderClearButton
-    ? (isFocused || isHovered || isButtonFocused
+    ? isFocused || isHovered || isButtonFocused
       ? 'opacity-100 visible'
-      : 'opacity-0 invisible')
+      : 'opacity-0 invisible'
     : '';
 
   return (

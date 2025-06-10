@@ -6,9 +6,7 @@ export const createProjectMutations = () => {
   const useCreateProject = createMutationHook(
     api.tenant.create_project,
     () => ({
-      queries: [
-        { queryKey: ['projects_list'] }
-      ],
+      queries: [{ queryKey: ['projects_list'] }],
     }),
     {
       successToast: {

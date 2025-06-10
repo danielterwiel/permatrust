@@ -10,7 +10,7 @@ use shared::types::access_control::{
 };
 
 #[ic_cdk_macros::update]
-pub fn create_role(input: RoleInput) -> CreateRoleResult {
+pub fn create_role(input: CreateRoleInput) -> CreateRoleResult {
     let principal = ic_cdk::api::msg_caller();
     log_debug!(
         "auth_check: Role creation attempt [principal={}, role_name='{}', project_id={}]",
@@ -133,7 +133,7 @@ pub fn assign_roles(input: AssignRolesInput) -> AssignRolesResult {
 
     let roles: Vec<Role> = input.role_ids.iter().filter_map(state::get_role).collect();
     if roles.len() != input.role_ids.len() {
-        log_warn!("role_assignment: Role validation failed [principal={}, requested_roles={:?}, found_roles={}]", 
+        log_warn!("role_assignment: Role validation failed [principal={}, requested_roles={:?}, found_roles={}]",
                  principal, input.role_ids, roles.len());
         return AssignRolesResult::Err(AppError::EntityNotFound("Role not found".to_string()));
     }
@@ -180,7 +180,7 @@ pub fn update_role_permissions(input: UpdateRolePermissionsInput) -> UpdateRoleP
 
     let mut role = match state::get_role(&input.role_id) {
         Some(role) => {
-            log_debug!("role_modification: Found role for update [role_id={}, name='{}', current_permissions={}]", 
+            log_debug!("role_modification: Found role for update [role_id={}, name='{}', current_permissions={}]",
                       input.role_id, role.name, role.permissions.len());
             role
         }
@@ -201,7 +201,7 @@ pub fn update_role_permissions(input: UpdateRolePermissionsInput) -> UpdateRoleP
     role.updated_at = Some(ic_cdk::api::time());
     state::update_role(input.role_id, role.clone());
 
-    log_info!("role_modification: Updated role permissions [principal={}, role_id={}, role_name='{}', old_permissions={}, new_permissions={}]", 
+    log_info!("role_modification: Updated role permissions [principal={}, role_id={}, role_name='{}', old_permissions={}, new_permissions={}]",
              principal, input.role_id, role.name, old_permissions_count, role.permissions.len());
     UpdateRolePermissionsResult::Ok
 }
@@ -223,14 +223,14 @@ pub fn init_default_roles() {
         }
     };
 
-    let admin_role = RoleInput {
+    let admin_role = CreateRoleInput {
         name: "Admin".to_string(),
         description: Some("Full system access".to_string()),
         permissions,
         project_id: 0,
     };
 
-    let editor_role = RoleInput {
+    let editor_role = CreateRoleInput {
         name: "Editor".to_string(),
         description: Some("Manages the content".to_string()),
         permissions: vec![
@@ -242,7 +242,7 @@ pub fn init_default_roles() {
         project_id: 0,
     };
 
-    let viewer_role = RoleInput {
+    let viewer_role = CreateRoleInput {
         name: "Viewer".to_string(),
         description: Some("Read-only access".to_string()),
         permissions: get_all_read_permissions(),

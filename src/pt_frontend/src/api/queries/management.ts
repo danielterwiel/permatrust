@@ -23,4 +23,3 @@ export const getAllWasmVersionsOptions = () => {
     queryKey: ['management', 'get_all_wasm_versions'],
   });
 };
-

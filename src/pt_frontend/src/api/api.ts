@@ -1,6 +1,10 @@
 import { HttpAgent } from '@dfinity/agent';
 
-import { createMainMutations, createTenantMutations, createUpgradeMutations } from '@/api/mutations';
+import {
+  createMainMutations,
+  createTenantMutations,
+  createUpgradeMutations,
+} from '@/api/mutations';
 import { isAppError } from '@/utils/is-app-error';
 
 import { canisterIdMain, canisterIdUpgrade } from '@/consts/canisters';
@@ -42,10 +46,7 @@ async function createActorWrapper<T, TApiKey extends keyof ApiInterface>(
     createActorFn,
     authClient,
   );
-  const wrappedActor = wrapActor<T>(
-    wrapWithAuth<T>(actor, authClient),
-  ) as T;
-
+  const wrappedActor = wrapActor<T>(wrapWithAuth<T>(actor, authClient)) as T;
   (api as unknown as Record<TApiKey, T>)[apiKey] = wrappedActor;
   createMutationsFn();
 
@@ -140,7 +141,10 @@ function isResultHandler(value: unknown): value is ResultHandler<unknown> {
 }
 
 function wrapActor<T>(actor: ActorWithIndex<T>): WrappedActorWithIndex<T> {
-  const wrappedActor: Record<string, (...args: Array<unknown>) => Promise<unknown>> = {};
+  const wrappedActor: Record<
+    string,
+    (...args: Array<unknown>) => Promise<unknown>
+  > = {};
 
   for (const key in actor) {
     const method = actor[key];

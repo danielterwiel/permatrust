@@ -1,4 +1,3 @@
-
 import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 
@@ -15,8 +14,11 @@ import type {
 
 type CreateRevisionFormProps = {
   isSubmitting: boolean;
-  onSubmit: (smallContents: Array<RevisionContent>, largeContents: Array<RevisionContent>) => Promise<{ revisionId: bigint } | null>;
-  onSubmitComplete: () => Promise<void>;
+  onSubmit: (
+    smallContents: Array<RevisionContent>,
+    largeContents: Array<RevisionContent>,
+  ) => Promise<{ revisionId: bigint } | null>;
+  onSubmitComplete: () => void;
   projectId: string;
   revision: Revision | undefined;
   revisionContents: Array<RevisionContent> | undefined;
@@ -31,15 +33,20 @@ export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
   revisionContents,
 }) => {
   const [isLoadingRevisionData, setIsLoadingRevisionData] = useState(false);
-  const [defaultMarkdownContent, setDefaultMarkdownContent] = useState('# Hello world');
+  const [defaultMarkdownContent, setDefaultMarkdownContent] =
+    useState('# Hello world');
   const [defaultFiles, setDefaultFiles] = useState<Array<File>>([]);
 
   // Helper function to convert RevisionContent back to File for form display
-  const convertContentToFile = async (content: RevisionContent): Promise<File | null> => {
+  const convertContentToFile = async (
+    content: RevisionContent,
+  ): Promise<File | null> => {
     try {
       // Check if content_data is available (not a reference)
       if (content.content_data.length === 0) {
-        console.warn(`Content ${content.id} is a reference with no data, cannot convert to file`);
+        console.warn(
+          `Content ${content.id} is a reference with no data, cannot convert to file`,
+        );
         return null;
       }
 
@@ -58,10 +65,20 @@ export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
         });
       }
 
-      const fileName = content.file_name.length > 0 ? content.file_name[0]! : `content-${content.id}`;
-      const mimeType = 'Upload' in content.content_type ? 'application/octet-stream' : 'text/markdown';
+      const fileName =
+        content.file_name.length > 0
+          ? content.file_name[0]
+          : `content-${content.id}`;
+      const mimeType =
+        'Upload' in content.content_type
+          ? 'application/octet-stream'
+          : 'text/markdown';
 
-      return new File([bytes], fileName, { type: mimeType });
+      const arrayBuffer = new ArrayBuffer(bytes.length);
+      const view = new Uint8Array(arrayBuffer);
+      view.set(bytes);
+
+      return new File([arrayBuffer], fileName ?? 'unknown', { type: mimeType });
     } catch (error) {
       console.error('Failed to convert content to file:', error);
       return null;
@@ -72,8 +89,8 @@ export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
   const getMarkdownContent = async (): Promise<string> => {
     if (!revisionContents) return '';
 
-    const markdownContent = revisionContents.find(content =>
-      'Markdown' in content.content_type
+    const markdownContent = revisionContents.find(
+      (content) => 'Markdown' in content.content_type,
     );
 
     if (!markdownContent) return '';
@@ -81,7 +98,9 @@ export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
     try {
       // Check if content_data is available (not a reference)
       if (markdownContent.content_data.length === 0) {
-        console.warn(`Markdown content ${markdownContent.id} is a reference with no data, cannot load`);
+        console.warn(
+          `Markdown content ${markdownContent.id} is a reference with no data, cannot load`,
+        );
         return '';
       }
 
@@ -111,8 +130,8 @@ export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
   const getUploadFiles = async (): Promise<Array<File>> => {
     if (!revisionContents) return [];
 
-    const uploadContents = revisionContents.filter(content =>
-      'Upload' in content.content_type
+    const uploadContents = revisionContents.filter(
+      (content) => 'Upload' in content.content_type,
     );
 
     const files: Array<File> = [];
@@ -128,6 +147,7 @@ export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
   };
 
   // Load revision data and populate form when component mounts
+  // biome-ignore lint/correctness/useExhaustiveDependencies: infinite loop
   useEffect(() => {
     const loadRevisionData = async () => {
       if (!revisionContents) {
@@ -140,7 +160,7 @@ export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
       try {
         const [markdownContent, uploadFiles] = await Promise.all([
           getMarkdownContent(),
-          getUploadFiles()
+          getUploadFiles(),
         ]);
 
         // Set default values for the ContentForm
@@ -160,7 +180,9 @@ export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
     return (
       <>
         <div className="flex items-center justify-between pb-4">
-          <h2 className="text-lg font-semibold">Loading previous revision...</h2>
+          <h2 className="text-lg font-semibold">
+            Loading previous revision...
+          </h2>
         </div>
         <Card>
           <CardHeader>
@@ -176,12 +198,12 @@ export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
           <CardContent>
             <div className="space-y-4">
               <div className="space-y-2">
-                <div className="h-4 bg-muted rounded animate-pulse"/>
-                <div className="h-32 bg-muted rounded animate-pulse"/>
+                <div className="h-4 bg-muted rounded animate-pulse" />
+                <div className="h-32 bg-muted rounded animate-pulse" />
               </div>
               <div className="space-y-2">
-                <div className="h-4 bg-muted rounded animate-pulse"/>
-                <div className="h-24 bg-muted rounded animate-pulse"/>
+                <div className="h-4 bg-muted rounded animate-pulse" />
+                <div className="h-24 bg-muted rounded animate-pulse" />
               </div>
             </div>
           </CardContent>
@@ -194,7 +216,9 @@ export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
     <>
       <div className="flex items-center justify-between pb-4">
         <h2 className="text-lg font-semibold">
-          {revisionContents ? 'Create new revision (based on latest)' : 'Create new revision'}
+          {revisionContents
+            ? 'Create new revision (based on latest)'
+            : 'Create new revision'}
         </h2>
       </div>
       <Card>

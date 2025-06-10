@@ -1,6 +1,9 @@
 import { createFileRoute } from '@tanstack/react-router';
 
-import { getAllTenantCanisterIds, getAllWasmVersionsOptions } from '@/api/queries';
+import {
+  getAllTenantCanisterIds,
+  getAllWasmVersionsOptions,
+} from '@/api/queries';
 
 import { EmptyState } from '@/components/empty-state';
 import { Badge } from '@/components/ui/badge';
@@ -16,9 +19,9 @@ export const Route = createFileRoute(
   loader: async ({ context }) => {
     const [wasmVersions, tenantCanisterIds] = await Promise.all([
       context.query.ensureQueryData(getAllWasmVersionsOptions()),
-      context.query.ensureQueryData(getAllTenantCanisterIds())
+      context.query.ensureQueryData(getAllTenantCanisterIds()),
     ]);
-    return { tenantCanisterIds,wasmVersions };
+    return { tenantCanisterIds, wasmVersions };
   },
   component: Management,
   errorComponent: ({ error }) => {
@@ -53,7 +56,11 @@ function Management() {
                   className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-center space-x-3">
-                    <Icon name="file-outline" size="sm" className="text-muted-foreground" />
+                    <Icon
+                      name="file-outline"
+                      size="sm"
+                      className="text-muted-foreground"
+                    />
                     <span className="font-medium">Version {version}</span>
                   </div>
                   <Badge variant="secondary">{version}</Badge>
@@ -61,10 +68,7 @@ function Management() {
               ))}
             </div>
           ) : (
-            <EmptyState 
-              icon="assembly"
-              message="No WASM versions available."
-            />
+            <EmptyState icon="assembly" message="No WASM versions available." />
           )}
         </CardContent>
       </Card>
@@ -89,7 +93,11 @@ function Management() {
                   className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-center space-x-3">
-                    <Icon name="building-outline" size="sm" className="text-muted-foreground" />
+                    <Icon
+                      name="building-outline"
+                      size="sm"
+                      className="text-muted-foreground"
+                    />
                     <div>
                       <p className="font-medium">Canister ID</p>
                       <p className="text-sm text-muted-foreground font-mono">
@@ -102,7 +110,7 @@ function Management() {
               ))}
             </div>
           ) : (
-            <EmptyState 
+            <EmptyState
               icon="buildings-outline"
               message="No tenant canisters found."
             />

@@ -1,4 +1,3 @@
-
 import type * as React from 'react';
 
 import type { PaginationSearchParams } from '@/schemas/pagination';

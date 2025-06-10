@@ -17,7 +17,10 @@ import { Icon } from '@/components/ui/icon';
 import { ENTITY } from '@/consts/entities';
 import { FIELDS, FILTER_OPERATOR, SORT_ORDER } from '@/consts/pagination';
 
-import type { Role, User } from '@/declarations/tenant_canister/tenant_canister.did';
+import type {
+  Role,
+  User,
+} from '@/declarations/tenant_canister/tenant_canister.did';
 import type { Row } from '@tanstack/react-table';
 
 const { schema: rolesSearchSchema, defaultPagination } = createPaginationSchema(
@@ -114,7 +117,7 @@ function RolesAssigned() {
         </CardHeader>
         <CardContent>
           {users.length === 0 ? (
-            <EmptyState 
+            <EmptyState
               icon="user-check-outline"
               message="No roles assigned yet."
             />

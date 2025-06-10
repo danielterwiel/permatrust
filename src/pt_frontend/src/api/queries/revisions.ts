@@ -66,16 +66,21 @@ export const getRevisionContentOptions = (contentId: bigint) =>
 
 export const listRevisionContentsOptions = (revisionId: bigint) =>
   createQueryOptions({
-    queryFn: () => api.tenant.list_revision_contents({ revision_id: revisionId }),
+    queryFn: () =>
+      api.tenant.list_revision_contents({ revision_id: revisionId }),
     queryKey: ['revision_contents', { revisionId }],
   });
 
-export const downloadRevisionContentOptions = (contentId: bigint, chunkId?: number) =>
+export const downloadRevisionContentOptions = (
+  contentId: bigint,
+  chunkId?: number,
+) =>
   createQueryOptions({
-    queryFn: () => api.tenant.download_revision_content({ 
-      content_id: contentId, 
-      chunk_id: chunkId !== undefined ? [chunkId] : [] 
-    }),
+    queryFn: () =>
+      api.tenant.download_revision_content({
+        content_id: contentId,
+        chunk_id: chunkId !== undefined ? [chunkId] : [],
+      }),
     queryKey: ['download_revision_content', { contentId, chunkId }],
     enabled: false, // Only enable when manually triggered
   });

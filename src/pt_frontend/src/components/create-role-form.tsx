@@ -94,15 +94,15 @@ export function CreateRoleForm({ permissions, project }: CreateRoleFormProps) {
         direction === 'left'
           ? [...prev.available, ...items]
           : prev.available.filter(
-            (item) => !items.find((i) => i.id === item.id),
-          );
+              (item) => !items.find((i) => i.id === item.id),
+            );
 
       const newSelected =
         direction === 'right'
           ? [...prev.selected, ...items]
           : prev.selected.filter(
-            (item) => !items.find((i) => i.id === item.id),
-          );
+              (item) => !items.find((i) => i.id === item.id),
+            );
 
       return {
         available: newAvailable,

@@ -38,4 +38,3 @@ interface EntityTypeMap {
   Workflow: Workflow;
   LogEntry: LogEntry;
 }
-

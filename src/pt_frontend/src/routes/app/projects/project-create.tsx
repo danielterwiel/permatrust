@@ -30,7 +30,7 @@ function CreateProject() {
     const result = await tryCatch(
       createProject({
         name: values.name,
-      })
+      }),
     );
 
     if (result.error) {

@@ -7,11 +7,7 @@
       "deploy": "false",
       "declarations": {
         "output": "src/declarations/tenant_canister",
-        "bindings": [
-          "ts",
-          "js",
-          "did"
-        ]
+        "bindings": ["ts", "js", "did"]
       }
     },
     "main_canister": {
@@ -20,11 +16,7 @@
       "candid": "src/main_canister/main_canister.did",
       "declarations": {
         "output": "src/declarations/main_canister",
-        "bindings": [
-          "ts",
-          "js",
-          "did"
-        ]
+        "bindings": ["ts", "js", "did"]
       }
     },
     "upgrade_canister": {
@@ -33,18 +25,12 @@
       "candid": "src/upgrade_canister/upgrade_canister.did",
       "declarations": {
         "output": "src/declarations/upgrade_canister",
-        "bindings": [
-          "ts",
-          "js",
-          "did"
-        ]
+        "bindings": ["ts", "js", "did"]
       }
     },
     "pt_frontend": {
       "type": "assets",
-      "source": [
-        "src/pt_frontend/dist"
-      ]
+      "source": ["src/pt_frontend/dist"]
     },
     "internet_identity": {
       "type": "custom",

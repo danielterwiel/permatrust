@@ -5,11 +5,11 @@ import { getInviteOptions } from '@/api/queries/invites';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 
-export const Route = createFileRoute(
-  '/_initialized/invites/$inviteId',
-)({
+export const Route = createFileRoute('/_initialized/invites/$inviteId')({
   loader: async ({ context, params }) => {
-    const invite = await context.query.ensureQueryData(getInviteOptions(params.inviteId));
+    const invite = await context.query.ensureQueryData(
+      getInviteOptions(params.inviteId),
+    );
     return { invite };
   },
   component: InviteDetails,
@@ -34,9 +34,7 @@ function InviteDetails() {
             Invite
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          Invite {invite.id.toString()}
-        </CardContent>
+        <CardContent>Invite {invite.id.toString()}</CardContent>
       </Card>
     </div>
   );

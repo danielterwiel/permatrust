@@ -28,4 +28,3 @@ export type IconName =
   | 'user-outline'
   | 'users-outline'
   | 'x-outline';
-

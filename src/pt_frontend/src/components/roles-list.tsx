@@ -41,9 +41,7 @@ export const RolesList = ({ roles }: RoleListProps) => {
   ) => {
     return permissions.reduce(
       (acc, permission) => {
-        if (!acc[permission.group]) {
-          acc[permission.group] = [];
-        }
+        acc[permission.group] = acc[permission.group] ?? [];
         acc[permission.group].push(permission);
         return acc;
       },
