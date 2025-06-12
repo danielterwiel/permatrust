@@ -8,24 +8,24 @@ load_env
 log_info "Running all autofix commands..."
 
 # Run Biome format and lint autofix
-if pnpm run format:fix; then
-  log_success "Biome format:fix completed"
+if pnpm run format; then
+  log_success "Biome format completed"
 else
-  log_error "Biome format:fix failed"
+  log_error "Biome format failed"
   exit 1
 fi
 
-if pnpm run lint:fix; then
-  log_success "Biome lint:fix completed"
+if pnpm run lint; then
+  log_success "Biome lint completed"
 else
-  log_error "Biome lint:fix failed"
+  log_error "Biome lint failed"
   exit 1
 fi
 
-if pnpm run eslint:fix; then
-  log_success "ESLint eslint:fix completed"
+if pnpm run oxlint; then
+  log_success "Oxlint completed"
 else
-  log_error "ESLint eslint:fix failed"
+  log_error "Oxlint failed"
   exit 1
 fi
 

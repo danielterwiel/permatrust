@@ -26,7 +26,7 @@ export function useLocalStorage<T>(
         // Dispatch custom event
         window.dispatchEvent(localStorageChangeEvent);
       }
-    } catch (_error) {
+    } catch {
       // TODO: handle error
     }
   };

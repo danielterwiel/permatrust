@@ -1,7 +1,6 @@
 import type {
   RevisionContent,
   RevisionContentChunk,
-  RevisionContentType,
 } from '@/declarations/tenant_canister/tenant_canister.did';
 
 import { api } from '@/api';

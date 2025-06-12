@@ -392,7 +392,6 @@ function CreateWorkflow() {
 
       // Enhanced positioning algorithm to prevent edge overlaps
       const nodeWidth = 220;
-      const nodeHeight = 120;
       const horizontalSpacing = 150;
       const verticalSpacing = 180;
 
@@ -576,9 +575,6 @@ function CreateWorkflow() {
               ? transitions
               : [transitions];
             for (const transition of transitionArray) {
-              const sourcePos = nodePositions.get(stateId);
-              const targetPos = nodePositions.get(transition.target);
-
               // Determine edge color and routing
               const edgeColor = edgeColors[edgeColorIndex % edgeColors.length];
               edgeColorIndex++;
@@ -604,16 +600,6 @@ function CreateWorkflow() {
                   strokeWidth: 2,
                 };
               }
-
-              // Calculate offset for multiple edges between same nodes
-              const edgeKey = `${stateId}-${transition.target}`;
-              const existingEdges = stateEdges.filter(
-                (e) =>
-                  (e.source === stateId && e.target === transition.target) ||
-                  (e.source === transition.target && e.target === stateId),
-              ).length;
-
-              const offset = existingEdges * 20; // Offset for parallel edges
 
               stateEdges.push({
                 animated: !isBackEdge, // Don't animate back edges to reduce visual noise
@@ -736,7 +722,7 @@ function CreateWorkflow() {
       setInitialEdges(newEdges);
       setNodes(newNodes);
       setEdges(newEdges);
-    } catch (_error) {
+    } catch {
       setInitialNodes([]);
       setInitialEdges([]);
       setNodes([]);

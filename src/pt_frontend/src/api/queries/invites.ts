@@ -1,7 +1,6 @@
 import { createQueryOptions } from '@/utils/create-query-options';
 
 import type { PaginationInput } from '@/declarations/tenant_canister/tenant_canister.did';
-import type { InviteId } from '@/types/entities';
 
 import { api } from '@/api';
 

@@ -8,7 +8,7 @@ import type { z } from 'zod';
 export const Route = createFileRoute(
   '/_initialized/_authenticated/_onboarding/onboarding/organization/create',
 )({
-  beforeLoad: ({ context }) => ({
+  beforeLoad: () => ({
     getTitle: () => 'Create organization',
   }),
   loader: ({ context }) => ({

@@ -5,11 +5,11 @@ build: pnpm run build
 deploy: pnpm run deploy
 start: pnpm run start
 generate: pnpm run generate
-lint: pnpm run lint:check
-lint:fix: pnpm run lint:fix
+lint: pnpm run lint
+lint:check: pnpm run lintcheck:
 typecheck: pnpm run typecheck
-format: pnpm run format:check
-format:fix: pnpm run format:fix
+format: pnpm run format
+format:check: pnpm run format:check
 build:icons: pnpm run build:icons
 add:icons: pnpm run add:icons
 

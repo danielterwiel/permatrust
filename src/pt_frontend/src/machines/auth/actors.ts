@@ -80,7 +80,7 @@ export const authActors = {
         onboardedUser: true,
         user,
       };
-    } catch (_error) {
+    } catch {
       return {
         onboardedUser: false,
       };

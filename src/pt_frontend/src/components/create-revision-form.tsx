@@ -7,20 +7,15 @@ import { ContentForm } from '@/components/content-form';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Icon } from '@/components/ui/icon';
 
-import type {
-  Revision,
-  RevisionContent,
-} from '@/declarations/tenant_canister/tenant_canister.did';
+import type { RevisionContent } from '@/declarations/tenant_canister/tenant_canister.did';
 
 type CreateRevisionFormProps = {
   isSubmitting: boolean;
   onSubmit: (
-    smallContents: Array<RevisionContent>,
+    contents: Array<RevisionContent>,
     largeContents: Array<RevisionContent>,
   ) => Promise<{ revisionId: bigint } | null>;
   onSubmitComplete: () => void;
-  projectId: string;
-  revision: Revision | undefined;
   revisionContents: Array<RevisionContent> | undefined;
 };
 
@@ -28,8 +23,6 @@ export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
   isSubmitting,
   onSubmit,
   onSubmitComplete,
-  projectId,
-  revision,
   revisionContents,
 }) => {
   const [isLoadingRevisionData, setIsLoadingRevisionData] = useState(false);
@@ -72,7 +65,7 @@ export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
       const mimeType =
         'Upload' in content.content_type
           ? 'application/octet-stream'
-          : 'text/markdown';
+          : 'text/markdown'; // oxlint-disable-line
 
       const arrayBuffer = new ArrayBuffer(bytes.length);
       const view = new Uint8Array(arrayBuffer);
@@ -174,7 +167,7 @@ export const CreateRevisionForm: FC<CreateRevisionFormProps> = ({
     };
 
     loadRevisionData();
-  }, [revisionContents]);
+  }, [revisionContents]); // oxlint-disable-line
 
   if (isLoadingRevisionData) {
     return (

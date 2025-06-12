@@ -52,7 +52,7 @@ const MAX_DIRECT_UPLOAD_SIZE = 512 * 1024; // 512KB - send smaller content direc
 export type ContentFormProps = {
   isSubmitting: boolean;
   onSubmit: (
-    smallContents: Array<RevisionContent>,
+    contents: Array<RevisionContent>,
     largeContents: Array<RevisionContent>,
   ) => Promise<{ revisionId: bigint } | null>;
   onSubmitComplete: () => void;
@@ -78,11 +78,6 @@ export const ContentForm: FC<ContentFormProps> = ({
   uploadDescription = 'Upload additional files to include.',
 }) => {
   const uploadProgress = useChunkedUpload();
-
-  type FormData = {
-    markdown_content: string;
-    uploaded_files: Array<File>;
-  };
 
   const form = useForm({
     defaultValues: {
@@ -391,7 +386,7 @@ export const ContentForm: FC<ContentFormProps> = ({
                   <Dropzone.Accepted>
                     {(_files) => (
                       <div className="grid gap-2 w-full min-w-0">
-                        {field.state.value.map((file, index) => {
+                        {field.state.value.map((file) => {
                           const isLargeFile =
                             file.size > MAX_DIRECT_UPLOAD_SIZE;
                           const fileKey = `${file.name}-${file.size}`;

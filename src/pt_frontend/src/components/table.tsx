@@ -97,7 +97,7 @@ function convertSortingStateToBackendFormat(
         order: sortOrder === SORT_ORDER.DESC ? 'Desc' : 'Asc',
       }),
     ];
-  } catch (_error) {
+  } catch {
     return [];
   }
 }
@@ -116,7 +116,7 @@ function extractSortField(sort: [] | [SortCriteria]): string | undefined {
     const fieldObj =
       sortCriteria.field[entityKey as keyof typeof sortCriteria.field];
     return Object.keys(fieldObj)[0];
-  } catch (_e) {
+  } catch {
     return undefined;
   }
 }

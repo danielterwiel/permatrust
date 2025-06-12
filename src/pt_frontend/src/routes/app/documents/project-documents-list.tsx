@@ -1,12 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { zodSearchValidator } from '@tanstack/router-zod-adapter';
 
-import {
-  listDocumentsByProjectIdOptions,
-  listDocumentsOptions,
-} from '@/api/queries/documents';
+import { listDocumentsOptions } from '@/api/queries/documents';
 import { usePagination } from '@/hooks/use-pagination';
-import { projectIdSchema } from '@/schemas/entities';
 import { createPaginationSchema } from '@/schemas/pagination';
 import { processPaginationInput } from '@/utils/pagination';
 

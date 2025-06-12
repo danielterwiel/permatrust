@@ -114,7 +114,7 @@ export function createMutationHook<TVariables, TData>(
       });
     };
 
-    const { errorToast, successToast, ...standardOptions } = options || {};
+    const { successToast, ...standardOptions } = options || {};
 
     const mutation = useMutation({
       mutationFn,

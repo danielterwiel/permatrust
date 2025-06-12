@@ -6,7 +6,7 @@ const getItem = <T>(key: string, initialValue: T): T => {
   try {
     const item = globalThis.localStorage.getItem(key);
     return item ? (JSON.parse(item) as T) : initialValue;
-  } catch (_error) {
+  } catch {
     // TODO: handle error
     return initialValue;
   }
@@ -19,7 +19,7 @@ const setItem = <T>(key: string, value: T): void => {
 
   try {
     globalThis.localStorage.setItem(key, JSON.stringify(value));
-  } catch (_error) {
+  } catch {
     // TODO: handle error
   }
 };

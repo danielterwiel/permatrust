@@ -50,7 +50,28 @@
   "linter": {
     "enabled": true,
     "rules": {
-      "recommended": true
+      "recommended": true,
+      "correctness": {
+        "noEmptyCharacterClassInRegex": "off",
+        "noEmptyPattern": "off",
+        "noNonoctalDecimalEscape": "off",
+        "noSelfAssign": "off",
+        "noUnsafeFinally": "off",
+        "noUnusedLabels": "off",
+        "noUnusedPrivateClassMembers": "off",
+        "useIsNan": "off"
+      },
+      "suspicious": {
+        "noShadowRestrictedNames": "off",
+        "noSparseArray": "off",
+        "noExtraNonNullAssertion": "off"
+      },
+      "style": {
+        "noInferrableTypes": "off",
+        "noNamespace": "off",
+        "noVar": "off",
+        "useImportType": "off"
+      }
     }
   }
 }

@@ -28,18 +28,16 @@ type CreateDocumentFormProps = {
   isSubmitting: boolean;
   onSubmit: (
     title: string,
-    smallContents: Array<RevisionContent>,
+    contents: Array<RevisionContent>,
     largeContents: Array<RevisionContent>,
   ) => Promise<{ revisionId: bigint } | null>;
   onSubmitComplete: () => void;
-  projectId: string;
 };
 
 export const CreateDocumentForm: FC<CreateDocumentFormProps> = ({
   isSubmitting,
   onSubmit,
   onSubmitComplete,
-  projectId,
 }) => {
   const titleForm = useForm({
     defaultValues: {
@@ -48,7 +46,7 @@ export const CreateDocumentForm: FC<CreateDocumentFormProps> = ({
   });
 
   const handleContentSubmit = async (
-    smallContents: Array<RevisionContent>,
+    contents: Array<RevisionContent>,
     largeContents: Array<RevisionContent>,
   ) => {
     const title = titleForm.state.values.title;
@@ -60,7 +58,7 @@ export const CreateDocumentForm: FC<CreateDocumentFormProps> = ({
       return null;
     }
 
-    return await onSubmit(title, smallContents, largeContents);
+    return await onSubmit(title, contents, largeContents);
   };
 
   return (

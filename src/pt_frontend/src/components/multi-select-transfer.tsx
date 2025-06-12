@@ -269,7 +269,7 @@ export const MultiSelectTransfer: React.FC<MultiSelectTransferProps> = ({
             setSelectedSelected(new Set());
           }
         }
-      } catch (_error) {
+      } catch {
         // TODO: handle error
       }
     },

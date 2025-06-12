@@ -6,11 +6,13 @@
 - Deploy: `pnpm run deploy`
 - Start dev server: `pnpm run start`
 - Generate types: `pnpm run generate`
-- Lint: `pnpm run lint:check`
-- Lint fix: `pnpm run lint:fix`
+- Lint (Biome): `pnpm run lint`
+- Lint check (Biome): `pnpm run lint:check`
+- Lint (Oxlint): `pnpm run oxlint`
+- Lint check (Oxlint): `pnpm run oxlint:check`
 - Typecheck: `pnpm run typecheck`
-- Format: `pnpm run format:check`
-- Format fix: `pnpm run format:fix`
+- Format (Biome): `pnpm run format`
+- Format check (Biome): `pnpm run format:check`
 - Build icons: `pnpm run build:icons`
 - Add icons: `pnpm run add:icons`
 

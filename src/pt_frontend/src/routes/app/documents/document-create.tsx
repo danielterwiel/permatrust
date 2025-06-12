@@ -34,8 +34,7 @@ function CreateDocument() {
 
   async function onSubmit(
     title: string,
-    smallContents: Array<RevisionContent>,
-    largeContents: Array<RevisionContent>,
+    contents: Array<RevisionContent>,
   ): Promise<{ revisionId: bigint } | null> {
     const projectId = projectIdSchema.parse(params.projectId);
 
@@ -59,7 +58,7 @@ function CreateDocument() {
       createRevision({
         project_id: projectId,
         document_id: createdDocumentId,
-        contents: smallContents,
+        contents: contents,
       }),
     );
 
@@ -98,7 +97,6 @@ function CreateDocument() {
       isSubmitting={isSubmitting}
       onSubmit={onSubmit}
       onSubmitComplete={onSubmitComplete}
-      projectId={params.projectId}
     />
   );
 }

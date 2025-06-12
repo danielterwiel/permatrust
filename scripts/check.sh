@@ -8,6 +8,7 @@ load_env
 log_info "Running checks..."
 
 ./scripts/check/check-node-version.sh
-./scripts/check/lint-and-typecheck.sh
+./scripts/check/lint.sh
+./scripts/check/typecheck.sh
 
 log_success "All checks completed!"

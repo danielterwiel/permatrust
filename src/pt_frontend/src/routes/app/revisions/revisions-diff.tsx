@@ -60,7 +60,6 @@ export const Route = createFileRoute(
 
 type DirectContent = { Direct: { bytes: Array<number> } };
 type ChunkedContent = { Chunked: { total_chunks: number; total_size: number } };
-type ContentData = DirectContent | ChunkedContent;
 
 function isDirectContent(data: unknown): data is DirectContent {
   if (typeof data !== 'object' || data === null || !('Direct' in data)) {
@@ -98,7 +97,7 @@ function RevisionDiff() {
   useEffect(() => {
     try {
       z.array(revisionSchema).parse(revisions);
-    } catch (_error) {
+    } catch {
       setError('Invalid revision data');
       setIsLoading(false);
       return;

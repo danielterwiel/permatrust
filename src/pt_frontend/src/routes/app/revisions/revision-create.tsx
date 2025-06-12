@@ -43,21 +43,16 @@ function RevisionsCreate() {
     mutations.tenant.useCreateRevision();
   const params = Route.useParams();
   const navigate = Route.useNavigate();
-  const { revisions: revisionData, revisionContents } = Route.useLoaderData();
+  const { revisionContents } = Route.useLoaderData();
 
-  const revision = revisionData[0][0];
-
-  async function onSubmit(
-    smallContents: Array<RevisionContent>,
-    largeContents: Array<RevisionContent>,
-  ) {
+  async function onSubmit(contents: Array<RevisionContent>) {
     const projectId = projectIdSchema.parse(params.projectId);
     const documentId = documentIdSchema.parse(params.documentId);
 
     // Create revision with small content first
     const result = await tryCatch(
       createRevision({
-        contents: smallContents,
+        contents: contents,
         document_id: documentId,
         project_id: projectId,
       }),
@@ -97,8 +92,6 @@ function RevisionsCreate() {
       isSubmitting={isSubmitting}
       onSubmit={onSubmit}
       onSubmitComplete={onSubmitComplete}
-      projectId={params.projectId}
-      revision={revision}
       revisionContents={revisionContents}
     />
   );

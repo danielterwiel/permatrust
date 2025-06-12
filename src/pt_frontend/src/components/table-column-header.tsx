@@ -64,7 +64,7 @@ export function DataTableColumnHeader<TData, TValue>({
         const fieldObj = urlSort.field[entityKey as keyof typeof urlSort.field];
 
         // Extract the field name using type assertion
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+        // oxlint-disable-next-line @typescript-eslint/no-unnecessary-condition
         const sortFieldName = fieldObj
           ? Object.keys(fieldObj as Record<string, unknown>)[0]
           : null;
@@ -73,7 +73,7 @@ export function DataTableColumnHeader<TData, TValue>({
         if (sortFieldName && pascalColumnId === sortFieldName) {
           return 'Desc' in urlSort.order ? 'desc' : 'asc';
         }
-      } catch (_e) {
+      } catch {
         // If any errors in parsing, continue to check table state
       }
     }
