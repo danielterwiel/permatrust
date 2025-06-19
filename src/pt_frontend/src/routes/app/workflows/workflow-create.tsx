@@ -1,7 +1,6 @@
 import { useForm } from '@tanstack/react-form';
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { useCallback, useEffect, useState } from 'react';
-import type { CSSProperties } from 'react';
 import ReactFlow, {
   Background,
   BackgroundVariant,
@@ -487,8 +486,7 @@ function CreateWorkflow() {
       }
 
       // Optimize node ordering within levels to minimize edge crossings
-      for (const [_level, levelIndex] of levels) {
-        const levelNodes = levels[levelIndex];
+      for (const [_levelIndex, levelNodes] of levels.entries()) {
         if (levelNodes.length > 1) {
           // Sort nodes in this level to minimize crossings with previous level
           levelNodes.sort((a, b) => {
@@ -543,7 +541,7 @@ function CreateWorkflow() {
         const isInitial = stateId === machineConfig.initial;
         const isFinal =
           !machineConfig.states[stateId].on ||
-          Object.keys(machineConfig.states[stateId].on).length === 0;
+          Object.keys(machineConfig.states[stateId].on ?? {}).length === 0;
 
         stateNodes.push({
           data: {
@@ -589,8 +587,7 @@ function CreateWorkflow() {
               let edgeStyle = {
                 stroke: edgeColor,
                 strokeWidth: 2,
-                strokeDasharray: '',
-              } satisfies CSSProperties;
+              };
 
               if (isBackEdge) {
                 // Back edges (like loops) use different styling and routing
@@ -623,11 +620,9 @@ function CreateWorkflow() {
                 labelBgStyle: {
                   fill: 'white',
                   fillOpacity: 0.95,
-                  rx: 4,
-                  ry: 4,
                   stroke: '#e5e7eb',
                   strokeWidth: 1,
-                } as React.CSSProperties,
+                },
                 // Add sourceHandle and targetHandle for better connection points
                 sourceHandle: isBackEdge ? 'left' : 'bottom',
                 targetHandle: isBackEdge ? 'right' : 'top',

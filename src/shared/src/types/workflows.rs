@@ -1,5 +1,5 @@
 use candid::CandidType;
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::types::errors::AppError;
 use crate::types::pagination::PaginationMetadata;
@@ -12,16 +12,16 @@ pub type WorkflowIdResult = Result<WorkflowId, AppError>;
 pub type WorkflowResult = Result<Workflow, AppError>;
 pub type PaginatedWorkflowsResult = Result<(Vec<Workflow>, PaginationMetadata), AppError>;
 
-#[derive(CandidType, Deserialize, Clone, Debug)]
+#[derive(CandidType, Serialize, Deserialize, Clone, Debug)]
 pub struct Edge(pub u64, pub u64, pub EventId);
 
-#[derive(CandidType, Deserialize, Clone, Debug)]
+#[derive(CandidType, Serialize, Deserialize, Clone, Debug)]
 pub struct WorkflowGraph {
     pub edges: Vec<Edge>,
     pub nodes: Vec<StateId>,
 }
 
-#[derive(CandidType, Deserialize, Clone, Debug)]
+#[derive(CandidType, Serialize, Deserialize, Clone, Debug)]
 pub struct Workflow {
     pub id: WorkflowId,
     pub current_state: StateId,

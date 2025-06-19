@@ -1,0 +1,84 @@
+---
+description: General coding standards for Permatrust
+globs: ./src/*
+alwaysApply: true
+---
+# Coding Standards
+
+This document outlines the coding standards, architecture, and best practices for this project. Adherence is mandatory.
+
+## Technology Stack
+
+-   **Framework**: React 19 + Vite
+-   **Language**: TypeScript (Strict)
+-   **Backend**: Rust + DFX (Internet Computer)
+-   **Routing**: @tanstack/react-router
+-   **Data Fetching**: @tanstack/react-query
+-   **Forms**: @tanstack/react-form
+-   **State Management**: XState 5
+-   **Validation**: Zod
+-   **UI**: Radix UI + Shadcn/ui
+-   **Formatting**: Prettier
+
+## Project Scripts
+
+| Command                 | Description                                                   |
+|-------------------------|---------------------------------------------------------------|
+| `pnpm run build`        | Creates a production build of the application.                |
+| `pnpm run deploy`       | Deploys the application.                                      |
+| `pnpm run start`        | Starts the development server.                                |
+| `pnpm run generate`     | Generates frontend types from the Candid interface.           |
+| `pnpm run lint`         | Lints the codebase for errors using Biome.                    |
+| `pnpm run lint:check`   | Checks for linting errors using Biome without fixing them.    |
+| `pnpm run oxlint`       | Lints the codebase for errors using Oxlint.                   |
+| `pnpm run oxlint:check` | Checks for linting errors using Oxlint without fixing them.   |
+| `pnpm run typecheck`    | Runs the TypeScript compiler to check for type                |
+|                         | errors.                                                       |
+| `pnpm run format`       | Formats the entire codebase with Biome.                       |
+| `pnpm run format:check` | Checks for formatting issues using Biome without fixing them. |
+| `pnpm run build:icons`  | Builds the icon sprite. Note: must be manually exited.        |
+| `pnpm run add:icons`    | Adds new icons to the project.                                |
+
+## Coding & Style Guide
+
+### General
+
+-   **TypeScript Strictness**: The `tsconfig.json` must be configured with `strict: true`. The `any` and `unknown` types are forbidden. Do not use `@ts-ignore` or other type-suppression comments.
+-   **Module System**: Use named exports exclusively. Default exports are prohibited to ensure consistency and simplify refactoring.
+-   **Formatting**: All code must be formatted with Biome
+-   **Linting**: All front-end code must be linted by both kkkkkkkkkk
+-   **Import Order**: Imports must be sorted according to the following strict order:
+    1.  React and its hooks
+    2.  Built-in Node.js modules
+    3.  External packages
+    4.  Internal modules (using path aliases)
+    5.  Parent directory imports (`../`)
+    6.  Sibling directory imports (`./`)
+    7.  Type imports
+-   **Path Aliases**: Use `@/*` for `src/*` and `~/icon-name` for icons. Do not use relative paths that traverse more than two directories (`../../`).
+
+### React & Components
+
+-   **Component Definition**: All components must be React 19 functional components written in TypeScript. Define components as arrow functions: `const Component = (props: Props): React.ReactElement => { ... }`.
+-   **Props & Return Types**: Always provide explicit types for props and function return values.
+-   **React 19 Features**: Leverage modern React 19 features. Use the `use` hook for promises and context. Use Actions for data mutations. Avoid legacy patterns like `useEffect` for data fetching.
+-   **File Structure**: Colocate components with their related files (e.g., stories, tests) in the same directory.
+-   **Backend architecture**: our API code for entities is separated in two files: state.rs for single-responsibility state management, methods.rs for more complex combining multiple state calls into an API response.
+-   **Naming Conventions**:
+    -   Components & Types: `PascalCase`
+    -   Variables, Functions, Hooks: `camelCase`
+    -   File names frontend: `kebab-case`
+    -   File names backend: `snake_case`
+-   **Accessibility (a11y)**: All components must be fully accessible. Use semantic HTML and ARIA attributes correctly.
+
+### State & Data Management
+
+-   **State Machines**: Use XState for any logic involving more than three interdependent states or complex event sequences. For simple, local UI state, `useState` is acceptable.
+-   **Server State**: Use TanStack Query for all server state management. Define query keys using type-safe factory functions.
+-   **Routing**: Use TanStack Router for all routing. Leverage its type-safe, file-based routing system.
+-   **Data Integrity**: Parse all external data sources (e.g., API responses) with Zod to ensure runtime type safety. Handle API responses using a Result/Option pattern.
+
+### Backend Interaction
+
+-   **Contract Synchronization**: The Candid interface is the single source of truth for the frontend-backend contract. After any change to a canister's public interface in Rust, you **must** run `pnpm run generate` and commit the updated TypeScript type definitions. Failure to do so will break the build.
+-   **Rust crates** when looking up documentation, always make sure that the documentation that you check is the documentation of my crates in Cargo.toml

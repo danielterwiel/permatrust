@@ -9,6 +9,30 @@ load_env
 validate_dfx_config
 populate_canister_arrays
 
+# Function to get and display WASM file size
+show_wasm_size() {
+    local canister_name="$1"
+    local wasm_file="target/wasm32-unknown-unknown/release/${canister_name}.wasm"
+
+    if [[ -f "$wasm_file" ]]; then
+        local file_size
+        file_size=$(stat -f%z "$wasm_file" 2>/dev/null || stat -c%s "$wasm_file" 2>/dev/null)
+
+        # Simple size formatting
+        if [[ "$file_size" -ge 1048576 ]]; then
+            local mb_size=$(echo "scale=2; $file_size / 1048576" | bc 2>/dev/null || echo "$((file_size / 1048576))")
+            log_info "  WASM size: ${mb_size} MB (${file_size} bytes)"
+        elif [[ "$file_size" -ge 1024 ]]; then
+            local kb_size=$(echo "scale=2; $file_size / 1024" | bc 2>/dev/null || echo "$((file_size / 1024))")
+            log_info "  WASM size: ${kb_size} KB (${file_size} bytes)"
+        else
+            log_info "  WASM size: ${file_size} bytes"
+        fi
+    else
+        log_warn "  WASM file not found: $wasm_file"
+    fi
+}
+
 # Parse arguments
 CANISTER_ARG="${1:-}"
 
@@ -36,6 +60,7 @@ if [[ ${#BUILD_RUST_CANISTERS[@]} -gt 0 ]]; then
     for canister in "${BUILD_RUST_CANISTERS[@]}"; do
         log_info "Building $canister..."
         run_dfx_with_env dfx build "$canister"
+        show_wasm_size "$canister"
     done
 fi
 

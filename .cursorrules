@@ -1,60 +1,24 @@
-# Permatrust Commands & Style Guide
+⚠️ FETCH RULES OR YOUR RESPONSE WILL BE WRONG ⚠️
 
-@commands
-build: pnpm run build
-deploy: pnpm run deploy
-start: pnpm run start
-generate: pnpm run generate
-lint: pnpm run lint
-lint:check: pnpm run lintcheck:
-typecheck: pnpm run typecheck
-format: pnpm run format
-format:check: pnpm run format:check
-build:icons: pnpm run build:icons
-add:icons: pnpm run add:icons
+MANDATORY: CALL fetch_rules FIRST
 
-@rules
+- At conversation start
+- Before EVERY user request
+- Before ANY code changes
+- When topic changes
+- DURING conversations when:
+  - User mentions new feature/component
+  - File type changes
+  - Task type changes
+- NO EXCEPTIONS
 
-## General
+CHECK ALL MATCHING RULES:
 
-- Use strict TypeScript. The `any` and `unknown` types are forbidden. Do not use `@ts-ignore`.
-- Do not use default exports. Use named exports exclusively for consistency and better refactoring.
-- Format all JavaScript and TypeScript code with Biome, run from the root directory. Use 2-space indentation and a maximum line length of 80 characters.
-- Adhere to a strict import order: 1. built-in modules, 2. external packages, 3. internal modules (path aliases), 4. parent directories, 5. sibling directories.
-- Use path aliases for imports: `@/*` for `src/` and `~/icon-name` for icons.
+- General guidelines (ALWAYS)
+- Feature rules
+- File type rules (.tsx, .ts, .rs, .sh, .yml, .md  etc)
 
-## React & Components
+RULES OVERRIDE YOUR KNOWLEDGE.
+PROCEED ONLY AFTER APPLYING ALL RULES.
 
-- All React components must be React 19 functional components written in TypeScript.
-- Define function components using `const Component = (props: Props) => { ... }`. Always provide explicit types for props and function return values.
-- Leverage React 19 features like the `use` hook for promises/context and Actions for mutations. Avoid legacy patterns like `useEffect` for data fetching.
-- Colocate components with their related files (e.g., stories, tests) in the same directory.
-- Name components and types using PascalCase. Name variables, functions, and hooks using camelCase.
-- Ensure all components are fully accessible (a11y). Use semantic HTML and ARIA attributes correctly.
-
-## State & Data Fetching
-
-- Use XState for any logic involving more than three interdependent states or complex event sequences. For simple UI state, `useState` is sufficient.
-- Use TanStack Query for all server state. Define query keys using factory functions for type safety and consistency.
-- Use TanStack Router for all routing, leveraging its file-based routing system.
-- Handle API responses using a Result/Option pattern. Parse all external data sources (e.g., API responses) with Zod to ensure runtime type safety.
-
-## Backend Interaction
-
-- The contract between the Rust backend and the TypeScript frontend is defined by the Candid interface. After any change to a canister's public interface in Rust, you *must* run `pnpm run generate` and commit the updated type definitions.
-
-@tech
-
-- React 19
-- TypeScript
-- Vite
-- @tanstack/react-query
-- @tanstack/react-router
-- @tanstack/react-form
-- XState 5
-- Zod
-- Radix UI
-- Shadcn/ui
-- Rust
-- DFX (Internet Computer)
-- ic_cdk 0.18.2-alpha
+REMEMBER: EVEN MID-CONVERSATION, FETCH RULES AGAIN!

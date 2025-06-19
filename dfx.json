@@ -5,6 +5,7 @@
       "package": "tenant_canister",
       "candid": "src/tenant_canister/tenant_canister.did",
       "deploy": "false",
+      "optimize": "size",
       "declarations": {
         "output": "src/declarations/tenant_canister",
         "bindings": ["ts", "js", "did"]
@@ -14,6 +15,7 @@
       "type": "rust",
       "package": "main_canister",
       "candid": "src/main_canister/main_canister.did",
+      "optimize": "size",
       "declarations": {
         "output": "src/declarations/main_canister",
         "bindings": ["ts", "js", "did"]
@@ -23,6 +25,7 @@
       "type": "rust",
       "package": "upgrade_canister",
       "candid": "src/upgrade_canister/upgrade_canister.did",
+      "optimize": "size",
       "declarations": {
         "output": "src/declarations/upgrade_canister",
         "bindings": ["ts", "js", "did"]

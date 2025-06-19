@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Permatrust Build Script
-# 
+#
 # This script builds canisters for the Permatrust project.
 # It supports building all canisters or a specific canister.
 #
@@ -69,7 +69,6 @@ fi
 ./scripts/setup.sh
 ./scripts/build/create-canisters.sh "$CANISTER_ARG"
 ./scripts/build/build-canisters.sh "$CANISTER_ARG"
-./scripts/build/optimize-canisters.sh "$CANISTER_ARG"
 
 if [[ -n "$CANISTER_ARG" ]]; then
     log_success "Build completed successfully for $CANISTER_ARG!"

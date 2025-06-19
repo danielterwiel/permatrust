@@ -1,6 +1,2 @@
-pub mod methods;
-pub(crate) mod state;
-
-use shared::types::errors::AppError;
-use shared::types::pagination::PaginationInput;
-use shared::types::projects::{Project, ProjectId};
+pub mod controllers;
+pub mod projects_manager;

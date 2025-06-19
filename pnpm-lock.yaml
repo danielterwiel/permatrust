@@ -20,6 +20,9 @@ importers:
       '@dfinity/auth-client':
         specifier: ^2.0.0
         version: 2.3.0(@dfinity/agent@2.3.0)(@dfinity/identity@2.3.0)(@dfinity/principal@2.3.0)
+      '@dfinity/vetkeys':
+        specifier: 0.2.0
+        version: 0.2.0
       '@mdxeditor/editor':
         specifier: ^3.11.5
         version: 3.26.0(@codemirror/language@6.10.8)(@lezer/highlight@1.2.1)(@types/react-dom@18.3.5)(@types/react@18.3.18)(react-dom@19.0.0)(react@19.0.0)(yjs@13.6.24)
@@ -940,6 +943,15 @@ packages:
     resolution: {integrity: sha512-rb3TsxR3L/Vq2GWV/GGIMXPbzDDqxNohPbNW8nJKhpcm8Ds00tCVEmPUDqrn735xJW0Pmzog/6/S1L9jG2UT9g==}
     dependencies:
       '@noble/hashes': 1.7.1
+    dev: false
+
+  /@dfinity/vetkeys@0.2.0:
+    resolution: {integrity: sha512-H+3ND3/lNArCoPboDBq5Dh3Bzk/bdARzRH9L1RUIGn8z9KV16MZPxtYzmpIpTXIxE9E6M0BxzuRKRMZHUvFikw==}
+    dependencies:
+      '@dfinity/agent': 2.3.0(@dfinity/candid@2.3.0)(@dfinity/principal@2.3.0)
+      '@dfinity/candid': 2.3.0(@dfinity/principal@2.3.0)
+      '@dfinity/principal': 2.3.0
+      idb-keyval: 6.2.2
     dev: false
 
   /@esbuild/aix-ppc64@0.25.1:
@@ -5552,6 +5564,10 @@ packages:
   /he@1.2.0:
     resolution: {integrity: sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==}
     hasBin: true
+    dev: false
+
+  /idb-keyval@6.2.2:
+    resolution: {integrity: sha512-yjD9nARJ/jb1g+CvD0tlhUHOrJ9Sy0P8T9MF3YaLlHnSRpwPfpTX0XIvpmw3gAJUmEu3FiICLBDPXVwyEvrleg==}
     dev: false
 
   /idb@7.1.1:

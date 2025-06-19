@@ -2,6 +2,7 @@ import { index, layout, rootRoute, route } from '@tanstack/virtual-file-routes';
 
 export const routes = rootRoute('root.tsx', [
   index('public/home.tsx'),
+
   layout('initialized', '_layouts/_initialized.tsx', [
     route('/login', 'public/login.tsx'),
     route('/unauthorized', 'public/unauthorized.tsx'),

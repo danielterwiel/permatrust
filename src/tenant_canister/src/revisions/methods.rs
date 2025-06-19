@@ -1,7 +1,7 @@
 use super::state;
 use super::*;
 use crate::documents;
-use crate::users::methods::get_user_by_principal;
+use crate::users::user_manager::UserManager;
 use shared::types::revisions::{
     CreateRevisionInput, CreateRevisionResult, DiffRevisionsInput, DiffRevisionsResult,
     DownloadRevisionContentInput, DownloadRevisionContentResult, FinishRevisionContentUploadInput,
@@ -46,7 +46,7 @@ pub fn create_revision(input: CreateRevisionInput) -> CreateRevisionResult {
                 caller
             );
 
-            let user = match get_user_by_principal(caller) {
+            let user = match UserManager::get_user_by_principal(caller) {
                 GetUserResult::Ok(u) => {
                     log_debug!(
                         "auth_check: User validated for revision creation [user_id={}, principal={}]",

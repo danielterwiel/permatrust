@@ -1,7 +1,7 @@
-use crate::logs::state::init_log_storage;
-use crate::organization::methods::create_init_organization;
-use crate::projects::methods::create_init_project;
-use crate::{access_control::init_default_roles, users::methods::create_new_user};
+use crate::logs::logs_manager::LogsManager;
+use crate::organization::create_init_organization;
+use crate::projects::projects_manager::ProjectsManager;
+use crate::{access_control::init_default_roles, users::user_manager::UserManager};
 use ic_cdk_macros::{init, post_upgrade, pre_upgrade};
 use shared::types::logs::CanisterOrigin;
 use shared::types::management::CreateInitTenantCanisterInput;
@@ -19,7 +19,7 @@ fn create_initial_entities(input: CreateInitTenantCanisterInput) -> Result<(), S
     };
     let principal = user_input.principal;
 
-    let user = match create_new_user(user_input) {
+    let user = match UserManager::create_new_user(user_input) {
         CreateUserResult::Ok(user) => {
             log_info!(
                 "user_creation: Created initial {} [principal={}]",
@@ -45,7 +45,7 @@ fn create_initial_entities(input: CreateInitTenantCanisterInput) -> Result<(), S
     };
     let project_name = project_input.name.clone();
 
-    let project_id = match create_init_project(project_input) {
+    let project_id = match ProjectsManager::create_init_project(project_input) {
         CreateProjectResult::Ok(project_id) => {
             log_info!(
                 "project_creation: Created initial project [id={}, name='{}']",
@@ -96,7 +96,7 @@ fn create_initial_entities(input: CreateInitTenantCanisterInput) -> Result<(), S
 fn init(input: CreateInitTenantCanisterInput) {
     // Initialize core systems first
     init_logger(CanisterOrigin::Tenant);
-    let log_storage = init_log_storage();
+    let log_storage = LogsManager::init_log_storage();
     set_log_storage(log_storage);
     init_default_roles();
 
@@ -129,7 +129,7 @@ fn pre_upgrade() {
 fn post_upgrade() {
     // Re-initialize stateless components first
     init_logger(CanisterOrigin::Tenant);
-    let log_storage = init_log_storage();
+    let log_storage = LogsManager::init_log_storage();
     set_log_storage(log_storage);
     init_default_roles();
 

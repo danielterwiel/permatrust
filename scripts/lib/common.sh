@@ -47,7 +47,7 @@ trap 'handle_error $LINENO' ERR
 # Load environment variables from .env file
 load_env() {
     local env_file="${1:-.env}"
-    
+
     if [[ -f "$env_file" ]]; then
         log_info "Loading environment from $env_file"
         set -o allexport
@@ -69,6 +69,8 @@ process_running() {
     pgrep -x "$1" >/dev/null
 }
 
+
+
 # WASM file paths
 get_wasm_path() {
     local canister_name="$1"
@@ -83,34 +85,34 @@ readonly UPGRADE_WASM="$(get_wasm_path upgrade_canister)"
 # Node.js version management
 check_node_version() {
     local nvmrc_file="${1:-.nvmrc}"
-    
+
     if [[ ! -f "$nvmrc_file" ]]; then
         log_error "$nvmrc_file file not found. Please create one with the desired Node.js version."
         exit 1
     fi
-    
+
     local required_version
     required_version=$(cat "$nvmrc_file")
     local current_version
     current_version=$(node -v)
-    
+
     log_info "Required Node.js version: $required_version"
     log_info "Current Node.js version: $current_version"
-    
+
     if [[ "$current_version" != "$required_version" ]]; then
         log_warn "Node.js version mismatch. Attempting to switch using nvm..."
-        
+
         # Load nvm if available
         if [[ -s "$HOME/.nvm/nvm.sh" ]]; then
             # shellcheck source=/dev/null
             source "$HOME/.nvm/nvm.sh"
         fi
-        
+
         if command_exists nvm; then
             nvm install "$required_version"
             nvm use "$required_version"
             current_version=$(node -v)
-            
+
             if [[ "$current_version" != "$required_version" ]]; then
                 log_error "Failed to switch to the correct Node.js version using nvm."
                 exit 1
@@ -120,7 +122,7 @@ check_node_version() {
             exit 1
         fi
     fi
-    
+
     log_success "Node.js version check passed: $current_version"
 }
 
@@ -146,9 +148,9 @@ stop_dfx_if_running() {
 create_canister_with_retry() {
     local canister_name="$1"
     local max_attempts=4
-    
+
     log_info "Creating canister: $canister_name"
-    
+
     for attempt in $(seq 1 $max_attempts); do
         if dfx canister create "$canister_name" 2>/dev/null; then
             log_success "Created canister: $canister_name"
@@ -158,32 +160,12 @@ create_canister_with_retry() {
             sleep 5
         fi
     done
-    
+
     log_error "Failed to create canister $canister_name after $max_attempts attempts"
     return 1
 }
 
-# WASM optimization
-optimize_wasm() {
-    local wasm_file="$1"
-    
-    if [[ ! -f "$wasm_file" ]]; then
-        log_error "WASM file not found: $wasm_file"
-        return 1
-    fi
-    
-    log_info "Optimizing WASM: $(basename "$wasm_file")"
-    
-    # Shrink
-    ic-wasm "$wasm_file" -o "$wasm_file" shrink
-    
-    # Optimize
-    ic-wasm "$wasm_file" -o "$wasm_file" optimize O3 \
-        --inline-functions-with-loops \
-        --always-inline-max-function-size 100
-    
-    log_success "Optimized WASM: $(basename "$wasm_file")"
-}
+
 
 # Directory creation with error handling
 ensure_directory() {
@@ -200,7 +182,7 @@ export_dfx_env() {
     export LOCAL_IDENTITY="${LOCAL_IDENTITY:-4utfr-vvzwz-h62h4-xxl23-jvlck-dxw5q-je4tf-t6nr4-nk7ry-rywf6-bae}"
     export APP_ENV="${APP_ENV:-development}"
     export DEBUG="${DEBUG:-false}"
-    
+
     # Export all DFX-related variables
     export DFX_VERSION
     export DFX_NETWORK

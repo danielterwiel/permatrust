@@ -1,4 +1,4 @@
-use crate::logs::state::init_log_storage;
+use crate::logs::logs_manager::LogsManager;
 use crate::management::types::{
     CreateTenantCanisterInput, CreateTenantCanisterResult, GetAllTenantCanistersResult,
     GetTenantCanisterIdsResult,
@@ -16,7 +16,7 @@ mod management;
 #[init]
 fn init() {
     init_logger(CanisterOrigin::Main);
-    let log_storage = init_log_storage();
+    let log_storage = LogsManager::init_log_storage();
     set_log_storage(log_storage);
     log_info!("initialization: Main canister initialized successfully");
 }

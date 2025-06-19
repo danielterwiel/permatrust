@@ -1,4 +1,4 @@
-use crate::logs::state::init_log_storage;
+use crate::logs::logs_manager::LogsManager;
 use ic_cdk_macros::{init, post_upgrade, pre_upgrade};
 use shared::log_info;
 use shared::types::logs::CanisterOrigin;
@@ -7,7 +7,7 @@ use shared::utils::logs::{init_logger, set_log_storage};
 #[init]
 fn init() {
     init_logger(CanisterOrigin::Upgrade);
-    let log_storage = init_log_storage();
+    let log_storage = LogsManager::init_log_storage();
     set_log_storage(log_storage);
     log_info!("initialization: Upgrade canister initialized successfully");
 }
@@ -22,7 +22,7 @@ fn pre_upgrade() {
 #[post_upgrade]
 fn post_upgrade() {
     init_logger(CanisterOrigin::Upgrade);
-    let log_storage = init_log_storage();
+    let log_storage = LogsManager::init_log_storage();
     set_log_storage(log_storage);
     log_info!("upgrade_start: Post-upgrade initiated");
     log_info!("upgrade_complete: Upgrade canister post-upgrade completed successfully");

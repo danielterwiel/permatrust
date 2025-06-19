@@ -1,13 +1,8 @@
-mod methods;
-mod state;
+pub mod access_control_manager;
+pub mod controllers;
 
-use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
-use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
-use shared::types::access_control::{
-    CreateRoleInput, DocumentPermission, OrganizationPermission, Permission, ProjectPermission,
-    RevisionPermission, Role, RoleId, RoleIdVec, UserPermission, WorkflowPermission,
-};
-use shared::types::errors::AppError;
-use shared::types::users::UserId;
+pub use access_control_manager::AccessControlManager;
 
-pub use methods::*;
+pub fn init_default_roles() {
+    AccessControlManager::init_default_roles()
+}
