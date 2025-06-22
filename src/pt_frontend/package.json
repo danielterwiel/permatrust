@@ -40,6 +40,7 @@
     "@tanstack/react-table": "^8.17.3",
     "@tanstack/router-zod-adapter": "^1.79.0",
     "@tanstack/virtual-file-routes": "^1.81.9",
+    "animejs": "4.0.2",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",

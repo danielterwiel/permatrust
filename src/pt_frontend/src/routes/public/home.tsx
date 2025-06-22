@@ -1,795 +1,920 @@
 import { createFileRoute } from '@tanstack/react-router';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { animate, createTimer, stagger, svg } from 'animejs';
 
 import { Link } from '@/components/link';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Icon } from '@/components/ui/icon';
 
 export const Route = createFileRoute('/')({
   component: Home,
 });
 
+interface Node {
+  id: string;
+  x: number;
+  y: number;
+  size: number;
+  delay: number;
+}
+
 function Home() {
   const search = Route.useSearch();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [currentTooltipIndex, setCurrentTooltipIndex] = useState(0);
+
+  const tooltipMessages = [
+    'Create document',
+    'Approve document',
+    'Comment to revision',
+  ];
+
+  // Function to show tooltip with slide animations
+  const showTooltip = useCallback((onSlideInComplete?: () => void) => {
+    const tooltipElement = containerRef.current?.querySelector(
+      '.user-action-tooltip',
+    );
+
+    if (!tooltipElement) return;
+
+    // Reset position for slide in from bottom, maintaining horizontal centering
+    (tooltipElement as HTMLElement).style.transform =
+      'translate(-50%, -100%) translateY(40px)';
+
+    // Slide in from bottom with fade in, preserving the horizontal centering
+    animate(tooltipElement, {
+      opacity: [0, 1],
+      transform: [
+        'translate(-50%, -100%) translateY(40px)',
+        'translate(-50%, -100%) translateY(0px)',
+      ],
+      duration: 600,
+      ease: 'outCubic',
+      onComplete: () => {
+        // Call the callback when slide-in is complete
+        if (onSlideInComplete) {
+          onSlideInComplete();
+        }
+      },
+    });
+  }, []);
+
+  // Function to hide tooltip with slide out animation
+  const hideTooltip = useCallback(() => {
+    const tooltipElement = containerRef.current?.querySelector(
+      '.user-action-tooltip',
+    );
+
+    if (!tooltipElement) return;
+
+    animate(tooltipElement, {
+      opacity: [1, 0],
+      transform: [
+        'translate(-50%, -100%) translateY(0px)',
+        'translate(-50%, -100%) translateY(-40px)',
+      ],
+      duration: 800,
+      ease: 'inCubic',
+      onComplete: () => {
+        // Cycle to next message
+        setCurrentTooltipIndex((prev) => (prev + 1) % tooltipMessages.length);
+      },
+    });
+  }, []);
+
+  // Generate nodes: 1 user + 1 boundary + 7 internal replicas
+  const nodes: Array<Node> = [
+    // User node (outside the network)
+    { id: 'user', x: 5, y: 50, size: 14, delay: 0 },
+
+    // Boundary node (entry point to the subnet)
+    { id: 'boundary', x: 25, y: 50, size: 16, delay: 100 },
+
+    // Internal replica nodes (7 nodes randomly positioned)
+    { id: 'replica-1', x: 45, y: 25, size: 12, delay: 200 },
+    { id: 'replica-2', x: 70, y: 30, size: 12, delay: 250 },
+    { id: 'replica-3', x: 85, y: 55, size: 12, delay: 300 },
+    { id: 'replica-4', x: 75, y: 75, size: 12, delay: 350 },
+    { id: 'replica-5', x: 50, y: 80, size: 12, delay: 400 },
+    { id: 'replica-6', x: 35, y: 70, size: 12, delay: 450 },
+    { id: 'replica-7', x: 40, y: 40, size: 12, delay: 500 },
+  ];
+
+  // Helper function to create connection lines and packets
+  const createConnectionElements = useCallback(() => {
+    const svgElement = containerRef.current?.querySelector('svg[data-network]');
+    const connectionLinesGroup = svgElement?.querySelector(
+      '.connection-lines-group',
+    );
+    const effectsGroup = svgElement?.querySelector('.effects-group');
+
+    if (!svgElement || !connectionLinesGroup || !effectsGroup) {
+      console.log('SVG element or groups not found');
+      return;
+    }
+
+    console.log('Creating connection elements using anime.js approach...');
+
+    // Clear existing connections and packets
+    const elementsToRemove = svgElement.querySelectorAll(
+      '.connection-line, .packet',
+    );
+    console.log(`Removing ${elementsToRemove.length} existing elements`);
+    for (const el of elementsToRemove) {
+      el.remove();
+    }
+
+    // Create connection from user to boundary using proper SVG path
+    const userToBoundaryLine = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'path',
+    );
+    userToBoundaryLine.setAttribute(
+      'class',
+      'connection-line user-to-boundary',
+    );
+    const pathData = `M ${nodes[0].x} ${nodes[0].y} L ${nodes[1].x} ${nodes[1].y}`;
+    console.log('User-to-boundary path data:', pathData);
+    userToBoundaryLine.setAttribute('d', pathData);
+    userToBoundaryLine.setAttribute('stroke', '#f59e0b');
+    userToBoundaryLine.setAttribute('stroke-width', '0.4');
+    userToBoundaryLine.setAttribute('stroke-dasharray', '2,1');
+    userToBoundaryLine.setAttribute('fill', 'none');
+    userToBoundaryLine.setAttribute('stroke-linecap', 'round');
+    connectionLinesGroup.appendChild(userToBoundaryLine);
+    console.log('Created user-to-boundary path', userToBoundaryLine);
+
+    // Create packet for user to boundary
+    const userToBoundaryPacket = document.createElementNS(
+      'http://www.w3.org/2000/svg',
+      'circle',
+    );
+    userToBoundaryPacket.setAttribute(
+      'class',
+      'packet user-to-boundary-packet',
+    );
+    userToBoundaryPacket.setAttribute('r', '1.5');
+    userToBoundaryPacket.setAttribute('fill', '#f59e0b');
+    userToBoundaryPacket.setAttribute('cx', nodes[0].x.toString());
+    userToBoundaryPacket.setAttribute('cy', nodes[0].y.toString());
+    userToBoundaryPacket.setAttribute('opacity', '0');
+    userToBoundaryPacket.style.filter =
+      'drop-shadow(0 0 4px rgba(245, 158, 11, 0.8))';
+    effectsGroup.appendChild(userToBoundaryPacket);
+    console.log('Created user-to-boundary packet');
+
+    // Create connections from boundary to all replica nodes
+    nodes.slice(2).forEach((replicaNode, index) => {
+      const line = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'path',
+      );
+      line.setAttribute(
+        'class',
+        `connection-line boundary-to-replica boundary-to-replica-${index}`,
+      );
+      const pathData = `M ${nodes[1].x} ${nodes[1].y} L ${replicaNode.x} ${replicaNode.y}`;
+      console.log(`Replica ${index} path data:`, pathData);
+      line.setAttribute('d', pathData);
+      line.setAttribute('stroke', '#3b82f6');
+      line.setAttribute('stroke-width', '0.3');
+      line.setAttribute('stroke-dasharray', '1.5,0.8');
+      line.setAttribute('fill', 'none');
+      line.setAttribute('stroke-linecap', 'round');
+      connectionLinesGroup.appendChild(line);
+
+      // Create packet for boundary to replica
+      const packet = document.createElementNS(
+        'http://www.w3.org/2000/svg',
+        'circle',
+      );
+      packet.setAttribute(
+        'class',
+        `packet boundary-to-replica-packet boundary-to-replica-packet-${index}`,
+      );
+      packet.setAttribute('r', '1.2');
+      packet.setAttribute('fill', '#3b82f6');
+      packet.setAttribute('cx', nodes[1].x.toString());
+      packet.setAttribute('cy', nodes[1].y.toString());
+      packet.setAttribute('opacity', '0');
+      packet.style.filter = 'drop-shadow(0 0 3px rgba(59, 130, 246, 0.8))';
+      effectsGroup.appendChild(packet);
+    });
+
+    console.log(
+      `Created ${nodes.slice(2).length} boundary-to-replica connections`,
+    );
+
+    // Initialize all lines as thin and light grey
+    const allLines = svgElement.querySelectorAll('.connection-line');
+    console.log(`Found ${allLines.length} connection lines to initialize`);
+
+    for (const line of allLines) {
+      const pathLength = (line as SVGPathElement).getTotalLength();
+      console.log(`Line ${line.className} has length: ${pathLength}`);
+
+      // Make lines thin and light grey consistently
+      (line as SVGElement).style.strokeDashoffset = '0';
+      (line as SVGElement).style.opacity = '0'; // Start completely hidden
+      (line as SVGElement).style.stroke = '#d1d5db'; // Light grey (gray-300)
+      (line as SVGElement).style.strokeWidth = '0.2'; // Thin lines
+      (line as SVGElement).style.filter = 'none'; // No blur
+    }
+
+    console.log(
+      'All lines initialized as hidden, ready to fade in after nodes appear',
+    );
+  }, []);
+
+  // Function to animate packets from boundary to all replica nodes
+  const animateBoundaryToReplicaPackets = useCallback(() => {
+    const boundaryNode = nodes[1]; // Boundary node
+    const replicaNodes = nodes.slice(2); // All replica nodes (7 nodes)
+
+    console.log(
+      `Animating ${replicaNodes.length} packets from boundary to replicas...`,
+    );
+
+    // Animate each replica packet with stagger
+    replicaNodes.forEach((replicaNode, index) => {
+      createTimer({
+        duration: index * 40, // Stagger the packets like the original user packet
+        onComplete: () => {
+          console.log(`Starting packet ${index} to replica ${replicaNode.id}`);
+
+          // Keep the connection line thin and light grey (no visual changes during packet transmission)
+
+          // First fade in the packet at boundary position
+          animate(`.boundary-replica-circle-${index}`, {
+            opacity: [0, 0.8],
+            duration: 800,
+            ease: 'outCubic',
+            onComplete: () => {
+              // After fade-in completes, animate the circle to replica position
+              createTimer({
+                duration: 200, // Brief pause after appearing
+                onComplete: () => {
+                  console.log(
+                    `Moving packet ${index} to replica ${replicaNode.id}`,
+                  );
+
+                  // Animate the packet from boundary to replica position
+                  animate(`.boundary-replica-circle-${index}`, {
+                    translateX: [`${replicaNode.x - boundaryNode.x}%`],
+                    translateY: [`${replicaNode.y - boundaryNode.y}%`],
+                    duration: 1000,
+                    ease: 'outCubic',
+                    onComplete: () => {
+                      console.log(
+                        `Packet ${index} reached replica ${replicaNode.id}`,
+                      );
+
+                      // Connection line remains unchanged (thin and light grey)
+
+                      // Pulse the replica node when packet arrives
+                      animate(`[data-node-id="${replicaNode.id}"]`, {
+                        scale: [1, 1.2, 1],
+                        duration: 350,
+                        ease: 'outQuad',
+                      });
+
+                      // Fade out the packet after arrival
+                      createTimer({
+                        duration: 500,
+                        onComplete: () => {
+                          animate(`.boundary-replica-circle-${index}`, {
+                            opacity: [0.8, 0],
+                            duration: 400,
+                            ease: 'outCubic',
+                          });
+                        },
+                      });
+                    },
+                  });
+                },
+              });
+            },
+          });
+        },
+      });
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    // Create connection elements
+    createConnectionElements();
+
+    // Animate nodes appearing with more sophisticated easing
+    animate('.subnet-node', {
+      scale: [0, 1],
+      opacity: [0, 1],
+      delay: stagger(60, { from: 'center' }),
+      duration: 800,
+      ease: 'outElastic(1, 0.5)',
+    });
+
+    // Fade in connection lines after nodes have appeared
+    // Calculate when last node finishes: 17 nodes * 60ms stagger + 800ms duration = ~1820ms
+    createTimer({
+      duration: 1820,
+      onComplete: () => {
+        console.log('Fading in connection lines...');
+        // Fade in all connection lines
+        animate('.connection-line', {
+          opacity: [0, 0.6],
+          duration: 1000,
+          ease: 'outCubic',
+          delay: stagger(50), // Subtle stagger for organic feel
+        });
+      },
+    });
+
+    // Animate user highlight circle after lines have faded in
+    createTimer({
+      duration: 2320, // 1820ms nodes + 500ms line fade delay
+      onComplete: () => {
+        animate('.user-highlight-circle', {
+          opacity: [0, 0.8],
+          duration: 1000,
+          ease: 'outCubic',
+          onComplete: () => {
+            // Show tooltip first, then start packet animation when slide-in completes
+            showTooltip(() => {
+              // Packet animation starts after tooltip has slid in completely
+              const userNode = nodes[0]; // User node
+              const boundaryNode = nodes[1]; // Boundary node
+
+              console.log(
+                'Animating user highlight circle to boundary node...',
+              );
+
+              // Keep the connection line thin and light grey (no visual changes during packet transit)
+
+              // Animate the highlight circle from user to boundary position
+              animate('.user-highlight-circle', {
+                translateX: [`${boundaryNode.x - userNode.x}%`],
+                translateY: [`${boundaryNode.y - userNode.y}%`],
+                duration: 1200,
+                ease: 'outCubic',
+                onComplete: () => {
+                  console.log('User highlight circle reached boundary node');
+
+                  // Connection line remains unchanged (thin and light grey)
+
+                  // Activate boundary node to show packet arrival (only scale and color, no position change)
+                  const boundaryNode = containerRef.current?.querySelector(
+                    '[data-node-id="boundary"]',
+                  );
+                  if (boundaryNode) {
+                    boundaryNode.setAttribute('data-already-animated', 'true');
+                  }
+
+                  animate('[data-node-id="boundary"]', {
+                    scale: [1, 1.15, 1],
+                    duration: 400,
+                    ease: 'outQuad',
+                    onComplete: () => {
+                      // Hide the user highlight circle after boundary activation
+                      animate('.user-highlight-circle', {
+                        opacity: [0.8, 0],
+                        duration: 400,
+                        ease: 'outCubic',
+                      });
+
+                      // After boundary node activation, spawn packets to all replica nodes
+                      createTimer({
+                        duration: 300, // Brief pause after boundary activation
+                        onComplete: () => {
+                          animateBoundaryToReplicaPackets();
+
+                          // Hide tooltip after the entire packet flow sequence completes
+                          // Total packet flow: boundary activation (400ms) + pause (300ms) + replica packets (~1500ms)
+                          createTimer({
+                            duration: 2200, // Wait for replica packet animations to complete
+                            onComplete: () => {
+                              hideTooltip();
+                            },
+                          });
+                        },
+                      });
+                    },
+                  });
+                },
+              });
+            });
+          },
+        });
+      },
+    });
+
+    // Animate title and description with better timing
+    createTimer({
+      duration: 300,
+      onComplete: () => {
+        animate('.hero-text', {
+          translateY: [30, 0],
+          opacity: [0, 1],
+          duration: 1000,
+          delay: stagger(150),
+          ease: 'outCubic',
+        });
+      },
+    });
+  }, [
+    createConnectionElements,
+    animateBoundaryToReplicaPackets,
+    showTooltip,
+    hideTooltip,
+  ]);
+
+  const simulateTransaction = () => {
+    console.log('Starting packet transmission simulation...');
+
+    // Step 1: User node activation
+    animate('[data-node-id="user"]', {
+      scale: [1, 1.3, 1.1],
+      backgroundColor: ['#fef3c7', '#f59e0b', '#fbbf24'],
+      duration: 800,
+      ease: 'outElastic(1, 0.6)',
+    });
+
+    // Show tooltip first, then start packet animation when slide-in completes
+    showTooltip(() => {
+      // Step 2: Show connection line from user to boundary and animate packet
+      console.log('Animating user-to-boundary line...');
+      // Keep the line thin and light grey (no visual changes during packet transmission)
+
+      // Show and animate the packet
+      const userToBoundaryPath = containerRef.current?.querySelector(
+        '.user-to-boundary',
+      ) as SVGPathElement;
+      if (userToBoundaryPath) {
+        console.log('Found user-to-boundary path, creating motion path...');
+        const motionPath = svg.createMotionPath(userToBoundaryPath);
+
+        animate('.user-to-boundary-packet', {
+          opacity: [0, 1, 1, 0.8],
+          scale: [0.8, 1.3, 1.1, 1.1],
+          ...motionPath,
+          duration: 600,
+          ease: 'outCubic',
+          onComplete: () => {
+            console.log('User-to-boundary packet animation complete');
+            // Line remains unchanged (thin and light grey)
+          },
+        });
+      } else {
+        console.log('User-to-boundary path not found!');
+      }
+    });
+
+    // Step 3: Boundary node activation (skip if already animated by packet flow)
+    createTimer({
+      duration: 1200, // 600ms tooltip slide-in + 600ms packet animation
+      onComplete: () => {
+        // Only animate if boundary node hasn't been animated recently
+        const boundaryNode = containerRef.current?.querySelector(
+          '[data-node-id="boundary"]',
+        );
+        if (
+          boundaryNode &&
+          !boundaryNode.hasAttribute('data-already-animated')
+        ) {
+          animate('[data-node-id="boundary"]', {
+            scale: [1, 1.15, 1],
+            duration: 400,
+            ease: 'outQuad',
+          });
+        }
+      },
+    });
+
+    // Step 4: Boundary broadcasts to all replica nodes
+    createTimer({
+      duration: 2000, // 600ms tooltip + 600ms packet + 800ms boundary activation
+      onComplete: () => {
+        console.log('Starting boundary-to-replica broadcasts...');
+        const replicaNodes = nodes.slice(2);
+
+        replicaNodes.forEach((replicaNode, index) => {
+          createTimer({
+            duration: index * 40, // Stagger the broadcasts
+            onComplete: () => {
+              console.log(`Broadcasting to replica ${index}...`);
+              // Keep the line thin and light grey (no visual changes during packet transmission)
+
+              // Animate the packet along the path
+              const replicaPath = containerRef.current?.querySelector(
+                `.boundary-to-replica-${index}`,
+              ) as SVGPathElement;
+              if (replicaPath) {
+                const motionPath = svg.createMotionPath(replicaPath);
+
+                animate(`.boundary-to-replica-packet-${index}`, {
+                  opacity: [0, 1, 1, 0.8],
+                  scale: [0.8, 1.2, 1.0, 1.0],
+                  ...motionPath,
+                  duration: 700,
+                  ease: 'outCubic',
+                  onComplete: () => {
+                    // Pulse the replica node when packet arrives
+                    animate(`[data-node-id="${replicaNode.id}"]`, {
+                      scale: [1, 1.2, 1],
+                      duration: 350,
+                      ease: 'outQuad',
+                    });
+
+                    // Connection line remains unchanged (thin and light grey)
+                  },
+                });
+              } else {
+                console.log(`Replica path ${index} not found!`);
+              }
+            },
+          });
+        });
+      },
+    });
+
+    // Step 5: Final consensus confirmation wave
+    createTimer({
+      duration: 4700, // Adjusted for new timing: 600ms tooltip + remaining animation time
+      onComplete: () => {
+        console.log('Starting final consensus wave...');
+        // Create ripple effect across all replica nodes
+        animate('[data-node-id^="replica"]', {
+          scale: [1, 1.1, 1.05, 1],
+          boxShadow: [
+            '0 0 0 rgba(59, 130, 246, 0)',
+            '0 0 15px rgba(59, 130, 246, 0.8)',
+            '0 0 20px rgba(59, 130, 246, 0.6)',
+            '0 0 8px rgba(59, 130, 246, 0.3)',
+          ],
+          backgroundColor: ['#dbeafe', '#93c5fd', '#bfdbfe', '#e0f2fe'],
+          duration: 1400,
+          delay: stagger(60, { from: 'center' }),
+          ease: 'outCubic',
+        });
+
+        // Hide all remaining packets and lines
+        createTimer({
+          duration: 800,
+          onComplete: () => {
+            animate('.packet', {
+              opacity: 0,
+              duration: 300,
+            });
+
+            // Hide tooltip after packet flow completes
+            hideTooltip();
+          },
+        });
+      },
+    });
+  };
 
   return (
-    <div className="flex flex-col min-h-dvh">
-      <header className="container mx-auto py-4 flex justify-between items-center">
-        <div className="font-bold text-xl">Permatrust QMS</div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-purple-50 relative overflow-hidden">
+      {/* Mobile dotted background - visible only underneath animation area */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-50 lg:hidden"
+        style={{
+          backgroundImage: 'radial-gradient(#64748b 1px, transparent 1px)',
+          backgroundSize: '20px 20px',
+          maskImage:
+            'linear-gradient(to bottom, transparent 0%, transparent 55%, rgba(0,0,0,0.3) 60%, black 65%, black 95%, rgba(0,0,0,0.3) 98%, transparent 100%)',
+          WebkitMaskImage:
+            'linear-gradient(to bottom, transparent 0%, transparent 55%, rgba(0,0,0,0.3) 60%, black 65%, black 95%, rgba(0,0,0,0.3) 98%, transparent 100%)',
+        }}
+      />
+
+      {/* Desktop dotted background - visible only underneath animation area */}
+      <div
+        className="absolute inset-0 pointer-events-none opacity-50 hidden lg:block"
+        style={{
+          backgroundImage: 'radial-gradient(#64748b 1px, transparent 1px)',
+          backgroundSize: '20px 20px',
+          maskImage:
+            'linear-gradient(to right, transparent 0%, transparent 45%, rgba(0,0,0,0.3) 50%, black 55%, black 100%)',
+          WebkitMaskImage:
+            'linear-gradient(to right, transparent 0%, transparent 45%, rgba(0,0,0,0.3) 50%, black 55%, black 100%)',
+        }}
+      />
+
+      <header className="container mx-auto py-6 flex justify-between items-center relative z-10">
+        <div className="font-bold text-2xl text-slate-800">Permatrust</div>
         <Link search={search} to="/login">
-          <Button>Login</Button>
+          <Button className="bg-slate-700 hover:bg-slate-800 text-white shadow-lg hover:shadow-xl transition-all duration-300">
+            Login
+          </Button>
         </Link>
       </header>
 
-      {/* Hero Section - max 1/3 of viewport height with content fit */}
-      <section className="relative min-h-fit max-h-[33vh] h-auto overflow-visible flex items-center">
-        <div className="container mx-auto py-8 px-4 sm:py-10 md:py-12 relative z-10">
-          <div className="max-w-2xl">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-primary to-primary-foreground bg-clip-text text-transparent">
-              Quality Management done differently
-            </h1>
-            <p className="mt-2 sm:mt-4 text-base sm:text-lg text-muted-foreground max-w-md">
-              Streamline your quality processes with our intuitive, compliant
-              and secure management system.
-            </p>
-            <div className="mt-6 sm:mt-8 flex flex-wrap gap-4 pb-2 sm:pb-4">
-              <Button className="group" size="lg">
-                Get Started
-                <svg
-                  aria-hidden="true"
-                  className="transition-transform duration-300 group-hover:translate-x-1"
-                  fill="none"
-                  height="16"
-                  viewBox="0 0 16 16"
-                  width="16"
-                  xmlns="http://www.w3.org/2000/svg"
+      {/* Hero Section */}
+      <section className="container mx-auto px-4 py-8 relative z-10">
+        <div className="grid lg:grid-cols-2 gap-12 items-center min-h-[80vh]">
+          {/* Left Column - Text Content */}
+          <div className="space-y-8">
+            <div className="space-y-6">
+              <h1 className="hero-text text-5xl md:text-6xl font-bold leading-tight text-slate-800 opacity-0">
+                Highly secure
+                <span className="block text-4xl md:text-5xl text-blue-600 mt-2">
+                  Quality Management
+                </span>
+              </h1>
+
+              <p className="hero-text text-xl text-slate-600 leading-relaxed opacity-0 max-w-lg">
+                Permatrust aims to be the most secure Quality Management System.
+                By replicating the data across multiple nodes in independent
+                datacenters, your data is
+                <span className="font-semibold text-red-700">
+                  {' '}
+                  ransomware-resillient
+                </span>{' '}
+                and
+                <span className="font-semibold text-blue-700">
+                  {' '}
+                  independent from big-tech
+                </span>
+                .
+              </p>
+
+              <div className="hero-text opacity-0 flex flex-wrap gap-4">
+                <Button
+                  size="lg"
+                  onClick={simulateTransaction}
+                  className="bg-blue-600 hover:bg-blue-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 group"
                 >
-                  <title>Arrow right</title>
-                  <path
-                    d="M6.5 12.5L11 8L6.5 3.5"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="1.5"
+                  See Packet Flow
+                  <svg
+                    aria-hidden="true"
+                    className="ml-2 transition-transform duration-300 group-hover:translate-x-1"
+                    fill="none"
+                    height="16"
+                    viewBox="0 0 16 16"
+                    width="16"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      d="M6.5 12.5L11 8L6.5 3.5"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.5"
+                    />
+                  </svg>
+                </Button>
+
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="border-slate-300 text-slate-700 hover:bg-slate-100 shadow hover:shadow-md transition-all duration-300"
+                >
+                  Learn More
+                </Button>
+              </div>
+            </div>
+
+            {/* QMS Advantages */}
+            <div className="hero-text opacity-0 grid grid-cols-3 gap-6 pt-8">
+              <div className="text-center">
+                <div className="flex justify-center mb-2">
+                  <Icon
+                    name="check"
+                    className="text-3xl text-blue-600"
+                    size="xl"
                   />
-                </svg>
-              </Button>
-              <Button size="lg" variant="outline">
-                Learn More
-              </Button>
+                </div>
+                <div className="text-sm text-slate-600">Data Integrity</div>
+              </div>
+              <div className="text-center">
+                <div className="flex justify-center mb-2">
+                  <Icon
+                    name="user-check-outline"
+                    className="text-3xl text-red-600"
+                    size="xl"
+                  />
+                </div>
+                <div className="text-sm text-slate-600">Data Validity</div>
+              </div>
+              <div className="text-center">
+                <div className="flex justify-center mb-2">
+                  <Icon
+                    name="infinity-outline"
+                    className="text-3xl text-emerald-600"
+                    size="xl"
+                  />
+                </div>
+                <div className="text-sm text-slate-600">Immutable Records</div>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* SVG Abstract Graph Background - hardware accelerated with transform-gpu */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none bg-gradient-to-r from-background via-primary/5 to-background">
-          {/* SVG abstract graph with hardware acceleration */}
-          <svg
-            aria-hidden="true"
-            className="absolute inset-0 w-full h-full opacity-75"
-            height="100%"
-            preserveAspectRatio="none"
-            style={{ willChange: 'transform' }}
-            viewBox="0 0 1440 800"
-            width="100%"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <defs>
-              <linearGradient
-                id="graph-gradient"
-                x1="0%"
-                x2="100%"
-                y1="0%"
-                y2="100%"
+          {/* Right Column - Subnet Visualization */}
+          <div className="relative" ref={containerRef}>
+            <div className="aspect-square max-w-lg mx-auto relative">
+              {/* Network visualization */}
+              <svg
+                className="absolute inset-0 w-full h-full"
+                viewBox="0 0 100 100"
+                data-network
               >
-                <stop
-                  offset="0%"
-                  stopColor="var(--primary)"
-                  stopOpacity="0.1"
-                />
-                <stop
-                  offset="50%"
-                  stopColor="var(--primary)"
-                  stopOpacity="0.2"
-                />
-                <stop
-                  offset="100%"
-                  stopColor="var(--primary)"
-                  stopOpacity="0.1"
-                />
-              </linearGradient>
-              <linearGradient
-                id="wave-gradient"
-                x1="0%"
-                x2="100%"
-                y1="0%"
-                y2="0%"
+                <title>Network Connections</title>
+                <defs>
+                  <linearGradient
+                    id="connectionGradient"
+                    x1="0%"
+                    y1="0%"
+                    x2="100%"
+                    y2="100%"
+                  >
+                    <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.2" />
+                    <stop offset="50%" stopColor="#3b82f6" stopOpacity="0.8" />
+                    <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.2" />
+                  </linearGradient>
+                  <filter
+                    id="glow"
+                    x="-50%"
+                    y="-50%"
+                    width="200%"
+                    height="200%"
+                  >
+                    <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+                    <feMerge>
+                      <feMergeNode in="coloredBlur" />
+                      <feMergeNode in="SourceGraphic" />
+                    </feMerge>
+                  </filter>
+
+                  {/* Gradients for node fills */}
+                  <radialGradient id="userGradient" r="80%">
+                    <stop offset="0%" stopColor="#fef3c7" />
+                    <stop offset="100%" stopColor="#fbbf24" />
+                  </radialGradient>
+                  <radialGradient id="boundaryGradient" r="80%">
+                    <stop offset="0%" stopColor="#fecaca" />
+                    <stop offset="100%" stopColor="#f87171" />
+                  </radialGradient>
+                  <radialGradient id="replicaGradient" r="80%">
+                    <stop offset="0%" stopColor="#dbeafe" />
+                    <stop offset="100%" stopColor="#93c5fd" />
+                  </radialGradient>
+                </defs>
+
+                {/* Group for connection lines - rendered first (behind nodes) */}
+                <g className="connection-lines-group">
+                  {/* Connection lines will be added here dynamically */}
+                </g>
+
+                {/* Group for nodes - rendered second (on top of lines) */}
+                <g className="nodes-group">
+                  {/* Render subnet nodes */}
+                  {nodes.map((node) => (
+                    <circle
+                      key={node.id}
+                      data-node-id={node.id}
+                      className="subnet-node"
+                      cx={node.x}
+                      cy={node.y}
+                      r={node.size / 8}
+                      fill={
+                        node.id === 'user'
+                          ? 'url(#userGradient)'
+                          : node.id === 'boundary'
+                            ? 'url(#boundaryGradient)'
+                            : 'url(#replicaGradient)'
+                      }
+                      stroke={
+                        node.id === 'user'
+                          ? '#f59e0b'
+                          : node.id === 'boundary'
+                            ? '#ef4444'
+                            : '#3b82f6'
+                      }
+                      strokeWidth="0.4"
+                      style={{
+                        transformBox: 'fill-box',
+                        transformOrigin: 'center center',
+                      }}
+                    />
+                  ))}
+                </g>
+
+                {/* Group for effects - rendered last (on top of everything) */}
+                <g className="effects-group">
+                  {/* User highlight circle - appears after all nodes */}
+                  <circle
+                    className="user-highlight-circle"
+                    cx={nodes[0].x}
+                    cy={nodes[0].y}
+                    r={nodes[0].size / 6.5} // Bigger than user node (14/8 = 1.75, 14/6.5 ≈ 2.15)
+                    fill="none"
+                    stroke="#f59e0b"
+                    strokeWidth="0.6"
+                    opacity="0"
+                    strokeDasharray="2,2"
+                  />
+
+                  {/* Boundary-to-replica highlight circles - spawn when boundary packet arrives */}
+                  {nodes.slice(2).map((replicaNode, index) => (
+                    <circle
+                      key={replicaNode.id}
+                      className={`boundary-replica-circle boundary-replica-circle-${index}`}
+                      cx={nodes[1].x} // Start at boundary node position
+                      cy={nodes[1].y}
+                      r={nodes[1].size / 7} // Similar size to user highlight circle
+                      fill="none"
+                      stroke="#3b82f6"
+                      strokeWidth="0.6"
+                      opacity="0"
+                      strokeDasharray="2,2"
+                    />
+                  ))}
+                </g>
+              </svg>
+
+              {/* User action tooltip - positioned centered above user node */}
+              <div
+                className="user-action-tooltip absolute pointer-events-none opacity-0"
+                style={{
+                  left: `${nodes[0].x}%`,
+                  top: `${nodes[0].y - 3}%`,
+                  zIndex: 50,
+                }}
               >
-                <stop
-                  offset="0%"
-                  stopColor="var(--primary)"
-                  stopOpacity="0.05"
-                />
-                <stop
-                  offset="50%"
-                  stopColor="var(--primary)"
-                  stopOpacity="0.2"
-                />
-                <stop
-                  offset="100%"
-                  stopColor="var(--primary)"
-                  stopOpacity="0.05"
-                />
-              </linearGradient>
-              <linearGradient
-                id="pulse-gradient"
-                x1="0%"
-                x2="100%"
-                y1="0%"
-                y2="100%"
-              >
-                <stop
-                  offset="0%"
-                  stopColor="var(--primary)"
-                  stopOpacity="0.3"
-                />
-                <stop
-                  offset="100%"
-                  stopColor="var(--primary)"
-                  stopOpacity="0.1"
-                />
-              </linearGradient>
-              <filter height="140%" id="glow" width="140%" x="-20%" y="-20%">
-                <feGaussianBlur result="blur" stdDeviation="8" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
-              <mask id="graph-mask">
-                <rect fill="white" height="100%" width="100%" />
-              </mask>
-            </defs>
+                <div className="bg-blue-600 text-white text-xs font-medium px-3 py-2 rounded-lg shadow-lg">
+                  <div className="tooltip-text">
+                    {tooltipMessages[currentTooltipIndex]}
+                  </div>
+                  {/* Tooltip arrow */}
+                  <div className="absolute top-full left-1/2 transform -translate-x-1/2">
+                    <div className="w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-blue-600" />
+                  </div>
+                </div>
+              </div>
 
-            {/* Dense grid lines - horizontal */}
-            <g
-              mask="url(#graph-mask)"
-              stroke="currentColor"
-              strokeOpacity="0.03"
-            >
-              <line x1="0" x2="1440" y1="50" y2="50" />
-              <line x1="0" x2="1440" y1="100" y2="100" />
-              <line x1="0" x2="1440" y1="150" y2="150" />
-              <line x1="0" x2="1440" y1="200" y2="200" />
-              <line x1="0" x2="1440" y1="250" y2="250" />
-              <line x1="0" x2="1440" y1="300" y2="300" />
-              <line x1="0" x2="1440" y1="350" y2="350" />
-              <line x1="0" x2="1440" y1="400" y2="400" />
-              <line x1="0" x2="1440" y1="450" y2="450" />
-              <line x1="0" x2="1440" y1="500" y2="500" />
-              <line x1="0" x2="1440" y1="550" y2="550" />
-              <line x1="0" x2="1440" y1="600" y2="600" />
-              <line x1="0" x2="1440" y1="650" y2="650" />
-              <line x1="0" x2="1440" y1="700" y2="700" />
-              <line x1="0" x2="1440" y1="750" y2="750" />
-            </g>
+              {/* Network labels */}
+              <div className="absolute top-2 left-2 pointer-events-none">
+                <div className="bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg border border-yellow-200">
+                  <div className="text-xs font-semibold text-yellow-700 text-center">
+                    User
+                  </div>
+                </div>
+              </div>
 
-            {/* Dense grid lines - vertical */}
-            <g
-              mask="url(#graph-mask)"
-              stroke="currentColor"
-              strokeOpacity="0.03"
-            >
-              <line x1="80" x2="80" y1="0" y2="800" />
-              <line x1="160" x2="160" y1="0" y2="800" />
-              <line x1="240" x2="240" y1="0" y2="800" />
-              <line x1="320" x2="320" y1="0" y2="800" />
-              <line x1="400" x2="400" y1="0" y2="800" />
-              <line x1="480" x2="480" y1="0" y2="800" />
-              <line x1="560" x2="560" y1="0" y2="800" />
-              <line x1="640" x2="640" y1="0" y2="800" />
-              <line x1="720" x2="720" y1="0" y2="800" />
-              <line x1="800" x2="800" y1="0" y2="800" />
-              <line x1="880" x2="880" y1="0" y2="800" />
-              <line x1="960" x2="960" y1="0" y2="800" />
-              <line x1="1040" x2="1040" y1="0" y2="800" />
-              <line x1="1120" x2="1120" y1="0" y2="800" />
-              <line x1="1200" x2="1200" y1="0" y2="800" />
-              <line x1="1280" x2="1280" y1="0" y2="800" />
-              <line x1="1360" x2="1360" y1="0" y2="800" />
-            </g>
+              <div className="absolute top-2 left-20 pointer-events-none">
+                <div className="bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg border border-red-200">
+                  <div className="text-xs font-semibold text-red-700 text-center">
+                    Network orchestrator
+                  </div>
+                </div>
+              </div>
 
-            {/* Main grid lines - highlighted */}
-            <g
-              mask="url(#graph-mask)"
-              stroke="currentColor"
-              strokeOpacity="0.07"
-            >
-              <line x1="0" x2="1440" y1="200" y2="200" />
-              <line x1="0" x2="1440" y1="400" y2="400" />
-              <line x1="0" x2="1440" y1="600" y2="600" />
-              <line x1="320" x2="320" y1="0" y2="800" />
-              <line x1="640" x2="640" y1="0" y2="800" />
-              <line x1="960" x2="960" y1="0" y2="800" />
-              <line x1="1280" x2="1280" y1="0" y2="800" />
-            </g>
+              <div className="absolute top-2 left-64 pointer-events-none">
+                <div className="bg-white/90 backdrop-blur-sm rounded-lg px-3 py-2 shadow-lg border border-red-200">
+                  <div className="text-xs font-semibold text-blue-700 text-center">
+                    Nodes
+                  </div>
+                </div>
+              </div>
+            </div>
 
-            {/* Wave patterns - animated with different speeds/phases */}
-            <path
-              className="transform-gpu animate-wave-1"
-              d="M0,500 C120,470 240,530 360,500 C480,470 600,530 720,500 C840,470 960,530 1080,500 C1200,470 1320,530 1440,500"
-              fill="none"
-              stroke="url(#wave-gradient)"
-              strokeWidth="2"
-            />
+            {/* Feature callouts */}
+            <div className="absolute right-2 top-1/4 hidden lg:block">
+              <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg border border-slate-200 max-w-48">
+                <div className="text-xs font-semibold text-slate-700">GDPR</div>
+                <div className="text-xs text-slate-500 mt-1">
+                  Optionally, all your data is stored in the EU
+                </div>
+              </div>
+            </div>
 
-            <path
-              className="transform-gpu animate-wave-2"
-              d="M0,300 C120,330 240,270 360,300 C480,330 600,270 720,300 C840,330 960,270 1080,300 C1200,330 1320,270 1440,300"
-              fill="none"
-              stroke="url(#wave-gradient)"
-              strokeWidth="2"
-            />
+            <div className="absolute -left-8 bottom-1/4 hidden lg:block">
+              <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg border border-slate-200 max-w-48">
+                <div className="text-xs font-semibold text-slate-700">
+                  End-to-end encryption
+                </div>
+                <div className="text-xs text-slate-500 mt-1">
+                  All your data is stored fully encrypted
+                </div>
+              </div>
+            </div>
 
-            <path
-              className="transform-gpu animate-wave-3"
-              d="M0,600 C160,550 320,650 480,600 C640,550 800,650 960,600 C1120,550 1280,650 1440,600"
-              fill="none"
-              stroke="url(#wave-gradient)"
-              strokeWidth="2.5"
-            />
-
-            {/* Additional wave patterns */}
-            <path
-              className="transform-gpu animate-wave-4"
-              d="M0,200 C90,220 180,180 270,200 C360,220 450,180 540,200 C630,220 720,180 810,200 C900,220 990,180 1080,200 C1170,220 1260,180 1350,200 C1440,220"
-              fill="none"
-              stroke="url(#wave-gradient)"
-              strokeWidth="2"
-            />
-
-            <path
-              className="transform-gpu animate-wave-5"
-              d="M0,400 C160,380 320,420 480,400 C640,380 800,420 960,400 C1120,380 1280,420 1440,400"
-              fill="none"
-              stroke="url(#wave-gradient)"
-              strokeWidth="2"
-            />
-
-            {/* Path 1 - Quality trend line */}
-            <path
-              className="transform-gpu animate-path-draw"
-              d="M0,650 C160,620 320,480 480,510 C640,540 800,430 960,410 C1120,390 1280,450 1440,430"
-              fill="none"
-              filter="url(#glow)"
-              stroke="url(#graph-gradient)"
-              strokeWidth="3"
-            />
-
-            {/* Path 2 - Secondary metric line */}
-            <path
-              className="transform-gpu animate-path-slide"
-              d="M0,580 C160,560 320,590 480,570 C640,550 800,580 960,550 C1120,520 1280,540 1440,510"
-              fill="none"
-              stroke="url(#graph-gradient)"
-              strokeDasharray="5,5"
-              strokeWidth="2"
-            />
-
-            {/* Path 3 - Additional trend line */}
-            <path
-              className="transform-gpu animate-path-slide-alt"
-              d="M0,350 C120,320 240,380 360,350 C480,320 600,380 720,350 C840,320 960,380 1080,350 C1200,320 1320,380 1440,350"
-              fill="none"
-              stroke="url(#graph-gradient)"
-              strokeDasharray="3,3"
-              strokeWidth="2"
-            />
-
-            {/* Data points - Primary with glow effect */}
-            <g
-              className="transform-gpu animate-pulse-slow"
-              fill="url(#pulse-gradient)"
-              filter="url(#glow)"
-            >
-              <circle cx="0" cy="650" opacity="0.7" r="4" />
-              <circle cx="480" cy="510" opacity="0.8" r="5" />
-              <circle cx="960" cy="410" opacity="0.8" r="5" />
-              <circle cx="1440" cy="430" opacity="0.7" r="4" />
-
-              <circle cx="0" cy="580" opacity="0.6" r="3" />
-              <circle cx="480" cy="570" opacity="0.7" r="3" />
-              <circle cx="960" cy="550" opacity="0.7" r="3" />
-              <circle cx="1440" cy="510" opacity="0.6" r="3" />
-            </g>
-
-            {/* Wave data points */}
-            <g
-              className="transform-gpu animate-pulse-alternate"
-              fill="var(--primary)"
-            >
-              <circle cx="360" cy="500" opacity="0.5" r="2.5" />
-              <circle cx="720" cy="500" opacity="0.5" r="2.5" />
-              <circle cx="1080" cy="500" opacity="0.5" r="2.5" />
-
-              <circle cx="240" cy="300" opacity="0.5" r="2" />
-              <circle cx="480" cy="300" opacity="0.5" r="2" />
-              <circle cx="720" cy="300" opacity="0.5" r="2" />
-              <circle cx="960" cy="300" opacity="0.5" r="2" />
-              <circle cx="1200" cy="300" opacity="0.5" r="2" />
-
-              <circle cx="240" cy="200" opacity="0.4" r="1.5" />
-              <circle cx="540" cy="200" opacity="0.4" r="1.5" />
-              <circle cx="810" cy="200" opacity="0.4" r="1.5" />
-              <circle cx="1080" cy="200" opacity="0.4" r="1.5" />
-              <circle cx="1350" cy="200" opacity="0.4" r="1.5" />
-
-              <circle cx="320" cy="400" opacity="0.4" r="2" />
-              <circle cx="640" cy="400" opacity="0.4" r="2" />
-              <circle cx="960" cy="400" opacity="0.4" r="2" />
-              <circle cx="1280" cy="400" opacity="0.4" r="2" />
-
-              <circle cx="160" cy="600" opacity="0.5" r="2.5" />
-              <circle cx="480" cy="600" opacity="0.5" r="2.5" />
-              <circle cx="800" cy="600" opacity="0.5" r="2.5" />
-              <circle cx="1120" cy="600" opacity="0.5" r="2.5" />
-              <circle cx="1440" cy="600" opacity="0.5" r="2.5" />
-            </g>
-
-            {/* Additional effect nodes with pulse animations */}
-            <g className="transform-gpu" filter="url(#glow)">
-              <circle
-                className="animate-node-pulse-1"
-                cx="480"
-                cy="510"
-                fill="var(--primary)"
-                opacity="0.7"
-                r="6"
-              />
-              <circle
-                className="animate-node-pulse-2"
-                cx="960"
-                cy="410"
-                fill="var(--primary)"
-                opacity="0.7"
-                r="6"
-              />
-              <circle
-                className="animate-node-pulse-3"
-                cx="720"
-                cy="300"
-                fill="var(--primary)"
-                opacity="0.6"
-                r="4"
-              />
-              <circle
-                className="animate-node-pulse-2"
-                cx="1080"
-                cy="500"
-                fill="var(--primary)"
-                opacity="0.6"
-                r="4"
-              />
-              <circle
-                className="animate-node-pulse-3"
-                cx="240"
-                cy="300"
-                fill="var(--primary)"
-                opacity="0.6"
-                r="4"
-              />
-            </g>
-
-            {/* Mathematical-looking patterns with enhanced visibility */}
-            <g
-              fill="none"
-              stroke="var(--primary)"
-              strokeOpacity="0.15"
-              strokeWidth="1.5"
-            >
-              <path
-                className="transform-gpu animate-path-fade"
-                d="M100,350 Q150,300 200,350 T300,350"
-              />
-              <path
-                className="transform-gpu animate-path-fade"
-                d="M700,200 Q750,150 800,200 T900,200"
-              />
-              <path
-                className="transform-gpu animate-path-fade"
-                d="M1100,450 Q1150,400 1200,450 T1300,450"
-              />
-              <path
-                className="transform-gpu animate-path-fade-delayed"
-                d="M400,250 Q450,200 500,250 T600,250"
-              />
-              <path
-                className="transform-gpu animate-path-fade-delayed"
-                d="M900,400 Q950,350 1000,400 T1100,400"
-              />
-            </g>
-
-            {/* Digital circuit-like pattern */}
-            <g
-              fill="none"
-              stroke="var(--primary)"
-              strokeLinecap="square"
-              strokeOpacity="0.2"
-              strokeWidth="1.5"
-            >
-              <path
-                className="transform-gpu animate-circuit-fade"
-                d="M100,150 L180,150 L180,250 L280,250"
-              />
-              <path
-                className="transform-gpu animate-circuit-fade"
-                d="M500,100 L500,200 L600,200 L600,300"
-              />
-              <path
-                className="transform-gpu animate-circuit-fade"
-                d="M900,120 L1000,120 L1000,300 L1100,300"
-              />
-              <path
-                className="transform-gpu animate-circuit-fade-delayed"
-                d="M300,450 L300,550 L400,550 L400,650"
-              />
-              <path
-                className="transform-gpu animate-circuit-fade-delayed"
-                d="M700,500 L800,500 L800,600 L900,600"
-              />
-              <path
-                className="transform-gpu animate-circuit-fade-delayed"
-                d="M1200,350 L1200,450 L1300,450"
-              />
-            </g>
-
-            {/* Connection nodes for circuit patterns */}
-            <g className="transform-gpu" fill="var(--primary)">
-              <circle
-                className="animate-node-pulse-1"
-                cx="180"
-                cy="150"
-                opacity="0.3"
-                r="3"
-              />
-              <circle
-                className="animate-node-pulse-2"
-                cx="180"
-                cy="250"
-                opacity="0.3"
-                r="3"
-              />
-              <circle
-                className="animate-node-pulse-3"
-                cx="500"
-                cy="200"
-                opacity="0.3"
-                r="3"
-              />
-              <circle
-                className="animate-node-pulse-1"
-                cx="1000"
-                cy="120"
-                opacity="0.3"
-                r="3"
-              />
-              <circle
-                className="animate-node-pulse-2"
-                cx="1000"
-                cy="300"
-                opacity="0.3"
-                r="3"
-              />
-              <circle
-                className="animate-node-pulse-3"
-                cx="300"
-                cy="550"
-                opacity="0.3"
-                r="3"
-              />
-              <circle
-                className="animate-node-pulse-1"
-                cx="800"
-                cy="500"
-                opacity="0.3"
-                r="3"
-              />
-              <circle
-                className="animate-node-pulse-2"
-                cx="800"
-                cy="600"
-                opacity="0.3"
-                r="3"
-              />
-              <circle
-                className="animate-node-pulse-3"
-                cx="1200"
-                cy="450"
-                opacity="0.3"
-                r="3"
-              />
-            </g>
-          </svg>
-
-          {/* Subtle gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/5 to-background/20" />
+            <div className="absolute -right-8 top-2/3 hidden lg:block">
+              <div className="bg-white/90 backdrop-blur-sm rounded-lg p-3 shadow-lg border border-slate-200 max-w-48">
+                <div className="text-xs font-semibold text-slate-700">
+                  Data Replication
+                </div>
+                <div className="text-xs text-slate-500 mt-1">
+                  Your data is safely stored across multiple geographic regions
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
-
-      {/* Features Section - 3 columns */}
-      <section className="container mx-auto py-16">
-        <h2 className="text-3xl font-bold text-center mb-12">
-          Why Choose Our QMS
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Feature 1 */}
-          <Card className="group hover:shadow-md transition-all border-t-4 border-t-primary/80">
-            <CardHeader>
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2 group-hover:bg-primary/20 transition-colors">
-                <svg
-                  aria-hidden="true"
-                  className="text-primary"
-                  fill="none"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  width="24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <title>Compliance icon</title>
-                  <path
-                    d="M8 12L11 15L16 9"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                  />
-                  <path
-                    d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  />
-                </svg>
-              </div>
-              <CardTitle>Compliance Assurance</CardTitle>
-              <CardDescription>
-                Stay compliant with industry standards and regulations
-                automatically.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Our platform continuously monitors regulatory changes and
-                ensures your processes remain compliant at all times.
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Button className="group p-0 h-auto" variant="ghost">
-                Learn more
-                <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
-                  →
-                </span>
-              </Button>
-            </CardFooter>
-          </Card>
-
-          {/* Feature 2 */}
-          <Card className="group hover:shadow-md transition-all border-t-4 border-t-primary/80">
-            <CardHeader>
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2 group-hover:bg-primary/20 transition-colors">
-                <svg
-                  aria-hidden="true"
-                  className="text-primary"
-                  fill="none"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  width="24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <title>Document control icon</title>
-                  <path
-                    d="M19 3H5C3.89543 3 3 3.89543 3 5V19C3 20.1046 3.89543 21 5 21H19C20.1046 21 21 20.1046 21 19V5C21 3.89543 20.1046 3 19 3Z"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  />
-                  <path
-                    d="M8 12H16"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeWidth="2"
-                  />
-                  <path
-                    d="M8 8H16"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeWidth="2"
-                  />
-                  <path
-                    d="M8 16H12"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeWidth="2"
-                  />
-                </svg>
-              </div>
-              <CardTitle>Document Control</CardTitle>
-              <CardDescription>
-                Centralize and manage all quality documentation effortlessly.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Track revisions, manage approvals, and ensure everyone has
-                access to the most up-to-date documentation.
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Button className="group p-0 h-auto" variant="ghost">
-                Learn more
-                <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
-                  →
-                </span>
-              </Button>
-            </CardFooter>
-          </Card>
-
-          {/* Feature 3 */}
-          <Card className="group hover:shadow-md transition-all border-t-4 border-t-primary/60">
-            <CardHeader>
-              <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center mb-2 group-hover:bg-primary/20 transition-colors">
-                <svg
-                  aria-hidden="true"
-                  className="text-primary"
-                  fill="none"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  width="24"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <title>Process automation icon</title>
-                  <path
-                    d="M12 15C13.6569 15 15 13.6569 15 12C15 10.3431 13.6569 9 12 9C10.3431 9 9 10.3431 9 12C9 13.6569 10.3431 15 12 15Z"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                  />
-                  <path
-                    d="M19.4 15C19.1277 15.8031 19.2289 16.6718 19.68 17.4L19.75 17.51C20.1294 18.0628 20.168 18.7879 19.8514 19.377C19.5348 19.9661 18.9158 20.3421 18.25 20.39L18.12 20.4C17.3366 20.4538 16.6375 20.9106 16.3 21.6C16.057 22.1495 15.5726 22.5691 14.984 22.7451C14.3955 22.921 13.7602 22.8338 13.25 22.51L13.15 22.43C12.4388 21.9047 11.5173 21.8996 10.8 22.42L10.74 22.47C10.2266 22.8275 9.59771 22.9219 9.01363 22.7324C8.42956 22.5429 7.95648 22.0889 7.73 21.51L7.69 21.37C7.41871 20.661 6.77109 20.1464 6 20.05L5.88 20.05C5.21539 19.9788 4.65149 19.5553 4.39457 18.949C4.13766 18.3427 4.22664 17.6457 4.63 17.13L4.69 17.04C5.13298 16.3041 5.21001 15.3999 4.9 14.6L4.86 14.47C4.60512 13.8795 4.65632 13.1965 5 12.65C5.34368 12.1035 5.9436 11.764 6.6 11.75H6.75C7.55044 11.7009 8.26988 11.2159 8.6 10.49L8.64 10.37C8.91233 9.7913 9.44784 9.38343 10.07 9.28041C10.6922 9.17739 11.3295 9.39208 11.76 9.85L11.85 9.93C12.5718 10.6089 13.6646 10.6089 14.39 9.93L14.46 9.86C14.8882 9.41295 15.5158 9.20055 16.1309 9.30014C16.746 9.39973 17.2785 9.80059 17.56 10.37L17.61 10.5C17.9292 11.2188 18.641 11.7088 19.44 11.76H19.53C20.1864 11.774 20.7863 12.1135 21.13 12.66C21.4736 13.2065 21.5248 13.8895 21.27 14.48L21.23 14.6C20.9309 15.4122 21.0255 16.3144 21.49 17.05"
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                  />
-                </svg>
-              </div>
-              <CardTitle>Process Automation</CardTitle>
-              <CardDescription>
-                Automate workflows and eliminate manual quality processes.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-muted-foreground">
-                Reduce errors and save time with intelligent process automation
-                and customizable approval workflows.
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Button className="group p-0 h-auto" variant="ghost">
-                Learn more
-                <span className="inline-block transition-transform duration-300 group-hover:translate-x-1">
-                  →
-                </span>
-              </Button>
-            </CardFooter>
-          </Card>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="mt-auto bg-muted/30">
-        <div className="container mx-auto py-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div>
-              <h3 className="font-semibold mb-4">Permatrust QMS</h3>
-              <p className="text-sm text-muted-foreground">
-                Simplifying quality management for modern organizations.
-              </p>
-            </div>
-            <div>
-              <h4 className="font-medium mb-4">Company</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <a
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    href="/about"
-                  >
-                    About
-                  </a>
-                </li>
-                <li>
-                  <a
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    href="/careers"
-                  >
-                    Careers
-                  </a>
-                </li>
-                <li>
-                  <a
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    href="/contact"
-                  >
-                    Contact
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-medium mb-4">Resources</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <a
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    href="/docs"
-                  >
-                    Documentation
-                  </a>
-                </li>
-                <li>
-                  <a
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    href="/blog"
-                  >
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    href="/support"
-                  >
-                    Support
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-medium mb-4">Legal</h4>
-              <ul className="space-y-2 text-sm">
-                <li>
-                  <a
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    href="/privacy"
-                  >
-                    Privacy
-                  </a>
-                </li>
-                <li>
-                  <a
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    href="/terms"
-                  >
-                    Terms
-                  </a>
-                </li>
-                <li>
-                  <a
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    href="/cookies"
-                  >
-                    Cookies
-                  </a>
-                </li>
-              </ul>
-            </div>
-          </div>
-          <div className="border-t border-border mt-8 pt-8 text-center text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} Permatrust. All rights reserved.
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
