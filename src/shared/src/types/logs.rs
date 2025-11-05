@@ -35,7 +35,7 @@ pub struct LogEntry {
 }
 
 impl Storable for LogEntry {
-    fn to_bytes(&self) -> Cow<[u8]> {
+    fn to_bytes(&self) -> Cow<'_, [u8]> {
         let encoded = candid::encode_one(self).expect("Failed to encode LogEntry");
         Cow::Owned(encoded)
     }

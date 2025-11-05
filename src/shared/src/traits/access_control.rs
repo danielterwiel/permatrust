@@ -7,7 +7,7 @@ use std::borrow::Cow;
 const MAX_VALUE_SIZE: u32 = 32_768;
 
 impl Storable for RoleIdVec {
-    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+    fn to_bytes(&self) -> std::borrow::Cow<'_, [u8]> {
         Cow::Owned(Encode!(&self.0).unwrap())
     }
 
@@ -22,7 +22,7 @@ impl Storable for RoleIdVec {
 }
 
 impl Storable for Permission {
-    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+    fn to_bytes(&self) -> std::borrow::Cow<'_, [u8]> {
         Cow::Owned(Encode!(self).unwrap())
     }
 
@@ -37,7 +37,7 @@ impl Storable for Permission {
 }
 
 impl Storable for Role {
-    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+    fn to_bytes(&self) -> std::borrow::Cow<'_, [u8]> {
         Cow::Owned(Encode!(self).unwrap())
     }
 

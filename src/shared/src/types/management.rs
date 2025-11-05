@@ -107,7 +107,7 @@ pub struct WasmMetadata {
 }
 
 impl Storable for WasmMetadata {
-    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+    fn to_bytes(&self) -> std::borrow::Cow<'_, [u8]> {
         std::borrow::Cow::Owned(candid::encode_one(self).unwrap())
     }
 
