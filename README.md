@@ -16,8 +16,8 @@ gpg --expert --full-generate-key
 
 ```sh
 chmod +x scripts/**/*.sh
-npm run deploy
-npm start
+pnpm run deploy
+pnpm start
 ```
 
 ## Requirements
@@ -27,19 +27,14 @@ npm start
 - pnpm
 - dfx
 - candid-extractor
-- didc
-
-```sh
-dfx extension install nns
-```
 
 ## Icons
 
 We're using `@sly-cli/cly` for adding icons and `svg-icons-cli` to build the SVG's
-into a sprite. As of date Sly seems somewhat buggy as it hangs after an add. But
-you can just ctrl+c the session as it does add the file.
+into a sprite. As of date Sly hangs after an add. But you can just ctrl+c the
+session as it does add the file.
 
 ```sh
-npm run icons:add # ctrl+c to close
-npm run build:icons
+pnpm icons:add # ctrl+c to close
+pnpm build:icons
 ```
