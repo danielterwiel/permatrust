@@ -1,6 +1,5 @@
 use ic_stable_structures::memory_manager::{MemoryId, MemoryManager, VirtualMemory};
 use ic_stable_structures::{DefaultMemoryImpl, StableBTreeMap};
-use serde::{Deserialize, Serialize};
 use shared::consts::memory_ids::tenant_canister::WORKFLOWS_MEMORY_ID;
 use shared::traits::workflows::WorkflowGraphExt;
 use shared::types::errors::AppError;
@@ -25,12 +24,6 @@ thread_local! {
 
     static NEXT_ID: AtomicU32 = const { AtomicU32::new(0) };
 }
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-pub struct GenericState(pub StateId);
-
-#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, Hash)]
-pub struct GenericEvent(pub EventId);
 
 #[derive(Clone, Debug)]
 pub struct GenericStateMachine {
