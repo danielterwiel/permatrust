@@ -34,9 +34,6 @@ export const Route = createFileRoute(
 });
 
 function WorkflowDetails() {
-  // const { workflowId } = Route.useParams();
-  // const { workflow, workflowState } = Route.useLoaderData();
-
   return (
     <div className="space-y-8">
       <Card>

@@ -218,31 +218,31 @@ impl std::fmt::Display for LoggableWorkflow<'_> {
 }
 
 // Convenience functions for creating loggable wrappers
-pub fn loggable_user(user: &User) -> LoggableUser {
+pub fn loggable_user(user: &User) -> LoggableUser<'_> {
     LoggableUser(user)
 }
 
-pub fn loggable_document(document: &Document) -> LoggableDocument {
+pub fn loggable_document(document: &Document) -> LoggableDocument<'_> {
     LoggableDocument(document)
 }
 
-pub fn loggable_project(project: &Project) -> LoggableProject {
+pub fn loggable_project(project: &Project) -> LoggableProject<'_> {
     LoggableProject(project)
 }
 
-pub fn loggable_organization(organization: &Organization) -> LoggableOrganization {
+pub fn loggable_organization(organization: &Organization) -> LoggableOrganization<'_> {
     LoggableOrganization(organization)
 }
 
-pub fn loggable_invite(invite: &Invite) -> LoggableInvite {
+pub fn loggable_invite(invite: &Invite) -> LoggableInvite<'_> {
     LoggableInvite(invite)
 }
 
-pub fn loggable_revision(revision: &Revision) -> LoggableRevision {
+pub fn loggable_revision(revision: &Revision) -> LoggableRevision<'_> {
     LoggableRevision(revision)
 }
 
-pub fn loggable_workflow(workflow: &Workflow) -> LoggableWorkflow {
+pub fn loggable_workflow(workflow: &Workflow) -> LoggableWorkflow<'_> {
     LoggableWorkflow(workflow)
 }
 

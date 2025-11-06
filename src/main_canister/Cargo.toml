@@ -10,7 +10,7 @@ crate-type = ["cdylib"]
 candid = "0.10.14"
 
 [dev-dependencies]
-pocket-ic = "9.0.0"
+pocket-ic = "10.0.0"
 
 [dependencies]
 candid = "0.10.0"

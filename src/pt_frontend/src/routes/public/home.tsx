@@ -57,7 +57,7 @@ function Home() {
         }
       },
     });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Function to hide tooltip with slide out animation
   const hideTooltip = useCallback(() => {
@@ -80,7 +80,7 @@ function Home() {
         setCurrentTooltipIndex((prev) => (prev + 1) % tooltipMessages.length);
       },
     });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Generate nodes: 1 user + 1 boundary + 7 internal replicas
   const nodes: Array<Node> = [
@@ -224,7 +224,7 @@ function Home() {
     console.log(
       'All lines initialized as hidden, ready to fade in after nodes appear',
     );
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Function to animate packets from boundary to all replica nodes
   const animateBoundaryToReplicaPackets = useCallback(() => {
@@ -298,7 +298,7 @@ function Home() {
         },
       });
     });
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -427,7 +427,7 @@ function Home() {
     animateBoundaryToReplicaPackets,
     showTooltip,
     hideTooltip,
-  ]);
+  ]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const simulateTransaction = () => {
     console.log('Starting packet transmission simulation...');

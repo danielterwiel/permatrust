@@ -7,7 +7,7 @@ use std::borrow::Cow;
 const MAX_VALUE_SIZE: u32 = 32_768;
 
 impl Storable for User {
-    fn to_bytes(&self) -> std::borrow::Cow<[u8]> {
+    fn to_bytes(&self) -> std::borrow::Cow<'_, [u8]> {
         Cow::Owned(Encode!(self).unwrap())
     }
 

@@ -4,14 +4,14 @@ import {
   useReactTable,
 } from '@tanstack/react-table';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type * as React from 'react';
+
+import { SORT_ORDER } from '@/consts/pagination';
 
 import { createSort } from '@/utils/pagination';
 import { pascalCaseToSnakeCase } from '@/utils/pascal-case-to-snake-case';
 import { snakeToPascalCase } from '@/utils/snake-to-pascal-case';
 
 import { Checkbox } from '@/components/ui/checkbox';
-import type { IconName } from '@/components/ui/icon';
 import {
   Table as TableBase,
   TableBody,
@@ -25,15 +25,15 @@ import { EmptyState } from './empty-state';
 import { Pagination } from './Pagination';
 import { DataTableColumnHeader } from './table-column-header';
 
-import { SORT_ORDER } from '@/consts/pagination';
-
+import type { ColumnDef, Row, SortingState } from '@tanstack/react-table';
+import type * as React from 'react';
+import type { IconName } from '@/components/ui/icon';
 import type {
   PaginationMetadata,
   SortCriteria,
 } from '@/declarations/tenant_canister/tenant_canister.did';
 import type { Entity, EntityName } from '@/types/entities';
 import type { FilterFieldName } from '@/types/pagination';
-import type { ColumnDef, Row, SortingState } from '@tanstack/react-table';
 
 function getEntityIcon(entityName: EntityName): IconName {
   const iconMap: Record<EntityName, IconName> = {
@@ -106,12 +106,16 @@ function convertSortingStateToBackendFormat(
  * Extracts the field name from sort criteria
  */
 function extractSortField(sort: [] | [SortCriteria]): string | undefined {
-  if (sort.length === 0) return undefined;
+  if (sort.length === 0) {
+    return undefined;
+  }
 
   try {
     const sortCriteria = sort[0];
     const entityKey = Object.keys(sortCriteria.field)[0];
-    if (!entityKey) return undefined;
+    if (!entityKey) {
+      return undefined;
+    }
 
     const fieldObj =
       sortCriteria.field[entityKey as keyof typeof sortCriteria.field];
@@ -128,15 +132,21 @@ function determineSortDirection(
   sort: [] | [SortCriteria],
   header: { column: { id: string } },
 ): 'asc' | 'desc' | false {
-  if (sort.length === 0) return false;
+  if (sort.length === 0) {
+    return false;
+  }
 
   const sortField = extractSortField(sort);
-  if (!sortField) return false;
+  if (!sortField) {
+    return false;
+  }
 
   const columnId = header.column.id.split('-')[0];
   const pascalColumnId = snakeToPascalCase(columnId);
 
-  if (pascalColumnId !== sortField) return false;
+  if (pascalColumnId !== sortField) {
+    return false;
+  }
 
   const sortCriteria = sort[0];
   return 'Desc' in sortCriteria.order ? 'desc' : 'asc';
@@ -157,24 +167,32 @@ export const Table = <T extends Entity = Entity>({
   const previousSelectionRef = useRef(rowSelection);
 
   const headers = useMemo(() => {
-    if (!Array.isArray(data) || data.length === 0) return [];
+    if (!Array.isArray(data) || data.length === 0) {
+      return [];
+    }
     return Object.keys(data[0] ?? {});
   }, [data]);
 
   // Convert backend sort format to TanStack sorting state
   const convertBackendSortToSortingState = useCallback(
     (sortProp: [] | [SortCriteria]): SortingState => {
-      if (!sortProp.length) return [];
+      if (sortProp.length === 0) {
+        return [];
+      }
 
       try {
         const sortCriteria = sortProp[0];
         const entityKey = Object.keys(sortCriteria.field)[0];
-        if (!entityKey) return [];
+        if (!entityKey) {
+          return [];
+        }
 
         const fieldObj =
           sortCriteria.field[entityKey as keyof typeof sortCriteria.field];
         const fieldName = Object.keys(fieldObj)[0];
-        if (!fieldName) return [];
+        if (!fieldName) {
+          return [];
+        }
 
         const columnId = pascalCaseToSnakeCase(fieldName);
         const isDesc = 'Desc' in sortCriteria.order;
@@ -214,6 +232,20 @@ export const Table = <T extends Entity = Entity>({
     }
   };
 
+  const handleSelectAllToggle = useCallback(
+    (table: { toggleAllPageRowsSelected: (checked: boolean) => void }) => {
+      return (checked: boolean) => table.toggleAllPageRowsSelected(!!checked);
+    },
+    [],
+  );
+
+  const handleRowSelectionToggle = useCallback(
+    (row: { toggleSelected: (checked: boolean) => void }) => {
+      return (checked: boolean) => row.toggleSelected(!!checked);
+    },
+    [],
+  );
+
   const columns: Array<ColumnDef<T>> = useMemo(() => {
     // Selection column for row selection functionality
     const selectColumn: ColumnDef<T> = {
@@ -224,16 +256,14 @@ export const Table = <T extends Entity = Entity>({
         <Checkbox
           aria-label="Select all"
           checked={table.getIsAllPageRowsSelected()}
-          onCheckedChange={(checked) =>
-            table.toggleAllPageRowsSelected(!!checked)
-          }
+          onCheckedChange={handleSelectAllToggle(table)}
         />
       ),
       cell: ({ row }) => (
         <Checkbox
           aria-label="Select row"
           checked={row.getIsSelected()}
-          onCheckedChange={(checked) => row.toggleSelected(!!checked)}
+          onCheckedChange={handleRowSelectionToggle(row)}
         />
       ),
     };
@@ -251,7 +281,12 @@ export const Table = <T extends Entity = Entity>({
     ) as Array<ColumnDef<T>>;
 
     return onSelectionChange ? [selectColumn, ...dataColumns] : dataColumns;
-  }, [columnConfig, onSelectionChange]);
+  }, [
+    columnConfig,
+    onSelectionChange,
+    handleSelectAllToggle,
+    handleRowSelectionToggle,
+  ]);
 
   // Manage column visibility
   const [columnVisibility, setColumnVisibility] = useState<
@@ -266,9 +301,9 @@ export const Table = <T extends Entity = Entity>({
 
     // Mark columns from columnConfig as visible
     if (columnConfig.length > 0) {
-      columnConfig.forEach((col, idx) => {
+      for (const [idx, col] of columnConfig.entries()) {
         initialVisibility[`${col.key}-${idx}`] = true;
-      });
+      }
     } else {
       // If no columnConfig, show all headers
 
@@ -291,9 +326,9 @@ export const Table = <T extends Entity = Entity>({
 
     // Mark columns from columnConfig as visible
     if (columnConfig.length > 0) {
-      columnConfig.forEach((col, idx) => {
+      for (const [idx, col] of columnConfig.entries()) {
         newVisibility[`${col.key}-${idx}`] = true;
-      });
+      }
     } else {
       // If no columnConfig, show all headers
       for (const header of headers) {
@@ -401,7 +436,7 @@ export const Table = <T extends Entity = Entity>({
         <div className="pt-4">
           <Pagination
             paginationMetaData={paginationMetaData}
-            getPageChangeParams={getPageChangeParams}
+            {...(getPageChangeParams && { getPageChangeParams })}
           />
         </div>
       )}
