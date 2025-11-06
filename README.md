@@ -2,16 +2,6 @@
 
 ## Getting started
 
-### Preparation
-
-Add an ECC encrypted GPG key:
-
-```sh
-gpg --expert --full-generate-key
-(9) ECC (sign and encrypt)
-(1) Curve 25519
-```
-
 ### Local Deployment
 
 ```sh
